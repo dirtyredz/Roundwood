@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "group": "roundwood:round_door",
+  "key": {
+    "N": {
+      "item": "minecraft:gold_nugget"
+    },
+    "P": {
+      "item": "minecraft:birch_planks"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "PNP",
+    "PPP"
+  ],
+  "result": {
+    "item": "roundwood:birch_round_door"
+  },
+  "show_notification": true
+}

@@ -1,0 +1,9 @@
+{
+  "parent": "roundwood:block/template_round_door_upper_right",
+  "textures": {
+    "brass": "roundwood:block/brass",
+    "panel": "minecraft:block/crimson_planks",
+    "particle": "minecraft:block/crimson_planks",
+    "trim": "minecraft:block/stripped_crimson_stem"
+  }
+}

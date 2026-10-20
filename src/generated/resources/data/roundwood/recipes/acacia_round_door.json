@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "group": "roundwood:round_door",
+  "key": {
+    "N": {
+      "item": "minecraft:gold_nugget"
+    },
+    "P": {
+      "item": "minecraft:acacia_planks"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "PNP",
+    "PPP"
+  ],
+  "result": {
+    "item": "roundwood:acacia_round_door"
+  },
+  "show_notification": true
+}

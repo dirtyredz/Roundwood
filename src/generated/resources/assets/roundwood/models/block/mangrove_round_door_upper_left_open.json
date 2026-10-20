@@ -1,0 +1,9 @@
+{
+  "parent": "roundwood:block/template_round_door_upper_left_open",
+  "textures": {
+    "brass": "roundwood:block/brass",
+    "panel": "minecraft:block/mangrove_planks",
+    "particle": "minecraft:block/mangrove_planks",
+    "trim": "minecraft:block/stripped_mangrove_log"
+  }
+}

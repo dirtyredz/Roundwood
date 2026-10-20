@@ -1,0 +1,9 @@
+{
+  "parent": "roundwood:block/template_round_door_lower_left",
+  "textures": {
+    "brass": "roundwood:block/brass",
+    "panel": "minecraft:block/spruce_planks",
+    "particle": "minecraft:block/spruce_planks",
+    "trim": "minecraft:block/stripped_spruce_log"
+  }
+}

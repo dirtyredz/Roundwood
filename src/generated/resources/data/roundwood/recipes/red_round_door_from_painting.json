@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "group": "roundwood:painted_round_door",
+  "ingredients": [
+    [
+      {
+        "item": "roundwood:oak_round_door"
+      },
+      {
+        "item": "roundwood:green_round_door"
+      },
+      {
+        "item": "roundwood:yellow_round_door"
+      },
+      {
+        "item": "roundwood:blue_round_door"
+      }
+    ],
+    {
+      "item": "minecraft:red_dye"
+    }
+  ],
+  "result": {
+    "item": "roundwood:red_round_door"
+  }
+}

@@ -1,0 +1,24 @@
+package io.github.dirtyredz.roundwood.registry;
+
+import io.github.dirtyredz.roundwood.Roundwood;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+
+/** Roundwood's own family tags, for packs and scripts. */
+public final class ModTags {
+    public static final TagKey<Block> ROUND_DOORS = BlockTags.create(id("round_doors"));
+    public static final TagKey<Block> ROUND_WINDOWS = BlockTags.create(id("round_windows"));
+    public static final TagKey<Item> ROUND_DOOR_ITEMS = ItemTags.create(id("round_doors"));
+    public static final TagKey<Item> ROUND_WINDOW_ITEMS = ItemTags.create(id("round_windows"));
+
+    private ModTags() {
+    }
+
+    private static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, path);
+    }
+}
