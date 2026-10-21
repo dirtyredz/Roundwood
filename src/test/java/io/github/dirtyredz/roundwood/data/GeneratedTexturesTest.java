@@ -19,6 +19,7 @@ import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * The generated block textures: manifest, sizes, preserved files, the 0.7.0 additions, board, brick and
@@ -66,6 +67,7 @@ class GeneratedTexturesTest {
                 "window_trim_face", "window_trim_edge"));
         expected.addAll(doorPanels());
         DYES.forEach(d -> expected.add("panel_" + d));
+        DYES.forEach(d -> expected.add("window_glass_" + d));
         for (String masonry : MASONRY) {
             expected.add("trim_radial_" + masonry);
             expected.add("trim_edge_" + masonry);
@@ -73,7 +75,7 @@ class GeneratedTexturesTest {
             expected.add("window_trim_round_" + masonry);
             expected.add("window_trim_arch_" + masonry);
         }
-        assertEquals(69, expected.size());
+        assertEquals(85, expected.size());
         TreeSet<String> actual = new TreeSet<>();
         try (Stream<Path> files = Files.list(DIR)) {
             files.map(p -> p.getFileName().toString()).filter(n -> n.endsWith(".png"))
@@ -97,6 +99,9 @@ class GeneratedTexturesTest {
             assertSize("trim_radial_thin_" + masonry, 64);
             assertSize("window_trim_round_" + masonry, 32);
             assertSize("window_trim_arch_" + masonry, 64);
+        }
+        for (String dye : DYES) {
+            assertSize("window_glass_" + dye, 16);
         }
         assertSize("window_glass", 16);
         assertSize("window_glass_clear", 16);
@@ -328,5 +333,40 @@ class GeneratedTexturesTest {
             }
         }
         assertTrue(accents > 0, "the glints must exist");
+    }
+
+    @Test
+    void stainedGlassKeepsTheClearGlassMarks() throws IOException {
+        BufferedImage clear = read("window_glass_clear");
+        for (String dye : DYES) {
+            BufferedImage stained = read("window_glass_" + dye);
+            long bodySum = 0;
+            int bodyCount = 0;
+            for (int y = 0; y < 16; y++) {
+                for (int x = 0; x < 16; x++) {
+                    int[] now = rgba(stained, x, y);
+                    if (rgba(clear, x, y)[3] != 176) {
+                        bodySum += now[0] + now[1] + now[2];
+                        bodyCount++;
+                    }
+                }
+            }
+            double bodyAverage = (double) bodySum / bodyCount;
+            for (int y = 0; y < 16; y++) {
+                for (int x = 0; x < 16; x++) {
+                    int[] now = rgba(stained, x, y);
+                    if (rgba(clear, x, y)[3] == 176) {
+                        if (now[3] != 176) {
+                            fail("window_glass_" + dye + " mark alpha " + now[3] + " at " + x + "," + y);
+                        }
+                        if (now[0] + now[1] + now[2] >= bodyAverage) {
+                            fail("window_glass_" + dye + " mark is not darker than its body at " + x + "," + y);
+                        }
+                    } else if (now[3] < 108 || now[3] > 120) {
+                        fail("window_glass_" + dye + " body alpha " + now[3] + " at " + x + "," + y);
+                    }
+                }
+            }
+        }
     }
 }

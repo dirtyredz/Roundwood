@@ -13,7 +13,13 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.interaction.WindowInteraction;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPlacement;
-import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimTarget;
+import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
+import io.github.dirtyredz.roundwood.block.window.geometry.WindowFaceIdentity;
+import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassStacks;
+import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import java.util.function.UnaryOperator;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -54,13 +60,22 @@ import java.util.function.Supplier;
  * adapter for one blockstate encoding of a {@link WindowPose}; everything else reads the pose:
  * placement from the targeted zone ({@link WindowPlacement}), connections ({@link WindowConnections}),
  * shapes and culling ({@link WindowShapes}), models (datagen). The design (profile and pattern) is
- * fixed per registration. The wooden face's appearance, and the look of a fitted window trim
- * ({@link #TRIMMED}, 0.7.0), live on a {@link RoundWindowBlockEntity}; glass and junctions are never
- * restyled. Clicks route through {@link WindowInteraction}.
+ * fixed per registration. The frame's appearance, the glass colour and the two face trims (0.8.0)
+ * live on a {@link RoundWindowBlockEntity}; the trims are drawn by its renderer and may project one
+ * pixel past the cell. Clicks route through {@link WindowInteraction}.
  */
 public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlock, AppearanceDefaults, AppearanceUseTarget {
-    /** A window trim is fitted (0.7.0; absent in older saves, which load untrimmed). */
+    /**
+     * Either face has a window trim: a derived compatibility summary since 0.8.0 (the faces live on
+     * the block entity, {@link RoundWindowBlockEntity#trims}). Absent in older saves, which load
+     * untrimmed; a 0.7.0 window with it set and no payload loads with oak trims on both faces.
+     */
     public static final BooleanProperty TRIMMED = BooleanProperty.create("trimmed");
+    /**
+     * The attachment FRONT slot faces away from the pose front (0.8.0, {@link WindowFaceIdentity}):
+     * keeps each face trim on its world side through rotations and mirrors. Changes no geometry.
+     */
+    public static final BooleanProperty FACE_REVERSED = BooleanProperty.create("face_reversed");
 
     private final WindowDesign design;
     private final Supplier<BlockEntityType<RoundWindowBlockEntity>> entityType;
@@ -70,13 +85,13 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
         super(properties);
         this.design = design;
         this.entityType = entityType;
-        registerDefaultState(defaultBlockState().setValue(TRIMMED, false));
+        registerDefaultState(defaultBlockState().setValue(TRIMMED, false).setValue(FACE_REVERSED, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(TRIMMED);
+        builder.add(TRIMMED, FACE_REVERSED);
     }
 
     /** The face this block draws: profile and pattern. */
@@ -109,6 +124,24 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
         return state.hasProperty(TRIMMED) && state.getValue(TRIMMED);
     }
 
+    public static boolean faceReversed(BlockState state) {
+        return state.hasProperty(FACE_REVERSED) && state.getValue(FACE_REVERSED);
+    }
+
+    /** The world side the attachment FRONT slot of a window state faces. */
+    public Direction attachmentFront(BlockState state) {
+        return WindowFaceIdentity.front(pose(state), faceReversed(state));
+    }
+
+    /**
+     * {@code after} (a rotated or mirrored {@code before}) with its face identity recomputed so the
+     * attachment FRONT stays on the world side {@code move} takes it to.
+     */
+    protected BlockState keepFaces(BlockState before, BlockState after, UnaryOperator<Direction> move) {
+        Direction front = move.apply(attachmentFront(before));
+        return after.setValue(FACE_REVERSED, WindowFaceIdentity.reversed(pose(after), front));
+    }
+
     @Override
     public AppearanceFamily appearanceFamily() {
         return AppearanceFamily.WINDOW;
@@ -119,10 +152,11 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
         return Appearance.DEFAULT;
     }
 
-    /** A hit on a fitted trim's band edits the trim; anywhere else the pane. */
+    /** The sneak-use bridge lets through exactly the clicks the router would handle ({@link WindowInteraction#claims}). */
     @Override
-    public AppearanceFamily appearanceFamilyAt(BlockState state, BlockGetter level, BlockPos pos, BlockHitResult hit) {
-        return WindowTrimTarget.hitsBand(state, pos, hit.getLocation()) ? AppearanceFamily.TRIM : AppearanceFamily.WINDOW;
+    public boolean claimsUse(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand,
+                             BlockHitResult hit) {
+        return WindowInteraction.claims(state, level, pos, player, hand, hit);
     }
 
     /** The item picks and drops are made of (the hidden aliases name the canonical window's). */
@@ -142,25 +176,45 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
         return WindowInteraction.use(state, level, pos, player, hand, hit);
     }
 
-    /** The pane in its look; a fitted trim drops through its own loot pool, never through here. */
+    /**
+     * The window in its frame look and glass colour; each face trim drops through its own loot pool
+     * (a styled window trim), never through here.
+     */
     @Override
     @SuppressWarnings("deprecation")
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         BlockEntity entity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
-        Appearance appearance = entity instanceof RoundWindowBlockEntity window ? window.appearance() : defaultAppearance();
-        return AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.WINDOW, appearance);
+        RoundWindowBlockEntity window = entity instanceof RoundWindowBlockEntity found ? found : null;
+        Appearance appearance = window != null ? window.appearance() : defaultAppearance();
+        List<ItemStack> drops = AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.WINDOW, appearance);
+        if (window != null) {
+            drops.stream().filter(stack -> stack.is(familyItem())).forEach(stack -> WindowGlassStacks.write(stack, window.glass()));
+        }
+        return drops;
     }
 
+    /** The window in its frame look and glass colour (never its trims). */
     @Override
     public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
-        Appearance appearance = level.getBlockEntity(pos) instanceof RoundWindowBlockEntity window
-                ? window.appearance() : defaultAppearance();
-        return AppearanceStacks.create(familyItem(), appearance);
+        RoundWindowBlockEntity window = level.getBlockEntity(pos) instanceof RoundWindowBlockEntity found ? found : null;
+        ItemStack stack = AppearanceStacks.create(familyItem(), window != null ? window.appearance() : defaultAppearance());
+        if (window != null) {
+            WindowGlassStacks.write(stack, window.glass());
+        }
+        return stack;
+    }
+
+    /** A {@code trimmed} summary loaded out of step with the faces is corrected here ({@link RoundWindowBlockEntity#onLoad}). */
+    @Override
+    @SuppressWarnings("deprecation")
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        super.tick(state, level, pos, random);
+        WindowTrimActions.reconcile(level, pos);
     }
 
     /**
      * Vanilla pane connections and waterlogging, the pose from the targeted zone, then every side
-     * re-judged for that pose ({@link WindowConnections}). A placed window is never trimmed.
+     * re-judged for that pose ({@link WindowConnections}). A placed window has no trims.
      */
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
@@ -178,10 +232,24 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
         return WindowConnections.filter(super.updateShape(state, direction, neighbor, level, pos, neighborPos), direction, neighbor);
     }
 
-    /** Outline and rays: the pane, its junction and any trim. */
+    /** Outline and rays: the pane, its junction and the in-cell part of each fitted face trim. */
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return WindowShapes.selection(design, pose(state), connections(state), trimmed(state));
+        return WindowShapes.selection(design, pose(state), connections(state), trimSides(state, level, pos));
+    }
+
+    /** The world sides (along the normal) whose face carries a trim, read from the entity when it is there. */
+    public Set<Direction> trimSides(BlockState state, BlockGetter level, BlockPos pos) {
+        if (!trimmed(state) || !(level.getBlockEntity(pos) instanceof RoundWindowBlockEntity window)) {
+            return Set.of();
+        }
+        Set<Direction> sides = EnumSet.noneOf(Direction.class);
+        for (AttachmentFace face : AttachmentFace.values()) {
+            if (window.trims().has(face)) {
+                sides.add(WindowFaceIdentity.side(pose(state), faceReversed(state), face));
+            }
+        }
+        return sides;
     }
 
     /** The trim is decorative: only the pane and its junction collide. */

@@ -15,6 +15,7 @@
 //   window_trim_round_<material>.png               0.7.0 32x32 round window trim face, thin mortar
 //   window_trim_arch_<material>.png                0.7.0 64x64 arched window trim face (radial top, straight courses)
 //   window_trim_face.png, window_trim_edge.png     0.7.0 window trim source markers (always replaced)
+//   window_glass_<dye>.png                         0.8.0 dyed window glass, the clear glass marks drawn darker
 // Re-running produces identical bytes. The artwork lives in tools/textures/; this file only orchestrates.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -22,10 +23,11 @@ import { fileURLToPath } from 'node:url';
 import { png } from './textures/png.mjs';
 import { legacyTextures } from './textures/legacy.mjs';
 import { newWindowPanels } from './textures/paint-panels.mjs';
-import { DOOR_WOOD, MASONRY } from './textures/palettes.mjs';
+import { DOOR_WOOD, MASONRY, STAINED_GLASS } from './textures/palettes.mjs';
 import { DOOR_PANEL_SIZE, doorPanel } from './textures/door-panels.mjs';
 import { EDGE_SIZE, RADIAL_SIZE, radialEdge, radialFace } from './textures/radial-bricks.mjs';
 import { GLASS_SIZE, windowGlass } from './textures/window-glass.mjs';
+import { stainedWindowGlass } from './textures/stained-glass.mjs';
 import { ARCH_FACE_SIZE, ROUND_BRICKS, ROUND_FACE_SIZE, archWindowFace, clearWindowGlass, thinRadialFace, trimMarker }
   from './textures/window-trims.mjs';
 
@@ -57,6 +59,11 @@ Object.entries(MASONRY).forEach(([material, palette], i) => {
 });
 textures.window_trim_face = png(trimMarker(DOOR_WOOD.oak, 503, false), 16);
 textures.window_trim_edge = png(trimMarker(DOOR_WOOD.oak, 509, true), 16);
+
+// 0.8.0 additions (new names only; nothing above changes)
+Object.entries(STAINED_GLASS).forEach(([dye, rgb], i) => {
+  textures[`window_glass_${dye}`] = png(stainedWindowGlass(rgb, 601 + i * 7), GLASS_SIZE, GLASS_SIZE, { alpha: true });
+});
 
 mkdirSync(outDir, { recursive: true });
 for (const [name, bytes] of Object.entries(textures)) {

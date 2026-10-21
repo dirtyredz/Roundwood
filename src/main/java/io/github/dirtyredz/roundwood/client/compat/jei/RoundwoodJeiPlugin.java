@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.client.compat.jei;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
-import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassStacks;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import mezz.jei.api.IModPlugin;
@@ -19,9 +19,9 @@ import java.util.List;
 
 /**
  * Optional JEI adapter (loaded only when JEI is present): a styled stack is its own subtype, keyed by
- * its normalised appearance (the default oak stack has none, so the three default entries stay
- * single), and the 0.4.0 alias items are hidden. Cycling previews are an EMI feature; JEI shows the
- * plain defaults.
+ * its normalised appearance plus, for windows, its glass colour (0.8.0) (the default oak stack has
+ * none, so the default entries stay single), and the 0.4.0 alias items are hidden. Cycling previews
+ * are an EMI feature; JEI shows the plain defaults.
  */
 @JeiPlugin
 public final class RoundwoodJeiPlugin implements IModPlugin {
@@ -35,7 +35,7 @@ public final class RoundwoodJeiPlugin implements IModPlugin {
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
         IIngredientSubtypeInterpreter<ItemStack> byAppearance = (stack, context) -> {
-            String key = AppearanceStacks.read(stack).key();
+            String key = WindowGlassStacks.key(stack);
             return key.equals(AppearanceDefaults.of(stack.getItem()).key()) ? IIngredientSubtypeInterpreter.NONE : key;
         };
         for (Item item : ModItems.all()) {

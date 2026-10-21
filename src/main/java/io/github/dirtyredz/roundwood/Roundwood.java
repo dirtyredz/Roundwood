@@ -3,12 +3,13 @@ package io.github.dirtyredz.roundwood;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceUseEvents;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
 import io.github.dirtyredz.roundwood.data.RoundwoodDataProviders;
-import io.github.dirtyredz.roundwood.migration.LegacyChunkMigration;
+import io.github.dirtyredz.roundwood.migration.ChunkMigrations;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModCreativeTab;
 import io.github.dirtyredz.roundwood.registry.ModItems;
+import io.github.dirtyredz.roundwood.registry.ModLootConditions;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCommand;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -31,14 +32,15 @@ public final class Roundwood {
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModCreativeTab.TABS.register(modBus);
+        ModLootConditions.CONDITIONS.register(modBus);
         modBus.addListener(RoundwoodDataProviders::gatherData);
 
         IEventBus gameBus = MinecraftForge.EVENT_BUS;
         gameBus.addListener(ShowcaseCommand::register);
         gameBus.addListener(AppearanceUseEvents::onRightClickBlock);
         gameBus.addListener(AssemblyHarvest::onLevelTick);
-        gameBus.addListener(LegacyChunkMigration::onChunkLoad);
-        gameBus.addListener(LegacyChunkMigration::onLevelTick);
-        gameBus.addListener(LegacyChunkMigration::onLevelUnload);
+        gameBus.addListener(ChunkMigrations::onChunkLoad);
+        gameBus.addListener(ChunkMigrations::onLevelTick);
+        gameBus.addListener(ChunkMigrations::onLevelUnload);
     }
 }

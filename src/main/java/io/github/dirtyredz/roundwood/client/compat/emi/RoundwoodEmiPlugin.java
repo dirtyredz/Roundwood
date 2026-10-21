@@ -8,6 +8,7 @@ import dev.emi.emi.api.stack.EmiStack;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.AppearanceSamples;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassStacks;
 import io.github.dirtyredz.roundwood.appearance.material.MasonryMaterials;
 import io.github.dirtyredz.roundwood.appearance.material.PlankMaterials;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
@@ -22,7 +23,8 @@ import java.util.Set;
  * Optional EMI adapter (loaded only when EMI is present): exactly one index entry per canonical item,
  * drawn as a cycling preview of sample appearances ({@link CyclingAppearanceStack}) while staying the
  * default stack for retrieval, comparison and recipes; the 0.4.0 aliases and any duplicate default
- * entries are removed; styled stacks compare by their normalised appearance key; previews save as
+ * entries are removed; styled stacks compare by their normalised appearance key (plus a window's
+ * glass colour, 0.8.0); previews save as
  * plain stacks. Samples are rediscovered whenever EMI reloads (tags and resources).
  */
 @EmiEntrypoint
@@ -44,6 +46,6 @@ public final class RoundwoodEmiPlugin implements EmiPlugin {
     }
 
     private static String appearanceKey(EmiStack stack) {
-        return AppearanceStacks.read(stack.getItemStack()).key();
+        return WindowGlassStacks.key(stack.getItemStack());
     }
 }

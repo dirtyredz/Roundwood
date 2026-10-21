@@ -14,7 +14,8 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
- * English names: the twelve canonical blocks and the window trim, the hidden 0.4.0 aliases under their old names (old
+ * English names: the twelve canonical blocks (the round trim block and item read "Door Trim" since 0.8.0)
+ * and the window trim, the hidden 0.4.0 aliases under their old names (old
  * stacks in chests still read "Spruce Round Door"), the creative tab, the appearance tooltip lines,
  * the restyling hints and the recipe-viewer preview note.
  */
@@ -31,7 +32,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
             add(ModBlocks.window(design), windowName(design));
         }
         add(ModItems.WINDOW_TRIM.get(), "Window Trim");
-        add(ModBlocks.roundTrim(), "Round Trim");
+        add(ModBlocks.roundTrim(), "Door Trim");
         for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
             add("block." + Roundwood.MOD_ID + "." + entry.id(), title(entry.id()));
         }
@@ -39,12 +40,15 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("tooltip.roundwood.masonry", "Masonry: %s");
         add("tooltip.roundwood.paint", "Paint: %s");
         add("tooltip.roundwood.unavailable", "Material %s is not installed (shown as oak)");
-        add("tooltip.roundwood.restyle", "Restyle placed: sneak + planks, or dye");
-        add("tooltip.roundwood.window_trim", "Use on any window; restyle it with planks, masonry or dye, remove it with shears");
+        add("tooltip.roundwood.restyle", "Restyle placed: planks or dye (doors: sneak + planks)");
+        add("tooltip.roundwood.window_trim", "Trims the clicked face of a window; restyle with planks, masonry or dye, remove with shears");
+        add("tooltip.roundwood.door_trim", "Trims the clicked face of a round door; restyle with planks, masonry or dye, remove with shears");
+        add("tooltip.roundwood.glass", "Glass: %s");
         add("tooltip.roundwood.preview", "Preview of a possible look");
         add("tooltip.roundwood.preview_note", "Crafting gives oak; restyle it in the world");
         add("message.roundwood.aim_at_leaf", "Aim at the door leaf to restyle or paint it");
         add("message.roundwood.masonry_unpaintable", "Masonry trims cannot be painted");
+        add("message.roundwood.masonry_trim_only", "Masonry restyles a trim; aim at the trim");
     }
 
     /** "Round Window Arch with Cross Beams, Left", "Round Window Corner, Bottom Right" and so on. */

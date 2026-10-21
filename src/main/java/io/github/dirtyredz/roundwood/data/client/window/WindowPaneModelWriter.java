@@ -1,15 +1,12 @@
 package io.github.dirtyredz.roundwood.data.client.window;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPaneGeometry;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowSurfaceGeometry;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
-import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimGeometry;
-import io.github.dirtyredz.roundwood.client.window.WindowTrimModels;
 import io.github.dirtyredz.roundwood.data.client.GeometryModelWriter;
 import io.github.dirtyredz.roundwood.geometry.Surface;
 import net.minecraft.core.Direction;
@@ -37,8 +34,10 @@ import java.util.function.Consumer;
  * ({@link WindowSurfaceGeometry}, 0.7.0): no glass sheet inside glass, no buried face. So a centred
  * upright pose, whose arms reach on to the panel's glass, has one model per combination of its two
  * across-plane connections rather than a core plus overlapping arm parts; every other pose has one.
- * Each also exists trimmed. Names are {@code <design>[<pose>][_trimmed][_arms_<north|south|both>]},
- * sides named in the canonical frame. Faces on the cell boundary cull against their side.
+ * Since 0.8.0 the models are pane-only: face trims are attachments drawn by a block-entity renderer,
+ * so there are no {@code _trimmed} models, and neither {@code trimmed} nor {@code face_reversed}
+ * selects a model. Names are {@code <design>[<pose>][_arms_<north|south|both>]}, sides named in the
+ * canonical frame. Faces on the cell boundary cull against their side.
  */
 public final class WindowPaneModelWriter {
     /** The wood the panel and beams bind: the template the client retextures from. */
@@ -82,9 +81,9 @@ public final class WindowPaneModelWriter {
         return design.id() + "_" + (canonical.front() == Direction.UP ? "up" : "down") + "_" + level;
     }
 
-    /** The full model name of a canonical state: pose, trim and the canonical sides its arms reach. */
-    public static String name(WindowDesign design, WindowPose canonical, boolean trimmed, Set<Direction> arms) {
-        String out = stem(design, canonical) + (trimmed ? "_trimmed" : "");
+    /** The full model name of a canonical state: pose and the canonical sides its arms reach. */
+    public static String name(WindowDesign design, WindowPose canonical, Set<Direction> arms) {
+        String out = stem(design, canonical);
         if (arms.isEmpty()) {
             return out;
         }
@@ -133,42 +132,26 @@ public final class WindowPaneModelWriter {
     }
 
     /** The visible surfaces of one complete state (shared with the tests that check the models). */
-    public static List<Surface> surfaces(WindowDesign design, WindowPose pose, Set<Direction> arms, boolean trimmed) {
-        return WindowSurfaceGeometry.surfaces(WindowPaneGeometry.pieces(design, pose, arms, trimmed),
-                Set.of(WindowPaneGeometry.GLASS));
+    public static List<Surface> surfaces(WindowDesign design, WindowPose pose, Set<Direction> arms) {
+        return WindowSurfaceGeometry.surfaces(WindowPaneGeometry.pieces(design, pose, arms), Set.of(WindowPaneGeometry.GLASS));
     }
 
-    /** Writes every model of {@code design}'s canonical pose: untrimmed and trimmed, each arm combination. */
+    /** Writes every model of {@code design}'s canonical pose, one per arm combination. */
     public static void writeModels(BlockModelProvider models, WindowDesign design, WindowPose canonical) {
         ResourceLocation glass = ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, GLASS);
-        for (boolean trimmed : new boolean[] {false, true}) {
-            for (Set<Direction> arms : armSets(canonical)) {
-                BlockModelBuilder builder = models.getBuilder(name(design, canonical, trimmed, arms)).renderType(RENDER_TYPE);
-                GeometryModelWriter.addSurfaces(builder, surfaces(design, canonical, arms, trimmed), true,
-                        surface -> texture(surface, canonical));
-                builder.texture(WindowPaneGeometry.FRAME, OAK_PLANKS)
-                        .texture(WindowPaneGeometry.GLASS, glass)
-                        .texture("particle", OAK_PLANKS);
-                if (trimmed) {
-                    builder.texture(WindowTrimGeometry.FACE, WindowTrimModels.FACE_MARKER)
-                            .texture(WindowTrimGeometry.EDGE, WindowTrimModels.EDGE_MARKER);
-                }
-            }
+        for (Set<Direction> arms : armSets(canonical)) {
+            BlockModelBuilder builder = models.getBuilder(name(design, canonical, arms)).renderType(RENDER_TYPE);
+            GeometryModelWriter.addSurfaces(builder, surfaces(design, canonical, arms), true, Surface::texture);
+            builder.texture(WindowPaneGeometry.FRAME, OAK_PLANKS)
+                    .texture(WindowPaneGeometry.GLASS, glass)
+                    .texture("particle", OAK_PLANKS);
         }
-    }
-
-    /** The trim's front and back take the face marker, its sides the edge marker; everything else its own variable. */
-    private static String texture(Surface surface, WindowPose canonical) {
-        if (!surface.texture().equals(WindowTrimGeometry.TRIM)) {
-            return surface.texture();
-        }
-        return surface.face().getAxis() == canonical.normal() ? WindowTrimGeometry.FACE : WindowTrimGeometry.EDGE;
     }
 
     /**
      * Adds the parts drawing {@code pose} to a multipart blockstate; {@code poseCondition} adds the
-     * state values selecting the pose. One part per trim state and arm combination, each naming every
-     * connection it depends on. Reads only names and geometry, so the alias blockstates can reuse the
+     * state values selecting the pose. One part per arm combination, each naming every connection it
+     * depends on. Reads only names and geometry, so the alias blockstates can reuse the
      * canonical models written by another provider.
      */
     public static void addParts(MultiPartBlockStateBuilder states, WindowDesign design, WindowPose pose,
@@ -176,19 +159,16 @@ public final class WindowPaneModelWriter {
         Canonical canonical = canonical(pose);
         int rotation = 90 * canonical.turns();
         List<Direction> sides = WindowPaneGeometry.neededSides(pose);
-        for (boolean trimmed : new boolean[] {false, true}) {
-            for (Set<Direction> arms : armSets(pose)) {
-                Set<Direction> authored = EnumSet.noneOf(Direction.class);
-                arms.forEach(side -> authored.add(rotate(side, -canonical.turns())));
-                MultiPartBlockStateBuilder.PartBuilder part = states.part()
-                        .modelFile(model(name(design, canonical.pose(), trimmed, authored))).rotationY(rotation).addModel();
-                poseCondition.accept(part);
-                part.condition(WindowPaneBlock.TRIMMED, trimmed);
-                for (Direction side : sides) {
-                    part.condition(PipeBlock.PROPERTY_BY_DIRECTION.get(side), arms.contains(side));
-                }
-                part.end();
+        for (Set<Direction> arms : armSets(pose)) {
+            Set<Direction> authored = EnumSet.noneOf(Direction.class);
+            arms.forEach(side -> authored.add(rotate(side, -canonical.turns())));
+            MultiPartBlockStateBuilder.PartBuilder part = states.part()
+                    .modelFile(model(name(design, canonical.pose(), authored))).rotationY(rotation).addModel();
+            poseCondition.accept(part);
+            for (Direction side : sides) {
+                part.condition(PipeBlock.PROPERTY_BY_DIRECTION.get(side), arms.contains(side));
             }
+            part.end();
         }
     }
 

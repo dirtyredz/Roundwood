@@ -8,7 +8,10 @@ import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import io.github.dirtyredz.roundwood.block.door.appearance.DoorAppearance;
+import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceUseTarget;
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorBlockEntities;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorColumn;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorIntegrity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorRemoval;
@@ -64,7 +67,7 @@ import java.util.function.Supplier;
  * services; the lower-left part carries the {@link RoundDoorBlockEntity} the client draws the leaf
  * and the camouflage from, and which holds the door's appearance (picked and dropped with the item).
  */
-public class RoundDoorBlock extends DoorBlock implements EntityBlock, AppearanceDefaults {
+public class RoundDoorBlock extends DoorBlock implements EntityBlock, AppearanceDefaults, AppearanceUseTarget {
     public static final EnumProperty<DoorColumn> COLUMN = EnumProperty.create("column", DoorColumn.class);
 
     private final Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType;
@@ -139,7 +142,14 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock, Appearance
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
     }
 
-    /** Restyling, then camouflage, then the toggle ({@link DoorInteraction}). */
+    /** The sneak-use bridge lets through the clicks the router handles: trim rings and restyling ({@link DoorInteraction#claims}). */
+    @Override
+    public boolean claimsUse(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand,
+                             BlockHitResult hit) {
+        return DoorInteraction.claims(state, level, pos, player, hand, hit);
+    }
+
+    /** Door trim, then restyling, then camouflage, then the toggle ({@link DoorInteraction}). */
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         return DoorInteraction.use(this, state, level, pos, player, hand, hit);
@@ -163,11 +173,17 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock, Appearance
         AssemblyHarvest.playerDestroy(level, pos, () -> super.playerDestroy(level, player, pos, state, entity, tool));
     }
 
-    /** The ordinary loot (one door per assembly), carrying the door's appearance. */
+    /**
+     * The ordinary loot (one door per assembly) carrying the door's appearance, plus one door trim per
+     * trimmed face (0.8.0). Whichever part broke, the loot is evaluated with the anchor's entity, so
+     * the trim pools see the door's faces.
+     */
     @Override
     @SuppressWarnings("deprecation")
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
-        return AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.DOOR, DoorAppearance.forDrops(builder, state));
+        Appearance appearance = DoorAppearance.forDrops(builder, state);
+        DoorBlockEntities.forLoot(builder, state).ifPresent(anchor -> builder.withParameter(LootContextParams.BLOCK_ENTITY, anchor));
+        return AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.DOOR, appearance);
     }
 
     /** Picking any part gives the door in its appearance. */

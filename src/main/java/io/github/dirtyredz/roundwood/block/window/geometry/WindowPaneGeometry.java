@@ -106,22 +106,13 @@ public final class WindowPaneGeometry {
         return List.copyOf(pieces);
     }
 
-    /** Everything drawn for an untrimmed state: panel then junction. */
-    public static List<Piece> pieces(WindowDesign design, WindowPose pose, Collection<Direction> connected) {
-        return pieces(design, pose, connected, false);
-    }
-
     /**
-     * Everything drawn for a state: panel, junction, then (when {@code trimmed}) the trim
-     * ({@link WindowTrimGeometry}). Later pieces win where they overlap: a flush trim's skin
-     * replaces the wood under it ({@link WindowSurfaceGeometry}).
+     * Everything the chunk model draws for a state: panel then junction. Trims are attachments drawn
+     * apart since 0.8.0 ({@link WindowTrimGeometry}); they never replace pane pixels.
      */
-    public static List<Piece> pieces(WindowDesign design, WindowPose pose, Collection<Direction> connected, boolean trimmed) {
+    public static List<Piece> pieces(WindowDesign design, WindowPose pose, Collection<Direction> connected) {
         List<Piece> pieces = new ArrayList<>(panel(design, pose));
         pieces.addAll(junction(design, pose, connected));
-        if (trimmed) {
-            pieces.addAll(WindowTrimGeometry.pieces(design.profile(), pose));
-        }
         return List.copyOf(pieces);
     }
 
@@ -133,12 +124,15 @@ public final class WindowPaneGeometry {
         return List.copyOf(boxes);
     }
 
-    /** Outline and target boxes: the collision boxes plus the trim when there is one. */
-    public static List<Box> selection(WindowDesign design, WindowPose pose, Collection<Direction> connected, boolean trimmed) {
+    /**
+     * Outline and target boxes: the collision boxes plus the in-cell part of the trim bands on
+     * {@code trimSides} (the world sides, along the normal, that carry a trim). A band beyond the cell
+     * is targeted through the slab face under it.
+     */
+    public static List<Box> selection(WindowDesign design, WindowPose pose, Collection<Direction> connected,
+                                      Collection<Direction> trimSides) {
         List<Box> boxes = new ArrayList<>(boxes(design, pose, connected));
-        if (trimmed) {
-            WindowTrimGeometry.pieces(design.profile(), pose).forEach(piece -> boxes.add(piece.box()));
-        }
+        boxes.addAll(WindowTrimGeometry.targetBoxes(design.profile(), pose, trimSides));
         return List.copyOf(boxes);
     }
 

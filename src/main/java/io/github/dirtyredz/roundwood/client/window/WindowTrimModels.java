@@ -1,18 +1,14 @@
 package io.github.dirtyredz.roundwood.client.window;
 
-import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.material.MasonryMaterials;
-import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
-import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimUv;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.BuiltinWoodStyles;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
 import io.github.dirtyredz.roundwood.client.material.MasonryStyles;
 import io.github.dirtyredz.roundwood.client.material.ModelRetexturing;
 import io.github.dirtyredz.roundwood.client.material.PaintStyles;
-import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
@@ -21,9 +17,10 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.Optional;
 
 /**
- * The window trim's artwork (0.7.0). The generated window models draw the trim with two marker
- * sprites ({@link #FACE_MARKER} for its front and back, {@link #EDGE_MARKER} for its sides), so after
- * baking its quads are never confused with the pane's oak wood; they are always replaced here:
+ * The window trim's artwork: what a trim look draws on its face and its edges. Since 0.8.0 the
+ * attachment renderer ({@link WindowTrimWorldModels}) builds the trim's quads from it directly; the
+ * generated markers {@code window_trim_face} and {@code _edge} are kept as textures but no model uses
+ * them any more:
  * <ul>
  *     <li>vanilla woods: their stripped log, tiled like a block (the round trim's wood);</li>
  *     <li>other woods: the donor plank sprite, tiled;</li>
@@ -35,9 +32,6 @@ import java.util.Optional;
  * Glass and pane wood are never touched. The window trim item resolves its stack the same way.
  */
 public final class WindowTrimModels {
-    public static final ResourceLocation FACE_MARKER = ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, "block/window_trim_face");
-    public static final ResourceLocation EDGE_MARKER = ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, "block/window_trim_edge");
-
     /** What a trim look draws: whole-face mapping or tiled, and the face and edge artwork. */
     public record Look(boolean whole, ResourceLocation face, ResourceLocation edge) {
     }
@@ -65,24 +59,6 @@ public final class WindowTrimModels {
         return DonorSprites.sprite(appearance.material())
                 .map(sprite -> new Look(false, sprite.contents().name(), sprite.contents().name()))
                 .orElse(OAK);
-    }
-
-    /** True for a quad drawn with one of the trim's marker sprites. */
-    public static boolean isTrim(BakedQuad quad) {
-        ResourceLocation name = quad.getSprite().contents().name();
-        return name.equals(FACE_MARKER) || name.equals(EDGE_MARKER);
-    }
-
-    /** A trim quad of a window posed {@code pose} with {@code profile}, in {@code look}. */
-    public static BakedQuad paint(BakedQuad quad, Look look, WindowProfile profile, WindowPose pose) {
-        boolean face = quad.getSprite().contents().name().equals(FACE_MARKER);
-        TextureAtlasSprite sprite = DonorSprites.atlas(face ? look.face() : look.edge());
-        if (!face || !look.whole()) {
-            return ModelRetexturing.retexture(quad, sprite, -1);
-        }
-        boolean front = quad.getDirection() == pose.front();
-        return ModelRetexturing.retexture(quad, sprite,
-                (x, y, z) -> WindowTrimUv.whole(profile, pose, x * 16.0, y * 16.0, z * 16.0, front));
     }
 
     /**

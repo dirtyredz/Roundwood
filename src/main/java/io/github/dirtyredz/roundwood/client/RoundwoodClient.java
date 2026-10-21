@@ -17,6 +17,7 @@ import io.github.dirtyredz.roundwood.client.trim.TrimAppearanceModels;
 import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
 import io.github.dirtyredz.roundwood.client.window.WindowAppearanceModel;
 import io.github.dirtyredz.roundwood.client.window.WindowTrimModels;
+import io.github.dirtyredz.roundwood.client.window.WindowTrimRenderer;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
@@ -42,7 +43,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Client-only wiring on the mod bus: the door and trim renderers, the source models they draw (no
+ * Client-only wiring on the mod bus: the door, frame and window-trim renderers, the source models they draw (no
  * blockstate references them, so they are registered for baking here), the appearance-aware window
  * blockstate and item models (the window trim item's too), the door items' panel tint, and dropping every appearance, donor and
  * camouflage cache whenever models are re-baked. Never loaded on a server.
@@ -56,6 +57,7 @@ public final class RoundwoodClient {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_DOOR.get(), RoundDoorRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_TRIM.get(), RoundTrimRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.ROUND_WINDOW.get(), WindowTrimRenderer::new);
     }
 
     @SubscribeEvent
@@ -98,11 +100,11 @@ public final class RoundwoodClient {
             if (!(item instanceof AppearanceBlockItem family)) {
                 continue;
             }
-            models.put(location, AppearanceItemOverrides.wrap(model, switch (family.appearanceFamily()) {
-                case DOOR -> DoorAppearanceModels::item;
-                case WINDOW -> WindowAppearanceModel::item;
-                case TRIM -> TrimAppearanceModels::item;
-            }));
+            models.put(location, switch (family.appearanceFamily()) {
+                case DOOR -> AppearanceItemOverrides.wrap(model, DoorAppearanceModels::item);
+                case WINDOW -> AppearanceItemOverrides.wrapStack(model, WindowAppearanceModel::item);
+                case TRIM -> AppearanceItemOverrides.wrap(model, TrimAppearanceModels::item);
+            });
         }
     }
 

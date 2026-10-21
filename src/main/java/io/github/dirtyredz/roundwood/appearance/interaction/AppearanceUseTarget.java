@@ -1,16 +1,18 @@
 package io.github.dirtyredz.roundwood.appearance.interaction;
 
-import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * A block whose parts carry looks of different families, so a restyling gesture is judged by what
- * the hit lands on (a window's pane is a window look, its fitted trim a trim look that takes
- * masonry). {@link AppearanceUseEvents} asks this before letting a sneaking gesture through.
+ * A block whose clicks are decided by what the hit lands on (a window's frame, glass or face trim, a
+ * door's leaf or trim ring), so the sneak-use bridge ({@link AppearanceUseEvents}) asks the block
+ * itself whether its router would handle this click, using the same targeting and rules as the
+ * router: sneaking then does exactly what a plain click does.
  */
 public interface AppearanceUseTarget {
-    AppearanceFamily appearanceFamilyAt(BlockState state, BlockGetter level, BlockPos pos, BlockHitResult hit);
+    boolean claimsUse(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit);
 }

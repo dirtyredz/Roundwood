@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.migration;
 
 import io.github.dirtyredz.roundwood.block.door.RoundDoorItem;
-import io.github.dirtyredz.roundwood.block.trim.RoundTrimItem;
+import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimItem;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowItem;
 import io.github.dirtyredz.roundwood.migration.block.LegacyDoorBlock;
 import io.github.dirtyredz.roundwood.migration.block.LegacyTrimBlock;
@@ -51,7 +51,7 @@ public final class LegacyContent {
         for (LegacyAppearances.Entry entry : LegacyAppearances.TRIMS) {
             TRIMS.add(blocks.register(entry.id(), () -> new LegacyTrimBlock(
                     ModBlocks.trimProperties(), entry, ModBlocks::roundTrim, ModBlockEntities::roundTrim)));
-            ITEMS.add(items.register(entry.id(), () -> new RoundTrimItem(ModBlocks.roundTrim(), new Item.Properties(),
+            ITEMS.add(items.register(entry.id(), () -> new DoorTrimItem(ModBlocks.roundTrim(), new Item.Properties(),
                     entry.appearance(), entry.id())));
         }
     }

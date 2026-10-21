@@ -38,3 +38,11 @@ export const MASONRY = {
   deepslate_brick: { brick: [74, 74, 77], dark: [56, 56, 59], light: [92, 92, 95], mortar: [36, 36, 38] },
   mud_brick: { brick: [146, 110, 80], dark: [124, 92, 66], light: [164, 126, 94], mortar: [100, 78, 66] },
 };
+
+// 0.8.0: the sixteen dye tints for dyed window glass, close to vanilla stained glass, in DyeColor order.
+export const STAINED_GLASS = {
+  white: [255, 255, 255], orange: [216, 127, 51], magenta: [178, 76, 216], light_blue: [102, 153, 216],
+  yellow: [229, 229, 51], lime: [127, 204, 25], pink: [242, 127, 165], gray: [76, 76, 76],
+  light_gray: [153, 153, 153], cyan: [76, 127, 153], purple: [127, 63, 178], blue: [51, 76, 178],
+  brown: [102, 76, 51], green: [102, 127, 51], red: [153, 51, 51], black: [25, 25, 25],
+};

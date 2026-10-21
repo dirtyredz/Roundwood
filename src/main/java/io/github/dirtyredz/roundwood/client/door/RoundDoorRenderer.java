@@ -27,14 +27,17 @@ import net.minecraftforge.client.model.data.ModelData;
  * facing, then swung about the hinge axis by the animated angle. Uses the normal baked-model path
  * (entity-solid block sheet, packed light, overlay), no custom shader; a donor tint reaches only the
  * panel's tinted quads, never the brass.
- * The static camouflage corners are drawn first, without the leaf's transforms ({@link CamouflageRenderer}).
+ * The static camouflage corners and trim rings (0.8.0) are drawn first, without the leaf's transforms
+ * ({@link CamouflageRenderer}, {@link DoorTrimRenderer}).
  * Incomplete assemblies draw nothing, so a broken door never shows a phantom leaf.
  */
 public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEntity> {
     private final BlockRenderDispatcher blocks;
+    private final DoorTrimRenderer trims;
 
     public RoundDoorRenderer(BlockEntityRendererProvider.Context context) {
         this.blocks = context.getBlockRenderDispatcher();
+        this.trims = new DoorTrimRenderer(blocks.getModelRenderer());
     }
 
     @Override
@@ -52,6 +55,7 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
         }
         // The corners stay in the closed door plane: drawn before any facing or swing transform.
         CamouflageRenderer.render(entity, assembly, level, pose, buffers);
+        trims.render(entity, assembly, level, pose, buffers);
 
         DoorHingeSide hinge = state.getValue(DoorBlock.HINGE);
         DoorAppearanceModels.Look look = DoorAppearanceModels.look(entity.appearance());

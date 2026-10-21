@@ -30,6 +30,7 @@ import net.minecraftforge.fml.common.Mod;
  * edges (no seams between boxes), with vanilla's line style. While the leaf is swinging the
  * blockstate already holds the final pose, so the leaf's outline is instead the closed silhouette
  * turned by the anchor's current swing ({@link DoorSwingOutline}, the renderer's own angle) and the
+ * installed trim rings (0.8.0, static casing) and
  * filled corners stay where they are: the outline never runs ahead of the leaf. An incomplete
  * assembly draws nothing, like the leaf renderer. Client-only, on the Forge bus.
  */
@@ -64,7 +65,7 @@ public final class DoorHighlightRenderer {
         double now = level.getGameTime() + event.getPartialTick();
         if (level.getBlockEntity(DoorLayout.of(pos, state).anchor()) instanceof RoundDoorBlockEntity anchor
                 && anchor.swing().moving(now)) {
-            OutlineLines.edges(pose, lines, DoorSelectionShapes.visibleCorners(state, level, pos), x, y, z, 0F, 0F, 0F, ALPHA);
+            OutlineLines.edges(pose, lines, DoorSelectionShapes.visibleStatic(state, level, pos), x, y, z, 0F, 0F, 0F, ALPHA);
             DoorLayout.Part part = DoorLayout.partOf(state);
             for (DoorSwingOutline.Edge e : DoorSwingOutline.forCell(state.getValue(DoorBlock.HINGE), anchor.swing().progress(now),
                     part.column.index(), part.row(), VoxelShapeFactory.quarterTurns(state.getValue(DoorBlock.FACING)))) {

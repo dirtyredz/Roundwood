@@ -120,10 +120,10 @@ final class LegacyMigrationFixtures {
         for (BlockPos pos : cells) {
             LevelChunk chunk = level.getChunkAt(pos);
             if (chunks.add(chunk.getPos().toLong())) {
-                LegacyChunkMigration.onChunkLoad(new ChunkEvent.Load(chunk, false));
+                ChunkMigrations.onChunkLoad(new ChunkEvent.Load(chunk, false));
             }
         }
-        LegacyChunkMigration.onLevelTick(new TickEvent.LevelTickEvent(LogicalSide.SERVER, TickEvent.Phase.END, level, () -> true));
+        ChunkMigrations.onLevelTick(new TickEvent.LevelTickEvent(LogicalSide.SERVER, TickEvent.Phase.END, level, () -> true));
     }
 
     static boolean isCanonicalDoor(BlockState state) {

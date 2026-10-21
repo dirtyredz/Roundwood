@@ -8,17 +8,18 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Minecraft-facing window data from {@link WindowPaneGeometry}, cached per design, pose, connection
- * set and trim (a few thousand variants at most): the collision shape (the whole slab plus the active
- * junction), the outline and target shape (that plus any trim) and what each cell boundary shows,
- * for face culling. A trim never reaches a cell boundary beyond the slab's own footprint, so the
- * boundaries ignore it.
+ * set and trimmed sides (a few thousand variants at most): the collision shape (the whole slab plus
+ * the active junction), the outline and target shape (that plus the in-cell part of any trim) and
+ * what each cell boundary shows, for face culling. Trims are attachments drawn by a renderer and
+ * never take part in culling.
  */
 public final class WindowShapes {
-    private record Key(WindowDesign design, WindowPose pose, int connections, boolean trimmed) {
+    private record Key(WindowDesign design, WindowPose pose, int connections, int trimSides) {
     }
 
     private static final ConcurrentHashMap<Key, VoxelShape> COLLISION = new ConcurrentHashMap<>();
@@ -30,14 +31,15 @@ public final class WindowShapes {
 
     /** What collides: never the trim. */
     public static VoxelShape collision(WindowDesign design, WindowPose pose, Collection<Direction> connected) {
-        return COLLISION.computeIfAbsent(key(design, pose, connected, false),
+        return COLLISION.computeIfAbsent(key(design, pose, connected, Set.of()),
                 k -> VoxelShapeFactory.shape(WindowPaneGeometry.boxes(design, pose, connected)));
     }
 
-    /** What is outlined and targeted: the collision shape plus the trim when there is one. */
-    public static VoxelShape selection(WindowDesign design, WindowPose pose, Collection<Direction> connected, boolean trimmed) {
-        return SELECTION.computeIfAbsent(key(design, pose, connected, trimmed),
-                k -> VoxelShapeFactory.shape(WindowPaneGeometry.selection(design, pose, connected, trimmed)));
+    /** What is outlined and targeted: the collision shape plus the in-cell trim on {@code trimSides}. */
+    public static VoxelShape selection(WindowDesign design, WindowPose pose, Collection<Direction> connected,
+                                       Collection<Direction> trimSides) {
+        return SELECTION.computeIfAbsent(key(design, pose, connected, trimSides),
+                k -> VoxelShapeFactory.shape(WindowPaneGeometry.selection(design, pose, connected, trimSides)));
     }
 
     /**
@@ -57,7 +59,7 @@ public final class WindowShapes {
 
     /** What the window draws on its {@code side} cell boundary ({@link WindowPaneGeometry#boundary}). */
     public static BitSet boundary(WindowDesign design, WindowPose pose, Collection<Direction> connected, Direction side) {
-        return BOUNDARIES.computeIfAbsent(key(design, pose, connected, false), k -> {
+        return BOUNDARIES.computeIfAbsent(key(design, pose, connected, Set.of()), k -> {
             var boxes = WindowPaneGeometry.pieces(design, pose, connected).stream().map(Piece::box).toList();
             BitSet[] sides = new BitSet[6];
             for (Direction direction : Direction.values()) {
@@ -67,11 +69,15 @@ public final class WindowShapes {
         })[side.ordinal()];
     }
 
-    private static Key key(WindowDesign design, WindowPose pose, Collection<Direction> connected, boolean trimmed) {
+    private static Key key(WindowDesign design, WindowPose pose, Collection<Direction> connected, Collection<Direction> trimSides) {
+        return new Key(design, pose, mask(connected), mask(trimSides));
+    }
+
+    private static int mask(Collection<Direction> sides) {
         int mask = 0;
-        for (Direction side : connected) {
+        for (Direction side : sides) {
             mask |= 1 << side.ordinal();
         }
-        return new Key(design, pose, mask, trimmed);
+        return mask;
     }
 }

@@ -18,6 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 class WindowItemModelsTest {
     private static final ResourceLocation SPRUCE = ResourceLocation.fromNamespaceAndPath("minecraft", "block/spruce_planks");
     private static final ResourceLocation BIRCH = ResourceLocation.fromNamespaceAndPath("minecraft", "block/birch_planks");
+    private static final ResourceLocation CLEAR = ResourceLocation.fromNamespaceAndPath("roundwood", "block/window_glass_clear");
+    private static final ResourceLocation RED_GLASS = ResourceLocation.fromNamespaceAndPath("roundwood", "block/window_glass_red");
+    private static final ResourceLocation BLUE_GLASS = ResourceLocation.fromNamespaceAndPath("roundwood", "block/window_glass_blue");
 
     /** A built model: remembers its source, never modifies it. */
     private record Built(Object source, int serial) {
@@ -30,16 +33,31 @@ class WindowItemModelsTest {
         Object archLeft = new Object();
         Object archRight = new Object();
         List<Object> built = new ArrayList<>();
-        Object a = cache.get(round, SPRUCE, source -> record(built, source));
-        Object b = cache.get(archLeft, SPRUCE, source -> record(built, source));
-        Object c = cache.get(archRight, SPRUCE, source -> record(built, source));
+        Object a = cache.get(round, SPRUCE, CLEAR, source -> record(built, source));
+        Object b = cache.get(archLeft, SPRUCE, CLEAR, source -> record(built, source));
+        Object c = cache.get(archRight, SPRUCE, CLEAR, source -> record(built, source));
         assertEquals(round, ((Built) a).source());
         assertEquals(archLeft, ((Built) b).source());
         assertEquals(archRight, ((Built) c).source());
         assertEquals(3, built.size());
-        assertSame(a, cache.get(round, SPRUCE, source -> record(built, source)), "the same pair is built once");
-        assertNotSame(a, cache.get(round, BIRCH, source -> record(built, source)), "another wood is another model");
+        assertSame(a, cache.get(round, SPRUCE, CLEAR, source -> record(built, source)), "the same pair is built once");
+        assertNotSame(a, cache.get(round, BIRCH, CLEAR, source -> record(built, source)), "another wood is another model");
         assertEquals(4, cache.size());
+    }
+
+    /** 0.8.0: the same window in the same wood with differently tinted glass must never share a model. */
+    @Test
+    void differentGlassInTheSameWoodNeverCollides() {
+        WindowItemModels<Object> cache = new WindowItemModels<>(16);
+        Object round = new Object();
+        List<Object> built = new ArrayList<>();
+        Object clear = cache.get(round, SPRUCE, CLEAR, source -> record(built, source));
+        Object red = cache.get(round, SPRUCE, RED_GLASS, source -> record(built, source));
+        Object blue = cache.get(round, SPRUCE, BLUE_GLASS, source -> record(built, source));
+        assertNotSame(clear, red);
+        assertNotSame(red, blue);
+        assertSame(red, cache.get(round, SPRUCE, RED_GLASS, source -> record(built, source)));
+        assertEquals(3, built.size());
     }
 
     @Test
@@ -47,11 +65,11 @@ class WindowItemModelsTest {
         WindowItemModels<Object> cache = new WindowItemModels<>(16);
         Object source = new Object();
         List<Object> built = new ArrayList<>();
-        Object first = cache.get(source, SPRUCE, s -> record(built, s));
+        Object first = cache.get(source, SPRUCE, CLEAR, s -> record(built, s));
         assertNotSame(source, first);
         cache.clear();
         assertEquals(0, cache.size());
-        Object second = cache.get(source, SPRUCE, s -> record(built, s));
+        Object second = cache.get(source, SPRUCE, CLEAR, s -> record(built, s));
         assertNotSame(first, second, "after a reload the model is rebuilt from the current source");
         assertEquals(2, built.size());
     }
@@ -60,7 +78,7 @@ class WindowItemModelsTest {
     void theCacheStaysBounded() {
         WindowItemModels<Object> cache = new WindowItemModels<>(4);
         for (int i = 0; i < 20; i++) {
-            cache.get(new Object(), SPRUCE, s -> s);
+            cache.get(new Object(), SPRUCE, CLEAR, s -> s);
         }
         assertEquals(4, cache.size());
     }

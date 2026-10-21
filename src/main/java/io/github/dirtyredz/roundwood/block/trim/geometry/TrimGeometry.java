@@ -2,13 +2,13 @@ package io.github.dirtyredz.roundwood.block.trim.geometry;
 
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.Piece;
-import io.github.dirtyredz.roundwood.geometry.PixelCircle;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The round frame, authored facing north like the door (the placing player stands south, looking
+ * The round frame (the ring profile is {@link RingGeometry}, shared with the door's trim attachment), authored facing north like the door (the placing player stands south, looking
  * north): a flat ring in the 32 x 32 plane of a 2 x 2 assembly, outer diameter {@link #OUTER}, inner
  * {@link #INNER} (the two-pixel border the door's own trim ring had before 0.4.0), one pixel deep at
  * the back of its cells ({@link #BACK}..{@link #FRONT}). Fitted in front of a door (the cells one
@@ -17,9 +17,9 @@ import java.util.List;
  * The centre is open. Plain Java.
  */
 public final class TrimGeometry {
-    public static final int OUTER = 32;
-    public static final int INNER = 28;
-    public static final int WIDTH = (OUTER - INNER) / 2;
+    public static final int OUTER = RingGeometry.OUTER;
+    public static final int INNER = RingGeometry.INNER;
+    public static final int WIDTH = RingGeometry.WIDTH;
     public static final double BACK = 0;
     public static final double FRONT = 1;
 
@@ -27,15 +27,14 @@ public final class TrimGeometry {
     public static final String FACE = "face";
     public static final String EDGE = "edge";
 
-    private static final List<Box> RING = PixelCircle.ring(OUTER, WIDTH).stream()
-            .map(rect -> rect.extrude(BACK, FRONT)).toList();
+    private static final List<Box> RING = RingGeometry.extrude(BACK, FRONT);
 
     private TrimGeometry() {
     }
 
     /** True when pixel (u, v) of the 32 x 32 assembly plane is part of the ring. */
     public static boolean inRing(int u, int v) {
-        return PixelCircle.inDisc(OUTER, OUTER, u, v) && !PixelCircle.inDisc(OUTER, INNER, u, v);
+        return RingGeometry.inRing(u, v);
     }
 
     /** The whole ring in assembly coordinates (x 0..32 across, y 0..32 up). */

@@ -13,6 +13,27 @@ public final class FaceUv {
     private FaceUv() {
     }
 
+    /**
+     * {@link #of} for a box that may lie in a neighbouring tile (0.8.0: a trim projecting one pixel
+     * past the cell, at {@code -1..0} or {@code 16..17}): the box is first moved by whole tiles on each
+     * axis into {@code 0..16}, so the face samples the same spot of the sprite a block there would,
+     * never outside the sprite. A box spanning a tile boundary is refused (split it first).
+     */
+    public static float[] tiled(Box b, Direction face) {
+        double dx = shift(b.minX(), b.maxX());
+        double dy = shift(b.minY(), b.maxY());
+        double dz = shift(b.minZ(), b.maxZ());
+        return of(b.translate(-dx, -dy, -dz), face);
+    }
+
+    private static double shift(double min, double max) {
+        double tile = Math.floor(min / TILE) * TILE;
+        if (max - tile > TILE + 1e-9) {
+            throw new IllegalArgumentException("box spans a tile boundary: " + min + ".." + max);
+        }
+        return tile;
+    }
+
     public static float[] of(Box b, Direction face) {
         double[] uv = switch (face) {
             case DOWN -> new double[] {b.minX(), TILE - b.maxZ(), b.maxX(), TILE - b.minZ()};

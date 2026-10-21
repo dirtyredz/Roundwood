@@ -12,12 +12,12 @@ import java.util.Set;
 /**
  * The surfaces a window model actually draws, from its completed logical geometry (0.7.0). The
  * pieces are painted, in order, into a half-pixel voxel grid of the cell (a later piece replaces an
- * earlier one where they overlap: a flush trim's skin replaces the wood under it). A voxel face is
+ * earlier one where they overlap). A voxel face is
  * drawn only where it can be seen:
  * <ul>
  *     <li>translucent material (glass) never against anything: no glass sheet inside glass, and none
- *     against wood or trim (0.6.1's horizontal seams were the faces between stacked glass boxes);</li>
- *     <li>opaque material (wood, beams, trim) against air or against glass, which leaves the frame's
+ *     against wood (0.6.1's horizontal seams were the faces between stacked glass boxes);</li>
+ *     <li>opaque material (wood, beams) against air or against glass, which leaves the frame's
  *     and the beams' reveals visible through the glazing, never against other opaque material.</li>
  * </ul>
  * Faces with the same material, direction and plane are merged into rectangles; their default UVs

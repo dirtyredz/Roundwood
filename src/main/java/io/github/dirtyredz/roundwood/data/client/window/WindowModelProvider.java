@@ -18,7 +18,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
  * The round windows' blockstates and models (plain and crossed), multipart like a vanilla pane. Every
  * position draws through {@link WindowPaneModelWriter}: centred, the upright model across {@code axis}
  * (turned 90 degrees for {@code axis=z}) in its arm combination; flush against a side, floor or
- * ceiling, the posed model, which grows no glass. Each also trimmed. The models bind oak planks; the
+ * ceiling, the posed model, which grows no glass. Pane-only since 0.8.0. The models bind oak planks; the
  * client swaps only those quads' sprite per window appearance. All models are translucent
  * (Roundwood's tinted glazing); {@code waterlogged} never selects a model.
  */

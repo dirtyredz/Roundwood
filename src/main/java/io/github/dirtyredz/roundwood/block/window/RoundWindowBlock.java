@@ -53,7 +53,11 @@ public class RoundWindowBlock extends WindowPaneBlock {
                 .setValue(POSITION, WindowPlacement.roundPosition(request));
     }
 
-    /** Connections turn with the block (inherited); a quarter turn also swaps the axis, and a flush side turns. */
+    /**
+     * Connections turn with the block (inherited); a quarter turn also swaps the axis, and a flush side
+     * turns. The attachment front turns too: a half turn keeps the axis but moves each trim to the
+     * other world side, so the face identity is recomputed ({@link #keepFaces}).
+     */
     @Override
     public BlockState rotate(BlockState state, Rotation rotation) {
         BlockState rotated = super.rotate(state, rotation);
@@ -61,7 +65,8 @@ public class RoundWindowBlock extends WindowPaneBlock {
             rotated = rotated.setValue(AXIS, state.getValue(AXIS) == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X);
         }
         Optional<Direction> side = state.getValue(POSITION).side();
-        return side.isEmpty() ? rotated : rotated.setValue(POSITION, WindowPosition.flush(rotation.rotate(side.get())));
+        BlockState turned = side.isEmpty() ? rotated : rotated.setValue(POSITION, WindowPosition.flush(rotation.rotate(side.get())));
+        return keepFaces(state, turned, rotation::rotate);
     }
 
     /** Connections mirror (inherited); the axis is unchanged and a flush side mirrors. */
@@ -69,6 +74,7 @@ public class RoundWindowBlock extends WindowPaneBlock {
     public BlockState mirror(BlockState state, Mirror mirror) {
         BlockState mirrored = super.mirror(state, mirror);
         Optional<Direction> side = state.getValue(POSITION).side();
-        return side.isEmpty() ? mirrored : mirrored.setValue(POSITION, WindowPosition.flush(mirror.mirror(side.get())));
+        BlockState reflected = side.isEmpty() ? mirrored : mirrored.setValue(POSITION, WindowPosition.flush(mirror.mirror(side.get())));
+        return keepFaces(state, reflected, mirror::mirror);
     }
 }

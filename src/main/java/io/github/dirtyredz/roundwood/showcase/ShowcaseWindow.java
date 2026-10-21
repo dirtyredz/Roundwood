@@ -14,20 +14,34 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 import java.util.Optional;
+import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
+import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
+import net.minecraft.world.item.DyeColor;
 
 /**
- * One window a showcase section places (0.7.0 sections): which block in which pose at frame
- * coordinates ({@code r}, {@code y}, {@code f}), the pane's look and any fitted trim's look. Sections
- * build from these and the showcase checks read the same list back from the world.
+ * One window a showcase section places: which block in which pose at frame coordinates ({@code r},
+ * {@code y}, {@code f}), the frame's look, the face trims (0.8.0: each face its own, FRONT being the
+ * pose's front for a freshly placed window) and the glass colour. Sections build from these and the
+ * showcase checks read the same list back from the world.
  */
 public record ShowcaseWindow(WindowDesign design, WindowPose pose, int r, int y, int f, Appearance pane,
-                             Optional<Appearance> trim) {
+                             FaceTrims trims, Optional<DyeColor> glass) {
     public static ShowcaseWindow of(WindowDesign design, WindowPose pose, int r, int y, int f, Appearance pane) {
-        return new ShowcaseWindow(design, pose, r, y, f, pane, Optional.empty());
+        return new ShowcaseWindow(design, pose, r, y, f, pane, FaceTrims.NONE, Optional.empty());
     }
 
+    /** The same look on both faces. */
     public ShowcaseWindow trimmed(Appearance look) {
-        return new ShowcaseWindow(design, pose, r, y, f, pane, Optional.of(look));
+        return new ShowcaseWindow(design, pose, r, y, f, pane, FaceTrims.both(look), glass);
+    }
+
+    /** {@code look} added on one face. */
+    public ShowcaseWindow trimmed(AttachmentFace face, Appearance look) {
+        return new ShowcaseWindow(design, pose, r, y, f, pane, trims.with(face, look), glass);
+    }
+
+    public ShowcaseWindow glass(DyeColor color) {
+        return new ShowcaseWindow(design, pose, r, y, f, pane, trims, Optional.of(color));
     }
 
     /** The block state drawing {@link #pose} (connections are left to the neighbours). */

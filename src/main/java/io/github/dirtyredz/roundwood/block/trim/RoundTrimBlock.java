@@ -59,7 +59,8 @@ import java.util.function.Supplier;
  * {@link #PART} it is. The anchor (lower-left) quarter carries the {@link RoundTrimBlockEntity}
  * that holds the frame's appearance and that the client draws all four quarters from (the world
  * model itself is empty). The callbacks hand off to the frame's assembly services; placement only
- * ever happens whole, through {@link RoundTrimItem}.
+ * ever happens whole, through {@code assembly/TrimPlacement} (0.8.0: frames are compatibility content
+ * from older saves; the {@code round_trim} item now attaches to doors and never places one).
  */
 public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefaults {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -158,7 +159,7 @@ public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefa
         return true;
     }
 
-    /** Frames are placed only whole, through {@link RoundTrimItem}; there is no single-cell placement. */
+    /** Frames are placed only whole ({@code assembly/TrimPlacement}); there is no single-cell placement. */
     @Override
     @Nullable
     public BlockState getStateForPlacement(BlockPlaceContext context) {

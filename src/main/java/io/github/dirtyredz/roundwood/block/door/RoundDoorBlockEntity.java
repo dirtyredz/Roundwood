@@ -4,7 +4,10 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
+import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
+import io.github.dirtyredz.roundwood.block.attachment.TrimAttachmentSource;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimNbt;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorSwing;
 import net.minecraft.core.BlockPos;
@@ -26,7 +29,7 @@ import java.util.Optional;
 /**
  * The anchor (lower-left part) of every assembly carries this entity, so the client has one place
  * to draw the whole leaf from, and the assembly has one place to keep its appearance (wood and
- * paint, {@link Appearance}) and its camouflage. It never
+ * paint, {@link Appearance}), its camouflage and its face trims (0.8.0, {@link DoorTrimNbt}). It never
  * ticks: the blockstate stays authoritative for open/closed, and the client-side {@link DoorSwing}
  * only animates between states it is told about through {@link #setBlockState}.
  *
@@ -34,13 +37,17 @@ import java.util.Optional;
  * camouflage material, never the refund. Loading always replaces both previous values (a clear or
  * a paint removal reaches clients too) and never touches the swing.
  */
-public class RoundDoorBlockEntity extends BlockEntity {
+public class RoundDoorBlockEntity extends BlockEntity implements TrimAttachmentSource {
     private final DoorSwing swing;
     @Nullable
     private CamouflageData camouflage;
     /** Null: the block's default (oak, or a hidden alias's historical finish). */
     @Nullable
     private Appearance appearance;
+    private FaceTrims trims = FaceTrims.NONE;
+    /** A trim payload of a version this build does not understand, saved back unchanged. */
+    @Nullable
+    private CompoundTag unknownTrims;
 
     public RoundDoorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -64,6 +71,30 @@ public class RoundDoorBlockEntity extends BlockEntity {
         if (level != null && !level.isClientSide) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
         }
+    }
+
+    /** The door's face trims (0.8.0; none while an unknown payload is held). */
+    @Override
+    public FaceTrims trims() {
+        return trims;
+    }
+
+    /** False while the stored trims are of an unknown future version: they must not be edited. */
+    public boolean trimsEditable() {
+        return unknownTrims == null;
+    }
+
+    /** Server: replaces the face trims, saves and tells the clients; refused while an unknown payload is held. */
+    public boolean setTrims(FaceTrims next) {
+        if (!trimsEditable()) {
+            return false;
+        }
+        trims = next;
+        setChanged();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        }
+        return true;
     }
 
     public Optional<CamouflageData> camouflage() {
@@ -98,19 +129,27 @@ public class RoundDoorBlockEntity extends BlockEntity {
         if (appearance != null) {
             AppearanceNbt.write(tag, appearance);
         }
+        if (unknownTrims != null) {
+            tag.put(DoorTrimNbt.TAG, unknownTrims.copy());
+        } else if (trims.any()) {
+            DoorTrimNbt.write(tag, trims);
+        }
     }
 
-    /** Replaces camouflage and appearance with whatever the tag holds (nothing when absent or not acceptable). */
+    /** Replaces camouflage, appearance and trims with whatever the tag holds (nothing when absent or not acceptable). */
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
         camouflage = CamouflageData.read(tag).orElse(null);
         appearance = AppearanceNbt.read(tag).filter(AppearanceFamily.DOOR::accepts).orElse(null);
+        DoorTrimNbt.Read read = DoorTrimNbt.read(tag);
+        trims = read.trims();
+        unknownTrims = read.unknown();
     }
 
     /**
-     * Looks only, always carrying the camouflage key (possibly empty) so that a clear is sent too; the
-     * appearance is omitted when it is the default, which the client then reads as the default.
+     * Looks only, always carrying the camouflage and trim keys (possibly empty) so that a clear is sent
+     * too; the appearance is omitted when it is the default, which the client then reads as the default.
      */
     @Override
     public CompoundTag getUpdateTag() {
@@ -119,6 +158,7 @@ public class RoundDoorBlockEntity extends BlockEntity {
         if (appearance != null) {
             AppearanceNbt.write(tag, appearance);
         }
+        DoorTrimNbt.write(tag, unknownTrims == null ? trims : FaceTrims.NONE); // always: a removal must reach clients
         return tag;
     }
 

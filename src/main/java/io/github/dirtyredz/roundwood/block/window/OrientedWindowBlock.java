@@ -66,17 +66,19 @@ public class OrientedWindowBlock extends WindowPaneBlock {
             case COUNTERCLOCKWISE_90 -> 3;
             default -> 0;
         };
-        return withPose(super.rotate(state, rotation), pose(state).rotateY(turns));
+        return keepFaces(state, withPose(super.rotate(state, rotation), pose(state).rotateY(turns)), rotation::rotate);
     }
 
     /** The geometry is reflected; the piece stays a left (or right) piece, now seen from its other face. */
     @Override
     public BlockState mirror(BlockState state, Mirror mirror) {
         BlockState mirrored = super.mirror(state, mirror);
-        return switch (mirror) {
+        BlockState reflected = switch (mirror) {
             case LEFT_RIGHT -> withPose(mirrored, pose(state).mirror(Direction.Axis.Z));
             case FRONT_BACK -> withPose(mirrored, pose(state).mirror(Direction.Axis.X));
             default -> mirrored;
         };
+        // The pose reverses its geometric front to keep handedness; the trims stay on their reflected sides.
+        return keepFaces(state, reflected, mirror::mirror);
     }
 }
