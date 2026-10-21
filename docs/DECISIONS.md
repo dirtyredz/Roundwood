@@ -2,6 +2,56 @@
 
 Newest first.
 
+## 2026-10-21 - Round trims: independent 2x2 frames, fitted or freestanding (0.4.0, supersedes the door's built-in trim ring)
+
+The door's 2-pixel ring is gone; frames are their own block family so trim and door colours mix.
+A frame is a 2 x 2 assembly of static quarters (`facing` + `part`, no block entity), one item
+placing all four through the ordinary item-use path. It occupies the cells in front of the door
+(a separate depth layer), its ring one pixel deep at the back of them, so a fitted frame sits one
+pixel proud of the leaf over the disc's edge and the camouflage corners stay visible. Fitting is a
+sneak-use on a closed door's front (standard sneak-placement against an interactive block; no new
+interception in `RoundDoorBlock.use`); anywhere else it is freestanding, like a door, so it frames
+any 2 x 2 opening. It is purely decorative: no collision, support, occlusion or redstone, and only
+the ring quarter is targetable, so the aperture passes rays to the door. Door and frame keep
+separate layout and placement policies; only the mutation batch and partner teardown are shared
+(`block/assembly`). Rejected: making the frame part of the door (no mixing), four independently
+auto-orienting quarter blocks (half-built frames, no one-item placement), a larger surround outside
+the door footprint (would need cells beside the door), a door-style framework shared with the frame
+(couples redstone, identity and block entities to a static decoration).
+
+## 2026-10-21 - Radial brickwork is painted, not modelled (0.4.0)
+
+Brick frames show a generated 64 x 64 polar image (24 wedge bricks, mortar radiating from the
+centre, a brick centred at the crown) spread once across the whole ring (`AssemblyFaceUv`), with a
+granular edge texture on the sides. The ring is two pixels wide, so modelled voussoirs would be
+dozens of rotated sub-pixel cuboids for no visible gain. Tradeoff: mortar relief is painted.
+
+## 2026-10-21 - Door leaves: one board panel, prominent hardware (0.4.0)
+
+The leaf is one panel over the whole disc with Roundwood's own 32 x 32 board art per finish (eight
+vertical boards, full height) mapped once across the leaf, so boards never restart at a cell or tile
+boundary. Brass straps stand half a pixel proud, the centred knobs two pixels proud of each face;
+collision and selection stay the disc slab (the hardware is decorative), and the render bounds grow
+by a 3-pixel margin to contain it at any swing angle. Tradeoff: door leaves no longer follow plank
+resource packs (they can retexture Roundwood's own panels). Rejected: vanilla planks (16-pixel
+horizontal courses that restart mid-door).
+
+## 2026-10-21 - Target shape vs visible highlight (0.4.0)
+
+`getShape` stays the target (empty corners join while a block item is held, so camouflage can be
+applied); the client replaces vanilla's highlight for round doors with the visible shape (leaf at
+rest plus filled corners). In 0.3.x the highlight was the target shape, so an open door with a
+block in hand was outlined as the closed frame. Rejected: dropping empty corners from the target
+(camouflage could no longer be applied to an open door's corners).
+
+## 2026-10-21 - Window glazing and arms (0.4.0, owner report)
+
+Windows show no glass in 0.3.x because vanilla `glass.png` is transparent inside its one-pixel
+border and the round glazing samples only that interior; they now use Roundwood's own visible,
+translucent `window_glass` in translucent models. Across the plane, a window connects only to
+genuine pane junctions (panes, bars, walls, a crossing window), never to a sturdy block in front of
+or behind it, and never to a parallel window face to face. In-plane connections keep vanilla rules.
+
 ## 2026-10-21 - Showcase command with a section registry (0.3.1)
 
 `/roundwood showcase` (level 2) rebuilds one bounded test layout (46 x 8 x 36, one-block margin

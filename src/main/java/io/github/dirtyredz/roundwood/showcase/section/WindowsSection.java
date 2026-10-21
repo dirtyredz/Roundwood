@@ -1,16 +1,16 @@
 package io.github.dirtyredz.roundwood.showcase.section;
 
+import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
 import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 /**
  * Windows: every finish in one connected row, a junction with a vanilla glass pane across the middle

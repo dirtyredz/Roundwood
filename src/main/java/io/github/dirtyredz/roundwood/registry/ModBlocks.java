@@ -2,10 +2,10 @@ package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.variant.Finish;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.variant.Finish;
+import io.github.dirtyredz.roundwood.variant.FinishCatalog;
 import io.github.dirtyredz.roundwood.variant.TrimMaterial;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;

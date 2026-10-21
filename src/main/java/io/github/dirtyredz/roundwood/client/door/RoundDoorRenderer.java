@@ -2,11 +2,11 @@ package io.github.dirtyredz.roundwood.client.door;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import io.github.dirtyredz.roundwood.client.camouflage.CamouflageRenderer;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
+import io.github.dirtyredz.roundwood.client.camouflage.CamouflageRenderer;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;

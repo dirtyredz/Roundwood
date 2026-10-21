@@ -7,14 +7,18 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
+import io.github.dirtyredz.roundwood.showcase.section.BrickArchesSection;
 import io.github.dirtyredz.roundwood.showcase.section.CamouflageSection;
 import io.github.dirtyredz.roundwood.showcase.section.DoorsSection;
 import io.github.dirtyredz.roundwood.showcase.section.RedstoneSection;
+import io.github.dirtyredz.roundwood.showcase.section.TrimCombinationsSection;
 import io.github.dirtyredz.roundwood.showcase.section.WindowsSection;
 import io.github.dirtyredz.roundwood.variant.Finish;
 import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.variant.TrimMaterial;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,15 +26,19 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LeverBlock;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
@@ -38,35 +46,35 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 
 /**
- * The showcase builder in a 50 x 10 x 50 template filled with gold: everything it promises is
+ * The showcase builder in a 76 x 10 x 76 template filled with gold: everything it promises is
  * present and complete, and no gold outside its bounds was touched (in each facing).
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class ShowcaseGameTests {
     private static final String TEMPLATE = "showcase";
-    private static final int SIZE = 50;
+    private static final int SIZE = 76;
     private static final int HEIGHT = 10;
 
     private ShowcaseGameTests() {
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 400)
+    @GameTest(template = TEMPLATE, timeoutTicks = 600)
     public static void buildsFacingSouth(GameTestHelper helper) {
         buildAndVerify(helper, Direction.SOUTH);
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 400)
+    @GameTest(template = TEMPLATE, timeoutTicks = 600)
     public static void buildsFacingEast(GameTestHelper helper) {
         buildAndVerify(helper, Direction.EAST);
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 400)
+    @GameTest(template = TEMPLATE, timeoutTicks = 600)
     public static void buildsFacingNorth(GameTestHelper helper) {
         buildAndVerify(helper, Direction.NORTH);
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 400)
+    @GameTest(template = TEMPLATE, timeoutTicks = 600)
     public static void buildsFacingWest(GameTestHelper helper) {
         buildAndVerify(helper, Direction.WEST);
     }
@@ -102,7 +110,8 @@ public final class ShowcaseGameTests {
 
     private static void buildAndVerify(GameTestHelper helper, Direction facing) {
         ServerLevel level = helper.getLevel();
-        BlockPos feetRel = new BlockPos(SIZE / 2, 2, SIZE / 2).relative(facing.getOpposite(), 17);
+        // The bounds run from 2 to DEPTH + 3 blocks ahead of the feet: centre them in the template.
+        BlockPos feetRel = new BlockPos(SIZE / 2, 2, SIZE / 2).relative(facing.getOpposite(), (ShowcaseFrame.DEPTH + 5) / 2);
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < HEIGHT; y++) {
                 for (int z = 0; z < SIZE; z++) {
@@ -115,7 +124,9 @@ public final class ShowcaseGameTests {
         check(result.built(), "refused: " + result.message());
         check(result.problems().isEmpty(), "placement problems: " + result.problems());
         BoundingBox bounds = result.bounds();
-        check(bounds.getXSpan() <= 48 && bounds.getYSpan() <= 8 && bounds.getZSpan() <= 48, "bounds too large: " + bounds);
+        int across = Math.min(bounds.getXSpan(), bounds.getZSpan());
+        int along = Math.max(bounds.getXSpan(), bounds.getZSpan());
+        check(across == 62 && along == 72 && bounds.getYSpan() == 8, "bounds are not 62 x 8 x 72: " + bounds);
 
         ShowcaseFrame frame = ShowcaseFrame.at(feet, facing);
         verifyBounds(helper, bounds);
@@ -123,7 +134,33 @@ public final class ShowcaseGameTests {
         verifyCamouflage(level, frame);
         verifyWindows(level, frame);
         verifyRedstone(level, frame);
-        helper.succeed();
+        verifyTrims(level, frame);
+        verifyArches(level, frame);
+        // Integrity checks run a tick later: everything must still be whole afterwards.
+        helper.runAfterDelay(3, () -> {
+            verifyTrims(level, frame);
+            verifyArches(level, frame);
+            verifyDoors(level, frame);
+            clearSilently(helper);
+            helper.succeed();
+        });
+    }
+
+    /**
+     * Leaves nothing behind: the framework later clears this area for other tests with shape updates,
+     * which would break doors and frames that lose their floor and drop items into those tests.
+     */
+    private static void clearSilently(GameTestHelper helper) {
+        int flags = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
+        for (int x = 0; x < SIZE; x++) {
+            for (int y = HEIGHT - 1; y >= 0; y--) {
+                for (int z = 0; z < SIZE; z++) {
+                    helper.getLevel().setBlock(helper.absolutePos(new BlockPos(x, y, z)), Blocks.AIR.defaultBlockState(), flags);
+                }
+            }
+        }
+        AABB area = new AABB(helper.absolutePos(BlockPos.ZERO), helper.absolutePos(new BlockPos(SIZE, HEIGHT, SIZE))).inflate(2);
+        helper.getLevel().getEntitiesOfClass(Entity.class, area, entity -> !(entity instanceof Player)).forEach(Entity::discard);
     }
 
     private static void verifyBounds(GameTestHelper helper, BoundingBox bounds) {
@@ -194,6 +231,10 @@ public final class ShowcaseGameTests {
                 && upper.getValue(RoundWindowBlock.AXIS) != lower.getValue(RoundWindowBlock.AXIS), "stacked pair axes");
         BlockState wet = level.getBlockState(frame.pos(WindowsSection.WATER_R, 0, WindowsSection.DEMO_F));
         check(wet.is(oak) && wet.getValue(BlockStateProperties.WATERLOGGED), "waterlogged window missing");
+        BlockState solid = level.getBlockState(frame.pos(WindowsSection.SOLID_R, 0, WindowsSection.DEMO_F));
+        check(solid.is(oak) && level.getBlockState(frame.pos(WindowsSection.SOLID_R, 0, WindowsSection.DEMO_F + 1)).is(Blocks.STONE),
+                "stone-behind window demo missing");
+        check(!connects(solid, frame.forward()), "a window grew an arm towards the stone behind it");
     }
 
     private static void verifyRedstone(ServerLevel level, ShowcaseFrame frame) {
@@ -204,6 +245,40 @@ public final class ShowcaseGameTests {
         check(!level.getBlockState(door).getValue(DoorBlock.OPEN), "redstone door starts open");
         ((LeverBlock) Blocks.LEVER).pull(lever, level, leverPos);
         check(level.getBlockState(door).getValue(DoorBlock.OPEN), "flipping the lever did not open the door");
+    }
+
+    private static void verifyTrims(ServerLevel level, ShowcaseFrame frame) {
+        for (int i = 0; i < FinishCatalog.TRIMS.size(); i++) {
+            TrimMaterial material = FinishCatalog.TRIMS.get(i);
+            for (int j = 0; j < TrimCombinationsSection.SAMPLES; j++) {
+                int r = TrimCombinationsSection.r(i, j);
+                int f = TrimCombinationsSection.f(i);
+                String what = material.id() + " sample " + j;
+                RoundDoorBlock door = ModBlocks.door(TrimCombinationsSection.finish(j));
+                DoorLayout.Assembly assembly = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(),
+                        TrimCombinationsSection.hinge(i, j));
+                check(assembly.complete(level, door), what + ": door missing or incomplete");
+                check(level.getBlockState(assembly.anchor()).getValue(DoorBlock.OPEN) == TrimCombinationsSection.open(j), what + ": open state");
+                boolean camouflaged = level.getBlockEntity(assembly.anchor()) instanceof RoundDoorBlockEntity entity
+                        && entity.camouflage().map(c -> c.material().is(Blocks.STONE_BRICKS)).orElse(false);
+                check(camouflaged == TrimCombinationsSection.camouflaged(j), what + ": camouflage");
+                TrimLayout.Assembly trim = new TrimLayout.Assembly(frame.pos(r, 0, f - 1), frame.forward());
+                check(trim.complete(level, ModBlocks.trim(material)), what + ": frame missing or incomplete");
+                check(level.getBlockEntity(frame.pos(r, 0, f - 2)) instanceof SignBlockEntity sign
+                                && sign.getFrontText().getMessage(0, false).getString().startsWith(material.displayName()),
+                        what + ": label sign missing");
+            }
+        }
+    }
+
+    private static void verifyArches(ServerLevel level, ShowcaseFrame frame) {
+        for (int i = 0; i < FinishCatalog.MASONRY.size(); i++) {
+            TrimMaterial material = FinishCatalog.MASONRY.get(i);
+            TrimLayout.Assembly trim = new TrimLayout.Assembly(frame.pos(BrickArchesSection.r(i), 0, BrickArchesSection.F), frame.forward());
+            check(trim.complete(level, ModBlocks.trim(material)), material.id() + ": freestanding arch missing");
+            check(level.getBlockEntity(frame.pos(BrickArchesSection.r(i) - 1, 0, BrickArchesSection.F)) instanceof SignBlockEntity,
+                    material.id() + ": arch label missing");
+        }
     }
 
     private static boolean connects(BlockState state, Direction direction) {

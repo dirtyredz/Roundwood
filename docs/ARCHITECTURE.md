@@ -22,7 +22,7 @@ always the lower-left part.
 
 - All present parts share `hinge`, `open` and `powered`.
 - Every write Roundwood makes goes through `DoorPlacement`, `DoorStateController` or `DoorRemoval`,
-  inside a `DoorMutationBatch` naming the four cells.
+  inside an `AssemblyMutationBatch` naming the four cells.
 - Nothing reads an unloaded cell. State changes and redstone do nothing while any cell is unloaded
   (deferred, not treated as air); removal only clears loaded partners.
 
@@ -46,7 +46,7 @@ are ignored.
 **Integrity.** A part appearing from anything but an in-place change (structure templates,
 commands, our own placement) schedules a block tick (`DoorIntegrity`, 1 tick later, after the
 writer finished). If all four cells are loaded and the assembly is incomplete, the part is broken
-with its own loot and `DoorRemoval` clears its matching partners: at most one item. Missing parts
+with its own loot and `DoorRemoval` (via `AssemblyTeardown`) clears its matching partners: at most one item. Missing parts
 are never created; an unloaded cell re-schedules the check (every 20 ticks) without being read.
 Vertically, `updateShape` keeps a part only while the cell above/below is its own column's other
 half. Mirroring cycles `hinge` (vanilla) and `column`; rotation turns `facing` only.
@@ -71,9 +71,11 @@ is not treated as a removal.
 
 ## The leaf: geometry, collision, rendering
 
-`door/leaf/DoorGeometry` describes one closed 32-pixel disc (2-pixel trim ring, recessed panel,
-brass straps on the hinge side, one centred knob per face) in a 32x32 plane at depth
-z 13..16, authored facing north. It turns as a rigid body about the vertical axis through the middle
+`block/door/leaf/DoorGeometry` describes one closed 32-pixel disc in a 32x32 plane, authored facing
+north: one board panel over the whole disc at depth z 13..16 (no trim ring since 0.4.0), brass
+straps on the hinge side half a pixel proud of each face (z 12.5..13 and 16..16.5) and a 2 x 2
+knob in the middle of each face standing two pixels proud (z 11..13 and 16..18). The hardware is
+decorative: collision and selection use the disc slab only. It turns as a rigid body about the vertical axis through the middle
 of its hinge-side thickness (x 1.5 or 30.5, z 14.5), +90 / -90 degrees, so the open leaf lies along
 the hinge wall (3/16 thick) and its outer half projects one block in the `facing` direction.
 
@@ -81,11 +83,15 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   to each of the four cells and turned for `facing`; cached (64 variants). Open: the free column is
   empty, the hinge column keeps the inner half (29/16 clear width). Support and visual shapes
   inherit it. The projection never collides.
-- **Selection** (`selection/DoorSelectionShapes`, `getShape`): every part returns the whole
-  assembly's outline at rest (closed disc, or the open leaf including its projection) relative to
-  itself, so all four give the same world shape and the highlight has no quarter seams. It follows
-  the authoritative `open`, not the 8-tick animation. The four static corners join it when filled,
-  or while the looking player (`EntityCollisionContext`) holds a block item in either hand.
+- **Selection** (`selection/DoorSelectionShapes`): two whole-assembly shapes, the same in world
+  space from every part (no quarter seams), both following the authoritative `open`, not the 8-tick
+  animation. The **target** shape (`getShape`, what rays hit) is the leaf at rest (closed disc, or
+  the open leaf including its projection) plus the four static corners when filled or while the
+  looking player (`EntityCollisionContext`) holds a block item in either hand, so empty corners can
+  take camouflage. The **visible** shape adds only filled corners. Vanilla highlights `getShape`,
+  which outlined an open door as the closed frame whenever a block was held (0.3.x), so
+  `client/door/DoorHighlightRenderer` cancels `RenderHighlightEvent.Block` for round doors and draws
+  the visible shape's edges with vanilla's line style (nothing for an incomplete assembly).
 - **Hit re-attribution** (`selection/DoorHitResolver`, client `DoorTargetingEvents` on
   `InputEvent.InteractionKeyMappingTriggered`): a ray is credited to the first part it passes,
   which may not contain the hit point (looking through an empty corner). Before use, attack,
@@ -100,7 +106,8 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   leaf model (`block/<finish>_round_door_leaf_<hinge>`, registered for baking by `RoundwoodClient`,
   looked up per frame so resource reloads are safe) through the normal baked-model path
   (`Sheets.solidBlockSheet`, packed light of the anchor, overlay). It draws nothing for an
-  incomplete assembly. `getRenderBoundingBox` covers the four cells plus the projection cells;
+  incomplete assembly. `getRenderBoundingBox` covers the four cells plus the projection cells, plus a 3-pixel margin
+  for the proud hardware at any swing angle (`DoorGeometry.SWEEP_MARGIN`);
   `shouldRenderOffScreen` keeps it out of section culling.
 - **Swing animation** (client only): `DoorSwing` holds a progress 0..1. `RoundDoorBlockEntity
   .setBlockState` (called by the chunk on every state change) retargets it when `open` flips, at
@@ -152,18 +159,61 @@ change; the 0.2.0 passage is unchanged.
 `axis`. Authored for `axis=x`: a square 16 x 16 wooden face at z 7..9, wood outside a centred
 12-pixel circle, glass inside it at z 7.5..8.5. In-plane connections add nothing (the square edges
 meet); connections across the plane add a 2-pixel glass arm from the block edge to the panel
-(reaching the recessed glass where the opening crosses it; buried faces omitted). Collision and
+(reaching the recessed glass where the opening crosses it; buried faces omitted). Across the
+plane only genuine pane junctions connect (`WindowConnections`, applied after vanilla in
+`getStateForPlacement` and `updateShape`): panes, bars, walls, or a window whose axis crosses this
+one; vanilla's "any sturdy face" rule grew an arm towards a solid block in front (0.3.x). The
+glazing and arms use Roundwood's `window_glass` (every texel visible, translucent) in a translucent
+model: vanilla `glass.png` is transparent inside its border, which is all the round glazing sampled. Collision and
 outline are the panel plus active arms (`WindowShapes`, 32 variants). Same-block faces above/below
 are hidden only when the axes match.
 
+## Frame (round trim)
+
+An independent 2 x 2 assembly of `RoundTrimBlock` quarters (`facing` + `part`), placed whole by
+`RoundTrimItem` through the ordinary `ItemStack.useOn` path (Forge's snapshot capture: one
+multi-place event, all four rolled back if cancelled). Geometry (`block/trim/geometry/TrimGeometry`):
+a ring, outer diameter 32, inner 28, one pixel deep at the back of its cells (z 0..1, authored
+facing north), cut into cell-local quarters.
+
+- **Fitted**: using the item on the front face of a complete, closed door (sneaking, since a plain
+  click goes to the door) resolves the door's anchor from whichever part was clicked and places
+  the frame at `doorAnchor.relative(facing.getOpposite())` with the door's facing: the cells in
+  front, so the ring sits one pixel proud of the door's front face over the disc's edge. Other
+  faces and open doors are refused (`FAIL`, nothing consumed). **Freestanding**: anywhere else the
+  target cell is the lower-left quarter, facing the player's direction.
+- **Checks** (`TrimPlacement`): loaded, inside build height and border, editable, replaceable, dry,
+  both lower quarters on a sturdy floor. No entity check (nothing collides). Door cells are not
+  replaceable, so a frame never overwrites a door. `placeAt` does the same without a player.
+- **Behaviour**: empty collision and support shapes, pathfindable, no occlusion, not a redstone
+  conductor, `PushReaction.BLOCK`, no block entity. The selection shape is only the quarter's own
+  ring piece, so rays pass through the centre and the corners to the door behind.
+- **Lifecycle**: the door's pattern, through the shared `block/assembly` services: `TrimRemoval`
+  clears loaded partners with drops suppressed (one item from the initiating quarter),
+  `TrimIntegrity` removes an incomplete frame a tick later (deferred while a cell is unloaded),
+  losing the floor under a lower quarter breaks it. Door and frame never remove each other.
+  Rotation turns `facing`; mirroring mirrors it and swaps the column of `part`.
+- **Materials** (`variant/TrimMaterial`, declared in `FinishCatalog`): one wooden frame per finish
+  (natural woods in their stripped log, tiled per block; painted ones in the painted door panel
+  spread across the ring) and four masonry frames whose 64 x 64 radial brick face (24 wedge
+  bricks, joints radiating from the centre, a brick at the crown) is spread across the ring.
+
 ## Data
 
-Everything except the five textures is generated. `GeometryModelWriter` cuts every element at the
-16-pixel texture-tile boundaries and writes vanilla's default UVs for its position inside its own
-tile (Forge omits a UV equal to the default), so no face samples outside its sprite. Door: two leaf
+Everything is generated: textures by `tools/generate-textures.mjs` (checked in under
+`src/main/resources`), the rest by datagen. `GeometryModelWriter` cuts every element at the
+16-pixel texture-tile boundaries and by default writes vanilla's default UVs for its position
+inside its own tile (Forge omits a UV equal to the default), so no face samples outside its
+sprite. A `FaceStyle` can hide buried faces, give some faces another texture variable (a frame's
+sides) or explicit UVs: door panels and painted/brick frames use `AssemblyFaceUv`, which spreads one
+image across the whole 32 x 32 front and back (front as seen from the front, back as seen from
+behind), so boards and brick joints continue across elements and cells. Door: two leaf
 templates (hinge left/right) plus per-finish bindings, one empty world model per finish and a
 blockstate with a single `""` variant. Window: one core template, per-finish bindings and a shared glass arm model, in a multipart
 blockstate (core by axis, arms by axis + connection).
-Items (`RoundwoodItemModelProvider`): door items inherit the left-hinge leaf, window items the
-window template, each with front GUI light and computed centred display transforms. Plus recipes
+Frame: four quarter templates in two families (tiled, whole-image), per-material bindings
+(`#face`, `#edge`), a blockstate variant per facing x part turned by `y`.
+Items (one provider per family, transforms in `ItemModelTransforms`): door items inherit the
+left-hinge leaf, window items the window template, frame items carry the whole ring; each with
+front GUI light and computed centred display transforms. Plus recipes
 and their advancements, loot, tags and English names.

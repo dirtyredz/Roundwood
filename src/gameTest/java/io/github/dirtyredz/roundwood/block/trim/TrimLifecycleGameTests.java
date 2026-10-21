@@ -181,14 +181,14 @@ public final class TrimLifecycleGameTests {
     public static void aLoneLowerQuarterIsRemovedByTheIntegrityTick(GameTestHelper helper) {
         floor(helper);
         TrimLayout.Assembly assembly = trimAssembly(helper, ANCHOR, Direction.NORTH);
-        helper.setBlock(ANCHOR, assembly.stateFor(TrimPart.LOWER_LEFT, oakTrim()));
+        helper.setBlock(ANCHOR, assembly.stateFor(TrimPart.LOWER_LEFT, birchTrim()));
         clearDrops(helper);
         helper.runAfterDelay(3, () -> {
             assertNoTrim(helper, assembly);
             for (BlockPos pos : assembly.positions()) {
                 check(helper.getLevel().getBlockState(pos).isAir(), "a quarter was created or left at " + pos);
             }
-            check(dropped(helper, oakTrim().asItem()) <= 1, "incomplete cleanup dropped " + dropped(helper, oakTrim().asItem()));
+            check(dropped(helper, birchTrim().asItem()) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropReport(helper, birchTrim().asItem()));
             helper.succeed();
         });
     }
@@ -198,13 +198,13 @@ public final class TrimLifecycleGameTests {
         floor(helper);
         TrimLayout.Assembly assembly = trimAssembly(helper, ANCHOR, Direction.NORTH);
         for (TrimPart part : new TrimPart[] {TrimPart.LOWER_LEFT, TrimPart.UPPER_LEFT, TrimPart.LOWER_RIGHT}) {
-            helper.setBlock(ANCHOR.relative(Direction.EAST, part.column).above(part.row), assembly.stateFor(part, oakTrim()));
+            helper.setBlock(ANCHOR.relative(Direction.EAST, part.column).above(part.row), assembly.stateFor(part, spruceTrim()));
         }
         clearDrops(helper);
         helper.runAfterDelay(3, () -> {
             assertNoTrim(helper, assembly);
             check(helper.getLevel().getBlockState(assembly.pos(TrimPart.UPPER_RIGHT)).isAir(), "the missing quarter was created");
-            check(dropped(helper, oakTrim().asItem()) <= 1, "incomplete cleanup dropped " + dropped(helper, oakTrim().asItem()));
+            check(dropped(helper, spruceTrim().asItem()) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropReport(helper, spruceTrim().asItem()));
             helper.succeed();
         });
     }
@@ -232,5 +232,17 @@ public final class TrimLifecycleGameTests {
             check(dropped(helper, oakTrim().asItem()) == 1, broken + ": expected one frame, got " + dropped(helper, oakTrim().asItem()));
         }
         helper.succeed();
+    }
+
+    /**
+     * Materials no other test drops (birch: the lone quarter, spruce: three quarters): the drop count
+     * reaches past a 9-wide template, so a neighbouring test's oak drops are never counted.
+     */
+    private static RoundTrimBlock birchTrim() {
+        return io.github.dirtyredz.roundwood.fixture.TrimFixtures.trim("birch");
+    }
+
+    private static RoundTrimBlock spruceTrim() {
+        return io.github.dirtyredz.roundwood.fixture.TrimFixtures.trim("spruce");
     }
 }

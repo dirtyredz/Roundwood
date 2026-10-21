@@ -10,6 +10,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CrossCollisionBlock;
@@ -19,7 +20,6 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -124,13 +124,15 @@ public final class WindowGameTests {
     public static void reciprocalPaneConnectionsInBothPlacementOrders(GameTestHelper helper) {
         floor(helper);
         String[] names = {"pane", "wall", "window"};
+        // A window joins across the plane only when its own plane crosses this one (placed facing east).
+        Direction[] facings = {Direction.NORTH, Direction.NORTH, Direction.EAST};
         for (int i = 0; i < names.length; i++) {
             int x = 1 + 3 * i;
             // (a) window first, then the neighbour on its north side, then one in plane (east).
             BlockPos a = new BlockPos(x, 1, 2);
             place(helper, "recip_a_" + names[i], Direction.NORTH, new ItemStack(window()), a);
             check(!at(helper, a).getValue(CrossCollisionBlock.NORTH), names[i] + " a: connected to nothing");
-            place(helper, "recip_a_n_" + names[i], Direction.NORTH, neighbourStacks()[i].get(), a.north());
+            place(helper, "recip_a_n_" + names[i], facings[i], neighbourStacks()[i].get(), a.north());
             check(at(helper, a).getValue(CrossCollisionBlock.NORTH), names[i] + " a: window did not connect north");
             if (i != 1) {
                 check(at(helper, a.north()).getValue(CrossCollisionBlock.SOUTH), names[i] + " a: neighbour did not connect back");
@@ -139,7 +141,7 @@ public final class WindowGameTests {
             check(at(helper, a).getValue(CrossCollisionBlock.EAST), names[i] + " a: in-plane east did not connect");
             // (b) neighbour first, then the window.
             BlockPos b = new BlockPos(x, 1, 6);
-            place(helper, "recip_b_n_" + names[i], Direction.NORTH, neighbourStacks()[i].get(), b.north());
+            place(helper, "recip_b_n_" + names[i], facings[i], neighbourStacks()[i].get(), b.north());
             place(helper, "recip_b_" + names[i], Direction.NORTH, new ItemStack(window()), b);
             check(at(helper, b).getValue(CrossCollisionBlock.NORTH), names[i] + " b: window did not connect north");
             if (i != 1) {

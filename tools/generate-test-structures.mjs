@@ -39,7 +39,7 @@ function structure([x, y, z]) {
 }
 
 mkdirSync(outDir, { recursive: true });
-for (const [name, size] of Object.entries({ empty: [9, 6, 9], strip: [17, 5, 4], showcase: [50, 10, 50] })) {
+for (const [name, size] of Object.entries({ empty: [9, 6, 9], strip: [17, 5, 4], showcase: [76, 10, 76] })) {
   writeFileSync(join(outDir, `${name}.nbt`), structure(size));
   console.log(`wrote ${name}.nbt ${size.join('x')}`);
 }

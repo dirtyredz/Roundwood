@@ -1,6 +1,5 @@
 package io.github.dirtyredz.roundwood.block.door;
 
-import io.github.dirtyredz.roundwood.client.door.DoorParticles;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorColumn;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorIntegrity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
@@ -10,6 +9,7 @@ import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageDrops;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageInteraction;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorShapes;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorSelectionShapes;
+import io.github.dirtyredz.roundwood.client.door.DoorParticles;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;

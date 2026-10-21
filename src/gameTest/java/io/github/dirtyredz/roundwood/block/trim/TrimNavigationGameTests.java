@@ -214,7 +214,9 @@ public final class TrimNavigationGameTests {
         });
         // Villager walks are known to be intermittent: same budget as the door suite.
         helper.succeedWhen(() -> {
-            check(arrived(helper, villager, target), "villager has not reached the far side");
+            check(arrived(helper, villager, target), "villager has not reached the far side: at " + rel(helper, villager.blockPosition())
+                    + ", path " + (villager.getNavigation().getPath() == null ? "none" : villager.getNavigation().getPath().getTarget() + " done=" + villager.getNavigation().getPath().isDone())
+                    + ", door open " + (door != null && helper.getLevel().getBlockState(door.anchor()).getValue(DoorBlock.OPEN)));
             check(!needsOpen || sawOpen.get(), "the door never opened");
         });
     }

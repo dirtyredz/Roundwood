@@ -188,7 +188,7 @@ public final class DoorRemovalGameTests {
             check(helper.getBlockState(ANCHOR).isAir() && helper.getBlockState(ANCHOR.above()).isAir(), "the lone column was not removed");
             check(helper.getBlockState(ANCHOR.east()).isAir() && helper.getBlockState(ANCHOR.east().above()).isAir(),
                     "a missing part was created at the right column");
-            check(dropped(helper, item()) <= 1, "incomplete cleanup dropped " + dropped(helper, item()));
+            check(dropped(helper, item()) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropReport(helper, item()));
             helper.succeed();
         });
     }

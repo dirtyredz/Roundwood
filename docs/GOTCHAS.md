@@ -3,9 +3,12 @@
 - **Clearing camouflage needs both hands empty.** Forge never calls block use for a sneaking
   player holding anything, so sneak + empty hands on a filled corner is the only clear gesture;
   sneaking with a block item places that block as vanilla would.
-- **Empty corners are only targetable with a block item in hand.** The outline adds them while the
-  looking player holds a block item (either hand), so placing blocks "through" an empty corner
-  hits the door instead; filled corners are always targetable.
+- **Empty corners are only targetable with a block item in hand.** The target shape (`getShape`)
+  adds them while the looking player holds a block item (either hand), so placing blocks "through"
+  an empty corner hits the door instead; filled corners are always targetable. The highlight never
+  shows empty corners (it draws the visible shape, `DoorHighlightRenderer`), so the aim can land on
+  an outline-less corner. Code that needs "what is drawn" must use `DoorSelectionShapes.visible`,
+  never `getShape`.
 - **The open projection is outlined but refused.** Clicking, mining or picking the projected half
   of an open leaf does nothing (the client cancels it). A ray that crosses a door cell before the
   projection can also stop a click on a block that sits inside the projection.
@@ -16,6 +19,28 @@
   refund (structure tools are creative tools).
 - **The open leaf passes through the hinge-side corners' edge.** At its hinge the open leaf crosses
   a sliver of the static corner region; when camouflaged the two overlap visually there.
+- **Round trims fit only the front of a closed door, by sneak-use.** A plain click opens the door
+  (or, on a corner with the trim in hand, is refused as camouflage); the back face, the sides and an
+  open door refuse the fit without using the item. A fitted frame occupies the four cells in front
+  of the door, so they must be empty or replaceable, and both lower cells need a solid floor.
+- **Trims and door hardware are decorative.** Nothing collides with the ring or the knobs and
+  straps; mobs and players walk through the ring's area and the knob pokes two pixels into the
+  cell in front of the door. At the hinge, the swinging leaf briefly passes a fraction of a pixel
+  into a fitted frame's cells.
+- **Door leaves no longer follow plank resource packs.** Since 0.4.0 the leaf uses Roundwood's own
+  generated board art (one 32 x 32 image across the leaf); a resource pack must retexture
+  `roundwood:block/door_panel_<finish>`. Windows and natural wooden trims still use vanilla textures.
+- **Windows from 0.3.x may keep an arm towards a solid block** in front or behind until a
+  neighbour update re-judges it; re-place such a window (or change a neighbour) after upgrading.
+- **Windows are translucent since 0.4.0** (visible tinted glass). Translucent sorting with water or
+  stained glass behind it, and shader packs, are owner checks.
+- **The GameTest world persists between runs** (`run/gametest/world`). Item entities and villagers
+  saved by an earlier run load into later tests' areas a few ticks after they start, after
+  `clearDrops`, and break drop counts (seen in 0.4.0 as "dropped 2" on integrity tests).
+  `runGameTestServer` now deletes that world first (build.gradle); do not remove that.
+- **GameTest drop counts reach past a 9-wide template** (`DoorFixtures.dropped` covers 17 x 6 x 9),
+  and the showcase test clears its 76 x 76 area silently when done, so later tests on that ground
+  are not hit by doors and frames losing their floor.
 - **Upgrading a trial world from 0.2.0**: doors keep working (no camouflage means none). Re-place
   existing windows so their pane connections are computed (old states load disconnected).
 - **Camouflage models are cached per donor/facing/cell** and dropped on every resource reload
@@ -49,6 +74,10 @@
   one block samples neighbouring atlas sprites. `GeometryModelWriter` splits at tile boundaries;
   never add elements to a model by another path. Forge's model builder omits a `uv` equal to the
   default, so generated JSON shows `uv` only on faces outside tile 0 (the tests account for this).
+- **Textures are generated too.** `node tools/generate-textures.mjs` writes every PNG under
+  `src/main/resources/assets/roundwood/textures/block/`; never hand-edit them. The five 0.1.0
+  textures must stay byte-identical (`GeneratedTexturesTest` pins their SHA-256), and every
+  catalogue id needs its palette entry in `tools/textures/palettes.mjs`.
 - **runData does not delete models nobody generates any more** without its local cache. When a
   model is renamed or removed, delete `src/generated/resources/assets/roundwood/models` and
   `blockstates` before `runData`; `GeneratedResourcesTest` lists the exact model manifest.

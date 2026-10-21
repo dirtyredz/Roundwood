@@ -4,11 +4,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Test;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import javax.imageio.ImageIO;
 
 import static io.github.dirtyredz.roundwood.data.ResolvedModels.Resolved;
 import static io.github.dirtyredz.roundwood.data.ResolvedModels.TEXTURES;

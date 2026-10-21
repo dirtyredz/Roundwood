@@ -1,12 +1,12 @@
 package io.github.dirtyredz.roundwood.data.client;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.WindowGeometry;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.variant.Finish;
 import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
-import io.github.dirtyredz.roundwood.block.window.WindowGeometry;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.CrossCollisionBlock;

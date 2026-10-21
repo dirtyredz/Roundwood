@@ -240,6 +240,13 @@ public final class DoorFixtures {
         return entities.stream().mapToInt(entity -> entity.getItem().getCount()).sum();
     }
 
+    /** Where each counted drop of {@code item} lies, relative to the test origin (for failure messages). */
+    public static String dropReport(GameTestHelper helper, Item item) {
+        return helper.getLevel().getEntitiesOfClass(ItemEntity.class, area(helper), entity -> entity.getItem().is(item)).stream()
+                .map(entity -> entity.getItem().getCount() + "@" + rel(helper, entity.blockPosition()).toShortString() + " age " + entity.getAge())
+                .toList().toString();
+    }
+
     /** The largest template (17 x 6 x 9) plus a 1-block margin; tests are spaced further apart than that. */
     private static AABB area(GameTestHelper helper) {
         return new AABB(helper.absolutePos(BlockPos.ZERO), helper.absolutePos(new BlockPos(17, 6, 9))).inflate(1);

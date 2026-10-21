@@ -32,7 +32,6 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropped;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.hold;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.rel;
@@ -204,7 +203,7 @@ public final class TrimRemovalGameTests {
     private static DoorLayout.Assembly doorWithCamouflage(GameTestHelper helper, String name) {
         floor(helper);
         ServerPlayer player = player(helper, name, GameType.SURVIVAL, Direction.NORTH);
-        check(placeDoor(helper, player, oakDoor().asItem(), DOOR_ANCHOR, DoorHingeSide.LEFT).consumesAction(), "door placement failed");
+        check(placeDoor(helper, player, spruceDoor().asItem(), DOOR_ANCHOR, DoorHingeSide.LEFT).consumesAction(), "door placement failed");
         DoorLayout.Assembly door = assembly(helper, DOOR_ANCHOR, Direction.NORTH, DoorHingeSide.LEFT);
         anchorEntity(helper, door).setCamouflage(
                 CamouflageData.free(Blocks.STONE.defaultBlockState()));
@@ -224,7 +223,7 @@ public final class TrimRemovalGameTests {
             check(breaker.gameMode.destroyBlock(frame.pos(part)), part + ": break refused");
             assertNoTrim(helper, frame);
             check(dropped(helper, oakTrim().asItem()) == 1, part + ": expected one frame, got " + dropped(helper, oakTrim().asItem()));
-            assertAssembly(helper, door, oakDoor(), false);
+            assertAssembly(helper, door, spruceDoor(), false);
             check(anchorEntity(helper, door).camouflage().isPresent(), part + ": the door lost its camouflage");
         }
         helper.succeed();
@@ -250,5 +249,10 @@ public final class TrimRemovalGameTests {
             clearDrops(helper);
         }
         helper.succeed();
+    }
+
+    /** A spruce door: other suites drop oak doors, and the drop count reaches into neighbouring test areas. */
+    private static io.github.dirtyredz.roundwood.block.door.RoundDoorBlock spruceDoor() {
+        return io.github.dirtyredz.roundwood.registry.ModBlocks.door(io.github.dirtyredz.roundwood.variant.FinishCatalog.NATURAL.get(1));
     }
 }
