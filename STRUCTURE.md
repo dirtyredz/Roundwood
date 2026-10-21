@@ -15,6 +15,8 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `src/main/java/io/github/dirtyredz/roundwood/door/selection/` — whole-assembly outline geometry and shapes, hit re-attribution
 - `src/main/java/io/github/dirtyredz/roundwood/door/camouflage/` — corner geometry, accepted materials, stored data, interaction, refunds
 - `src/main/java/io/github/dirtyredz/roundwood/window/` — the window block (a pane), its geometry and shapes
+- `src/main/java/io/github/dirtyredz/roundwood/showcase/` — the `/roundwood showcase` command, bounded builder, coordinate frame, canvas and section registry
+- `src/main/java/io/github/dirtyredz/roundwood/showcase/section/` — one class per showcase section (doors, camouflage, windows, redstone)
 - `src/main/java/io/github/dirtyredz/roundwood/geometry/` — pixel circles, boxes, face UVs, voxel-shape conversion (shared)
 - `src/main/java/io/github/dirtyredz/roundwood/client/` — client-only mod-bus wiring (`RoundwoodClient`)
 - `src/main/java/io/github/dirtyredz/roundwood/client/door/` — the door leaf renderer, leaf model names, targeting events, break/hit particles
@@ -24,8 +26,8 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `src/main/java/io/github/dirtyredz/roundwood/data/server/` — recipe, loot and tag providers
 - `src/main/resources/` — mods.toml, pack.mcmeta, the five original textures
 - `src/generated/resources/` — datagen output, checked in and packaged (its `.cache/` is ignored and excluded)
-- `src/test/java/io/github/dirtyredz/roundwood/` — pure JUnit tests (`geometry/`, `door/leaf/`, `door/selection/`, `door/camouflage/`, `window/`, `data/`)
-- `src/gameTest/java/io/github/dirtyredz/roundwood/` — Forge GameTests (`fixture/`, `door/`, `door/selection/`, `door/camouflage/`, `window/`, `data/`); never in the release jar
+- `src/test/java/io/github/dirtyredz/roundwood/` — pure JUnit tests (`geometry/`, `door/leaf/`, `door/selection/`, `door/camouflage/`, `window/`, `showcase/`, `data/`)
+- `src/gameTest/java/io/github/dirtyredz/roundwood/` — Forge GameTests (`fixture/`, `door/`, `door/selection/`, `door/camouflage/`, `window/`, `showcase/`, `data/`); never in the release jar
 - `src/gameTest/resources/` — empty GameTest structure templates
 - `tools/` — deterministic generators for the textures and GameTest structures (Node, not packaged)
 - `docs/` — architecture, decisions, gotchas
@@ -50,12 +52,13 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 | Door targeting | `client/door/DoorTargetingEvents` | Re-attributes or cancels the crosshair hit before use/attack/pick (Forge bus) |
 | Camouflage rendering | `client/camouflage/CamouflageRenderer`, `CamouflageMaterials`, `CamouflageModels` | Per-cell corner models tessellated with world light/AO/tint; caches dropped on model reload |
 | Window | `window/RoundWindowBlock`, `WindowGeometry`, `WindowShapes` | Thin pane (`IronBarsBlock`): square wooden face, round glazing, glass arms across the plane; waterloggable |
+| Showcase | `showcase/ShowcaseCommand`, `ShowcaseBuilder`, `ShowcaseFrame`, `ShowcaseCanvas`, `ShowcaseSection(s)`, `section/*` | Op-only command; bounded clear + floor + registered sections, built through `DoorPlacement.placeAt` and real block states; a new feature adds a section |
 | Geometry | `geometry/PixelCircle`, `Box`, `Piece`, `FaceUv`, `VoxelShapeFactory` | Rasterize, describe, rotate, block-like face UVs, convert |
 | Datagen | `data/**` | Models from the same geometry (tile-split, explicit UVs); items; recipes, loot, tags, names |
 
 ## Dependency direction
 
-`registry` -> `door`, `window` -> `geometry`; `client` -> `door`, `registry`; `data` -> everything
+`showcase` -> `door`, `window`, `registry`, `variant` (nothing imports it but the bootstrap). `registry` -> `door`, `window` -> `geometry`; `client` -> `door`, `registry`; `data` -> everything
 above. `door` and `window` never import each other, and `door` does not import `registry` (the
 block receives its entity type as a supplier). Inside `door`: the adapters call `assembly`,
 `leaf`, `selection` and `camouflage`; `selection` reads `leaf` and `camouflage/CamouflageGeometry`;

@@ -56,6 +56,17 @@ be waterlogged and bucketed, and drops itself without Silk Touch.
 cherry, bamboo, crimson, warped, plus green, yellow, red and blue painted (on oak). Natural doors
 use the wood's planks with a stripped-log trim; painted doors use painted panels with oak trim.
 
+## Showcase command
+
+`/roundwood showcase` (permission level 2: ops, or single-player with cheats) builds a labelled test
+layout on the ground ahead of you, centred on the way you face (about 46 x 8 x 36 blocks, starting
+three blocks ahead). It first clears that whole box to air and lays a stone floor, so use it on
+open ground; it refuses if the box would leave the build limits, the world border or loaded chunks,
+and never touches blocks outside it. The layout: every door finish closed and open on both
+hinges (labelled with signs), doors with stone-brick, plank, grass and wool corner camouflage, every
+window finish in one connected row, a junction with a vanilla glass pane, a stacked pair on
+different axes, a waterlogged window, and a lever beside a door.
+
 ## Recipes
 
 | Result | Recipe |
@@ -83,7 +94,7 @@ Dramatic Doors from a pack instance to the GameTest runtime for compatibility ru
 
 ## Release
 
-Not released yet; 0.3.0 is a local candidate. The flow follows DankRecipeTransfer: an immutable
+Not released yet; 0.3.1 is a local candidate. The flow follows DankRecipeTransfer: an immutable
 GitHub prerelease asset, then a direct-URL `mods/roundwood.pw.toml` (with SHA-256,
 `side = "both"`) in the pack repo, rehashed with
 that repo's tools. Both steps need the owner's go-ahead.

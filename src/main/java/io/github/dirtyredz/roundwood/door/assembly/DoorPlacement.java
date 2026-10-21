@@ -109,6 +109,31 @@ public final class DoorPlacement {
         return Optional.of(states);
     }
 
+    /**
+     * Places a complete assembly without a player or item (the showcase builder, other commands):
+     * the same bounds, loaded, replaceable, dry, unobstructed and floor checks, then the same single
+     * write per cell. Returns false, writing nothing, if any check fails. The cells are left unpowered,
+     * in the requested open state.
+     */
+    public static boolean placeAt(Level level, RoundDoorBlock block, DoorLayout.Assembly assembly, boolean open) {
+        Map<DoorLayout.Part, BlockState> states = new EnumMap<>(DoorLayout.Part.class);
+        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+            BlockPos pos = assembly.pos(part);
+            if (level.isOutsideBuildHeight(pos) || !level.getWorldBorder().isWithinBounds(pos) || !level.isLoaded(pos)
+                    || !level.getBlockState(pos).canBeReplaced() || !level.getFluidState(pos).isEmpty()) {
+                return false;
+            }
+            BlockState state = assembly.stateFor(part, block, open, false);
+            if (!level.isUnobstructed(state, pos, CollisionContext.empty())
+                    || part.half == DoubleBlockHalf.LOWER && !state.canSurvive(level, pos)) {
+                return false;
+            }
+            states.put(part, state);
+        }
+        install(level, assembly, states);
+        return true;
+    }
+
     private static void install(Level level, DoorLayout.Assembly assembly, Map<DoorLayout.Part, BlockState> states) {
         DoorMutationBatch.run(level, assembly.positions(), () -> {
             for (DoorLayout.Part part : DoorLayout.Part.values()) {

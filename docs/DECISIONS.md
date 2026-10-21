@@ -2,6 +2,17 @@
 
 Newest first.
 
+## 2026-10-21 - Showcase command with a section registry (0.3.1)
+
+`/roundwood showcase` (level 2) rebuilds one bounded test layout (46 x 8 x 36, one-block margin
+and a floor) from a registry of `ShowcaseSection`s, so a new feature adds a class and a registry
+line, and CLAUDE.md requires it. Doors go through `DoorPlacement.placeAt` (the item path's checks
+and single write per cell, without a player); camouflage uses the anchor entity's own setter. The
+clear and floor use client-only block updates, so no neighbour outside the box is notified; content
+keeps one block inside the box so door and pane updates stay inside too. Cleared block entities
+(chests) lose their contents: the command is for open ground. Rejected: structure templates
+(cannot show new states without hand-edited NBT) and raw `setBlock` of door parts.
+
 ## 2026-10-21 - Pane windows again (0.3.0, supersedes "Windows are full wooden blocks")
 
 Windows are `IronBarsBlock` panes again: a square 16 x 16 wooden face two pixels thick (wood in

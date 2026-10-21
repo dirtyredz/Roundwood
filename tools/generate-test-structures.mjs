@@ -2,7 +2,7 @@
 //
 //   node tools/generate-test-structures.mjs
 //
-// Writes src/gameTest/resources/data/roundwood/structures/{empty,strip}.nbt. Each template is only
+// Writes src/gameTest/resources/data/roundwood/structures/{empty,strip,showcase}.nbt. Each template is only
 // a size and an air palette: GameTests build their own floor. "strip" is wide enough (17 blocks) to
 // always contain a chunk boundary.
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -39,7 +39,7 @@ function structure([x, y, z]) {
 }
 
 mkdirSync(outDir, { recursive: true });
-for (const [name, size] of Object.entries({ empty: [9, 6, 9], strip: [17, 5, 4] })) {
+for (const [name, size] of Object.entries({ empty: [9, 6, 9], strip: [17, 5, 4], showcase: [50, 10, 50] })) {
   writeFileSync(join(outDir, `${name}.nbt`), structure(size));
   console.log(`wrote ${name}.nbt ${size.join('x')}`);
 }

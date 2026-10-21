@@ -16,3 +16,6 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
 - **Version** lives only in `gradle.properties` (`mod_version`).
 - Shared files (wrapper, `.gitattributes`, `.gitignore`) come from `../../tools/mod-template/`;
   never edit them here.
+- **Showcase rule:** every new block or feature adds or updates its section in `showcase/`
+  (`ShowcaseSections` is the registry; `/roundwood showcase` builds them all), plus the matching
+  check in `ShowcaseGameTests`.
