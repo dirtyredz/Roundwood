@@ -24,7 +24,8 @@
 - **Alias ids stay registered.** The 49 0.4.0 ids exist as hidden blocks and items so old chunks and
   inventories load; they are in no tab, recipe or viewer. Never delete them while worlds may hold
   0.4.0 content; old items in containers are not renamed (they place canonical blocks).
-- **Structure templates in GameTests sit one block up**: the framework places a template at the
+- **Structure templates in GameTests sit one block up and lose their scheduled ticks**: the framework
+  clears block ticks in the area after placing, and places a template at the
   helper's origin plus (0, 1, 0), so template y 1 is `helper` y 2 (`legacy_v040` tests).
 - **GameTest drop counts must be look-specific.** Every family is one item now, so tests that count
   drops use a look no other test drops (`DoorFixtures.dropped(helper, item, appearance)`).

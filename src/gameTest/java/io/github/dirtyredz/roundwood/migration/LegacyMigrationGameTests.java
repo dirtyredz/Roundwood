@@ -99,7 +99,13 @@ public final class LegacyMigrationGameTests {
      */
     @GameTest(template = "legacy_v040", timeoutTicks = 100)
     public static void aHistoricalBuildConvertsLosslessly(GameTestHelper helper) {
-        helper.runAfterDelay(4, () -> {
+        // The framework clears the template's scheduled ticks after placing it, so the build is found the
+        // way a saved chunk is: through the chunk-load handler and the end-of-tick queue.
+        List<BlockPos> template = new java.util.ArrayList<>();
+        BlockPos.betweenClosed(helper.absolutePos(new BlockPos(0, 1, 0)), helper.absolutePos(new BlockPos(12, 4, 3)))
+                .forEach(pos -> template.add(pos.immutable()));
+        loadAndTick(helper, template);
+        helper.runAfterDelay(2, () -> {
             DoorLayout.Assembly spruce = new DoorLayout.Assembly(helper.absolutePos(new BlockPos(1, 2, 1)), Direction.NORTH, DoorHingeSide.LEFT);
             for (BlockPos cell : spruce.positions()) {
                 check(isCanonicalDoor(helper.getLevel().getBlockState(cell)), "spruce door cell not converted: " + helper.getLevel().getBlockState(cell));
