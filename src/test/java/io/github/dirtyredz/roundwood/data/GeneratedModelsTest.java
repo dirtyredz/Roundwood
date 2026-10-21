@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static io.github.dirtyredz.roundwood.data.ResolvedModels.Resolved;
 import static io.github.dirtyredz.roundwood.data.ResolvedModels.allModelIds;
@@ -21,7 +22,6 @@ import static io.github.dirtyredz.roundwood.data.ResolvedModels.resolve;
 import static io.github.dirtyredz.roundwood.data.ResolvedModels.vec;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,7 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * {@link GeneratedTrimModelsTest}.
  */
 class GeneratedModelsTest {
-    private static final String BRASS = "roundwood:block/brass";
+    private static final String BRASS = ModelExpectations.BRASS;
+    private static final String PANEL_OAK = ModelExpectations.DOOR_PANEL_OAK;
 
     /** Assembly-mapped UVs: one image across a 32-pixel face, front (south) and back (north). */
     static double[] assemblyUv(String face, double[] from, double[] to, double offsetX, double offsetY) {
@@ -115,22 +116,30 @@ class GeneratedModelsTest {
         assertTrue(assembly > 200, "suspiciously few whole-image faces: " + assembly);
     }
 
+    /** The oak item model is the placeholder the client retextures: oak boards, brass hardware, whole closed leaf. */
     @Test
-    void doorItemsAreTheWholeClosedLeafInTheirFinish() {
-        for (String finish : ModelExpectations.FINISHES) {
-            Resolved item = resolve("roundwood:item/" + finish + "_round_door");
-            String panel = ModelExpectations.doorPanel(finish);
-            assertEquals(panel, item.texture("#panel"), finish);
-            assertNull(item.texture("#trim"), finish + ": the door has no built-in trim since 0.4.0");
-            assertEquals(BRASS, item.texture("#brass"), finish);
-            for (int u = 0; u < 32; u++) {
-                for (int v = 0; v < 32; v++) {
-                    boolean disc = inDisc(32, 32, u, v);
-                    boolean covered = frontCovered(item, u, v, panel) || frontCovered(item, u, v, BRASS);
-                    assertEquals(disc, covered, finish + " door face at " + u + "," + v);
-                }
+    void doorItemIsTheWholeClosedLeafWithOakPlaceholders() {
+        Resolved item = resolve("roundwood:item/round_door");
+        assertEquals(PANEL_OAK, item.texture("#panel"));
+        assertNull(item.texture("#trim"), "the door has no built-in trim since 0.4.0");
+        assertEquals(BRASS, item.texture("#brass"));
+        assertEquals(PANEL_OAK, item.texture("#particle"));
+        for (int u = 0; u < 32; u++) {
+            for (int v = 0; v < 32; v++) {
+                boolean disc = inDisc(32, 32, u, v);
+                boolean covered = frontCovered(item, u, v, PANEL_OAK) || frontCovered(item, u, v, BRASS);
+                assertEquals(disc, covered, "door face at " + u + "," + v);
             }
-            ModelExpectations.assertDisplay(item, finish + " door", new double[] {16, 16, 14.5});
+        }
+        ModelExpectations.assertDisplay(item, "door", new double[] {16, 16, 14.5});
+    }
+
+    @Test
+    void aliasDoorItemsJustParentTheCanonicalDoorItem() {
+        for (String alias : ModelExpectations.aliasDoors()) {
+            JsonObject model = read("roundwood:item/" + alias);
+            assertEquals(Set.of("parent"), model.keySet(), alias);
+            assertEquals("roundwood:item/round_door", model.get("parent").getAsString(), alias);
         }
     }
 
@@ -138,7 +147,7 @@ class GeneratedModelsTest {
     @Test
     void doorLeavesAreOnePanelOverTheWholeDisc() {
         for (String hinge : List.of("left", "right")) {
-            Resolved leaf = resolve("roundwood:block/template_round_door_leaf_" + hinge);
+            Resolved leaf = resolve("roundwood:block/round_door_leaf_" + hinge);
             for (JsonObject element : elements(leaf)) {
                 boolean brass = usesBrass(leaf, element);
                 for (Map.Entry<String, JsonElement> face : element.getAsJsonObject("faces").entrySet()) {
@@ -161,7 +170,7 @@ class GeneratedModelsTest {
     @Test
     void prominentCentredKnobsAndProudStrapsOnBothFacesForBothHinges() {
         for (String hinge : List.of("left", "right")) {
-            Resolved leaf = resolve("roundwood:block/template_round_door_leaf_" + hinge);
+            Resolved leaf = resolve("roundwood:block/round_door_leaf_" + hinge);
             boolean[][] front = new boolean[2][2];
             boolean[][] back = new boolean[2][2];
             int straps = 0;
@@ -203,7 +212,7 @@ class GeneratedModelsTest {
     /** The door panel's front reads the image once, left to right and top to bottom, across the cells. */
     @Test
     void doorPanelImageRunsUnbrokenAcrossTheMidlines() {
-        Resolved leaf = resolve("roundwood:block/template_round_door_leaf_left");
+        Resolved leaf = resolve("roundwood:block/round_door_leaf_left");
         int checked = 0;
         for (JsonObject element : elements(leaf)) {
             JsonObject south = element.getAsJsonObject("faces").getAsJsonObject("south");
@@ -234,18 +243,28 @@ class GeneratedModelsTest {
     }
 
     @Test
-    void doorWorldModelsAreEmptyAndLeafModelsExistForBothHinges() {
-        for (String finish : ModelExpectations.FINISHES) {
-            Resolved world = resolve("roundwood:block/" + finish + "_round_door");
-            assertEquals(0, world.elements().size(), finish + ": the world model must not draw the leaf twice");
-            assertEquals(ModelExpectations.doorPanel(finish), world.texture("#particle"), finish + ": break particle");
-            for (String hinge : List.of("left", "right")) {
-                Resolved leaf = resolve("roundwood:block/" + finish + "_round_door_leaf_" + hinge);
-                assertFalse(leaf.elements().isEmpty(), finish + " " + hinge + " leaf has no geometry");
-                assertEquals(ModelExpectations.doorPanel(finish), leaf.texture("#panel"), finish + " " + hinge);
-                assertNotNull(leaf.texture("#brass"));
-                assertNull(leaf.texture("#trim"), finish + " " + hinge + ": no trim binding since 0.4.0");
-            }
+    void doorWorldModelIsEmptyAndLeafModelsExistForBothHinges() {
+        Resolved world = resolve("roundwood:block/round_door");
+        assertEquals(0, world.elements().size(), "the world model must not draw the leaf twice");
+        assertEquals(PANEL_OAK, world.texture("#particle"), "break particle");
+        for (String hinge : List.of("left", "right")) {
+            JsonObject raw = read("roundwood:block/round_door_leaf_" + hinge);
+            assertEquals("roundwood:block/template_round_door_leaf_" + hinge, raw.get("parent").getAsString(), hinge);
+            Resolved leaf = resolve("roundwood:block/round_door_leaf_" + hinge);
+            assertFalse(leaf.elements().isEmpty(), hinge + " leaf has no geometry");
+            assertEquals(PANEL_OAK, leaf.texture("#panel"), hinge);
+            assertEquals(BRASS, leaf.texture("#brass"), hinge);
+            assertNull(leaf.texture("#trim"), hinge + ": no trim binding since 0.4.0");
+        }
+    }
+
+    /** The templates leave the variables open; only the oak models bind them, so retexturing has one source. */
+    @Test
+    void templatesBindNothingAndOnlyBrassIsFixed() {
+        for (String hinge : List.of("left", "right")) {
+            Resolved template = resolve("roundwood:block/template_round_door_leaf_" + hinge);
+            assertNull(template.texture("#panel"), hinge + ": template must not pick a panel");
+            assertNull(template.texture("#brass"), hinge + ": brass is bound by the leaf model");
         }
     }
 }

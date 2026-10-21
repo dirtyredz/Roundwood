@@ -1,8 +1,33 @@
 # Gotchas - Roundwood
 
-- **Clearing camouflage needs both hands empty.** Forge never calls block use for a sneaking
-  player holding anything, so sneak + empty hands on a filled corner is the only clear gesture;
-  sneaking with a block item places that block as vanilla would.
+- **Sneak-use reaches Roundwood blocks only for restyling.** Forge never calls block use for a
+  sneaking player holding anything; since 0.5.0 `AppearanceUseEvents` lets exactly sneak + planks,
+  sneak + dye and (trims) sneak + masonry through to the block and denies the item use, so a plank
+  is never placed against a door. Every other sneak-use is vanilla: sneak + a block item places it,
+  sneak + a trim item fits the trim, and clearing camouflage still needs both hands empty.
+- **Restyling a door needs the leaf.** Sneak + planks or dye on a corner is refused with an
+  action-bar hint (it would otherwise be ambiguous with camouflage); plain planks on a corner are
+  camouflage.
+- **The look is cosmetic.** Every door, window and trim has oak's properties: brick trims mine with
+  an axe and need no pickaxe, nether-wood looks still burn as oak would.
+- **Same-block linking is broader since 0.5.0.** All round doors are one block, so vanilla hinge
+  pairing and Double Doors join doors of different looks. No appearance-aware patch.
+- **Unfamiliar woods on doors are a tint.** Doors in a non-vanilla wood show Roundwood's neutral
+  full-height boards tinted with the donor plank's average colour, not the donor's pixels.
+  Windows and trims show the donor's real plank texture (its north face; connected or layered
+  textures are not reproduced).
+- **Appearance caches are dropped on every model bake** (F3+T, resource packs): donor sprites,
+  sampled colours, leaf/quarter/window/item models together. A donor whose texture changes is
+  re-sampled then.
+- **Trims are drawn by their anchor's renderer** since 0.5.0: like doors, no mining crack shows,
+  break particles are oak, and an incomplete frame draws nothing.
+- **Alias ids stay registered.** The 49 0.4.0 ids exist as hidden blocks and items so old chunks and
+  inventories load; they are in no tab, recipe or viewer. Never delete them while worlds may hold
+  0.4.0 content; old items in containers are not renamed (they place canonical blocks).
+- **Structure templates in GameTests sit one block up**: the framework places a template at the
+  helper's origin plus (0, 1, 0), so template y 1 is `helper` y 2 (`legacy_v040` tests).
+- **GameTest drop counts must be look-specific.** Every family is one item now, so tests that count
+  drops use a look no other test drops (`DoorFixtures.dropped(helper, item, appearance)`).
 - **Empty corners are only targetable with a block item in hand.** The target shape (`getShape`)
   adds them while the looking player holds a block item (either hand), so placing blocks "through"
   an empty corner hits the door instead; filled corners are always targetable. The highlight never
@@ -29,7 +54,7 @@
   into a fitted frame's cells.
 - **Door leaves no longer follow plank resource packs.** Since 0.4.0 the leaf uses Roundwood's own
   generated board art (one 32 x 32 image across the leaf); a resource pack must retexture
-  `roundwood:block/door_panel_<finish>`. Windows and natural wooden trims still use vanilla textures.
+  `roundwood:block/door_panel_<wood|dye|neutral>`. Windows and wooden trims use the plank / stripped-log textures.
 - **Windows from 0.3.x may keep an arm towards a solid block** in front or behind until a
   neighbour update re-judges it; re-place such a window (or change a neighbour) after upgrading.
 - **Windows are translucent since 0.4.0** (visible tinted glass). Translucent sorting with water or
@@ -39,7 +64,7 @@
   `clearDrops`, and break drop counts (seen in 0.4.0 as "dropped 2" on integrity tests).
   `runGameTestServer` now deletes that world first (build.gradle); do not remove that.
 - **GameTest drop counts reach past a 9-wide template** (`DoorFixtures.dropped` covers 17 x 6 x 9),
-  and the showcase test clears its 76 x 76 area silently when done, so later tests on that ground
+  and the showcase test clears its 86 x 86 area silently when done, so later tests on that ground
   are not hit by doors and frames losing their floor.
 - **Upgrading a trial world from 0.2.0**: doors keep working (no camouflage means none). Re-place
   existing windows so their pane connections are computed (old states load disconnected).
@@ -53,9 +78,9 @@
   never call `super.use`, so player clicks are untouched), listens to buttons, levers and pressure
   plates (`NeighborNotifyEvent`) and to villager door use, then writes `open` with
   `setBlock(..., 10)` on every same-block door in a 3x3x3 hop chain (up to 10 blocks). Our `onPlace`
-  reconciliation makes any such single-part write move the whole assembly, silently. Two
-  assemblies of the **same finish** placed touching are linked by it for levers/buttons/plates and
-  villagers (its intended behaviour); different finishes are not. No adapter, so no `compat/`.
+  reconciliation makes any such single-part write move the whole assembly, silently. Since 0.5.0 every
+  round door is the same block, so any two placed touching are linked by it for levers/buttons/plates
+  and villagers, whatever their looks. No adapter, so no `compat/`.
 - **Dramatic Doors (pack, 2.3.7_1) makes every `DoorBlock` waterloggable** through a mixin, so in
   the pack our door gains a `waterlogged` property. Placement still refuses wet cells, the door
   blockstate is one `""` variant so any injected property resolves, and teardown restores any fluid
@@ -75,9 +100,9 @@
   never add elements to a model by another path. Forge's model builder omits a `uv` equal to the
   default, so generated JSON shows `uv` only on faces outside tile 0 (the tests account for this).
 - **Textures are generated too.** `node tools/generate-textures.mjs` writes every PNG under
-  `src/main/resources/assets/roundwood/textures/block/`; never hand-edit them. The five 0.1.0
-  textures must stay byte-identical (`GeneratedTexturesTest` pins their SHA-256), and every
-  catalogue id needs its palette entry in `tools/textures/palettes.mjs`.
+  `src/main/resources/assets/roundwood/textures/block/`; never hand-edit them. Every 0.4.0
+  texture must stay byte-identical (`GeneratedTexturesTest` pins their SHA-256): door-board seeds
+  follow palette order, so only append to `tools/textures/palettes.mjs`.
 - **runData does not delete models nobody generates any more** without its local cache. When a
   model is renamed or removed, delete `src/generated/resources/assets/roundwood/models` and
   `blockstates` before `runData`; `GeneratedResourcesTest` lists the exact model manifest.

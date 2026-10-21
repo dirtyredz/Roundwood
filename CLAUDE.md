@@ -9,11 +9,13 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   workspace. The owner checks visuals and client behaviour in game.
 - **Generated resources are source.** Change a provider, run `./gradlew runData`, commit the
   regenerated `src/generated/resources/` with the code. Never hand-edit generated JSON.
-- **One catalogue.** Add or change finishes and frame materials only in `variant/FinishCatalog`;
-  update the independent lists in the `data/` tests (`GeneratedResourcesTest`, `ModelExpectations`,
-  `GeneratedTexturesTest`) to match. The texture generator's palettes (`tools/textures/palettes.mjs`)
-  are artwork keyed by those ids, not a second catalogue: a new id needs a palette entry and a
-  regenerated texture (`node tools/generate-textures.mjs`), and the texture test fails until it has one.
+- **Separate authorities, no catalogue.** Content is three blocks; looks are data. Which items
+  restyle: `appearance/material` (tagged planks, the fixed four masonry). What a look draws:
+  `client/material` (`BuiltinWoodStyles`, `PaintStyles`) plus the generated art. Examples:
+  `AppearanceSamples`. History: `migration/LegacyAppearances` is frozen, never edit it. New artwork
+  needs a palette entry appended (never reordered: seeds follow position) in `tools/textures/` and
+  `node tools/generate-textures.mjs`; the `data/` tests pin the exact texture manifest and the old
+  bytes. Run `node tools/generate-test-structures.mjs` when a template changes.
 - **Layout:** every source and resource directory is declared in STRUCTURE.md `## Layout`. GameTests
   stay in `src/gameTest/`, unit tests in `src/test/`, generators in `tools/`.
 - **Version** lives only in `gradle.properties` (`mod_version`).

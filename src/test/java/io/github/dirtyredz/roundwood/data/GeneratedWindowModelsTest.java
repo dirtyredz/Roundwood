@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.imageio.ImageIO;
 
 import static io.github.dirtyredz.roundwood.data.ResolvedModels.Resolved;
@@ -26,38 +27,69 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** The generated window models: square wooden face, visible round glazing, glass arms. */
 class GeneratedWindowModelsTest {
-    private static final String GLASS = "roundwood:block/window_glass";
+    private static final String GLASS = ModelExpectations.GLASS;
+
+    /** The oak item model is the placeholder: only its oak_planks faces are swapped at runtime, glass never. */
+    @Test
+    void windowItemIsSquareOakWithRoundGlass() {
+        Resolved item = resolve("roundwood:item/round_window");
+        String wood = ModelExpectations.OAK_PLANKS;
+        assertEquals(wood, item.texture("#frame"));
+        assertEquals(GLASS, item.texture("#glass"));
+        assertEquals(wood, item.texture("#particle"));
+        for (int u = 0; u < 16; u++) {
+            for (int v = 0; v < 16; v++) {
+                boolean opening = inDisc(16, 12, u, v);
+                assertEquals(!opening, covered(item, u, v, "south", wood), "wood at " + u + "," + v);
+                assertEquals(opening, covered(item, u, v, "south", GLASS), "glass at " + u + "," + v);
+            }
+        }
+        ModelExpectations.assertDisplay(item, "window", new double[] {8, 8, 8});
+        for (JsonObject element : elements(item)) {
+            double[] from = vec(element, "from");
+            double[] to = vec(element, "to");
+            assertTrue(from[2] >= 7 && to[2] <= 9, "window element outside the pane depth z 7..9");
+            JsonObject south = element.getAsJsonObject("faces").getAsJsonObject("south");
+            if (south == null) {
+                continue;
+            }
+            String texture = item.texture(south.get("texture").getAsString());
+            if (wood.equals(texture)) {
+                assertEquals(9, to[2], 1e-9, "wood front face is not at z 9");
+            } else if (GLASS.equals(texture)) {
+                assertEquals(7.5, from[2], 1e-9, "glass back");
+                assertEquals(8.5, to[2], 1e-9, "glass front");
+            }
+        }
+    }
 
     @Test
-    void windowItemsAreSquareWoodWithRoundGlass() {
-        for (String finish : ModelExpectations.FINISHES) {
-            Resolved item = resolve("roundwood:item/" + finish + "_round_window");
-            String wood = ModelExpectations.windowWood(finish);
-            assertEquals(wood, item.texture("#frame"), finish);
-            assertEquals(GLASS, item.texture("#glass"), finish);
-            for (int u = 0; u < 16; u++) {
-                for (int v = 0; v < 16; v++) {
-                    boolean opening = inDisc(16, 12, u, v);
-                    assertEquals(!opening, covered(item, u, v, "south", wood), finish + " wood at " + u + "," + v);
-                    assertEquals(opening, covered(item, u, v, "south", GLASS), finish + " glass at " + u + "," + v);
+    void aliasWindowItemsJustParentTheCanonicalWindowItem() {
+        for (String alias : ModelExpectations.aliasWindows()) {
+            JsonObject model = ResolvedModels.read("roundwood:item/" + alias);
+            assertEquals(Set.of("parent"), model.keySet(), alias);
+            assertEquals("roundwood:item/round_window", model.get("parent").getAsString(), alias);
+        }
+    }
+
+    /** Only the frame variable ever carries wood: no glass face may use it, and no frame face the glass. */
+    @Test
+    void glassFacesNeverUseTheFrameVariable() {
+        for (String id : List.of("roundwood:block/template_round_window", "roundwood:block/round_window_arm")) {
+            for (JsonObject element : elements(resolve(id))) {
+                Set<String> used = new java.util.TreeSet<>();
+                for (Map.Entry<String, JsonElement> face : element.getAsJsonObject("faces").entrySet()) {
+                    String texture = face.getValue().getAsJsonObject().get("texture").getAsString();
+                    assertTrue(texture.equals("#frame") || texture.equals("#glass"), id + ": unexpected " + texture);
+                    used.add(texture);
                 }
+                assertEquals(1, used.size(), id + ": an element mixes frame and glass faces " + used);
             }
-            ModelExpectations.assertDisplay(item, finish + " window", new double[] {8, 8, 8});
-            for (JsonObject element : elements(item)) {
-                double[] from = vec(element, "from");
-                double[] to = vec(element, "to");
-                assertTrue(from[2] >= 7 && to[2] <= 9, finish + ": window element outside the pane depth z 7..9");
-                JsonObject south = element.getAsJsonObject("faces").getAsJsonObject("south");
-                if (south == null) {
-                    continue;
-                }
-                String texture = item.texture(south.get("texture").getAsString());
-                if (wood.equals(texture)) {
-                    assertEquals(9, to[2], 1e-9, finish + ": wood front face is not at z 9");
-                } else if (GLASS.equals(texture)) {
-                    assertEquals(7.5, from[2], 1e-9, finish + ": glass back");
-                    assertEquals(8.5, to[2], 1e-9, finish + ": glass front");
-                }
+        }
+        Resolved arm = resolve("roundwood:block/round_window_arm");
+        for (JsonObject element : elements(arm)) {
+            for (Map.Entry<String, JsonElement> face : element.getAsJsonObject("faces").entrySet()) {
+                assertEquals(GLASS, arm.texture(face.getValue().getAsJsonObject().get("texture").getAsString()));
             }
         }
     }
@@ -98,16 +130,18 @@ class GeneratedWindowModelsTest {
             }
             assertTrue(glassFaces > 0, id + ": no glazing faces at all");
         }
-        for (String finish : ModelExpectations.FINISHES) {
-            Resolved core = resolve("roundwood:block/" + finish + "_round_window");
-            assertEquals(GLASS, core.texture("#glass"), finish + ": glazing texture");
-            assertEquals("minecraft:translucent", renderType("roundwood:block/" + finish + "_round_window"), finish);
-            for (int u = 0; u < 16; u++) {
-                for (int v = 0; v < 16; v++) {
-                    if (inDisc(16, 12, u, v)) {
-                        assertTrue(covered(core, u, v, "south", GLASS), finish + ": no front glass at " + u + "," + v);
-                        assertTrue(covered(core, u, v, "north", GLASS), finish + ": no back glass at " + u + "," + v);
-                    }
+        JsonObject raw = ResolvedModels.read("roundwood:block/round_window");
+        assertEquals("roundwood:block/template_round_window", raw.get("parent").getAsString());
+        Resolved core = resolve("roundwood:block/round_window");
+        assertEquals(GLASS, core.texture("#glass"), "glazing texture");
+        assertEquals(ModelExpectations.OAK_PLANKS, core.texture("#frame"), "oak frame placeholder");
+        assertEquals(ModelExpectations.OAK_PLANKS, core.texture("#particle"));
+        assertEquals("minecraft:translucent", renderType("roundwood:block/round_window"));
+        for (int u = 0; u < 16; u++) {
+            for (int v = 0; v < 16; v++) {
+                if (inDisc(16, 12, u, v)) {
+                    assertTrue(covered(core, u, v, "south", GLASS), "no front glass at " + u + "," + v);
+                    assertTrue(covered(core, u, v, "north", GLASS), "no back glass at " + u + "," + v);
                 }
             }
         }

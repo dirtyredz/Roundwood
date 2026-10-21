@@ -102,8 +102,8 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
 - **Particles** (`client/door/DoorParticles`): break and hit particles use the cell's collision
   piece, not the whole-door outline (which would scatter four doors' worth of particles).
 - **Rendering**: every door state uses an empty world model (break particle only). The anchor carries
-  a non-ticking `RoundDoorBlockEntity`; `client/door/RoundDoorRenderer` draws the finish's baked
-  leaf model (`block/<finish>_round_door_leaf_<hinge>`, registered for baking by `RoundwoodClient`,
+  a non-ticking `RoundDoorBlockEntity`; `client/door/RoundDoorRenderer` draws the leaf in the door's
+  appearance (from `block/round_door_leaf_<hinge>`, registered for baking by `RoundwoodClient`,
   looked up per frame so resource reloads are safe) through the normal baked-model path
   (`Sheets.solidBlockSheet`, packed light of the anchor, overlay). It draws nothing for an
   incomplete assembly. `getRenderBoundingBox` covers the four cells plus the projection cells, plus a 3-pixel margin
@@ -186,34 +186,91 @@ facing north), cut into cell-local quarters.
   both lower quarters on a sturdy floor. No entity check (nothing collides). Door cells are not
   replaceable, so a frame never overwrites a door. `placeAt` does the same without a player.
 - **Behaviour**: empty collision and support shapes, pathfindable, no occlusion, not a redstone
-  conductor, `PushReaction.BLOCK`, no block entity. The selection shape is only the quarter's own
+  conductor, `PushReaction.BLOCK`; only the anchor quarter has a block entity (the look). The selection shape is only the quarter's own
   ring piece, so rays pass through the centre and the corners to the door behind.
 - **Lifecycle**: the door's pattern, through the shared `block/assembly` services: `TrimRemoval`
   clears loaded partners with drops suppressed (one item from the initiating quarter),
   `TrimIntegrity` removes an incomplete frame a tick later (deferred while a cell is unloaded),
   losing the floor under a lower quarter breaks it. Door and frame never remove each other.
   Rotation turns `facing`; mirroring mirrors it and swaps the column of `part`.
-- **Materials** (`variant/TrimMaterial`, declared in `FinishCatalog`): one wooden frame per finish
-  (natural woods in their stripped log, tiled per block; painted ones in the painted door panel
-  spread across the ring) and four masonry frames whose 64 x 64 radial brick face (24 wedge
-  bricks, joints radiating from the centre, a brick at the crown) is spread across the ring.
+- **Looks** (see Appearance): vanilla woods in their stripped log, tiled per block; other woods in
+  their plank sprite, tiled; paint in the painted board panel spread across the ring; masonry in a
+  64 x 64 radial brick face (24 wedge bricks, a brick at the crown) spread across the ring.
+
+## Appearance (0.5.0)
+
+One canonical block and item per family; the look is data.
+
+- **Value** (`appearance/Appearance`): kind (wood/masonry), the donor block's id and an optional dye.
+  Saved as `RoundwoodAppearance: {Version, Kind, Material, Paint}` (`AppearanceNbt`) in item tags and
+  block entities alike. Missing means the holder's default (`AppearanceDefaults`: oak, or an alias's
+  historical finish), so only non-default looks are stored and default stacks stack. Reading never
+  fails; an unregistered but well-formed id is kept (drawn as oak, restored when its mod returns).
+- **Storage**: door anchor, trim anchor (non-ticking `RoundTrimBlockEntity`) and every window
+  (`RoundWindowBlockEntity`). Loads and update packets replace the whole look (a paint removal
+  reaches clients); loading never resets the door swing.
+- **Items**: placement reads the stack (`AppearanceStacks`) and installs the look on the new anchor in
+  the same placement transaction (windows via `updateCustomBlockEntityTag`), so a cancelled placement
+  rolls it back with the cells. Picks (`getCloneItemStack`) and loot (`getDrops` -> `AppearanceDrops`)
+  read the look through the anchor from any part.
+- **Harvest lifetime** (`block/assembly/AssemblyHarvest`): Forge removes a block before its harvest
+  callback, and removing one part tears down the anchor. For a harvesting survival break on the
+  server, `onDestroyedByPlayer` only announces the break; `playerDestroy` evaluates loot with the
+  assembly present and removes the part in a `finally` (normal teardown and refunds); a deferred part
+  whose callback never came is removed at the end of the level tick. Explosions, support loss and
+  integrity cleanup evaluate loot before removal anyway.
+- **Gestures** (`appearance/interaction`): sneak + planks (tag `minecraft:planks` or
+  `roundwood:appearance_planks`), dye, sneak + one of four masonry blocks (trims). Forge never calls
+  block use for a sneaking player holding something, so `AppearanceUseEvents` sets `useBlock=ALLOW`,
+  `useItem=DENY` on `RightClickBlock` for exactly those gestures on Roundwood blocks (cancelled events
+  and existing denials are left alone); the block's router then acts once. `AppearanceActions` checks
+  build permission over every loaded cell and completeness, applies `AppearanceChanges`, and charges
+  one item for a change (none in creative, for an unchanged result or for a refusal). Doors route in
+  `DoorInteraction`: restyle on the leaf (refused with a hint on a corner), then the offhand pass,
+  then camouflage, then the toggle; `DoorHitRegion` decides corner or leaf once.
+- **Rendering** (client): the oak source models are retextured, never rebuilt per frame.
+  `DoorAppearanceModels` swaps only the leaf's `door_panel_oak` quads (vanilla woods and paint: their
+  own panel art; other woods: `door_panel_neutral` with tint index 0, the BER passing the donor's
+  sampled colour so only the panel is tinted). `RoundTrimRenderer` (anchor BER) tessellates each
+  quarter, retextured by face/edge and turned for the facing (positions, normals, winding, cull
+  sides), at its own cell with world light. Windows stay chunk-baked: `WindowAppearanceModel` wraps
+  every window blockstate model and swaps the `oak_planks` quads by the model data its entity hands
+  it. `AppearanceItemOverrides` resolves item stacks the same way. `DonorSprites` (shared with
+  camouflage) and `DonorColors` cache 512 donors; model caches hold 2048 entries keyed by look and
+  geometry variant; all of them clear together on every model bake.
+- **Viewers**: `client/compat/emi` replaces each canonical index entry with a stack whose identity,
+  NBT and comparison are the default's and whose icon (unbatched) cycles through `AppearanceSamples`;
+  it serialises as the plain stack. Styled stacks compare by appearance key. `client/compat/jei` gives
+  subtypes by key and hides the aliases. Both are discovered by annotation, so nothing loads without
+  the viewer.
+
+## Migration from 0.4.0
+
+The 49 0.4.0 ids stay registered as hidden aliases (`migration/LegacyContent`; blocks extend the
+canonical classes with their frozen look, items place the canonical block). `ChunkEvent.Load` only
+reads the chunk's sections (skipping palettes without an alias) and queues one cell per object;
+`LegacyChunkMigration` converts at most 64 per level at the end of the level tick, dropping work for
+chunks that unloaded again. Aliases placed later convert through their own scheduled tick, tried
+before the integrity check. A conversion (`Legacy{Door,Trim,Window}Conversion`, `LegacyCells`) reads
+the whole object (each cell the alias or the canonical block in exactly its slot), takes the anchor's
+look and camouflage (refund included), rewrites the alias cells silently inside an
+`AssemblyMutationBatch` (`updateShape` now stands down for marked cells) keeping every shared state
+property, restores look and camouflage on the new anchor, then notifies neighbours. Nothing drops,
+refunds or sounds. An unloaded cell defers; a loaded incomplete object is cleared by integrity with a
+canonical drop in its old look.
 
 ## Data
 
 Everything is generated: textures by `tools/generate-textures.mjs` (checked in under
-`src/main/resources`), the rest by datagen. `GeometryModelWriter` cuts every element at the
-16-pixel texture-tile boundaries and by default writes vanilla's default UVs for its position
-inside its own tile (Forge omits a UV equal to the default), so no face samples outside its
-sprite. A `FaceStyle` can hide buried faces, give some faces another texture variable (a frame's
-sides) or explicit UVs: door panels and painted/brick frames use `AssemblyFaceUv`, which spreads one
-image across the whole 32 x 32 front and back (front as seen from the front, back as seen from
-behind), so boards and brick joints continue across elements and cells. Door: two leaf
-templates (hinge left/right) plus per-finish bindings, one empty world model per finish and a
-blockstate with a single `""` variant. Window: one core template, per-finish bindings and a shared glass arm model, in a multipart
-blockstate (core by axis, arms by axis + connection).
-Frame: four quarter templates in two families (tiled, whole-image), per-material bindings
-(`#face`, `#edge`), a blockstate variant per facing x part turned by `y`.
-Items (one provider per family, transforms in `ItemModelTransforms`): door items inherit the
-left-hinge leaf, window items the window template, frame items carry the whole ring; each with
-front GUI light and computed centred display transforms. Plus recipes
-and their advancements, loot, tags and English names.
+`src/main/resources`), the rest by datagen. `GeometryModelWriter` cuts every element at the 16-pixel
+texture-tile boundaries and by default writes vanilla's default UVs for its position inside its own
+tile, so no face samples outside its sprite. A `FaceStyle` can hide buried faces, give some faces
+another texture variable (a frame's sides) or explicit UVs: door panels and whole-ring frames use
+`AssemblyFaceUv`, which spreads one image across the whole 32 x 32 front and back. Door: two leaf
+templates, two oak leaves (`round_door_leaf_<hinge>`), one empty world model and a single `""`
+variant. Window: the core template, the oak core and the shared glass arm in a multipart blockstate.
+Trim: quarter templates in two families (tiled, whole-image), oak source quarters per family, one
+empty world model and a single `""` variant. `LegacyModelProvider` gives the 49 aliases blockstates
+over the canonical models and item models parenting the canonical items. Items carry front GUI light
+and computed centred transforms. Plus three recipes and their advancements, loot (aliases drop the
+canonical item), tags and English names.

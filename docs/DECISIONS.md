@@ -2,6 +2,68 @@
 
 Newest first.
 
+## 2026-10-21 - One block per family; the look is data (0.5.0, supersedes "Limited catalogue" and the per-finish registrations)
+
+Roundwood now registers `round_door`, `round_window` and `round_trim`; wood, paint and masonry are an
+`Appearance` on the anchor block entity (every window has one) and on the item stack. Any tagged
+planks (`minecraft:planks`, plus `roundwood:appearance_planks` for datapacks) restyle wood in the
+world, any of the 16 dyes paints it. Rejected: registering a block per wood x paint (hundreds of
+ids, cannot cover modded woods), runtime-generated blocks (registry freezes before tags load).
+Tradeoff: every family behaves like its oak counterpart (sounds, hardness, fire, tools), so a
+masonry trim no longer needs a pickaxe and nether woods no longer resist fire; the look is purely
+cosmetic. Crafting gives oak only; a donor-copying recipe is deferred.
+
+## 2026-10-21 - Hidden aliases plus deferred conversion, not a missing-mapping remap (0.5.0)
+
+A bare many-to-one remap of the 49 0.4.0 ids to the three new ones cannot attach each occurrence's
+old finish. Keeping the old ids registered (hidden: no tab, recipe or viewer entry) lets each saved
+cell and stack keep its look until converted. Chunk load only queues; conversion runs on the level
+tick, one guarded whole-object rewrite, never loading partners. Tradeoff: 49 permanent compatibility
+registrations. Mirrored structure copies keep the 0.4.0 camouflage limitation.
+
+## 2026-10-21 - Restyling gestures and payment (0.5.0)
+
+Sneak + planks sets the wood and strips paint; dye paints (sneaking or not); sneak + one of four
+masonry blocks faces a trim. One material per change, nothing refunded, unchanged results free,
+creative free; re-planking with the same wood strips paint. A narrow `RightClickBlock` hook lets only
+these sneak gestures reach the block (0.3/0.4 relied on Forge's sneak bypass to keep block use out of
+sneak-placement). On a door, restyling needs the leaf; corners stay camouflage. Rejected: crafting
+recipes for every look, a refund of the previous material (would make looks a free storage), paint
+removal by water.
+
+## 2026-10-21 - Unfamiliar woods on doors are tinted boards; masonry stays fixed (0.5.0)
+
+Door leaves keep Roundwood's full-height vertical boards. The eleven vanilla woods and all paints
+have their own generated board art (the 0.4.0 bytes unchanged); any other wood uses neutral grey
+boards tinted with the donor plank's average colour, because copying a horizontal plank texture
+would restart boards mid-door and runtime atlas generation is out of scope. Windows and trims show
+the donor's real plank sprite. Masonry is exactly bricks, stone, deepslate and mud bricks with their
+radial art; arbitrary modded masonry is not accepted rather than shown with a misleading
+approximation.
+
+## 2026-10-21 - Trims drawn by an anchor renderer; windows stay chunk-baked (0.5.0)
+
+A trim's look lives on its anchor quarter, so the four quarters are tessellated by the anchor's
+block-entity renderer at their own cells (world light, AO, culling) from cached, pre-turned models.
+Rejected: a block entity per quarter (four copies of one look) and propagating the anchor's look to
+chunk model data of cells without entities. Tradeoff: like doors, no mining crack on trims. Windows
+are single blocks with their own entity, so they keep chunk baking through model data.
+
+## 2026-10-21 - EMI previews keep a stable identity (0.5.0)
+
+EMI shows one entry per item whose icon cycles through bounded samples while its key, NBT,
+comparison, retrieval, recipes and saved form are the plain default stack; styled stacks compare by
+appearance. Rejected: EMI stack providers (they report ingredients under screen coordinates) and one
+index entry per look (floods the index, cannot list modded woods). JEI gets subtypes only.
+
+## 2026-10-21 - Harvest defers removal until loot has read the anchor (0.5.0)
+
+Forge removes a broken block before its harvest callback, and removing a part tears down the
+anchor that holds the look. Harvesting survival breaks therefore keep the part until `playerDestroy`
+has evaluated loot, then remove it normally; a missed callback is cleaned up at the end of the tick.
+Loot tables stay plain; the block only decorates its family item. Rejected: unconditional drops from
+`onRemove` (breaks explosion decay, `doTileDrops`, loot modifiers).
+
 ## 2026-10-21 - Round trims: independent 2x2 frames, fitted or freestanding (0.4.0, supersedes the door's built-in trim ring)
 
 The door's 2-pixel ring is gone; frames are their own block family so trim and door colours mix.
@@ -151,7 +213,7 @@ tile boundaries and writes per-tile UVs: default UVs on a 32-pixel model sampled
 atlas sprites (the 0.1.0 scrambled icons). Rejected: a custom item renderer (extra client code and
 a BER dependency for icons).
 
-## 2026-10-20 - Paint recipes list the other paintable items instead of using a tag
+## 2026-10-20 - Paint recipes list the other paintable items instead of using a tag (superseded in 0.5.0: paint is applied in the world)
 
 The painting ingredient is oak plus the three other painted finishes (as vanilla wool dyeing does),
 so no recipe turns an item into itself. Rejected: `paintable_doors` / `paintable_windows` item tags
@@ -186,7 +248,7 @@ pathing integration.
 Facing, hinge and half already identify the anchor, so the assembly stores nothing beyond the
 vanilla door properties.
 
-## 2026-10-20 - Limited catalogue, no Biomes O' Plenty
+## 2026-10-20 - Limited catalogue, no Biomes O' Plenty (superseded in 0.5.0: one block per family, any planks)
 
 11 vanilla woods plus four oak-based paints, not a wood x paint product. BOP finishes and compat
 recipes are deferred.

@@ -2,14 +2,15 @@ package io.github.dirtyredz.roundwood.data;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import static io.github.dirtyredz.roundwood.data.ResolvedModels.Resolved;
 import static io.github.dirtyredz.roundwood.data.ResolvedModels.elements;
@@ -28,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * frames, and a centred whole-ring inventory icon. Independent of the mod's own code.
  */
 class GeneratedTrimModelsTest {
-    private static final List<String> PARTS = List.of("lower_left", "upper_left", "lower_right", "upper_right");
+    private static final List<String> PARTS = ModelExpectations.PARTS;
 
     private static boolean ring(int u, int v) {
         return inDisc(32, 32, u, v) && !inDisc(32, 28, u, v);
@@ -40,22 +41,6 @@ class GeneratedTrimModelsTest {
 
     private static int row(String part) {
         return part.startsWith("upper") ? 1 : 0;
-    }
-
-    private static boolean whole(String material) {
-        return !ModelExpectations.NATURAL.contains(material);
-    }
-
-    private static String face(String material) {
-        if (ModelExpectations.NATURAL.contains(material)) {
-            return ModelExpectations.stripped(material);
-        }
-        return ModelExpectations.PAINTED.contains(material)
-                ? ModelExpectations.doorPanel(material) : "roundwood:block/trim_radial_" + material;
-    }
-
-    private static String edge(String material) {
-        return ModelExpectations.MASONRY.contains(material) ? "roundwood:block/trim_edge_" + material : face(material);
     }
 
     @Test
@@ -148,54 +133,75 @@ class GeneratedTrimModelsTest {
         }
     }
 
+    /** The oak models are what the client retextures: tiled stripped oak log, or the oak door panel as one image. */
     @Test
-    void everyMaterialBindsItsTexturesToTheRightTemplate() {
-        for (String material : ModelExpectations.TRIMS) {
-            String family = whole(material) ? "template_round_trim_whole_" : "template_round_trim_";
-            for (String part : PARTS) {
-                String id = "roundwood:block/" + material + "_round_trim_" + part;
-                JsonObject raw = ResolvedModels.read(id);
-                assertEquals("roundwood:block/" + family + part, raw.get("parent").getAsString(), id);
-                Resolved model = resolve(id);
-                assertEquals(face(material), model.texture("#face"), id);
-                assertEquals(edge(material), model.texture("#edge"), id);
-            }
+    void canonicalQuarterModelsBindTheOakPlaceholdersToTheRightTemplate() {
+        for (String part : PARTS) {
+            assertQuarter("roundwood:block/round_trim_" + part, "roundwood:block/template_round_trim_" + part,
+                    ModelExpectations.STRIPPED_OAK_LOG);
+            assertQuarter("roundwood:block/round_trim_whole_" + part, "roundwood:block/template_round_trim_whole_" + part,
+                    ModelExpectations.DOOR_PANEL_OAK);
+        }
+    }
+
+    private static void assertQuarter(String id, String parent, String oak) {
+        JsonObject raw = ResolvedModels.read(id);
+        assertEquals(parent, raw.get("parent").getAsString(), id);
+        Resolved model = resolve(id);
+        assertEquals(oak, model.texture("#face"), id);
+        assertEquals(oak, model.texture("#edge"), id);
+        assertEquals(oak, model.texture("#particle"), id);
+    }
+
+    @Test
+    void worldModelIsEmptyWithOnlyAParticleTexture() {
+        Resolved world = resolve("roundwood:block/round_trim");
+        assertEquals(0, world.elements().size(), "the ring is drawn by the block-entity renderer");
+        assertEquals(ModelExpectations.STRIPPED_OAK_LOG, world.texture("#particle"));
+        assertEquals(Set.of("particle"), world.textures().keySet());
+    }
+
+    @Test
+    void canonicalAndEveryAliasBlockstateIsTheSingleEmptyVariant() throws Exception {
+        List<String> ids = new ArrayList<>(ModelExpectations.aliasTrims());
+        ids.add("round_trim");
+        assertEquals(20, ids.size());
+        for (String id : ids) {
+            Path file = Path.of("src/generated/resources/assets/roundwood/blockstates/" + id + ".json");
+            JsonObject state = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
+            assertFalse(state.has("multipart"), id);
+            JsonObject variants = state.getAsJsonObject("variants");
+            assertEquals(Set.of(""), variants.keySet(), id);
+            assertEquals("roundwood:block/round_trim", variants.getAsJsonObject("").get("model").getAsString(), id);
         }
     }
 
     @Test
-    void blockstatesCoverEveryFacingAndPartWithTheTurnedQuarter() throws Exception {
-        Map<String, Integer> turns = Map.of("north", 0, "east", 90, "south", 180, "west", 270);
-        for (String material : ModelExpectations.TRIMS) {
-            Path file = Path.of("src/generated/resources/assets/roundwood/blockstates/" + material + "_round_trim.json");
-            JsonObject variants = com.google.gson.JsonParser.parseString(Files.readString(file)).getAsJsonObject()
-                    .getAsJsonObject("variants");
-            Set<String> expected = new TreeSet<>();
-            for (String facing : turns.keySet()) {
-                for (String part : PARTS) {
-                    String key = "facing=" + facing + ",part=" + part;
-                    expected.add(key);
-                    JsonObject variant = variants.getAsJsonObject(key);
-                    assertEquals("roundwood:block/" + material + "_round_trim_" + part, variant.get("model").getAsString(), key);
-                    assertEquals((int) turns.get(facing), variant.has("y") ? variant.get("y").getAsInt() : 0, material + " " + key);
-                }
-            }
-            assertEquals(expected, new TreeSet<>(variants.keySet()), material);
+    void aliasItemModelsParentTheCanonicalTrimItem() {
+        for (String alias : ModelExpectations.aliasTrims()) {
+            JsonObject model = ResolvedModels.read("roundwood:item/" + alias);
+            assertEquals(Set.of("parent"), model.keySet(), alias);
+            assertEquals("roundwood:item/round_trim", model.get("parent").getAsString(), alias);
         }
     }
 
     @Test
     void itemIconsAreTheWholeRingCentred() {
-        for (String material : ModelExpectations.TRIMS) {
-            Resolved item = resolve("roundwood:item/" + material + "_round_trim");
-            assertEquals(face(material), item.texture("#face"), material);
-            for (int u = 0; u < 32; u++) {
-                for (int v = 0; v < 32; v++) {
-                    assertEquals(ring(u, v), ResolvedModels.frontCovered(item, u, v, face(material)),
-                            material + " icon at " + u + "," + v);
-                }
+        assertIcon("roundwood:item/round_trim", "roundwood:item/template_round_trim", ModelExpectations.STRIPPED_OAK_LOG);
+        assertIcon("roundwood:item/round_trim_whole", "roundwood:item/template_round_trim_whole",
+                ModelExpectations.DOOR_PANEL_OAK);
+    }
+
+    private static void assertIcon(String id, String parent, String oak) {
+        assertEquals(parent, ResolvedModels.read(id).get("parent").getAsString(), id);
+        Resolved item = resolve(id);
+        assertEquals(oak, item.texture("#face"), id);
+        assertEquals(oak, item.texture("#edge"), id);
+        for (int u = 0; u < 32; u++) {
+            for (int v = 0; v < 32; v++) {
+                assertEquals(ring(u, v), ResolvedModels.frontCovered(item, u, v, oak), id + " icon at " + u + "," + v);
             }
-            ModelExpectations.assertDisplay(item, material + " frame", new double[] {16, 16, 0.5});
         }
+        ModelExpectations.assertDisplay(item, id, new double[] {16, 16, 0.5});
     }
 }
