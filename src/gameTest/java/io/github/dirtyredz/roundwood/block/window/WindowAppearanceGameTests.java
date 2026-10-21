@@ -98,7 +98,7 @@ public final class WindowAppearanceGameTests {
         helper.succeed();
     }
 
-    /** A flush window restyles like a centred one: only the look changes, the position and its glass bridge stay. */
+    /** A flush window restyles like a centred one: only the look changes, the position (and its absent connections) stay. */
     @GameTest(template = TEMPLATE)
     public static void aFlushWindowRestylesWithoutMoving(GameTestHelper helper) {
         floor(helper);
@@ -109,7 +109,7 @@ public final class WindowAppearanceGameTests {
         helper.setBlock(rel.east(), Blocks.GLASS_PANE);
         BlockPos abs = helper.absolutePos(rel);
         BlockState before = state(helper, abs);
-        check(before.getValue(RoundWindowBlock.POSITION) == WindowPosition.NORTH && before.getValue(RoundWindowBlock.EAST), "setup " + before);
+        check(before.getValue(RoundWindowBlock.POSITION) == WindowPosition.NORTH && !before.getValue(RoundWindowBlock.EAST), "setup " + before);
         ServerPlayer player = player(helper, "flush_style", GameType.SURVIVAL, Direction.NORTH);
         check(use(helper, player, new ItemStack(Items.BIRCH_PLANKS), ItemStack.EMPTY, front(abs), true).consumesAction(), "sneak + birch");
         check(use(helper, player, new ItemStack(Items.RED_DYE), ItemStack.EMPTY, front(abs), true).consumesAction(), "sneaking dye");

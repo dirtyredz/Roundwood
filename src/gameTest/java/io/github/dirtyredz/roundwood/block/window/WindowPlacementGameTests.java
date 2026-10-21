@@ -216,7 +216,7 @@ public final class WindowPlacementGameTests {
         helper.succeed();
     }
 
-    /** A neighbour placed later re-judges the connection exactly as placing next to it would have. */
+    /** A neighbour placed later re-judges the connection exactly as placing next to it would have (a flush window: none). */
     @GameTest(template = TEMPLATE)
     public static void laterNeighboursMatchWhatPlacementWouldHavePredicted(GameTestHelper helper) {
         floor(helper);
@@ -227,7 +227,7 @@ public final class WindowPlacementGameTests {
         WindowFixtures.place(player, new ItemStack(Items.GLASS_PANE), WindowFixtures.zone(helper, first.east().below(), Direction.UP,
                 WindowTargetZones.Zone.CENTER));
         BlockState updated = helper.getBlockState(first);
-        check(updated.getValue(CrossCollisionBlock.EAST), "a pane placed later did not connect");
+        check(!updated.getValue(CrossCollisionBlock.EAST), "a pane placed later connected to a flush window");
         BlockPos second = new BlockPos(6, 1, 2);
         helper.setBlock(second.east(), Blocks.GLASS_PANE);
         BlockState next = placeAndCompare(helper, player, WindowFixtures.zone(helper, second.below(), Direction.UP,
