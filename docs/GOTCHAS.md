@@ -10,9 +10,26 @@
 - **0.5.0 windows load centred.** `position` defaults to center when absent, so saved windows keep
   their axis, connections, water and look. Aliases inherit the property.
 - **Restyling changes the wood only.** Glass and arms never change with planks or dye.
-- **Arch blockstates are multipart files over every pose** (36 orientation and depth pairs). After
-  any pose or geometry change rerun `runData`; `GeneratedWindowArchModelsTest` compares every posed
-  state's parts with the block geometry and fails on a stale file.
+- **Every window blockstate applies one complete model** (visible surfaces, with a model per
+  centred arm combination and each also `_trimmed`). After any pose or geometry change rerun
+  `runData`; `GeneratedWindowPaneModelsTest` compares every state's model with the block geometry
+  and fails on a stale file.
+- **Internal translucent faces cause seams.** Glass faces drawn inside or against other glass show
+  as horizontal lines. Never add window geometry outside `WindowPaneGeometry` and
+  `WindowSurfaceGeometry` (the models are emitted from those two), and rerun `runData` after any
+  geometry change.
+- **Trim clicks target the band, the pane outside it.** The band is the pixels under the trim; a
+  click there (no sneaking) removes or restyles the trim, a click elsewhere on the pane restyles the
+  pane. Masonry is trim-only: on a pane it does nothing.
+- **Flush trims are inlaid at the wall plane; centred trims project one pixel.** A flush window's
+  trim replaces its outer pixels rather than occupying the neighbouring cell. Selection includes the
+  trim, collision does not.
+- **A missing `trimmed` means untrimmed.** 0.6.x saves and old chunks load with no trim; never
+  default it to true.
+- **Pane and trim drop separately; pick-block gives the pane only.** Count both items in drop tests,
+  and use the trim's loot pool when changing window loot.
+- **Window tests that sweep geometry are slow if assertion messages are built eagerly.** Check
+  inside an `if` and call `fail(...)` there instead of passing a built string to `assertEquals`.
 - **A junction face partly against wood is still drawn** (harmless, opposite-facing); a wholly
   buried one is not.
 - **The strip where an arch's glazed edge reaches the cell edge keeps the 0.5 px glass recess.**

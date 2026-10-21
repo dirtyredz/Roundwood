@@ -1,10 +1,10 @@
 # Roundwood
 
-Forge 1.20.1 mod: a round 2x2 wooden door, a round window with two arch pieces and a round 2x2
-trim, hobbit-hole style. Each is one item you restyle in the world: any planks (vanilla or modded)
-set the wood, any of the
-16 dyes paints it, and trims can also be faced with radial brick. Install on **both** the server
-and every client. Generic: not tied to any modpack.
+Forge 1.20.1 mod: a round 2x2 wooden door, a round window with arch and corner pieces (each plain
+or with cross beams), a window trim and a round 2x2 trim, hobbit-hole style. Each is one item you
+restyle in the world: any planks (vanilla or modded) set the wood, any of the 16 dyes paints it,
+and trims can also be faced with radial brick. Install on **both** the server and every client.
+Generic: not tied to any modpack.
 
 ## Supported versions
 
@@ -16,10 +16,13 @@ and every client. Generic: not tied to any modpack.
 
 ## Content
 
-Five items: **Round Door**, **Round Window**, **Round Window Arch, Left**, **Round Window Arch,
-Right** and **Round Trim** (creative tab order: door, window, left arch, right arch, trim). They are
-crafted (and found in the creative tab) in oak; their look is changed once placed and travels with
-them when picked or broken.
+Thirteen items: **Round Door**, five window pieces, each in a plain and a cross-beam version
+(**Round Window**, **Round Window Arch, Left**, **Round Window Arch, Right**, **Round Window
+Corner, Bottom Left**, **Round Window Corner, Bottom Right**; the crossed ones are named "... with
+Cross Beams"), **Window Trim** and **Round Trim**. Creative tab order: door, then each plain window
+piece followed by its crossed variant (round, arch left, arch right, corner bottom left, corner
+bottom right), window trim, round trim. They are crafted (and found in the creative tab) in oak;
+their look is changed once placed and travels with them when picked or broken.
 
 **Round door** (one item places a 2 wide x 2 high assembly). One round leaf on one hinge, like a
 hobbit door: vertical boards running the full height of the door, brass straps on the hinge side
@@ -51,8 +54,9 @@ any filled camouflage corners. The knobs and straps are decoration and do not co
 It can stand upright and centred, or flush against any side of its cell (four walls, floor,
 ceiling). Centred, it connects like a glass pane, with a short glass arm across its plane where it
 meets a pane, bars, wall or crossing window (never towards a solid block); flush, floor and ceiling
-windows grow no glass, so where they meet each other their frames simply abut. Waterloggable; drops itself. See "Placing
-windows".
+windows grow no glass, so where they meet each other their frames simply abut. Waterloggable; drops
+itself. The glass is clear (since 0.7.0 much more transparent, with the same diagonal glints) and
+shows no horizontal seam lines. See "Placing windows".
 
 **Round window arches** (two single blocks, left and right). The upper half of a round window two
 blocks wide, split into two independent pieces: place them side by side and the glazed half circle
@@ -62,6 +66,27 @@ its bottom left, so they meet at the circle's centre. The back shows the mirrore
 is a 16 x 16 pane 2 pixels thick; there is no partner lookup, so a single piece stands fine alone.
 They share the round window's restyling, waterlogging and drops.
 
+**Round window corners** (two single blocks, bottom left and bottom right). The lower corners of a
+2 x 2 arched window: a two-pixel outer jamb and sill meeting square around glass, with no top or
+inner border. Put a corner under each arch piece (bottom left under the left arch, bottom right
+under the right arch) and the four pieces form a 32 x 32 window with one continuous frame, an arch
+over a square-cornered lower opening and no divider where the pieces meet. Corners are independent
+pieces like the arches and share their targeted placement, overlay, restyling, waterlogging and
+drops.
+
+**Plain or cross beams.** Each of the five window pieces also exists as a separate item with cross
+beams (names end "with Cross Beams"). Every crossed piece has its own one-pixel wooden cross through
+the middle of its own opening, so four crossed pieces in a 2 x 2 show four crosses (a grid), not one
+shared cross. The beams use the pane's wood or paint, run the full thickness of the pane, and glass
+is cut away under them. Plain and crossed are chosen by the item, not by a click or toggle.
+
+**Window trim** (one item, a single piece). A ring of trim that fits onto any of the ten windows
+(plain or crossed) and follows its shape: a ring round the round window, the matching quarter of the
+big ring on an arch, the outer jamb and sill on a corner (beams are never trimmed). Click a window
+with it, sneaking or not; it shows on both faces, and a window already trimmed just ignores the
+click and keeps the item. A trimmed window drops its pane and the trim as two separate items; picking
+the block gives the pane only.
+
 **Round trim** (one item places a 2 x 2 frame). A flat ring, open in the middle, purely decorative.
 Fit it to a door by **sneak-right-clicking the front of a closed round door** with it (it goes in
 the four cells in front, one pixel proud of the leaf); anywhere else it stands free, the target cell
@@ -70,7 +95,7 @@ other.
 
 ## Placing windows
 
-Holding a window item (round window or either arch) and aiming at a block face draws an overlay on
+Holding a window item (any of the ten window pieces) and aiming at a block face draws an overlay on
 that face: a centre square and four edge trapezoids, with the zone you aim at picked out in white
 and the pane that would be placed outlined in light blue at its destination. The outline is hidden
 when placement would be refused. The main hand's window wins; the offhand window is used only when
@@ -89,11 +114,12 @@ the main hand is empty. Sneaking changes nothing.
 - The destination cell is vanilla's (a replaceable clicked block is replaced); the zone is read on
   the face you clicked. Interactive blocks (doors, chests, levers) can still take the click first,
   so the overlay is not a promise.
-- Arch pieces: the centre zone places them upright with the front towards you (a left piece on your
-  left); an edge zone places them flush with the front towards you; on a floor or ceiling the top
-  is the side you see as up, so a left piece looks left to whoever placed it.
-- **To move a placed window, break it and place it again**; its look survives in the item. Windows
-  saved by 0.5.0 load centred, with their axis, connections, water and look unchanged.
+- Arch and corner pieces: the centre zone places them upright with the front towards you (a left
+  piece on your left); an edge zone places them flush with the front towards you; on a floor or
+  ceiling the top is the side you see as up, so a left piece looks left to whoever placed it.
+- **To move a placed window, break it and place it again**; its look survives in the item (a fitted
+  window trim comes back as its own item). Windows saved by 0.5.0 or 0.6.x load unchanged and
+  untrimmed, with their position, connections, water and look as they were.
 - Junctions: only a centred window grows glass, an arm across its plane towards a pane, bars, a
   wall or a centred window crossing it. Flush, floor and ceiling windows never connect, so two of
   them meeting at a corner or edge just meet frame to frame. Panes never link up or down.
@@ -106,8 +132,13 @@ the main hand is empty. Sneaking changes nothing.
 | Door leaf | Dye (sneaking or not) | Painted, the wood kept underneath | 1 dye |
 | Door corner | Block, not sneaking (planks included) | Camouflage, as above | 1 block, refunded later |
 | Door corner | Sneak + planks or dye | Refused with a hint to aim at the leaf | nothing |
-| Window or arch | **Sneak** + planks | The wooden face only; glass and arms never change | 1 plank |
-| Window or arch | Dye (sneaking or not) | The wooden face painted; glass never changes | 1 dye |
+| Window piece (any of the ten) | **Sneak** + planks | The wooden face and cross beams; glass never changes | 1 plank |
+| Window piece | Dye (sneaking or not) | The wooden face and beams painted; glass never changes | 1 dye |
+| Window trim band (the ring pixels under the trim) | Planks (sneaking or not) | That wood for the trim | 1 plank |
+| Window trim band | Bricks, stone bricks, deepslate bricks or mud bricks | Brickwork for the trim | 1 block |
+| Window trim band | Dye | Painted trim (refused on brickwork, free) | 1 dye |
+| Window trim band | Shears | Trim removed and returned as an item; shears take one wear | none |
+| Window piece | Window trim item, sneaking or not | Fits the trim (nothing happens if already trimmed) | 1 trim |
 | Trim | **Sneak** + planks | That wood (also replaces masonry) | 1 plank |
 | Trim | **Sneak** + bricks, stone bricks, deepslate bricks or mud bricks | Radial brickwork, paint cleared | 1 block |
 | Wooden trim | Dye | Painted | 1 dye |
@@ -117,15 +148,20 @@ the main hand is empty. Sneaking changes nothing.
   nothing; re-planking a painted object with its own wood strips the paint (one plank). Creative
   costs nothing. A plain click (or a plain click with planks) still opens the door; sneak + a trim
   item on a door still fits a trim; buckets still work on windows.
+- On a trimmed window, aim decides: the trim band is the part of the pane under the trim, and there
+  no sneaking is needed; aiming anywhere else on the pane uses the pane gestures above (sneak +
+  planks, or dye). Masonry only ever goes on a trim: on a pane it does nothing. Shears in creative
+  return nothing. Buckets still work on windows.
 - The offhand works only when the main hand is empty.
 - **Planks** are any item tagged `minecraft:planks`, or added by a datapack to
   `roundwood:appearance_planks`. Modded woods show their own plank texture on windows, arches and
   trims and
   Roundwood's full-height boards tinted to that wood's colour on doors. A wood whose mod is later
   removed shows as oak and comes back when the mod returns.
-- The look is cosmetic: every door, window, arch and trim behaves like the oak one (an axe mines all
-  of
-  them, nether woods do not change fire behaviour, brick trims do not need a pickaxe).
+- The look is cosmetic: every door, window piece and trim behaves like the oak one (an axe mines all
+  of them, nether woods do not change fire behaviour, brick trims do not need a pickaxe).
+- Brickwork has thinner mortar since 0.7.0, on door trims, round trims and window trims; saved
+  brick looks pick it up automatically.
 
 ## Showcase command
 
@@ -138,7 +174,9 @@ planks) as doors closed and open on both hinges and as one connected window row;
 window junction, stacked, waterlogged and stone-behind demos; a window positions section (centred and
 the six flush positions, connected junctions, a solid-neighbour example, waterlogging) and a window
 arches section (centred, flush, floor and ceiling pairs, single pieces, wood and paint examples);
-a lever-driven door; every paint on a
+a window corners section (2 x 2 arched windows, centred and flush, corner singles), a cross-beam
+section (crossed pieces alone and in a grid) and a window trims section (every wood, paint and
+masonry trim on each piece, both faces, centred and flush); a lever-driven door; every paint on a
 door, a trim and a window; every wood and masonry trim fitted round a blue, a camouflaged oak and an
 open red door; and the four brick trims standing free.
 
@@ -150,17 +188,30 @@ open red door; and the four brick trims standing free.
 | Round window | 4 planks around 1 glass pane (plus shape) |
 | Round window arch, left | Rows `PP` / `PG` / `P ` (P planks, G glass pane) |
 | Round window arch, right | Rows `PPP` / ` G ` / ` P ` (P planks, G glass pane) |
+| Round window corner, bottom left | Rows `P ` / `PG` / `PP` (P planks, G glass pane) |
+| Round window corner, bottom right | Rows ` P ` / ` G ` / `PPP` (P planks, G glass pane) |
+| Round window with cross beams | Rows `SPS` / `PGP` / `SPS` (S stick) |
+| Arch with cross beams, left | Rows `PPS` / `PGS` / `P  ` |
+| Arch with cross beams, right | Rows `PPP` / `SGS` / ` P ` |
+| Corner with cross beams, bottom left | Rows `P  ` / `PGS` / `PPS` |
+| Corner with cross beams, bottom right | Rows ` P ` / `SGS` / `PPP` |
+| Window trim | Rows ` P ` / `PSP` / ` P ` (P planks, S stick) |
 | Round trim | 4 planks in the four corners of the grid |
 
 Crafting always gives the oak object; restyle it in the world. With **EMI** each item is one index
 entry whose icon cycles through example looks (the tooltip says it is a preview; taking or
 bookmarking it gives the plain oak item); styled stacks in your inventory are told apart by their
-look. With **JEI** styled stacks are separate subtypes and the five plain items are listed. Neither
-viewer is required.
+look. With **JEI** styled stacks are separate subtypes and the thirteen plain items are listed.
+Neither viewer is required.
 
-## Upgrading from 0.4.0
+## Upgrading
 
-The 49 old door, window and trim ids still load. Placed doors, windows and trims (fitted or
+**From 0.6.x:** saves load unchanged. Placed windows keep their position, connections, water and
+look and come back untrimmed (a missing `trimmed` means no trim); they are redrawn with the
+clearer glass and without seams, and saved brick looks get the thinner mortar. Nothing converts
+and nothing drops.
+
+**From 0.4.0:** the 49 old door, window and trim ids still load. Placed doors, windows and trims (fitted or
 freestanding) turn into the new blocks shortly after their chunk loads, keeping their wood or paint,
 facing, hinge, open state, water and camouflage (with its refund); nothing drops. Old items in chests
 keep their names and looks and place the new blocks. Mirrored structure copies keep the 0.4.0
@@ -183,9 +234,15 @@ The release jar is `build/libs/roundwood-1.20.1-<version>.jar`.
 
 ## Release
 
-Not released yet. 0.5.0 is the baseline; 0.6.0 (targeted window placement and the arch pieces) was
-trialled by the owner; 0.6.1 (no glass bridges on positioned windows, the door highlight follows
-the swing) is a local candidate, owner trial pending. The flow follows DankRecipeTransfer: an immutable
+Not released yet. 0.5.0 is the baseline; 0.6.0 (targeted window placement and the arch pieces) and
+0.6.1 (no glass bridges on positioned windows, the door highlight follows the swing) were trialled
+by the owner. 0.7.0 (seamless clearer window glass, corner pieces, cross beams, window trims,
+thinner mortar) is built and tested headless; owner trial pending. Owner checks in game: no seams
+in the glass, clearer glass with unchanged glints, a 2 x 2 arched window with a continuous frame,
+square bottom corners and no divider, per-piece crosses, targeting of the corners, trim fitting,
+restyling and shears on both faces, thinner mortar on door and window trims, water, F3+T, and a
+copied 0.6.x world. Not covered by a unit test: the client-side trim retexturing. Out of scope:
+independent front and back trim looks, and freestanding window trims. The flow follows DankRecipeTransfer: an immutable
 GitHub prerelease asset, then a direct-URL `mods/roundwood.pw.toml` (with SHA-256, `side = "both"`)
 in the pack repo. Both steps need the owner's go-ahead.
 

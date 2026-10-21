@@ -9,8 +9,9 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   workspace. The owner checks visuals and client behaviour in game.
 - **Generated resources are source.** Change a provider, run `./gradlew runData`, commit the
   regenerated `src/generated/resources/` with the code. Never hand-edit generated JSON.
-- **Separate authorities, no catalogue.** Content is five canonical blocks in three appearance
-  families (door; window family = round window plus two arch pieces; trim); looks are data. Which
+- **Separate authorities, no catalogue.** Content is twelve canonical blocks and thirteen items in
+  three appearance families (door; window family = ten windows; trim, with the window trim a
+  trim-family item); looks are data. Which
   items restyle: `appearance/material` (tagged planks, the fixed four masonry). What a look draws:
   `client/material` (`BuiltinWoodStyles`, `PaintStyles`) plus the generated art. Examples:
   `AppearanceSamples`. History: `migration/LegacyAppearances` is frozen, never edit it. New artwork

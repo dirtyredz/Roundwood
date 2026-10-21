@@ -159,18 +159,22 @@ change; the 0.2.0 passage is unchanged.
 
 ## Window
 
-Three blocks share one pane base, `WindowPaneBlock` (a vanilla `IronBarsBlock`): `RoundWindowBlock`
-and the two single-cell arch pieces `RoundWindowArchBlock` (left, right). One block entity type,
-`roundwood:round_window`, holds the look of all three. Every state has the four horizontal
-connections and `waterlogged`.
+Ten blocks share one pane base, `WindowPaneBlock` (a vanilla `IronBarsBlock`): `RoundWindowBlock`
+and the single-cell `OrientedWindowBlock` pieces (arch left and right, corner bottom left and
+right), each also in a `_cross` version. One block entity type, `roundwood:round_window`, holds the
+look of all ten (and of 15 alias windows). Every state has the four horizontal connections,
+`waterlogged` and `trimmed`.
 
 **State.** Round window: `axis` (the 0.5.0 value) plus `position` = center/north/east/south/west/
-up/down (default center). Arch: `orientation` (12: north/east/south/west upright with top up;
-`up_<dir>` / `down_<dir>` = front facing up or down with that horizontal top) and `depth`
+up/down (default center). Arches and corners: `orientation` (12: north/east/south/west upright with
+top up; `up_<dir>` / `down_<dir>` = front facing up or down with that horizontal top) and `depth`
 (center/negative/positive along the positive world axis of the pane's normal). Both reduce to a
-`WindowPose` (front, top, depth; right = top x front) in `block/window/geometry/`; a
-`WindowProfile` (ROUND, ARCH_LEFT, ARCH_RIGHT) says which pixels are glazed. `WindowGeometry` keeps
-the 0.5.0 centred round window as the regression baseline.
+`WindowPose` (front, top, depth; right = top x front) in `block/window/geometry/`. What a block
+draws is a `WindowDesign` (`geometry/face/`): a `WindowProfile` (ROUND, ARCH_LEFT, ARCH_RIGHT,
+BOTTOM_LEFT, BOTTOM_RIGHT, each with its assembly offset) says which pixels are glazed, and a
+`WindowPattern` (PLAIN or CROSS) says whether beams cross the opening. The pattern is fixed per
+registration, not a blockstate. `trimmed` (boolean, every window and alias; missing in an old save
+reads false) says a window trim is fitted.
 
 **Pane geometry.** The slab is 2 px thick at 7..9 (centre), 0..2 (negative) or 14..16 (positive); the
 glass sits 0.5 px inside each side. The round window is a 16 x 16 pane with a 12 px glazed circle.
@@ -179,8 +183,27 @@ combined face u 0..32, v 0..16, circle centre (16, 0), outer 32 px, glazed openi
 taken by their centre. Each piece is a square pane whose glass is a quarter circle in its bottom
 inner corner (square wooden corners, no mullion, nothing below the diameter); left and right are
 judged from the front and the back shows the mirrored silhouette. `WindowArchGeometry` is the arch
-circle, `WindowPaneGeometry` the panel, junctions, shapes, boundary footprints and the buried-face
-test, `WindowShapes` the cached voxel shapes and culling footprints (the Minecraft adapter).
+circle. The corners (`WindowCornerGeometry`) glaze u 2..16, v 2..16 (bottom left) or u 0..14, v 2..16
+(bottom right): a two-pixel outer jamb and sill meeting square, no top or inner border. Arches over
+corners make a 32 x 32 window whose lower opening is x 2..30, y 2..16 under the radius-14
+semicircle, with one continuous frame and no divider. Corners are independent pieces (no partner
+lookup or teardown) with the arches' placement, overlay, restyling and water.
+
+**Cross beams.** A crossed piece adds a one-pixel cross through its own middle (u and v 7.5..8.5),
+clipped to its own opening (`WindowMuntinGeometry`). Each crossed piece has its own cross, so four
+crossed pieces in a 2 x 2 show four crosses (a grid), never one shared cross. Beams are wood (the
+pane's wood or paint) at full slab depth; the glass is cut away under them and a centred pane's
+arms respect them. Beams are never trimmed.
+
+**Exposed-surface generation.** `WindowPaneGeometry` gives the logical pieces (wood, glass, beams,
+arms); `WindowShapes` the cached voxel shapes and culling footprints (the Minecraft adapter; keyed
+by design, pose, connections and trim, with collision and selection distinct). The models do not
+draw those pieces. `WindowSurfaceGeometry` paints them into a half-pixel voxel grid (later pieces
+replace earlier ones) and emits only visible faces: glass never against anything (no translucent
+sheet can sit inside glass), opaque material (wood, beams, trim) only against air or glass so
+reveals stay, merged into rectangles, with default position UVs so the glass texture runs on
+continuously. Before 0.7.0 every face of every glass box was drawn, which produced horizontal seam
+lines where translucent sheets overlapped.
 
 **Targeted placement** (`block/window/placement/`). `WindowTargetZones` is the one authority: a
 centre square [1/4,3/4]^2 (boundary included) and four edge trapezoids on the clicked face; outside
@@ -190,7 +213,7 @@ u = south, v = up. An edge zone names a world direction (the top and bottom zone
 mean up and down). `WindowPlacement` adapts the ordinary use context: the destination cell is
 vanilla's (a replaceable clicked block is replaced), the zone is read on the originally clicked
 cell's face, centre = upright and centred facing the player (round window: the 0.5.0 plane across
-the line of sight), edge = flush against that side (six sides). Arches: centre = front towards the
+the line of sight), edge = flush against that side (six sides). Arches and corners: centre = front towards the
 player; edge = front towards the player's eye (tie or no player: towards the player if the plane
 faces them, else into the cell); floor and ceiling pieces take the top the player sees as up. The
 server decides from the use context, no packet carries the zone, and sneaking changes nothing.
@@ -215,24 +238,70 @@ connection package reads `WindowPaneBlock.pose` of neighbours and the block call
 deliberate two-way edge inside `block/window`.
 
 **Culling.** A window face on the cell boundary is skipped only when the neighbouring window's
-geometry covers everything this one draws there (half-pixel footprints), not because the blocks or
-connections match. Non-window neighbours never hide window faces. The glazing and arms use
-Roundwood's `window_glass` (every texel visible, translucent) in a translucent model; collision
-and outline are the panel plus active junction parts.
+geometry covers everything this one draws there (half-pixel footprints, `WindowShapes.hides`), not
+because the blocks or connections match; so a 2 x 2 has no inner divider. Non-window neighbours never
+hide window faces. The glazing and arms use `window_glass_clear` (the `window_glass` colours with
+alpha 24..36; the diagonal accent texels keep alpha 176) in a translucent model; collision and
+outline are the panel plus active junction parts (the outline also includes the trim).
 
-**Models** (`data/client/window/`). Posed models are authored once per canonical pose (upright
-facing south, or front up/down with top north) and every other pose is a blockstate y rotation of
-one. Per canonical pose: a core (panel, oak-bound), and for a centred upright pose one arm per
-side across its plane. Names are `<profile>[_back|_front|_up_<floor|level|ceiling>|_down_<...>]`,
-arms `_arm_<side>`. The round window's centred state reuses the 0.5.0 parts; flush uses
-`round_window_back*` turned per side, ceiling `round_window_down_ceiling*`, floor
-`round_window_up_floor*`. `GeometryModelWriter` drops an element whose faces are all buried.
+**Models** (`data/client/window/`). `GeometryModelWriter.addSurfaces` writes each surface as one
+element: a half-pixel-thick backing box with one face (the shared record is `geometry/Surface`).
+Models are authored per canonical pose (upright facing south, or front up/down with top north) and
+every other pose is a blockstate y rotation of one. Each blockstate state applies exactly one
+complete model, so there are no multipart arms: a centred upright pose has one model per
+combination of its two across-plane connections (`_arms_north`, `_arms_south`, `_arms_both`),
+and every other pose has one. Every model also exists `_trimmed`. Names are
+`<design>[_back|_front|_up_<floor|level|ceiling>|_down_<...>][_arms_<...>][_trimmed]`.
+`OrientedWindowModelProvider` and `WindowModelProvider` write them (220 window block models);
+`GeometryModelWriter` drops an element whose faces are all buried.
 
-**Client and save.** `WindowAppearanceModel` wraps round and arch states alike. The restyled item
-model cache (`client/window/WindowItemModels`) is keyed by source item model and wood, since three
+**Window trim.** An item, not a block (`block/window/trim/WindowTrimItem`, family TRIM, so it takes
+wood, paint or the four masonry materials). Recipe ` P /PSP/ P `. Using it on any of the ten windows,
+sneaking or not, fits it to that window; on an already trimmed window nothing happens and nothing
+is used.
+
+- **State and payload.** Fitting sets `trimmed=true` and stores the trim's look in the window block
+  entity under `WindowTrim: {Version: 1, RoundwoodAppearance: {...}}` (`WindowTrimNbt`); the pane's
+  top-level `RoundwoodAppearance` is untouched. Both faces share one trim look.
+- **Band and depth** (`geometry/trim/WindowTrimGeometry`, independent of `face`). Round window: a
+  ring 16 outer / 12 inner; arches: their quarter of the 32/28 ring; corners: the outer jamb and
+  sill. Depth: a centred pane (7..9) gets trim at 6..7 and 9..10 (one pixel proud on each face); a
+  flush pane at 0..2 gets a replacement skin 0..1 plus 2..3, and one at 14..16 gets 13..14 plus a
+  skin 15..16. The flush outer face is therefore inlaid at the wall plane (a tradeoff: the trim
+  never occupies a neighbouring cell). Selection includes the trim; collision does not.
+- **Interaction routing** (`block/window/interaction/WindowInteraction`, extracted from
+  `WindowPaneBlock.use`). Main hand first, the offhand only with an empty main hand. A window
+  trim item passes to the item's own use (fit). Otherwise the hit point in face pixels
+  (`trim/WindowTrimTarget`) decides: on the trim band no sneaking is needed and shears remove the
+  trim (survival: one trim item back in its look and one wear on the shears; creative: nothing
+  back), planks and masonry restyle the trim, dye paints it (dye on masonry is refused, free).
+  Elsewhere the pane's existing gesture applies (sneak + planks, or dye, on pane wood and beams);
+  everything else (buckets) is the item's own use. Masonry on the pane does nothing.
+  `appearance/interaction/AppearanceUseTarget` lets `AppearanceUseEvents` judge a sneaking gesture
+  by the part under the hit (the band is the TRIM family, which accepts masonry), and
+  `AppearanceGestures.donor` recognises donors without the sneak requirement.
+- **Loot.** Every window loot table (canonical and alias) has a second pool, conditioned on
+  `trimmed=true`, dropping one window trim with `copy_nbt` from `WindowTrim.RoundwoodAppearance`,
+  under the pane's explosion rule. Breaking yields separate pane and trim items; pick-block gives
+  the pane only.
+- **Rendering channels.** `WindowAppearanceData` carries the pane look and an optional trim look;
+  `WindowAppearanceModel` caches by state, side, render type, wood and trim look. The trimmed
+  models draw the trim quads with marker sprites `roundwood:block/window_trim_face` and `_edge`
+  (generated, always replaced) and `client/window/WindowTrimModels` retextures them: vanilla woods
+  with their stripped log tiled, other woods with the plank sprite tiled, paint with the door boards
+  spread over the face, masonry with a thin-mortar face (`window_trim_round_<m>`, 32 x 32, 12
+  bricks, over the round window; `window_trim_arch_<m>`, 64 x 64, over the whole 2 x 2 arched
+  window, radial above the spring line and straight jamb and sill courses below). The edge uses
+  the granular `trim_edge_<m>`. Whole-face UVs come from `geometry/trim/WindowTrimUv` (positions
+  mapped through the pose) into `ModelRetexturing.retexture(quad, sprite, PositionUv)`. The trim
+  item model `item/window_trim` (a ring in stripped oak log) is resolved per stack.
+
+**Client and save.** `WindowAppearanceModel` wraps every window state alike. The restyled item
+model cache (`client/window/WindowItemModels`) is keyed by source item model and wood, since the
 window items would otherwise share one item's geometry. Windows saved by 0.5.0 have no `position`
-and load centred with their axis, connections, water and look; aliases (`LegacyWindowBlock`)
-inherit the property, and `LegacyAppearances` and the 0.4.0 fixture are unchanged.
+and load centred; windows saved by 0.6.x have no `trimmed` and load untrimmed, both with their
+axis, connections, water and look unchanged; aliases (`LegacyWindowBlock`) inherit the properties,
+and `LegacyAppearances` and the 0.4.0 fixture are unchanged.
 
 ## Frame (round trim)
 
@@ -261,11 +330,14 @@ facing north), cut into cell-local quarters.
   Rotation turns `facing`; mirroring mirrors it and swaps the column of `part`.
 - **Looks** (see Appearance): vanilla woods in their stripped log, tiled per block; other woods in
   their plank sprite, tiled; paint in the painted board panel spread across the ring; masonry in a
-  64 x 64 radial brick face (24 wedge bricks, a brick at the crown) spread across the ring.
+  64 x 64 radial brick face (24 wedge bricks, a brick at the crown) spread across the ring. Since
+  0.7.0 that face is `trim_radial_thin_<m>` (joint half width 0.425 texels, anti-aliased) via
+  `client/material/MasonryStyles`; the old `trim_radial_<m>` stay generated and pinned, unused.
 
 ## Appearance (0.5.0)
 
-One canonical block and item per family; the look is data.
+One canonical block and item per door and trim; the window family has ten blocks (since 0.7.0) and
+the window trim is a trim-family item. The look is data.
 
 - **Value** (`appearance/Appearance`): kind (wood/masonry), the donor block's id and an optional dye.
   Saved as `RoundwoodAppearance: {Version, Kind, Material, Paint}` (`AppearanceNbt`) in item tags and
@@ -273,7 +345,7 @@ One canonical block and item per family; the look is data.
   historical finish), so only non-default looks are stored and default stacks stack. Reading never
   fails; an unregistered but well-formed id is kept (drawn as oak, restored when its mod returns).
 - **Storage**: door anchor, trim anchor (non-ticking `RoundTrimBlockEntity`) and every window
-  (`RoundWindowBlockEntity`). Loads and update packets replace the whole look (a paint removal
+  (`RoundWindowBlockEntity`, which also holds the window trim's look under `WindowTrim`). Loads and update packets replace the whole look (a paint removal
   reaches clients); loading never resets the door swing.
 - **Items**: placement reads the stack (`AppearanceStacks`) and installs the look on the new anchor in
   the same placement transaction (windows via `updateCustomBlockEntityTag`), so a cancelled placement
@@ -334,10 +406,12 @@ tile, so no face samples outside its sprite. A `FaceStyle` can hide buried faces
 another texture variable (a frame's sides) or explicit UVs: door panels and whole-ring frames use
 `AssemblyFaceUv`, which spreads one image across the whole 32 x 32 front and back. Door: two leaf
 templates, two oak leaves (`round_door_leaf_<hinge>`), one empty world model and a single `""`
-variant. Window: posed models per canonical pose (core, plus arms for centred poses; see Window) in
-multipart blockstates, 50 block models in all, three window item models.
+variant. Window: visible-surface models per design, pose and arm combination, each also trimmed (see
+Window), in one-model-per-state blockstates; 220 window block models in all, ten window item
+models plus the window trim item model. Textures: `window_glass_clear`, `window_trim_face` and
+`_edge`, `trim_radial_thin_<m>`, `window_trim_round_<m>`, `window_trim_arch_<m>`.
 Trim: quarter templates in two families (tiled, whole-image), oak source quarters per family, one
 empty world model and a single `""` variant. `LegacyModelProvider` gives the 49 aliases blockstates
 over the canonical models and item models parenting the canonical items. Items carry front GUI light
-and computed centred transforms. Plus five recipes and their advancements, loot (aliases drop the
-canonical item), tags and English names.
+and computed centred transforms. Plus thirteen recipes and their advancements, loot (aliases drop the
+canonical item; windows add a trim pool), tags and English names.

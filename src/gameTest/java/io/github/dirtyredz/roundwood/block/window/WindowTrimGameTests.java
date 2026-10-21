@@ -145,7 +145,10 @@ public final class WindowTrimGameTests {
         // The offhand acts only with an empty main hand.
         ItemStack offBricks = new ItemStack(Items.BRICKS, 2);
         AppearanceFixtures.use(helper, player, new ItemStack(Items.STICK), offBricks, band, false);
-        check(!entity(helper).trim().equals(Optional.of(BRICKS)) && offBricks.getCount() == 2, "offhand acted with a full main hand");
+        // (vanilla may then place the offhand bricks as a block, as with any block item; the trim is untouched)
+        check(entity(helper).trim().equals(Optional.of(SPRUCE.painted(DyeColor.RED))), "offhand restyled with a full main hand");
+        helper.setBlock(AT.south(), Blocks.AIR);
+        offBricks.setCount(2);
         AppearanceFixtures.use(helper, player, ItemStack.EMPTY, offBricks, band, false);
         check(entity(helper).trim().equals(Optional.of(BRICKS)) && offBricks.getCount() == 1, "offhand bricks with an empty main hand: " + entity(helper).trim());
         helper.succeed();
@@ -226,5 +229,22 @@ public final class WindowTrimGameTests {
                 && !pick.getOrCreateTag().contains("WindowTrim"), "pick " + pick);
         check(SPRUCE.equals(windowLook(helper, helper.absolutePos(AT))), "pane look");
         helper.succeed();
+    }
+
+    /** A trim fitted to a 0.4.0 alias window before it converts survives the conversion: one attachment, both looks kept. */
+    @GameTest(template = TEMPLATE)
+    public static void aTrimOnAnAliasWindowSurvivesConversion(GameTestHelper helper) {
+        WindowPaneBlock alias = io.github.dirtyredz.roundwood.migration.LegacyContent.windows().get(1);
+        helper.setBlock(AT, alias.defaultBlockState().setValue(WindowPaneBlock.TRIMMED, true));
+        entity(helper).setTrim(BRICKS);
+        Appearance historical = alias.defaultAppearance();
+        helper.runAfterDelay(5, () -> {
+            BlockState state = helper.getBlockState(AT);
+            check(state.is(ModBlocks.roundWindow()), "alias not converted: " + state);
+            check(WindowPaneBlock.trimmed(state), "conversion lost the trim: " + state);
+            check(entity(helper).trim().equals(Optional.of(BRICKS)), "trim look after conversion: " + entity(helper).trim());
+            check(entity(helper).appearance().equals(historical), "pane look after conversion: " + entity(helper).appearance());
+            helper.succeed();
+        });
     }
 }

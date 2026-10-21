@@ -70,8 +70,9 @@ public final class ContentGameTests {
         }
         check(ForgeRegistries.ITEMS.containsKey(id("window_trim")) && !ForgeRegistries.BLOCKS.containsKey(id("window_trim")),
                 "the window trim is an item without a block");
-        check(ModItems.WINDOW_TRIM.get() instanceof WindowTrimItem trim && trim.appearanceFamily() == AppearanceFamily.TRIM
-                && !(ModItems.WINDOW_TRIM.get() instanceof BlockItem), "the window trim is a trim-family attachment item");
+        Item windowTrim = ModItems.WINDOW_TRIM.get();
+        check(windowTrim instanceof WindowTrimItem trim && trim.appearanceFamily() == AppearanceFamily.TRIM
+                && !(windowTrim instanceof BlockItem), "the window trim is a trim-family attachment item");
         check(ModBlocks.roundDoor().asItem() == ModItems.ROUND_DOOR.get(), "an alias took the door's item mapping");
         check(ModBlocks.roundWindow().asItem() == ModItems.ROUND_WINDOW.get(), "an alias took the window's item mapping");
         check(ModBlocks.roundTrim().asItem() == ModItems.ROUND_TRIM.get(), "an alias took the trim's item mapping");

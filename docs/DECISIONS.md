@@ -2,6 +2,70 @@
 
 Newest first.
 
+## 2026-10-21 - Window models are exposed surfaces, not stacked boxes (0.7.0, owner report)
+
+Owner trial of 0.6.1: horizontal lines in the window glass (round window at heights 3, 4, 6, 10, 12,
+13). The cause was that the glazing was rasterised into stacked glass boxes and every face of every
+box was drawn, so translucent sheets sat inside the glass. `WindowSurfaceGeometry` now paints the
+logical pieces into a half-pixel voxel grid (later pieces replace earlier ones) and emits only
+visible faces: glass never against anything, opaque material only against air or glass, merged
+rectangles with default position UVs so the texture runs on continuously. Each blockstate state
+applies exactly one complete model (a centred upright pose has one per combination of its two
+across-plane connections, every model also `_trimmed`), which replaces the multipart arms. Rejected:
+hiding only wholly buried faces (the sheets inside the glass still overlap) and a striped-texture
+theory (the texture is not striped; the faces were the cause). Cost: 220 window block models, and
+the 0.5.0 baseline class `WindowGeometry`, the old round-window and arm models are gone.
+
+## 2026-10-21 - Clearer glass is a new texture with the accents kept (0.7.0)
+
+The glass was too opaque. `window_glass_clear` has the same RGB as `window_glass`, the diagonal
+accent texels unchanged (RGBA 246,252,255,176) and every other texel at alpha 24..36 (was 92..104);
+all window models use it. `window_glass` stays generated and byte-identical (its hash is pinned),
+just unused, so the historical bytes survive. Rejected: lowering alpha in place (changes pinned
+bytes and the accents) and a render-type trick (would affect other translucent blocks).
+
+## 2026-10-21 - Cross beams are separate items, and every piece has its own cross (0.7.0)
+
+Each of the five window pieces has a crossed version as its own block and item (`_cross`), with
+its own recipe. Owner ruling: every crossed piece carries its OWN one-pixel cross through its middle,
+clipped to its own opening, so four crossed pieces in a 2 x 2 show four crosses (a grid). Rejected:
+one cross shared across the 2 x 2 (the plan's assumption; it would need partner lookups the pieces
+deliberately do not have) and a click or sneak toggle for the pattern (hidden state, and the owner
+dislikes sneak-click mechanics). Cost: five more registrations, items, recipes and tab entries; the
+benefit is that the choice is explicit in the inventory, recipes and previews. The pattern is fixed
+per registration, not a blockstate.
+
+## 2026-10-21 - The window trim is an attachment item with a flag and a payload (0.7.0)
+
+Window trims take masonry like the door trim. `roundwood:window_trim` is an item that fits onto any of
+the ten windows: blockstate `trimmed=true` plus the trim's look in the window block entity under a
+versioned `WindowTrim` payload, leaving the pane's own look untouched. The band follows each piece's
+shape, and beams are never trimmed. Rejected: a second block in the same cell (a cell holds one
+block) and a separate placement system for trims (windows already route placement and clicks).
+Tradeoff: a flush trim is inlaid at the wall plane (its outer face replaces the pane's outer
+pixels) instead of projecting, so it never occupies a neighbouring cell; a centred trim projects one
+pixel on each face. One look serves both faces; independent front and back looks and freestanding
+window trims are out of scope. Clicks are routed by what is under the hit: the band takes shears
+and restyling without sneaking, the rest of the pane keeps the sneak gestures.
+
+## 2026-10-21 - The trim drops as its own item (0.7.0)
+
+Every window loot table has a second pool, conditioned on `trimmed=true`, dropping one window trim
+with its look copied from `WindowTrim.RoundwoodAppearance`, under the same explosion rule as the
+pane. Breaking yields separate pane and trim items; pick-block gives the pane only. Rejected: folding
+the trim into the pane stack's NBT (a window item would then hold a hidden second look, and the trim
+could not be recovered or reused on its own).
+
+## 2026-10-21 - Thinner brick mortar as new textures; door trims switch to them (0.7.0)
+
+The owner found the brick mortar too thick. The thin faces are new generated textures
+(`trim_radial_thin_<m>`, joint half width 0.425 texels instead of 0.85, partial-coverage
+anti-aliased joints, same tones; `window_trim_round_<m>` and `window_trim_arch_<m>` for windows), and
+door and round trims now use the thin face (`client/material/MasonryStyles`, extracted from
+`PaintStyles`). The old `trim_radial_<m>` stay generated and pinned, unused. Saved masonry looks need
+no migration: the look is data and gets the thinner mortar automatically. Rejected: editing the old
+textures in place (their bytes are pinned).
+
 ## 2026-10-21 - Positioned windows never grow glass bridges (0.6.1, owner ruling; supersedes "Fixed central junctions")
 
 Owner trial of 0.6.0: two flush windows meeting in an L grew a glass post, stems and arms filling
