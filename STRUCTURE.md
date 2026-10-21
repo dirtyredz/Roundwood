@@ -45,7 +45,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `src/main/java/io/github/dirtyredz/roundwood/data/server/` — recipe, loot and tag providers
 - `src/main/resources/` — mods.toml, pack.mcmeta, the generated original textures (checked in)
 - `src/generated/resources/` — datagen output, checked in and packaged (its `.cache/` is ignored and excluded)
-- `src/test/java/io/github/dirtyredz/roundwood/` — pure JUnit tests (`appearance/`, `migration/`, `client/material/`, `geometry/`, `block/door/leaf/`, `block/door/selection/`, `block/door/camouflage/`, `block/trim/geometry/`, `block/window/`, `data/`)
+- `src/test/java/io/github/dirtyredz/roundwood/` — pure JUnit tests (`testsupport/` bootstrap shim, `appearance/`, `migration/`, `client/material/`, `geometry/`, `block/door/leaf/`, `block/door/selection/`, `block/door/camouflage/`, `block/trim/geometry/`, `block/window/`, `data/`)
 - `src/gameTest/java/io/github/dirtyredz/roundwood/` — Forge GameTests (`fixture/`, `appearance/`, `migration/`, `block/door/`, `block/door/appearance/`, `block/door/selection/`, `block/door/camouflage/`, `block/trim/`, `block/window/`, `showcase/`, `data/`); never in the release jar
 - `src/gameTest/resources/` — GameTest structure templates (empty ones and the 0.4.0 fixture) and a test-only plank tag
 - `tools/` — entry points of the deterministic generators for the textures and GameTest structures (Node, not packaged)
