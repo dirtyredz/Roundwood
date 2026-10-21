@@ -1,6 +1,15 @@
 package io.github.dirtyredz.roundwood.door;
 
+import io.github.dirtyredz.roundwood.door.assembly.DoorColumn;
+import io.github.dirtyredz.roundwood.door.assembly.DoorIntegrity;
+import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.door.assembly.DoorRemoval;
+import io.github.dirtyredz.roundwood.door.assembly.DoorStateController;
+import io.github.dirtyredz.roundwood.door.leaf.DoorShapes;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -10,28 +19,60 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Supplier;
+
 /**
  * One quarter of a round door. Stays a {@link DoorBlock} (same properties, wooden-door tags, hand
- * opening) so villager AI, pathfinding and other mods see an ordinary wooden door; the callbacks
- * here only hand off to the assembly services.
+ * opening) so villager AI, pathfinding and other mods see an ordinary wooden door; it adds only the
+ * {@link #COLUMN} identity. The callbacks here hand off to the assembly services; the lower-left
+ * part carries the {@link RoundDoorBlockEntity} the client draws the leaf from.
  */
-public class RoundDoorBlock extends DoorBlock {
-    public RoundDoorBlock(Properties properties, BlockSetType type) {
+public class RoundDoorBlock extends DoorBlock implements EntityBlock {
+    public static final EnumProperty<DoorColumn> COLUMN = EnumProperty.create("column", DoorColumn.class);
+
+    private final Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType;
+
+    public RoundDoorBlock(Properties properties, BlockSetType type, Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType) {
         super(properties, type);
+        this.entityType = entityType;
+        // Extend the inherited default (never stateDefinition.any()): other mods inject properties into DoorBlock.
+        registerDefaultState(defaultBlockState().setValue(COLUMN, DoorColumn.LEFT));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
+        builder.add(COLUMN);
+    }
+
+    @Override
+    @Nullable
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return DoorLayout.partOf(state) == DoorLayout.Part.LOWER_LEFT
+                ? new RoundDoorBlockEntity(entityType.get(), pos, state) : null;
     }
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return DoorGeometry.shape(state.getValue(FACING), state.getValue(HINGE), state.getValue(HALF), state.getValue(OPEN));
+        return DoorShapes.shape(state);
     }
 
     /** Assemblies are placed only through {@link RoundDoorItem}; there is no single-cell placement. */
@@ -61,10 +102,54 @@ public class RoundDoorBlock extends DoorBlock {
         DoorStateController.neighborChanged(this, state, level, pos, source);
     }
 
+    /**
+     * Vanilla re-derives a door half from the half above/below it. Here the vertical partner must
+     * be the same column of the same assembly, or this part goes (with its normal loot).
+     */
+    @Override
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
+                                  BlockPos pos, BlockPos neighborPos) {
+        boolean lower = state.getValue(HALF) == DoubleBlockHalf.LOWER;
+        if (direction.getAxis() == Direction.Axis.Y && lower == (direction == Direction.UP) && !verticalPartner(state, neighbor)) {
+            return Blocks.AIR.defaultBlockState();
+        }
+        return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+    }
+
+    /** Mirroring swaps which column is on the left as well as the physical hinge (vanilla cycles the hinge). */
+    @Override
+    public BlockState mirror(BlockState state, Mirror mirror) {
+        BlockState mirrored = super.mirror(state, mirror);
+        return mirror == Mirror.NONE ? mirrored : mirrored.cycle(COLUMN);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
+        super.onPlace(state, level, pos, oldState, moving);
+        DoorStateController.reconcileExternalOpen(this, oldState, state, level, pos);
+        DoorIntegrity.scheduleCheck(this, oldState, level, pos);
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        super.tick(state, level, pos, random);
+        DoorIntegrity.check(this, state, level, pos);
+    }
+
     @Override
     @SuppressWarnings("deprecation")
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
         DoorRemoval.onRemove(this, state, level, pos, newState);
         super.onRemove(state, level, pos, newState, moving);
+    }
+
+    private boolean verticalPartner(BlockState state, BlockState neighbor) {
+        return neighbor.is(this)
+                && neighbor.getValue(HALF) != state.getValue(HALF)
+                && neighbor.getValue(FACING) == state.getValue(FACING)
+                && neighbor.getValue(HINGE) == state.getValue(HINGE)
+                && neighbor.getValue(COLUMN) == state.getValue(COLUMN);
     }
 }

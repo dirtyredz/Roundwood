@@ -1,6 +1,8 @@
 package io.github.dirtyredz.roundwood.door;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.door.assembly.DoorColumn;
+import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.fixture.PlacementCanceller;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.variant.Finish;
@@ -30,6 +32,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assembly;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assertAssembly;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assertNoDoor;
+import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assertOneAnchorEntity;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
@@ -63,8 +66,67 @@ public final class DoorPlacementGameTests {
         }
         // Concretely, facing north the right column is one block east of the anchor.
         BlockState rightLower = helper.getBlockState(new BlockPos(2, 1, 1));
-        check(rightLower.is(door) && rightLower.getValue(DoorBlock.HINGE) == DoorHingeSide.RIGHT
+        check(rightLower.is(door) && rightLower.getValue(RoundDoorBlock.COLUMN) == DoorColumn.RIGHT
+                && rightLower.getValue(DoorBlock.HINGE) == DoorHingeSide.LEFT
                 && rightLower.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER, "north: right column not east of anchor");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void everyFacingAndHingeSharesOneHingeAndOneEntity(GameTestHelper helper) {
+        floor(helper);
+        RoundDoorBlock door = oakDoor();
+        BlockPos anchor = new BlockPos(3, 1, 3);
+        for (Direction facing : List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST)) {
+            for (DoorHingeSide hinge : DoorHingeSide.values()) {
+                String name = facing + "/" + hinge;
+                ServerPlayer player = player(helper, "hinge_" + facing + "_" + hinge, GameType.SURVIVAL, facing);
+                check(placeDoor(helper, player, door.asItem(), anchor, hinge).consumesAction(), name + ": placement failed");
+                DoorLayout.Assembly assembly = assembly(helper, anchor, facing, hinge);
+                assertAssembly(helper, assembly, door, false);
+                for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                    BlockState state = helper.getLevel().getBlockState(assembly.pos(part));
+                    check(state.getValue(DoorBlock.HINGE) == hinge, name + ": hinge differs on " + part);
+                    check(state.getValue(RoundDoorBlock.COLUMN) == part.column, name + ": wrong column on " + part);
+                }
+                check(assembly.pos(DoorLayout.Part.LOWER_RIGHT).equals(assembly.anchor().relative(facing.getClockWise())),
+                        name + ": right column not clockwise of the anchor");
+                assertOneAnchorEntity(helper, assembly);
+                helper.setBlock(anchor, Blocks.AIR);
+            }
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void fullBlocksJustOutsideAnEdgeDecideTheHinge(GameTestHelper helper) {
+        floor(helper);
+        BlockPos anchor = new BlockPos(3, 1, 3); // facing north: columns x = 3 (left) and 4 (right)
+        for (int y = 1; y <= 2; y++) {
+            helper.setBlock(new BlockPos(5, y, 3), Blocks.STONE); // just outside the right edge
+        }
+        ServerPlayer player = player(helper, "edge_right", GameType.SURVIVAL, Direction.NORTH);
+        check(placeDoor(helper, player, oakDoor().asItem(), anchor).consumesAction(), "placement failed (right edge)");
+        check(helper.getBlockState(anchor).getValue(DoorBlock.HINGE) == DoorHingeSide.RIGHT, "block outside the right edge should give hinge RIGHT");
+        helper.setBlock(anchor, Blocks.AIR);
+        for (int y = 1; y <= 2; y++) {
+            helper.setBlock(new BlockPos(5, y, 3), Blocks.AIR);
+            helper.setBlock(new BlockPos(2, y, 3), Blocks.STONE); // just outside the left edge
+        }
+        check(placeDoor(helper, player, oakDoor().asItem(), anchor).consumesAction(), "placement failed (left edge)");
+        check(helper.getBlockState(anchor).getValue(DoorBlock.HINGE) == DoorHingeSide.LEFT, "block outside the left edge should give hinge LEFT");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void aNeighbouringRoundDoorMakesTheNewOneHingeAwayFromIt(GameTestHelper helper) {
+        floor(helper);
+        ServerPlayer player = player(helper, "neighbour", GameType.SURVIVAL, Direction.NORTH);
+        check(placeDoor(helper, player, oakDoor().asItem(), new BlockPos(1, 1, 3)).consumesAction(), "first placement failed");
+        // The first door's right column (x = 2) is just outside the second door's left edge.
+        check(placeDoor(helper, player, oakDoor().asItem(), new BlockPos(3, 1, 3)).consumesAction(), "second placement failed");
+        assertAssembly(helper, assembly(helper, new BlockPos(1, 1, 3), Direction.NORTH, DoorHingeSide.LEFT), oakDoor(), false);
+        assertAssembly(helper, assembly(helper, new BlockPos(3, 1, 3), Direction.NORTH, DoorHingeSide.RIGHT), oakDoor(), false);
         helper.succeed();
     }
 

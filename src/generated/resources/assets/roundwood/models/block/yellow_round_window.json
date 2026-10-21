@@ -2,7 +2,7 @@
   "parent": "roundwood:block/template_round_window",
   "render_type": "minecraft:cutout",
   "textures": {
-    "particle": "roundwood:block/panel_yellow",
-    "rim": "roundwood:block/panel_yellow"
+    "frame": "roundwood:block/panel_yellow",
+    "particle": "roundwood:block/panel_yellow"
   }
 }

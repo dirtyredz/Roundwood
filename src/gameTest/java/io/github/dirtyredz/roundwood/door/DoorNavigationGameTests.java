@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.door;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -17,6 +18,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
@@ -51,6 +53,11 @@ public final class DoorNavigationGameTests {
 
     /** A corridor (x 3..4) with a wall across z = 4 holding the door; the only way through is the door. */
     private static DoorLayout.Assembly corridor(GameTestHelper helper, String name) {
+        return corridor(helper, name, DoorHingeSide.LEFT);
+    }
+
+    /** The corridor has walls on both sides, so only the explicit click point chooses the hinge. */
+    private static DoorLayout.Assembly corridor(GameTestHelper helper, String name, DoorHingeSide hinge) {
         floor(helper);
         for (int z = 0; z < 9; z++) {
             for (int y = 1; y <= 3; y++) {
@@ -61,8 +68,10 @@ public final class DoorNavigationGameTests {
         helper.setBlock(new BlockPos(3, 3, 4), Blocks.STONE);
         helper.setBlock(new BlockPos(4, 3, 4), Blocks.STONE);
         ServerPlayer player = player(helper, name, GameType.SURVIVAL, Direction.NORTH);
-        check(placeDoor(helper, player, oakDoor().asItem(), ANCHOR).consumesAction(), "placement failed");
-        return assembly(helper, ANCHOR, Direction.NORTH);
+        check(placeDoor(helper, player, oakDoor().asItem(), ANCHOR, hinge).consumesAction(), "placement failed");
+        DoorLayout.Assembly assembly = assembly(helper, ANCHOR, Direction.NORTH, hinge);
+        check(assembly.complete(helper.getLevel(), oakDoor()), "door has the wrong hinge: " + helper.getBlockState(ANCHOR));
+        return assembly;
     }
 
     @GameTest(template = TEMPLATE, timeoutTicks = 600)
@@ -75,8 +84,17 @@ public final class DoorNavigationGameTests {
         walkThrough(helper, "nav_north", new BlockPos(4, 1, 7), new BlockPos(4, 1, 1));
     }
 
+    @GameTest(template = TEMPLATE, timeoutTicks = 600)
+    public static void villagerWalksThroughARightHingedDoor(GameTestHelper helper) {
+        walkThrough(helper, "nav_right", new BlockPos(3, 1, 1), new BlockPos(3, 1, 7), DoorHingeSide.RIGHT);
+    }
+
     private static void walkThrough(GameTestHelper helper, String name, BlockPos start, BlockPos target) {
-        DoorLayout.Assembly assembly = corridor(helper, name);
+        walkThrough(helper, name, start, target, DoorHingeSide.LEFT);
+    }
+
+    private static void walkThrough(GameTestHelper helper, String name, BlockPos start, BlockPos target, DoorHingeSide hinge) {
+        DoorLayout.Assembly assembly = corridor(helper, name, hinge);
         Villager villager = helper.spawn(EntityType.VILLAGER, start);
         BlockPos absoluteTarget = helper.absolutePos(target);
         AtomicBoolean sawOpen = new AtomicBoolean();

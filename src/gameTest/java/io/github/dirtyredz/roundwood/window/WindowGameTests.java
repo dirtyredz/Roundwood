@@ -12,13 +12,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
+
+import java.util.function.Supplier;
 
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
@@ -28,7 +33,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.useItemOn;
 
-/** Round windows: orientation, round collision, pane connections and water. */
+/** Round windows: orientation, full-block collision, stability next to neighbours and water. */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class WindowGameTests {
@@ -49,6 +54,15 @@ public final class WindowGameTests {
         return helper.getBlockState(pos);
     }
 
+    /** Fresh stacks of a pane, a wall and another window: a placed stack is consumed. */
+    @SuppressWarnings("unchecked")
+    private static Supplier<ItemStack>[] neighbourStacks() {
+        return new Supplier[] {
+                (Supplier<ItemStack>) () -> new ItemStack(Items.GLASS_PANE),
+                (Supplier<ItemStack>) () -> new ItemStack(Items.COBBLESTONE_WALL),
+                (Supplier<ItemStack>) () -> new ItemStack(window())};
+    }
+
     @GameTest(template = TEMPLATE)
     public static void facesThePlacingPlayer(GameTestHelper helper) {
         floor(helper);
@@ -60,52 +74,59 @@ public final class WindowGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void collisionIsRound(GameTestHelper helper) {
+    public static void collisionIsASquareBlock(GameTestHelper helper) {
         floor(helper);
-        place(helper, "round", Direction.NORTH, new ItemStack(window()), new BlockPos(4, 1, 4));
+        place(helper, "square", Direction.NORTH, new ItemStack(window()), new BlockPos(4, 1, 4));
         BlockPos abs = helper.absolutePos(new BlockPos(4, 1, 4));
-        AABB centre = new AABB(abs.getX() + 0.45, abs.getY() + 0.45, abs.getZ() + 0.4, abs.getX() + 0.55, abs.getY() + 0.55, abs.getZ() + 0.6);
-        AABB corner = new AABB(abs.getX() + 0.0, abs.getY() + 0.0, abs.getZ() + 0.4, abs.getX() + 0.08, abs.getY() + 0.08, abs.getZ() + 0.6);
-        check(!helper.getLevel().noCollision(centre), "window centre should collide");
-        check(helper.getLevel().noCollision(corner), "unconnected corner should be open");
+        double[][] probes = {{0.45, 0.45}, {0.01, 0.01}, {0.92, 0.01}, {0.01, 0.92}, {0.92, 0.92}};
+        for (double[] probe : probes) {
+            AABB box = new AABB(abs.getX() + probe[0], abs.getY() + probe[1], abs.getZ() + 0.4,
+                    abs.getX() + probe[0] + 0.07, abs.getY() + probe[1] + 0.07, abs.getZ() + 0.6);
+            check(!helper.getLevel().noCollision(box), "window should collide at " + probe[0] + "," + probe[1]);
+        }
+        AABB bounds = helper.getLevel().getBlockState(abs).getShape(helper.getLevel(), abs).bounds();
+        check(bounds.equals(new AABB(0, 0, 0, 1, 1, 1)), "outline is not the full unit cube: " + bounds);
         helper.succeed();
     }
 
     @GameTest(template = TEMPLATE)
-    public static void panesAndWindowsConnectReciprocallyInBothOrders(GameTestHelper helper) {
+    public static void woodCornersHitRays(GameTestHelper helper) {
         floor(helper);
-        // Window first, then a pane to its east (in plane).
-        place(helper, "order_a1", Direction.NORTH, new ItemStack(window()), new BlockPos(1, 1, 1));
-        place(helper, "order_a2", Direction.NORTH, new ItemStack(Items.GLASS_PANE), new BlockPos(2, 1, 1));
-        check(at(helper, new BlockPos(1, 1, 1)).getValue(IronBarsBlock.EAST), "window did not connect east to the pane");
-        check(at(helper, new BlockPos(2, 1, 1)).getValue(IronBarsBlock.WEST), "pane did not connect west to the window");
-        // Pane first, then the window.
-        place(helper, "order_b1", Direction.NORTH, new ItemStack(Items.GLASS_PANE), new BlockPos(5, 1, 1));
-        place(helper, "order_b2", Direction.NORTH, new ItemStack(window()), new BlockPos(6, 1, 1));
-        check(at(helper, new BlockPos(6, 1, 1)).getValue(IronBarsBlock.WEST), "window did not connect west to the pane");
-        check(at(helper, new BlockPos(5, 1, 1)).getValue(IronBarsBlock.EAST), "pane did not connect east to the window");
-        // Two windows side by side.
-        place(helper, "order_c1", Direction.NORTH, new ItemStack(window()), new BlockPos(1, 1, 7));
-        place(helper, "order_c2", Direction.NORTH, new ItemStack(window()), new BlockPos(2, 1, 7));
-        check(at(helper, new BlockPos(1, 1, 7)).getValue(IronBarsBlock.EAST) && at(helper, new BlockPos(2, 1, 7)).getValue(IronBarsBlock.WEST),
-                "adjacent windows did not connect");
+        place(helper, "corner_ray", Direction.NORTH, new ItemStack(window()), new BlockPos(4, 1, 4)); // axis x: opening runs along z
+        BlockPos abs = helper.absolutePos(new BlockPos(4, 1, 4));
+        for (double[] corner : new double[][] {{0.05, 0.05}, {0.95, 0.05}, {0.05, 0.95}, {0.95, 0.95}}) {
+            Vec3 from = new Vec3(abs.getX() + corner[0], abs.getY() + corner[1], abs.getZ() - 1.0);
+            Vec3 to = new Vec3(abs.getX() + corner[0], abs.getY() + corner[1], abs.getZ() + 2.0);
+            BlockHitResult hit = helper.getLevel().clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, null));
+            check(hit.getType() == HitResult.Type.BLOCK && helper.getLevel().getBlockState(hit.getBlockPos()).is(window()),
+                    "ray through the wooden corner " + corner[0] + "," + corner[1] + " missed the window: " + hit);
+        }
         helper.succeed();
     }
 
     @GameTest(template = TEMPLATE)
-    public static void perpendicularPaneFormsAJunctionAndRemovalDisconnects(GameTestHelper helper) {
+    public static void noConnectorStatesAndStableNextToPanesWallsAndWindows(GameTestHelper helper) {
         floor(helper);
-        BlockPos windowPos = new BlockPos(4, 1, 4);
-        place(helper, "junction_w", Direction.NORTH, new ItemStack(window()), windowPos); // axis x
-        place(helper, "junction_p", Direction.EAST, new ItemStack(Items.GLASS_PANE), windowPos.north());
-        check(at(helper, windowPos).getValue(IronBarsBlock.NORTH), "window did not join the perpendicular pane");
-        // The arm adds collision between the north edge and the window plane.
-        BlockPos abs = helper.absolutePos(windowPos);
-        AABB arm = new AABB(abs.getX() + 0.45, abs.getY() + 0.1, abs.getZ() + 0.05, abs.getX() + 0.55, abs.getY() + 0.2, abs.getZ() + 0.3);
-        check(!helper.getLevel().noCollision(arm), "junction arm has no collision");
-        helper.setBlock(windowPos.north(), Blocks.AIR);
-        check(!at(helper, windowPos).getValue(IronBarsBlock.NORTH), "connection survived removing the pane");
-        check(helper.getLevel().noCollision(arm), "arm collision survived removing the pane");
+        Supplier<ItemStack>[] neighbours = neighbourStacks();
+        BlockPos[] offsets = {new BlockPos(1, 0, 0), new BlockPos(0, 0, 1), new BlockPos(-1, 0, 0)}; // in plane, behind, in plane
+        // Window first, then each neighbour; and neighbours first, then the window.
+        BlockPos first = new BlockPos(2, 1, 1);
+        place(helper, "stable_a", Direction.NORTH, new ItemStack(window()), first);
+        BlockState expected = at(helper, first);
+        check(expected.getProperties().size() == 2, "window has connector or extra properties: " + expected.getProperties());
+        for (int i = 0; i < neighbours.length; i++) {
+            place(helper, "stable_a" + i, Direction.NORTH, neighbours[i].get(), first.offset(offsets[i]));
+            check(at(helper, first).equals(expected), "window state changed after neighbour " + i + ": " + at(helper, first));
+        }
+        BlockPos second = new BlockPos(6, 1, 5);
+        for (int i = 0; i < neighbours.length; i++) {
+            place(helper, "stable_b" + i, Direction.NORTH, neighbours[i].get(), second.offset(offsets[i]));
+        }
+        place(helper, "stable_b", Direction.NORTH, new ItemStack(window()), second);
+        BlockState placed = at(helper, second);
+        check(placed.getValue(RoundWindowBlock.AXIS) == Direction.Axis.X && !placed.getValue(RoundWindowBlock.WATERLOGGED),
+                "window placed between neighbours has the wrong state: " + placed);
+        check(placed.getProperties().size() == 2, "window has connector or extra properties: " + placed.getProperties());
         helper.succeed();
     }
 

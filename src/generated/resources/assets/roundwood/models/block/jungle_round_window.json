@@ -2,7 +2,7 @@
   "parent": "roundwood:block/template_round_window",
   "render_type": "minecraft:cutout",
   "textures": {
-    "particle": "minecraft:block/jungle_planks",
-    "rim": "minecraft:block/jungle_planks"
+    "frame": "minecraft:block/jungle_planks",
+    "particle": "minecraft:block/jungle_planks"
   }
 }

@@ -6,8 +6,8 @@ import io.github.dirtyredz.roundwood.variant.Finish;
 import io.github.dirtyredz.roundwood.variant.FinishCatalog;
 import io.github.dirtyredz.roundwood.window.RoundWindowBlock;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -16,6 +16,7 @@ import net.minecraftforge.registries.RegistryObject;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /** One round door and one round window per finish. */
 public final class ModBlocks {
@@ -27,7 +28,7 @@ public final class ModBlocks {
     static {
         for (Finish finish : FinishCatalog.ALL) {
             DOORS.put(finish, BLOCKS.register(finish.doorId(),
-                    () -> new RoundDoorBlock(doorProperties(finish), finish.setType())));
+                    () -> new RoundDoorBlock(doorProperties(finish), finish.setType(), ModBlockEntities::roundDoor)));
         }
         for (Finish finish : FinishCatalog.ALL) {
             WINDOWS.put(finish, BLOCKS.register(finish.windowId(),
@@ -55,7 +56,7 @@ public final class ModBlocks {
     }
 
     public static List<Block> all() {
-        return java.util.stream.Stream.concat(doors().stream(), windows().stream()).map(Block.class::cast).toList();
+        return Stream.concat(doors().stream(), windows().stream()).map(Block.class::cast).toList();
     }
 
     private static BlockBehaviour.Properties doorProperties(Finish finish) {
@@ -66,9 +67,24 @@ public final class ModBlocks {
         return properties;
     }
 
+    /**
+     * A wooden building block with a glazed hole: plank-like hardness and sound, but glass-like for
+     * light, vision and spawning, and never occluding its neighbours (they show through the glass).
+     */
     private static BlockBehaviour.Properties windowProperties(Finish finish) {
-        BlockBehaviour.Properties properties = BlockBehaviour.Properties.copy(Blocks.GLASS_PANE)
-                .mapColor(finish.baseDoor().defaultMapColor());
+        BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
+                .mapColor(finish.baseDoor().defaultMapColor())
+                .instrument(NoteBlockInstrument.BASS)
+                .strength(1.5F, 3.0F)
+                .sound(finish.setType().soundType())
+                .noOcclusion()
+                .isValidSpawn((state, level, pos, type) -> false)
+                .isRedstoneConductor((state, level, pos) -> false)
+                .isSuffocating((state, level, pos) -> false)
+                .isViewBlocking((state, level, pos) -> false);
+        if (finish.baseDoor().defaultBlockState().ignitedByLava()) {
+            properties.ignitedByLava(); // nether woods do not burn, like their doors
+        }
         finish.paint().ifPresent(dye -> properties.mapColor(dye));
         return properties;
     }

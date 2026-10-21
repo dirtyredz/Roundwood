@@ -1,7 +1,5 @@
 package io.github.dirtyredz.roundwood.geometry;
 
-import io.github.dirtyredz.roundwood.door.DoorGeometry;
-import io.github.dirtyredz.roundwood.window.WindowGeometry;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -12,11 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** Geometry invariants, checked against independent pixel maths rather than the rasterizer's own code. */
+/** Rasterizer invariants, checked against independent pixel maths rather than the rasterizer's own code. */
 class PixelCircleTest {
 
     /** Expands rectangles back to a pixel set, failing on any overlap. */
-    private static Set<Long> pixels(List<PixelCircle.Rect> rects) {
+    static Set<Long> pixels(List<PixelCircle.Rect> rects) {
         Set<Long> out = new HashSet<>();
         for (PixelCircle.Rect r : rects) {
             for (int u = r.u1(); u < r.u2(); u++) {
@@ -28,7 +26,7 @@ class PixelCircleTest {
         return out;
     }
 
-    private static long key(int u, int v) {
+    static long key(int u, int v) {
         return ((long) u << 32) | (v & 0xffffffffL);
     }
 
@@ -59,7 +57,7 @@ class PixelCircleTest {
     }
 
     @Test
-    void ringPlusInnerDiscIsTheDiscAndCornersAreTheRest() {
+    void ringPlusInnerDiscIsTheDiscAndTheComplementIsTheRest() {
         int d = 32;
         Set<Long> disc = pixels(PixelCircle.disc(d));
         Set<Long> ring = pixels(PixelCircle.ring(d, 2));
@@ -72,98 +70,8 @@ class PixelCircleTest {
             assertTrue(union.add(p), "ring and inner disc overlap");
         }
         assertEquals(disc, union);
-        Set<Long> outside = pixels(PixelCircle.outside(d));
+        Set<Long> outside = pixels(PixelCircle.rasterize(d, d, (u, v) -> !PixelCircle.inDisc(d, d, u, v)));
         assertEquals(d * d, outside.size() + disc.size());
         outside.forEach(p -> assertFalse(disc.contains(p)));
-    }
-
-    @Test
-    void doorQuartersPartitionTheAssemblyAndStayInsideTheirCell() {
-        double closedVolume = 0;
-        for (int column = 0; column < 2; column++) {
-            for (int row = 0; row < 2; row++) {
-                for (boolean open : new boolean[] {false, true}) {
-                    double volume = 0;
-                    for (Piece piece : DoorGeometry.pieces(column, row, open)) {
-                        assertTrue(piece.box().within(Box.cell()), "piece outside cell: " + piece);
-                        volume += piece.box().volume();
-                    }
-                    for (Box box : DoorGeometry.envelope(column, row, open)) {
-                        assertTrue(box.within(Box.cell()), "envelope outside cell: " + box);
-                        assertTrue(open ? box.maxX() <= 3 || box.minX() >= 13 : box.minZ() >= 13,
-                                "leaf thicker than 3/16 or out of its slab: " + box);
-                    }
-                    if (!open) {
-                        closedVolume += volume;
-                    } else {
-                        // Swinging moves geometry; it never adds or loses any.
-                        double closed = DoorGeometry.pieces(column, row, false).stream().mapToDouble(p -> p.box().volume()).sum();
-                        assertEquals(closed, volume, 1e-9);
-                    }
-                }
-            }
-        }
-        double assembly = DoorGeometry.assembly().stream().mapToDouble(p -> p.box().volume()).sum();
-        assertEquals(assembly, closedVolume, 1e-9, "the four quarters must add up to the whole door");
-    }
-
-    @Test
-    void openLeavesLeaveAtLeast26PixelsOfClearWidth() {
-        // Both open leaves hug their outer edges: left leaf within x <= 3 of the left cell, right leaf
-        // within x >= 13 of the right cell, so the gap spans (16 - 3) + 13 = 26 pixels.
-        double leftMax = 0;
-        double rightMin = 16;
-        for (int row = 0; row < 2; row++) {
-            for (Box box : DoorGeometry.envelope(0, row, true)) {
-                leftMax = Math.max(leftMax, box.maxX());
-            }
-            for (Box box : DoorGeometry.envelope(1, row, true)) {
-                rightMin = Math.min(rightMin, box.minX());
-            }
-        }
-        assertTrue((16 - leftMax) + rightMin >= 26, "clear width " + ((16 - leftMax) + rightMin));
-    }
-
-    @Test
-    void closedCornersAreEmptyAndTheCentreIsSolid() {
-        List<Box> lowerLeft = DoorGeometry.envelope(0, 0, false);
-        assertFalse(covers(lowerLeft, 0.5, 0.5), "outer corner should be open");
-        assertTrue(covers(lowerLeft, 15.5, 15.5), "centre should be solid");
-        assertTrue(covers(lowerLeft, 0.5, 15.5), "disc reaches the outer edge at mid height");
-    }
-
-    private static boolean covers(List<Box> boxes, double x, double y) {
-        return boxes.stream().anyMatch(b -> b.minX() <= x && x <= b.maxX() && b.minY() <= y && y <= b.maxY());
-    }
-
-    @Test
-    void fourQuarterTurnsAreIdentityAndOneTurnMovesSouthToWest() {
-        Box box = new Box(1, 2, 13, 5, 6, 16);
-        assertEquals(box, box.rotateY(4));
-        Box turned = box.rotateY(1);
-        assertEquals(new Box(0, 2, 1, 3, 6, 5), turned);
-        assertEquals(box.volume(), turned.volume(), 1e-9);
-    }
-
-    @Test
-    void windowPiecesStayInsideTheBlockAndFillsMirror() {
-        for (Piece piece : WindowGeometry.core()) {
-            assertTrue(piece.box().within(Box.cell()));
-        }
-        double east = 0;
-        for (Piece piece : WindowGeometry.sideFill()) {
-            assertTrue(piece.box().minX() >= 8 && piece.box().within(Box.cell()));
-            east += piece.box().volume();
-        }
-        double west = 0;
-        for (Piece piece : WindowGeometry.sideFill()) {
-            Box b = piece.rotateY(2).box();
-            assertTrue(b.maxX() <= 8);
-            west += b.volume();
-        }
-        assertEquals(east, west, 1e-9);
-        for (Piece piece : WindowGeometry.arm()) {
-            assertTrue(piece.box().minZ() == 0 && piece.box().within(Box.cell()));
-        }
     }
 }

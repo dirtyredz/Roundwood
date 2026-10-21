@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.data;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModCreativeTab;
 import io.github.dirtyredz.roundwood.registry.ModItems;
@@ -54,6 +55,17 @@ public final class ContentGameTests {
             check(ForgeRegistries.BLOCKS.containsKey(id(finish.doorId())), "missing " + finish.doorId());
             check(ForgeRegistries.BLOCKS.containsKey(id(finish.windowId())), "missing " + finish.windowId());
             check(ModBlocks.door(finish).asItem() != Items.AIR && ModBlocks.window(finish).asItem() != Items.AIR, "missing item for " + finish.id());
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void blockEntityTypeCoversEveryDoorFinish(GameTestHelper helper) {
+        for (Block door : ModBlocks.doors()) {
+            check(ModBlockEntities.ROUND_DOOR.get().isValid(door.defaultBlockState()), door + " cannot carry the round-door block entity");
+        }
+        for (Block window : ModBlocks.windows()) {
+            check(!ModBlockEntities.ROUND_DOOR.get().isValid(window.defaultBlockState()), window + " must not be valid for the door entity");
         }
         helper.succeed();
     }

@@ -1,3 +1,7 @@
 {
-  "parent": "roundwood:block/acacia_round_window"
+  "parent": "roundwood:item/template_round_window",
+  "textures": {
+    "frame": "minecraft:block/acacia_planks",
+    "particle": "minecraft:block/acacia_planks"
+  }
 }

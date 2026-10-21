@@ -1,99 +1,11 @@
 {
-  "multipart": [
-    {
-      "apply": {
-        "model": "roundwood:block/yellow_round_window"
-      },
-      "when": {
-        "axis": "x"
-      }
+  "variants": {
+    "axis=x": {
+      "model": "roundwood:block/yellow_round_window"
     },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_side_fill"
-      },
-      "when": {
-        "axis": "x",
-        "east": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_side_fill",
-        "y": 180
-      },
-      "when": {
-        "axis": "x",
-        "west": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arm"
-      },
-      "when": {
-        "axis": "x",
-        "north": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arm",
-        "y": 180
-      },
-      "when": {
-        "axis": "x",
-        "south": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/yellow_round_window",
-        "y": 90
-      },
-      "when": {
-        "axis": "z"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_side_fill",
-        "y": 90
-      },
-      "when": {
-        "axis": "z",
-        "south": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_side_fill",
-        "y": 270
-      },
-      "when": {
-        "axis": "z",
-        "north": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arm",
-        "y": 90
-      },
-      "when": {
-        "axis": "z",
-        "east": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arm",
-        "y": 270
-      },
-      "when": {
-        "axis": "z",
-        "west": "true"
-      }
+    "axis=z": {
+      "model": "roundwood:block/yellow_round_window",
+      "y": 90
     }
-  ]
+  }
 }

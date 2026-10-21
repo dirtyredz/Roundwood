@@ -81,38 +81,51 @@ class GeneratedResourcesTest {
     }
 
     @Test
-    void generatedFileSetHasExactlyTheExpectedSize() throws IOException {
-        // 8 door templates + 15 x 8 door models + window template, fill, arm + 15 window cores.
-        assertEquals(8 + 15 * 8 + 3 + 15, allJson(assets("models/block")).size());
-        // 30 block items + the door item template.
-        assertEquals(31, allJson(assets("models/item")).size());
+    void generatedModelSetIsExactlyTheExpectedManifest() throws IOException {
+        Set<String> block = new TreeSet<>(List.of("template_round_door_leaf_left", "template_round_door_leaf_right",
+                "template_round_window"));
+        Set<String> item = new TreeSet<>(List.of("template_round_door", "template_round_window"));
+        for (String finish : FINISHES) {
+            block.addAll(List.of(finish + "_round_door", finish + "_round_door_leaf_left", finish + "_round_door_leaf_right",
+                    finish + "_round_window"));
+            item.addAll(List.of(finish + "_round_door", finish + "_round_window"));
+        }
+        // Exact sets: the 0.1.0 quadrant, open-quadrant, side-fill and arm models must be gone.
+        assertEquals(block, names(assets("models/block")));
+        assertEquals(item, names(assets("models/item")));
         assertEquals(30, allJson(assets("blockstates")).size());
         assertEquals(30, allJson(data("recipes")).size());
         assertEquals(30, allJson(data("loot_tables/blocks")).size());
         assertEquals(30, allJson(data("advancements/recipes")).size());
     }
 
+    private static Set<String> names(Path dir) throws IOException {
+        Set<String> out = new TreeSet<>();
+        for (Path file : allJson(dir)) {
+            out.add(file.getFileName().toString().replace(".json", ""));
+        }
+        return out;
+    }
+
     @Test
-    void doorBlockstatesCoverEveryStateExceptPowered() {
+    void everyDoorStateUsesTheEmptyWorldModel() {
         for (String finish : FINISHES) {
             JsonObject variants = json(assets("blockstates/" + finish + "_round_door.json")).getAsJsonObject("variants");
-            // facing 4 x half 2 x hinge 2 x open 2
-            assertEquals(32, variants.size(), finish);
-            Set<String> keys = new TreeSet<>(variants.keySet());
-            for (String key : keys) {
-                assertTrue(!key.contains("powered"), "powered must not select a model: " + key);
-            }
-            assertTrue(keys.contains("facing=north,half=lower,hinge=left,open=false"), finish);
+            // One unconditional variant covers every facing, half, hinge, column, open and powered value
+            // (and properties other mods inject); the leaf itself is drawn by the block-entity renderer.
+            assertEquals(Set.of(""), variants.keySet(), finish);
+            assertEquals("roundwood:block/" + finish + "_round_door",
+                    variants.getAsJsonObject("").get("model").getAsString(), finish);
         }
     }
 
     @Test
-    void windowBlockstatesCoverBothAxesAndEveryConnection() {
+    void windowBlockstatesSelectOnlyByAxis() {
         for (String finish : FINISHES) {
-            String text = json(assets("blockstates/" + finish + "_round_window.json")).toString();
-            assertTrue(!text.contains("waterlogged"), "waterlogged must not select a model");
-            int parts = json(assets("blockstates/" + finish + "_round_window.json")).getAsJsonArray("multipart").size();
-            assertEquals(10, parts, "core + 4 connections per axis");
+            JsonObject variants = json(assets("blockstates/" + finish + "_round_window.json")).getAsJsonObject("variants");
+            assertEquals(Set.of("axis=x", "axis=z"), variants.keySet(), finish + ": no connection or waterlogged keys");
+            assertEquals(90, variants.getAsJsonObject("axis=z").get("y").getAsInt(), finish);
+            assertTrue(!variants.getAsJsonObject("axis=x").has("y"), finish);
         }
     }
 

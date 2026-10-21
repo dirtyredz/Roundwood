@@ -1,8 +1,9 @@
 package io.github.dirtyredz.roundwood.fixture;
 
 import com.mojang.authlib.GameProfile;
-import io.github.dirtyredz.roundwood.door.DoorLayout;
 import io.github.dirtyredz.roundwood.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.variant.FinishCatalog;
 import net.minecraft.core.BlockPos;
@@ -22,6 +23,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -95,6 +97,22 @@ public final class DoorFixtures {
         return useItemOn(helper, player, new ItemStack(item), anchor.below(), Direction.UP);
     }
 
+    /**
+     * Places a door whose hinge is picked by the click point: 0.25 of the way along the player's
+     * clockwise axis inside the anchor cell gives LEFT, 0.75 gives RIGHT (nothing else decides it in open space).
+     */
+    public static InteractionResult placeDoor(GameTestHelper helper, ServerPlayer player, Item item, BlockPos anchor,
+                                              DoorHingeSide hinge) {
+        Direction across = player.getDirection().getClockWise();
+        double along = hinge == DoorHingeSide.LEFT ? 0.25 : 0.75;
+        BlockPos floor = helper.absolutePos(anchor.below());
+        Vec3 hit = Vec3.atCenterOf(floor).add(0, 0.5, 0)
+                .add(across.getStepX() * (along - 0.5), 0, across.getStepZ() * (along - 0.5));
+        ItemStack stack = new ItemStack(item);
+        player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+        return stack.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, new BlockHitResult(hit, Direction.UP, floor, false)));
+    }
+
     /** Clicks a block with an empty hand through the real server interaction path. */
     public static InteractionResult click(GameTestHelper helper, ServerPlayer player, BlockPos relative) {
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
@@ -112,8 +130,31 @@ public final class DoorFixtures {
     }
 
     /** The assembly anchored at a relative position, in absolute coordinates. */
+    public static DoorLayout.Assembly assembly(GameTestHelper helper, BlockPos anchor, Direction facing, DoorHingeSide hinge) {
+        return new DoorLayout.Assembly(helper.absolutePos(anchor), facing, hinge);
+    }
+
+    /** As above with the hinge a centre click gives in open space. */
     public static DoorLayout.Assembly assembly(GameTestHelper helper, BlockPos anchor, Direction facing) {
-        return new DoorLayout.Assembly(helper.absolutePos(anchor), facing);
+        return assembly(helper, anchor, facing, DoorHingeSide.LEFT);
+    }
+
+    /** How many of the assembly's four cells hold a round-door block entity. */
+    public static int blockEntities(GameTestHelper helper, DoorLayout.Assembly assembly) {
+        int count = 0;
+        for (BlockPos pos : assembly.positions()) {
+            if (helper.getLevel().getBlockEntity(pos) instanceof RoundDoorBlockEntity) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /** Asserts exactly one block entity in the assembly, at the anchor. */
+    public static void assertOneAnchorEntity(GameTestHelper helper, DoorLayout.Assembly assembly) {
+        int count = blockEntities(helper, assembly);
+        check(count == 1, "expected exactly one door block entity, found " + count);
+        check(helper.getLevel().getBlockEntity(assembly.anchor()) instanceof RoundDoorBlockEntity, "block entity is not at the anchor");
     }
 
     /** Asserts all four parts are present with the expected open state. */

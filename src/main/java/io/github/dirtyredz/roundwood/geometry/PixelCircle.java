@@ -61,10 +61,6 @@ public final class PixelCircle {
                 (u, v) -> inDisc(diameter, diameter, u, v) && !inDisc(diameter, inner, u, v));
     }
 
-    /** The square around a disc minus the disc itself (the four corners). */
-    public static List<Rect> outside(int diameter) {
-        return rasterize(diameter, diameter, (u, v) -> !inDisc(diameter, diameter, u, v));
-    }
 
     /**
      * Turns a pixel predicate into rectangles: runs per row, then identical runs on consecutive rows

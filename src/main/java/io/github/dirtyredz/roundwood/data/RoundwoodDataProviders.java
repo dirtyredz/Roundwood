@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.data;
 
 import io.github.dirtyredz.roundwood.data.client.DoorModelProvider;
+import io.github.dirtyredz.roundwood.data.client.RoundwoodItemModelProvider;
 import io.github.dirtyredz.roundwood.data.client.RoundwoodLanguageProvider;
 import io.github.dirtyredz.roundwood.data.client.WindowModelProvider;
 import io.github.dirtyredz.roundwood.data.server.RoundwoodBlockTagsProvider;
@@ -28,6 +29,7 @@ public final class RoundwoodDataProviders {
 
         generator.addProvider(event.includeClient(), new DoorModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new WindowModelProvider(output, existingFiles));
+        generator.addProvider(event.includeClient(), new RoundwoodItemModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new RoundwoodLanguageProvider(output));
 
         generator.addProvider(event.includeServer(), new RoundwoodRecipeProvider(output));

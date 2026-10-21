@@ -1,32 +1,28 @@
 package io.github.dirtyredz.roundwood.data.client;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.door.DoorGeometry;
-import io.github.dirtyredz.roundwood.door.DoorLayout;
-import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
+import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
+import io.github.dirtyredz.roundwood.door.leaf.DoorGeometry;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.variant.Finish;
 import io.github.dirtyredz.roundwood.variant.FinishCatalog;
 import net.minecraft.data.PackOutput;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
-import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
-import java.util.EnumMap;
-import java.util.Locale;
-import java.util.Map;
-
 /**
- * Round door blockstates and models. Eight geometry templates (four cells, closed and open) carry
- * the elements once; each finish only binds textures. Blockstates turn the north-facing models by
- * facing and ignore {@code powered}.
+ * Round door blockstates and models. The leaf is drawn whole by the anchor's block-entity renderer,
+ * so every door state uses one empty world model that only carries the break particle. Two leaf
+ * templates (hinge left / right) hold the geometry once; each finish binds textures to them. The
+ * item models reuse the left-hinge template (see {@link RoundwoodItemModelProvider}).
  */
 public class DoorModelProvider extends BlockStateProvider {
+    public static final String LEAF_TEMPLATE = "template_round_door_leaf_";
+
     public DoorModelProvider(PackOutput output, ExistingFileHelper existingFiles) {
         super(output, Roundwood.MOD_ID, existingFiles);
     }
@@ -38,43 +34,21 @@ public class DoorModelProvider extends BlockStateProvider {
 
     @Override
     protected void registerStatesAndModels() {
-        Map<DoorLayout.Part, ModelFile> closedTemplates = new EnumMap<>(DoorLayout.Part.class);
-        Map<DoorLayout.Part, ModelFile> openTemplates = new EnumMap<>(DoorLayout.Part.class);
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
-            closedTemplates.put(part, template(part, false));
-            openTemplates.put(part, template(part, true));
-        }
-        ItemModelBuilder itemTemplate = itemTemplate();
-
+        BlockModelBuilder leftTemplate = template(DoorHingeSide.LEFT);
+        BlockModelBuilder rightTemplate = template(DoorHingeSide.RIGHT);
         for (Finish finish : FinishCatalog.ALL) {
-            Map<DoorLayout.Part, ModelFile> closed = new EnumMap<>(DoorLayout.Part.class);
-            Map<DoorLayout.Part, ModelFile> open = new EnumMap<>(DoorLayout.Part.class);
-            for (DoorLayout.Part part : DoorLayout.Part.values()) {
-                closed.put(part, bind(models().getBuilder(finish.doorId() + "_" + partName(part)), closedTemplates.get(part), finish));
-                open.put(part, bind(models().getBuilder(finish.doorId() + "_" + partName(part) + "_open"), openTemplates.get(part), finish));
-            }
-            getVariantBuilder(ModBlocks.door(finish)).forAllStatesExcept(state -> {
-                DoorLayout.Part part = DoorLayout.partOf(state);
-                ModelFile model = (state.getValue(DoorBlock.OPEN) ? open : closed).get(part);
-                return ConfiguredModel.builder()
-                        .modelFile(model)
-                        .rotationY(90 * VoxelShapeFactory.quarterTurns(state.getValue(DoorBlock.FACING)))
-                        .build();
-            }, DoorBlock.POWERED);
-
-            ItemModelBuilder item = itemModels().getBuilder(finish.doorId()).parent(itemTemplate);
-            item.texture("panel", finish.panelTexture())
-                    .texture("trim", finish.trimTexture())
-                    .texture("brass", modLoc("block/brass"))
-                    .texture("particle", finish.panelTexture());
+            bind(models().getBuilder(DoorLeafModels.path(finish.doorId(), DoorHingeSide.LEFT)), leftTemplate, finish);
+            bind(models().getBuilder(DoorLeafModels.path(finish.doorId(), DoorHingeSide.RIGHT)), rightTemplate, finish);
+            ModelFile world = models().getBuilder(finish.doorId()).texture("particle", finish.panelTexture());
+            // Every state (facing, half, hinge, column, open, powered, injected properties) draws nothing itself.
+            getVariantBuilder(ModBlocks.door(finish)).partialState().setModels(new ConfiguredModel(world));
         }
     }
 
-    private BlockModelBuilder template(DoorLayout.Part part, boolean open) {
-        BlockModelBuilder builder = models().getBuilder("template_round_door_" + partName(part) + (open ? "_open" : ""));
+    private BlockModelBuilder template(DoorHingeSide hinge) {
+        BlockModelBuilder builder = models().getBuilder(LEAF_TEMPLATE + hinge.getSerializedName());
         builder.texture("particle", "#" + DoorGeometry.PANEL);
-        return GeometryModelWriter.addPieces(builder,
-                DoorGeometry.pieces(DoorGeometry.column(part.hinge), DoorGeometry.row(part.half), open));
+        return GeometryModelWriter.addPieces(builder, DoorGeometry.leaf(hinge), false);
     }
 
     private BlockModelBuilder bind(BlockModelBuilder builder, ModelFile template, Finish finish) {
@@ -84,27 +58,4 @@ public class DoorModelProvider extends BlockStateProvider {
                 .texture(DoorGeometry.BRASS, modLoc("block/brass"))
                 .texture("particle", finish.panelTexture());
     }
-
-    /** The whole closed disc (32 pixels) shrunk to item size; the model spans 0..32 in x and y. */
-    private ItemModelBuilder itemTemplate() {
-        ItemModelBuilder builder = itemModels().getBuilder("template_round_door");
-        GeometryModelWriter.addPieces(builder, DoorGeometry.assembly());
-        builder.texture("particle", "#" + DoorGeometry.PANEL);
-        // With scale s, the disc centre (1, 1) block lands at 0.5 * s; translate it back to the slot centre.
-        builder.transforms()
-                .transform(ItemDisplayContext.GUI).rotation(0, 180, 0).translation(4, -4, 0).scale(0.5F).end()
-                .transform(ItemDisplayContext.FIXED).rotation(0, 180, 0).translation(4, -4, 0).scale(0.5F).end()
-                .transform(ItemDisplayContext.GROUND).translation(-2, 1, -2).scale(0.25F).end()
-                .transform(ItemDisplayContext.THIRD_PERSON_RIGHT_HAND).rotation(0, 180, 0).translation(2, 1, -2).scale(0.25F).end()
-                .transform(ItemDisplayContext.THIRD_PERSON_LEFT_HAND).rotation(0, 180, 0).translation(2, 1, -2).scale(0.25F).end()
-                .transform(ItemDisplayContext.FIRST_PERSON_RIGHT_HAND).rotation(0, 135, 0).translation(0, 2, 0).scale(0.3F).end()
-                .transform(ItemDisplayContext.FIRST_PERSON_LEFT_HAND).rotation(0, 135, 0).translation(0, 2, 0).scale(0.3F).end()
-                .end();
-        return builder;
-    }
-
-    private static String partName(DoorLayout.Part part) {
-        return part.name().toLowerCase(Locale.ROOT);
-    }
-
 }

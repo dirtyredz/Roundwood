@@ -1,6 +1,8 @@
 package io.github.dirtyredz.roundwood.door;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.door.assembly.DoorColumn;
+import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -8,7 +10,11 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -60,9 +66,27 @@ public final class DoorCollisionGameTests {
     }
 
     private static DoorLayout.Assembly place(GameTestHelper helper, Direction facing, BlockPos anchor, String name) {
+        return place(helper, facing, anchor, name, DoorHingeSide.LEFT);
+    }
+
+    private static DoorLayout.Assembly place(GameTestHelper helper, Direction facing, BlockPos anchor, String name, DoorHingeSide hinge) {
         ServerPlayer player = player(helper, name, GameType.SURVIVAL, facing);
-        check(placeDoor(helper, player, oakDoor().asItem(), anchor).consumesAction(), facing + ": placement failed");
-        return assembly(helper, anchor, facing);
+        check(placeDoor(helper, player, oakDoor().asItem(), anchor, hinge).consumesAction(), facing + ": placement failed");
+        return assembly(helper, anchor, facing, hinge);
+    }
+
+    private static void open(GameTestHelper helper, DoorLayout.Assembly assembly) {
+        oakDoor().setOpen(null, helper.getLevel(), helper.getLevel().getBlockState(assembly.anchor()), assembly.anchor(), true);
+    }
+
+    /** The column the leaf turns on: the hinge side. */
+    private static DoorColumn hingeColumn(DoorLayout.Assembly assembly) {
+        return assembly.hinge() == DoorHingeSide.LEFT ? DoorColumn.LEFT : DoorColumn.RIGHT;
+    }
+
+    /** Across-coordinate of the middle of the hinge-side slab. */
+    private static double slabCentre(DoorLayout.Assembly assembly) {
+        return assembly.hinge() == DoorHingeSide.LEFT ? 0.05 : 1.95;
     }
 
     @GameTest(template = TEMPLATE)
@@ -86,21 +110,72 @@ public final class DoorCollisionGameTests {
     @GameTest(template = TEMPLATE)
     public static void openLeavesLetAPlayerThroughBothColumns(GameTestHelper helper) {
         floor(helper);
-        for (Direction facing : FACINGS) {
-            DoorLayout.Assembly assembly = place(helper, facing, ANCHOR, "open_" + facing);
-            oakDoor().setOpen(null, helper.getLevel(), helper.getLevel().getBlockState(assembly.anchor()), assembly.anchor(), true);
-            // A player-sized box (0.6 wide, 1.8 tall) through each column, across the whole depth.
-            for (double centre : new double[] {0.5, 1.5}) {
-                AABB body = new AABB(point(assembly, centre - 0.3, 0.01, 0.0), point(assembly, centre + 0.3, 1.81, 1.0));
-                check(free(helper, body), facing + ": player cannot pass column at " + centre);
+        for (DoorHingeSide hinge : DoorHingeSide.values()) {
+            for (Direction facing : FACINGS) {
+                String name = facing + "/" + hinge;
+                DoorLayout.Assembly assembly = place(helper, facing, ANCHOR, "open_" + name, hinge);
+                open(helper, assembly);
+                boolean left = hinge == DoorHingeSide.LEFT;
+                // A player-sized box (0.6 wide, 1.8 tall) through each column, across the whole depth.
+                for (double centre : new double[] {0.5, 1.5}) {
+                    AABB body = new AABB(point(assembly, centre - 0.3, 0.01, 0.0), point(assembly, centre + 0.3, 1.81, 1.0));
+                    check(free(helper, body), name + ": player cannot pass column at " + centre);
+                }
+                // The clear width beside the single retained segment is 29/16.
+                double from = left ? 3.0 / 16 + 0.001 : 0.001;
+                double to = left ? 1.999 : 2 - 3.0 / 16 - 0.001;
+                check(free(helper, new AABB(point(assembly, from, 0.1, 0.1), point(assembly, to, 1.9, 0.9))), name + ": less than 29/16 clear");
+                // The hinge-side slab collides; the far side has nothing.
+                double slab = slabCentre(assembly);
+                check(!free(helper, new AABB(point(assembly, slab - 0.02, 0.98, 0.4), point(assembly, slab + 0.02, 1.02, 0.6))),
+                        name + ": hinge-side slab missing");
+                // The non-hinge column has no shape at all, in either row.
+                for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                    if (part.column != hingeColumn(assembly)) {
+                        BlockPos pos = assembly.pos(part);
+                        BlockState state = helper.getLevel().getBlockState(pos);
+                        check(state.getShape(helper.getLevel(), pos).isEmpty(), name + ": outline not empty at " + part);
+                        check(state.getCollisionShape(helper.getLevel(), pos).isEmpty(), name + ": collision not empty at " + part);
+                    }
+                }
+                // The outer half of the leaf projects into the cell in front of the hinge column: visual only.
+                BlockPos hingeLower = assembly.pos(DoorLayout.Part.of(hingeColumn(assembly), DoubleBlockHalf.LOWER));
+                check(helper.getLevel().getBlockState(hingeLower.relative(facing)).isAir(), name + ": a block appeared in the projection cell");
+                double a0 = left ? 0.001 : 1.001;
+                check(free(helper, new AABB(point(assembly, a0, 0.001, 1.001), point(assembly, a0 + 0.998, 1.999, 1.999))),
+                        name + ": the projected half of the leaf collides");
+                helper.setBlock(ANCHOR, Blocks.AIR);
             }
-            // The clear width between the open leaves is at least 26/16.
-            AABB gap = new AABB(point(assembly, 3.0 / 16 + 0.001, 0.1, 0.1), point(assembly, 2 - 3.0 / 16 - 0.001, 1.9, 0.9));
-            check(free(helper, gap), facing + ": less than 26/16 clear");
-            // Each open leaf lies along its outer edge.
-            check(!free(helper, new AABB(point(assembly, 0.0, 1.0, 0.4), point(assembly, 0.1, 1.05, 0.6))), facing + ": left leaf missing");
-            check(!free(helper, new AABB(point(assembly, 1.9, 1.0, 0.4), point(assembly, 2.0, 1.05, 0.6))), facing + ": right leaf missing");
-            helper.setBlock(ANCHOR, net.minecraft.world.level.block.Blocks.AIR);
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void openRaysHitOnlyTheRetainedSegment(GameTestHelper helper) {
+        floor(helper);
+        for (DoorHingeSide hinge : DoorHingeSide.values()) {
+            for (Direction facing : FACINGS) {
+                String name = facing + "/" + hinge;
+                DoorLayout.Assembly assembly = place(helper, facing, ANCHOR, "open_ray_" + name, hinge);
+                open(helper, assembly);
+                // Along the facing axis through the hinge-side slab: the retained open segment is clickable.
+                BlockHitResult slab = ray(helper, assembly, slabCentre(assembly), 1.0);
+                check(slab.getType() == HitResult.Type.BLOCK
+                                && helper.getLevel().getBlockState(slab.getBlockPos()).getBlock() instanceof RoundDoorBlock,
+                        name + ": ray at the hinge-side slab did not hit the door");
+                // Across the plane through the projection region (d = 1.5): nothing there to hit.
+                BlockHitResult projection = helper.getLevel().clip(new ClipContext(point(assembly, -1.0, 1.0, 1.5), point(assembly, 3.0, 1.0, 1.5),
+                        ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, null));
+                check(projection.getType() == HitResult.Type.MISS
+                                || !(helper.getLevel().getBlockState(projection.getBlockPos()).getBlock() instanceof RoundDoorBlock),
+                        name + ": ray through the projection region hit the door");
+                // Along the facing axis through the empty non-hinge column.
+                BlockHitResult empty = ray(helper, assembly, hinge == DoorHingeSide.LEFT ? 1.5 : 0.5, 1.0);
+                check(empty.getType() == HitResult.Type.MISS
+                                || !(helper.getLevel().getBlockState(empty.getBlockPos()).getBlock() instanceof RoundDoorBlock),
+                        name + ": ray through the non-hinge column hit the door");
+                helper.setBlock(ANCHOR, Blocks.AIR);
+            }
         }
         helper.succeed();
     }

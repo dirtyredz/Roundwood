@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.door;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
@@ -36,28 +38,36 @@ public final class DoorInteractionGameTests {
 
     /** Places an oak assembly facing north at {@link #ANCHOR}. */
     static DoorLayout.Assembly place(GameTestHelper helper, String name) {
+        return place(helper, name, DoorHingeSide.LEFT);
+    }
+
+    /** Places an oak assembly facing north at {@link #ANCHOR} with the given hinge. */
+    static DoorLayout.Assembly place(GameTestHelper helper, String name, DoorHingeSide hinge) {
         floor(helper);
         ServerPlayer player = player(helper, name, GameType.SURVIVAL, Direction.NORTH);
-        check(placeDoor(helper, player, oakDoor().asItem(), ANCHOR).consumesAction(), "placement failed");
-        return assembly(helper, ANCHOR, Direction.NORTH);
+        check(placeDoor(helper, player, oakDoor().asItem(), ANCHOR, hinge).consumesAction(), "placement failed");
+        return assembly(helper, ANCHOR, Direction.NORTH, hinge);
     }
 
     @GameTest(template = TEMPLATE)
     public static void clickingAnyPartTogglesAllFour(GameTestHelper helper) {
-        DoorLayout.Assembly assembly = place(helper, "click");
-        ServerPlayer player = player(helper, "clicker", GameType.SURVIVAL, Direction.NORTH);
-        boolean open = false;
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
-            InteractionResult result = click(helper, player, rel(helper, assembly.pos(part)));
-            check(result.consumesAction(), "click on " + part + " was not handled: " + result);
-            open = !open;
-            assertAssembly(helper, assembly, oakDoor(), open);
+        for (DoorHingeSide hinge : DoorHingeSide.values()) {
+            DoorLayout.Assembly assembly = place(helper, "click_" + hinge, hinge);
+            ServerPlayer player = player(helper, "clicker_" + hinge, GameType.SURVIVAL, Direction.NORTH);
+            boolean open = false;
+            for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                InteractionResult result = click(helper, player, rel(helper, assembly.pos(part)));
+                check(result.consumesAction(), hinge + ": click on " + part + " was not handled: " + result);
+                open = !open;
+                assertAssembly(helper, assembly, oakDoor(), open);
+            }
+            // Crouching with an empty hand still opens a door, exactly once.
+            player.setShiftKeyDown(true);
+            click(helper, player, rel(helper, assembly.pos(DoorLayout.Part.UPPER_RIGHT)));
+            player.setShiftKeyDown(false);
+            assertAssembly(helper, assembly, oakDoor(), !open);
+            helper.setBlock(ANCHOR, Blocks.AIR);
         }
-        // Crouching with an empty hand still opens a door, exactly once.
-        player.setShiftKeyDown(true);
-        click(helper, player, rel(helper, assembly.pos(DoorLayout.Part.UPPER_RIGHT)));
-        player.setShiftKeyDown(false);
-        assertAssembly(helper, assembly, oakDoor(), !open);
         helper.succeed();
     }
 
@@ -139,7 +149,8 @@ public final class DoorInteractionGameTests {
         check(placeDoor(helper, player, oakDoor().asItem(), leftAnchor).consumesAction(), "left placement failed");
         check(placeDoor(helper, player, oakDoor().asItem(), rightAnchor).consumesAction(), "right placement failed");
         DoorLayout.Assembly left = assembly(helper, leftAnchor, Direction.NORTH);
-        DoorLayout.Assembly right = assembly(helper, rightAnchor, Direction.NORTH);
+        // A round door just outside its left edge makes the new one hinge on the right (vanilla pairing).
+        DoorLayout.Assembly right = assembly(helper, rightAnchor, Direction.NORTH, DoorHingeSide.RIGHT);
         click(helper, player, rel(helper, left.pos(DoorLayout.Part.LOWER_RIGHT)));
         assertAssembly(helper, left, oakDoor(), true);
         assertAssembly(helper, right, oakDoor(), false);

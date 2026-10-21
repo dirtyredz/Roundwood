@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood;
 
 import io.github.dirtyredz.roundwood.data.RoundwoodDataProviders;
+import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModCreativeTab;
 import io.github.dirtyredz.roundwood.registry.ModItems;
@@ -16,6 +17,7 @@ public final class Roundwood {
     public Roundwood() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModBlocks.BLOCKS.register(modBus);
+        ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModCreativeTab.TABS.register(modBus);
         modBus.addListener(RoundwoodDataProviders::gatherData);

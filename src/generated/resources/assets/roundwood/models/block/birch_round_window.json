@@ -2,7 +2,7 @@
   "parent": "roundwood:block/template_round_window",
   "render_type": "minecraft:cutout",
   "textures": {
-    "particle": "minecraft:block/birch_planks",
-    "rim": "minecraft:block/birch_planks"
+    "frame": "minecraft:block/birch_planks",
+    "particle": "minecraft:block/birch_planks"
   }
 }

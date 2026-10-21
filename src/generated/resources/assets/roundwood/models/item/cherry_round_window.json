@@ -1,3 +1,7 @@
 {
-  "parent": "roundwood:block/cherry_round_window"
+  "parent": "roundwood:item/template_round_window",
+  "textures": {
+    "frame": "minecraft:block/cherry_planks",
+    "particle": "minecraft:block/cherry_planks"
+  }
 }

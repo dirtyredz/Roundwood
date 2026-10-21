@@ -1,0 +1,9 @@
+{
+  "parent": "roundwood:block/template_round_door_leaf_left",
+  "textures": {
+    "brass": "roundwood:block/brass",
+    "panel": "roundwood:block/panel_blue",
+    "particle": "roundwood:block/panel_blue",
+    "trim": "minecraft:block/stripped_oak_log"
+  }
+}

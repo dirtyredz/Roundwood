@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.door;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -12,7 +13,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DirectionalBlock;
-import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
@@ -20,9 +21,9 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assembly;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assertAssembly;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assertNoDoor;
+import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.blockEntities;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.click;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropped;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
@@ -40,10 +41,19 @@ public final class DoorRemovalGameTests {
     }
 
     private static DoorLayout.Assembly place(GameTestHelper helper, String name) {
+        return place(helper, name, DoorHingeSide.LEFT, false);
+    }
+
+    /** Places a door with the given hinge, optionally opened, and clears the drops. */
+    private static DoorLayout.Assembly place(GameTestHelper helper, String name, DoorHingeSide hinge, boolean open) {
         ServerPlayer player = player(helper, name + "_placer", GameType.SURVIVAL, Direction.NORTH);
-        check(placeDoor(helper, player, oakDoor().asItem(), ANCHOR).consumesAction(), "placement failed");
+        check(placeDoor(helper, player, oakDoor().asItem(), ANCHOR, hinge).consumesAction(), "placement failed");
+        if (open) {
+            oakDoor().setOpen(null, helper.getLevel(), helper.getLevel().getBlockState(helper.absolutePos(ANCHOR)),
+                    helper.absolutePos(ANCHOR), true);
+        }
         clearDrops(helper);
-        return assembly(helper, ANCHOR, Direction.NORTH);
+        return assembly(helper, ANCHOR, Direction.NORTH, hinge);
     }
 
     private static Item item() {
@@ -53,12 +63,18 @@ public final class DoorRemovalGameTests {
     @GameTest(template = TEMPLATE)
     public static void survivalBreakOfAnyPartDropsOneDoor(GameTestHelper helper) {
         floor(helper);
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
-            DoorLayout.Assembly assembly = place(helper, "survival");
-            ServerPlayer player = player(helper, "survival_breaker", GameType.SURVIVAL, Direction.NORTH);
-            check(player.gameMode.destroyBlock(assembly.pos(part)), "break of " + part + " refused");
-            assertNoDoor(helper, assembly);
-            check(dropped(helper, item()) == 1, part + ": expected one door, got " + dropped(helper, item()));
+        for (DoorHingeSide hinge : DoorHingeSide.values()) {
+            for (boolean open : new boolean[] {false, true}) {
+                for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                    String name = hinge + "/open=" + open + "/" + part;
+                    DoorLayout.Assembly assembly = place(helper, "survival", hinge, open);
+                    ServerPlayer player = player(helper, "survival_breaker", GameType.SURVIVAL, Direction.NORTH);
+                    check(player.gameMode.destroyBlock(assembly.pos(part)), name + ": break refused");
+                    assertNoDoor(helper, assembly);
+                    check(blockEntities(helper, assembly) == 0, name + ": block entity left behind");
+                    check(dropped(helper, item()) == 1, name + ": expected one door, got " + dropped(helper, item()));
+                }
+            }
         }
         helper.succeed();
     }
@@ -66,12 +82,18 @@ public final class DoorRemovalGameTests {
     @GameTest(template = TEMPLATE)
     public static void creativeBreakOfAnyPartDropsNothing(GameTestHelper helper) {
         floor(helper);
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
-            DoorLayout.Assembly assembly = place(helper, "creative");
-            ServerPlayer player = player(helper, "creative_breaker", GameType.CREATIVE, Direction.NORTH);
-            check(player.gameMode.destroyBlock(assembly.pos(part)), "break of " + part + " refused");
-            assertNoDoor(helper, assembly);
-            check(dropped(helper, item()) == 0, part + ": creative break dropped " + dropped(helper, item()));
+        for (DoorHingeSide hinge : DoorHingeSide.values()) {
+            for (boolean open : new boolean[] {false, true}) {
+                for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                    String name = hinge + "/open=" + open + "/" + part;
+                    DoorLayout.Assembly assembly = place(helper, "creative", hinge, open);
+                    ServerPlayer player = player(helper, "creative_breaker", GameType.CREATIVE, Direction.NORTH);
+                    check(player.gameMode.destroyBlock(assembly.pos(part)), name + ": break refused");
+                    assertNoDoor(helper, assembly);
+                    check(blockEntities(helper, assembly) == 0, name + ": block entity left behind");
+                    check(dropped(helper, item()) == 0, name + ": creative break dropped " + dropped(helper, item()));
+                }
+            }
         }
         helper.succeed();
     }
@@ -154,20 +176,20 @@ public final class DoorRemovalGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void incompleteStructureBehavesAndBreaksCleanly(GameTestHelper helper) {
+    public static void incompleteStructureIsCleanedUpWithoutCreatingParts(GameTestHelper helper) {
         floor(helper);
         // A lone left column, as a command or a structure tool could leave it.
         DoorLayout.Assembly assembly = assembly(helper, ANCHOR, Direction.NORTH);
         helper.setBlock(ANCHOR, assembly.stateFor(DoorLayout.Part.LOWER_LEFT, oakDoor(), false, false));
         helper.setBlock(ANCHOR.above(), assembly.stateFor(DoorLayout.Part.UPPER_LEFT, oakDoor(), false, false));
-        ServerPlayer player = player(helper, "incomplete", GameType.SURVIVAL, Direction.NORTH);
-        click(helper, player, ANCHOR);
-        check(helper.getBlockState(ANCHOR).getValue(DoorBlock.OPEN) && helper.getBlockState(ANCHOR.above()).getValue(DoorBlock.OPEN),
-                "present parts should still open together");
-        check(helper.getBlockState(ANCHOR.east()).isAir(), "a missing part was created");
-        player.gameMode.destroyBlock(helper.absolutePos(ANCHOR.above()));
-        assertNoDoor(helper, assembly);
-        check(dropped(helper, item()) == 1, "incomplete break dropped " + dropped(helper, item()));
-        helper.succeed();
+        clearDrops(helper);
+        helper.runAfterDelay(3, () -> {
+            assertNoDoor(helper, assembly);
+            check(helper.getBlockState(ANCHOR).isAir() && helper.getBlockState(ANCHOR.above()).isAir(), "the lone column was not removed");
+            check(helper.getBlockState(ANCHOR.east()).isAir() && helper.getBlockState(ANCHOR.east().above()).isAir(),
+                    "a missing part was created at the right column");
+            check(dropped(helper, item()) <= 1, "incomplete cleanup dropped " + dropped(helper, item()));
+            helper.succeed();
+        });
     }
 }

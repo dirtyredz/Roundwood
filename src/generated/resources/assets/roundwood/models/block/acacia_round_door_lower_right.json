@@ -1,9 +1,0 @@
-{
-  "parent": "roundwood:block/template_round_door_lower_right",
-  "textures": {
-    "brass": "roundwood:block/brass",
-    "panel": "minecraft:block/acacia_planks",
-    "particle": "minecraft:block/acacia_planks",
-    "trim": "minecraft:block/stripped_acacia_log"
-  }
-}
