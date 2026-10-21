@@ -60,6 +60,22 @@ class WindowTrimGeometryTest {
         };
     }
 
+    /**
+     * 0.8.0 regression guard (owner report: trim "missing" on edge windows). A flush or floor/ceiling
+     * pane's trim must stand one pixel proud of BOTH faces, like a centred pane's, including the face
+     * against the cell boundary (render-only, beyond the cell). 0.7.0 inlaid that side at 0..1 / 15..16,
+     * replacing the pane's own outer pixels, so it read as no trim at all.
+     */
+    @Test
+    void flushTrimProjectsBeyondTheCellOnTheWallSide() {
+        assertArrayEquals(new double[] {6, 7}, WindowTrimGeometry.depths(WindowDepth.CENTER)[0]);
+        assertArrayEquals(new double[] {9, 10}, WindowTrimGeometry.depths(WindowDepth.CENTER)[1]);
+        assertArrayEquals(new double[] {-1, 0}, WindowTrimGeometry.depths(WindowDepth.NEGATIVE)[0], "negative flush, wall side");
+        assertArrayEquals(new double[] {2, 3}, WindowTrimGeometry.depths(WindowDepth.NEGATIVE)[1], "negative flush, room side");
+        assertArrayEquals(new double[] {13, 14}, WindowTrimGeometry.depths(WindowDepth.POSITIVE)[0], "positive flush, room side");
+        assertArrayEquals(new double[] {16, 17}, WindowTrimGeometry.depths(WindowDepth.POSITIVE)[1], "positive flush, wall side");
+    }
+
     @Test
     void trimDepthsStayInTheCellAndCoverBothFaces() {
         for (WindowPose pose : WindowPaneGeometryTest.allPoses()) {
