@@ -12,6 +12,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.CrossCollisionBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
@@ -33,7 +36,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.useItemOn;
 
-/** Round windows: orientation, full-block collision, stability next to neighbours and water. */
+/** Round windows: orientation, thin-panel collision, pane connections, rotation and water. */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class WindowGameTests {
@@ -63,6 +66,12 @@ public final class WindowGameTests {
                 (Supplier<ItemStack>) () -> new ItemStack(window())};
     }
 
+    /** True when a thin probe box inside the cell at {@code abs} (block fractions, mid height) collides. */
+    private static boolean collides(GameTestHelper helper, BlockPos abs, double x0, double x1, double z0, double z1) {
+        AABB box = new AABB(abs.getX() + x0, abs.getY() + 0.3, abs.getZ() + z0, abs.getX() + x1, abs.getY() + 0.7, abs.getZ() + z1);
+        return !helper.getLevel().noCollision(box);
+    }
+
     @GameTest(template = TEMPLATE)
     public static void facesThePlacingPlayer(GameTestHelper helper) {
         floor(helper);
@@ -74,18 +83,24 @@ public final class WindowGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void collisionIsASquareBlock(GameTestHelper helper) {
+    public static void collisionIsAThinPanel(GameTestHelper helper) {
         floor(helper);
-        place(helper, "square", Direction.NORTH, new ItemStack(window()), new BlockPos(4, 1, 4));
+        place(helper, "thin", Direction.NORTH, new ItemStack(window()), new BlockPos(4, 1, 4));
         BlockPos abs = helper.absolutePos(new BlockPos(4, 1, 4));
         double[][] probes = {{0.45, 0.45}, {0.01, 0.01}, {0.92, 0.01}, {0.01, 0.92}, {0.92, 0.92}};
         for (double[] probe : probes) {
-            AABB box = new AABB(abs.getX() + probe[0], abs.getY() + probe[1], abs.getZ() + 0.4,
-                    abs.getX() + probe[0] + 0.07, abs.getY() + probe[1] + 0.07, abs.getZ() + 0.6);
-            check(!helper.getLevel().noCollision(box), "window should collide at " + probe[0] + "," + probe[1]);
+            AABB panel = new AABB(abs.getX() + probe[0], abs.getY() + probe[1], abs.getZ() + 0.45,
+                    abs.getX() + probe[0] + 0.07, abs.getY() + probe[1] + 0.07, abs.getZ() + 0.55);
+            check(!helper.getLevel().noCollision(panel), "window should collide at " + probe[0] + "," + probe[1]);
+            for (double[] z : new double[][] {{0.05, 0.3}, {0.65, 0.95}}) {
+                AABB free = new AABB(abs.getX() + probe[0], abs.getY() + probe[1], abs.getZ() + z[0],
+                        abs.getX() + probe[0] + 0.07, abs.getY() + probe[1] + 0.07, abs.getZ() + z[1]);
+                check(helper.getLevel().noCollision(free),
+                        "unconnected window collides off the panel at " + probe[0] + "," + probe[1] + " z " + z[0]);
+            }
         }
         AABB bounds = helper.getLevel().getBlockState(abs).getShape(helper.getLevel(), abs).bounds();
-        check(bounds.equals(new AABB(0, 0, 0, 1, 1, 1)), "outline is not the full unit cube: " + bounds);
+        check(bounds.equals(new AABB(0, 0, 7 / 16.0, 1, 1, 9 / 16.0)), "outline is not the thin panel: " + bounds);
         helper.succeed();
     }
 
@@ -105,28 +120,81 @@ public final class WindowGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void noConnectorStatesAndStableNextToPanesWallsAndWindows(GameTestHelper helper) {
+    public static void reciprocalPaneConnectionsInBothPlacementOrders(GameTestHelper helper) {
         floor(helper);
-        Supplier<ItemStack>[] neighbours = neighbourStacks();
-        BlockPos[] offsets = {new BlockPos(1, 0, 0), new BlockPos(0, 0, 1), new BlockPos(-1, 0, 0)}; // in plane, behind, in plane
-        // Window first, then each neighbour; and neighbours first, then the window.
-        BlockPos first = new BlockPos(2, 1, 1);
-        place(helper, "stable_a", Direction.NORTH, new ItemStack(window()), first);
-        BlockState expected = at(helper, first);
-        check(expected.getProperties().size() == 2, "window has connector or extra properties: " + expected.getProperties());
-        for (int i = 0; i < neighbours.length; i++) {
-            place(helper, "stable_a" + i, Direction.NORTH, neighbours[i].get(), first.offset(offsets[i]));
-            check(at(helper, first).equals(expected), "window state changed after neighbour " + i + ": " + at(helper, first));
+        String[] names = {"pane", "wall", "window"};
+        for (int i = 0; i < names.length; i++) {
+            int x = 1 + 3 * i;
+            // (a) window first, then the neighbour on its north side, then one in plane (east).
+            BlockPos a = new BlockPos(x, 1, 2);
+            place(helper, "recip_a_" + names[i], Direction.NORTH, new ItemStack(window()), a);
+            check(!at(helper, a).getValue(CrossCollisionBlock.NORTH), names[i] + " a: connected to nothing");
+            place(helper, "recip_a_n_" + names[i], Direction.NORTH, neighbourStacks()[i].get(), a.north());
+            check(at(helper, a).getValue(CrossCollisionBlock.NORTH), names[i] + " a: window did not connect north");
+            if (i != 1) {
+                check(at(helper, a.north()).getValue(CrossCollisionBlock.SOUTH), names[i] + " a: neighbour did not connect back");
+            }
+            place(helper, "recip_a_e_" + names[i], Direction.NORTH, new ItemStack(Items.GLASS_PANE), a.east());
+            check(at(helper, a).getValue(CrossCollisionBlock.EAST), names[i] + " a: in-plane east did not connect");
+            // (b) neighbour first, then the window.
+            BlockPos b = new BlockPos(x, 1, 6);
+            place(helper, "recip_b_n_" + names[i], Direction.NORTH, neighbourStacks()[i].get(), b.north());
+            place(helper, "recip_b_" + names[i], Direction.NORTH, new ItemStack(window()), b);
+            check(at(helper, b).getValue(CrossCollisionBlock.NORTH), names[i] + " b: window did not connect north");
+            if (i != 1) {
+                check(at(helper, b.north()).getValue(CrossCollisionBlock.SOUTH), names[i] + " b: neighbour did not connect back");
+            }
+            place(helper, "recip_b_e_" + names[i], Direction.NORTH, new ItemStack(Items.GLASS_PANE), b.east());
+            check(at(helper, b).getValue(CrossCollisionBlock.EAST), names[i] + " b: in-plane east did not connect");
         }
-        BlockPos second = new BlockPos(6, 1, 5);
-        for (int i = 0; i < neighbours.length; i++) {
-            place(helper, "stable_b" + i, Direction.NORTH, neighbours[i].get(), second.offset(offsets[i]));
-        }
-        place(helper, "stable_b", Direction.NORTH, new ItemStack(window()), second);
-        BlockState placed = at(helper, second);
-        check(placed.getValue(RoundWindowBlock.AXIS) == Direction.Axis.X && !placed.getValue(RoundWindowBlock.WATERLOGGED),
-                "window placed between neighbours has the wrong state: " + placed);
-        check(placed.getProperties().size() == 2, "window has connector or extra properties: " + placed.getProperties());
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void perpendicularArmCollidesAndInPlaneAddsNothing(GameTestHelper helper) {
+        floor(helper);
+        BlockPos pos = new BlockPos(4, 1, 4);
+        place(helper, "arm_w", Direction.NORTH, new ItemStack(window()), pos);
+        place(helper, "arm_n", Direction.NORTH, new ItemStack(Items.GLASS_PANE), pos.north());
+        BlockPos abs = helper.absolutePos(pos);
+        check(collides(helper, abs, 0.45, 0.55, 0.05, 0.3), "north arm should collide");
+        check(!collides(helper, abs, 0.45, 0.55, 0.7, 0.95), "no south neighbour, yet the south arm collides");
+        place(helper, "arm_e", Direction.NORTH, new ItemStack(Items.GLASS_PANE), pos.east());
+        check(at(helper, pos).getValue(CrossCollisionBlock.EAST), "east pane did not connect");
+        check(!collides(helper, abs, 0.6, 0.95, 0.05, 0.3), "an in-plane connection added geometry");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void removingANeighbourDisconnects(GameTestHelper helper) {
+        floor(helper);
+        BlockPos pos = new BlockPos(4, 1, 4);
+        place(helper, "rm_w", Direction.NORTH, new ItemStack(window()), pos);
+        place(helper, "rm_n", Direction.NORTH, new ItemStack(Items.GLASS_PANE), pos.north());
+        BlockPos abs = helper.absolutePos(pos);
+        check(at(helper, pos).getValue(CrossCollisionBlock.NORTH) && collides(helper, abs, 0.45, 0.55, 0.05, 0.3), "setup: north arm missing");
+        helper.setBlock(pos.north(), Blocks.AIR);
+        check(!at(helper, pos).getValue(CrossCollisionBlock.NORTH), "window still connected north after removal");
+        check(!collides(helper, abs, 0.45, 0.55, 0.05, 0.3), "arm region still collides after removal");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public static void rotationAndMirrorTurnConnectionsAndAxis(GameTestHelper helper) {
+        floor(helper);
+        BlockPos pos = new BlockPos(4, 1, 4);
+        place(helper, "rot_w", Direction.NORTH, new ItemStack(window()), pos);
+        place(helper, "rot_n", Direction.NORTH, new ItemStack(Items.GLASS_PANE), pos.north());
+        BlockState state = at(helper, pos);
+        check(state.getValue(CrossCollisionBlock.NORTH) && state.getValue(RoundWindowBlock.AXIS) == Direction.Axis.X, "setup: " + state);
+        BlockState rotated = state.rotate(Rotation.CLOCKWISE_90);
+        check(rotated.getValue(RoundWindowBlock.AXIS) == Direction.Axis.Z, "rotation did not turn the axis: " + rotated);
+        check(rotated.getValue(CrossCollisionBlock.EAST) && !rotated.getValue(CrossCollisionBlock.NORTH),
+                "rotation did not turn the connection: " + rotated);
+        BlockState mirrored = state.mirror(Mirror.LEFT_RIGHT);
+        check(mirrored.getValue(CrossCollisionBlock.SOUTH) && !mirrored.getValue(CrossCollisionBlock.NORTH),
+                "mirror did not swap north and south: " + mirrored);
+        check(mirrored.getValue(RoundWindowBlock.AXIS) == Direction.Axis.X, "mirror changed the axis: " + mirrored);
         helper.succeed();
     }
 

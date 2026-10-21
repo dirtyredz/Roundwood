@@ -1,11 +1,15 @@
 package io.github.dirtyredz.roundwood.door;
 
+import io.github.dirtyredz.roundwood.client.door.DoorParticles;
 import io.github.dirtyredz.roundwood.door.assembly.DoorColumn;
 import io.github.dirtyredz.roundwood.door.assembly.DoorIntegrity;
 import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.door.assembly.DoorRemoval;
 import io.github.dirtyredz.roundwood.door.assembly.DoorStateController;
+import io.github.dirtyredz.roundwood.door.camouflage.CamouflageDrops;
+import io.github.dirtyredz.roundwood.door.camouflage.CamouflageInteraction;
 import io.github.dirtyredz.roundwood.door.leaf.DoorShapes;
+import io.github.dirtyredz.roundwood.door.selection.DoorSelectionShapes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -32,18 +36,22 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
  * One quarter of a round door. Stays a {@link DoorBlock} (same properties, wooden-door tags, hand
  * opening) so villager AI, pathfinding and other mods see an ordinary wooden door; it adds only the
- * {@link #COLUMN} identity. The callbacks here hand off to the assembly services; the lower-left
- * part carries the {@link RoundDoorBlockEntity} the client draws the leaf from.
+ * {@link #COLUMN} identity. The callbacks here hand off to the assembly, selection and camouflage
+ * services; the lower-left part carries the {@link RoundDoorBlockEntity} the client draws the leaf
+ * and the camouflage from.
  */
 public class RoundDoorBlock extends DoorBlock implements EntityBlock {
     public static final EnumProperty<DoorColumn> COLUMN = EnumProperty.create("column", DoorColumn.class);
@@ -70,9 +78,23 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock {
                 ? new RoundDoorBlockEntity(entityType.get(), pos, state) : null;
     }
 
+    /** The selection outline: the whole assembly, from every part (corners included when targetable). */
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return DoorSelectionShapes.outline(state, level, pos, context);
+    }
+
+    /** Collision stays this cell's own clipped piece of the leaf; support and visual shapes follow it. */
+    @Override
+    @SuppressWarnings("deprecation")
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return DoorShapes.shape(state);
+    }
+
+    /** Break and hit particles from this cell's own piece, not from the whole-door outline. */
+    @Override
+    public void initializeClient(Consumer<IClientBlockExtensions> consumer) {
+        consumer.accept(DoorParticles.INSTANCE); // only ever called on the client
     }
 
     /** Assemblies are placed only through {@link RoundDoorItem}; there is no single-cell placement. */
@@ -89,7 +111,17 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock {
 
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        return DoorStateController.use(this, state, level, pos, player);
+        InteractionResult camouflage = CamouflageInteraction.use(this, state, level, pos, player, hand, hit);
+        return camouflage != null ? camouflage : DoorStateController.use(this, state, level, pos, player);
+    }
+
+    /** A creative player's break discards stored camouflage instead of dropping it. */
+    @Override
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+        if (player.getAbilities().instabuild) {
+            return CamouflageDrops.discardingRefunds(level, () -> super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid));
+        }
+        return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
     }
 
     @Override

@@ -30,6 +30,9 @@ public final class DoorGeometry {
     /** The swing axis runs through the middle of the leaf's thickness. */
     public static final double PIVOT_Z = (BACK + FRONT) / 2;
 
+    /** The knob is a 2 x 2 pixel stud in the middle of each face. */
+    public static final double KNOB_SIZE = 2;
+
     public static final String TRIM = "trim";
     public static final String PANEL = "panel";
     public static final String BRASS = "brass";
@@ -89,9 +92,9 @@ public final class DoorGeometry {
     }
 
     /**
-     * Collision and outline boxes for one cell, block-local, facing north: the leaf slab turned as
-     * one piece, then clipped to the cell. Whatever the open leaf covers outside the four cells is
-     * visual only.
+     * Collision boxes for one cell, block-local, facing north: the leaf slab turned as one piece,
+     * then clipped to the cell. Whatever the open leaf covers outside the four cells is visual only.
+     * The selection outline is the whole leaf instead (see {@code door/selection/DoorOutlineGeometry}).
      */
     public static List<Box> cellEnvelope(DoorHingeSide hinge, int column, int row, boolean open) {
         Box cell = new Box(16 * column, 16 * row, 0, 16 * column + 16, 16 * row + 16, 16);
@@ -121,14 +124,15 @@ public final class DoorGeometry {
         for (PixelCircle.Rect rect : PixelCircle.disc(DIAMETER - 2 * TRIM_WIDTH)) {
             pieces.add(new Piece(rect.offset(TRIM_WIDTH, TRIM_WIDTH).extrude(PANEL_BACK, PANEL_FRONT), PANEL));
         }
-        // Left hinge: two straps reaching in from the west edge on both faces, one knob on each face
-        // near the free (east) edge. Brass sits on the recessed panel, flush with the trim faces.
+        // Left hinge: two straps reaching in from the west edge on both faces, one knob in the middle
+        // of each face (hobbit style). Brass sits on the recessed panel, flush with the trim faces.
         for (int v : new int[] {8, 23}) {
             pieces.add(new Piece(new Box(4, v, PANEL_FRONT, 11, v + 1, FRONT), BRASS));
             pieces.add(new Piece(new Box(4, v, BACK, 11, v + 1, PANEL_BACK), BRASS));
         }
-        pieces.add(new Piece(new Box(25, 15, PANEL_FRONT, 27, 17, FRONT), BRASS));
-        pieces.add(new Piece(new Box(25, 15, BACK, 27, 17, PANEL_BACK), BRASS));
+        double knob = (DIAMETER - KNOB_SIZE) / 2;
+        pieces.add(new Piece(new Box(knob, knob, PANEL_FRONT, knob + KNOB_SIZE, knob + KNOB_SIZE, FRONT), BRASS));
+        pieces.add(new Piece(new Box(knob, knob, BACK, knob + KNOB_SIZE, knob + KNOB_SIZE, PANEL_BACK), BRASS));
         return List.copyOf(pieces);
     }
 

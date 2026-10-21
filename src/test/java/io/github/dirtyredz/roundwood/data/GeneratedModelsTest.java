@@ -227,7 +227,98 @@ class GeneratedModelsTest {
                 }
             }
             assertDisplay(item, finish + " window", new double[] {8, 8, 8});
+            for (JsonElement e : item.elements()) {
+                JsonObject element = e.getAsJsonObject();
+                double[] from = vec(element, "from");
+                double[] to = vec(element, "to");
+                assertTrue(from[2] >= 7 && to[2] <= 9, finish + ": window element outside the pane depth z 7..9");
+                JsonObject south = element.getAsJsonObject("faces").getAsJsonObject("south");
+                if (south == null) {
+                    continue;
+                }
+                String texture = item.texture(south.get("texture").getAsString());
+                if (panel(finish).equals(texture)) {
+                    assertEquals(9, to[2], 1e-9, finish + ": wood front face is not at z 9");
+                } else if ("minecraft:block/glass".equals(texture)) {
+                    assertEquals(7.5, from[2], 1e-9, finish + ": glass back");
+                    assertEquals(8.5, to[2], 1e-9, finish + ": glass front");
+                }
+            }
         }
+    }
+
+    @Test
+    void centredKnobsOnBothFacesForBothHinges() {
+        for (String hinge : List.of("left", "right")) {
+            Resolved leaf = resolve("roundwood:block/template_round_door_leaf_" + hinge);
+            boolean[][] front = new boolean[2][2];
+            boolean[][] back = new boolean[2][2];
+            for (JsonElement e : leaf.elements()) {
+                JsonObject element = e.getAsJsonObject();
+                if (!usesBrass(leaf, element)) {
+                    continue;
+                }
+                double[] from = vec(element, "from");
+                double[] to = vec(element, "to");
+                double width = to[0] - from[0];
+                if (width >= 3) {
+                    double centre = (from[0] + to[0]) / 2;
+                    assertTrue(hinge.equals("left") ? centre < 16 : centre > 16, hinge + ": strap centre " + centre);
+                    continue;
+                }
+                // A knob piece: one 1x1 quarter of the 2x2 knob at x 15..17, y 15..17.
+                assertTrue(from[0] >= 15 && to[0] <= 17 && from[1] >= 15 && to[1] <= 17, hinge + ": knob piece off centre");
+                boolean isFront = to[2] == 16;
+                boolean isBack = from[2] == 13;
+                assertTrue(isFront || isBack, hinge + ": knob piece on neither face");
+                for (int x = (int) Math.round(from[0]); x < Math.round(to[0]); x++) {
+                    for (int y = (int) Math.round(from[1]); y < Math.round(to[1]); y++) {
+                        (isFront ? front : back)[x - 15][y - 15] = true;
+                    }
+                }
+            }
+            for (int x = 0; x < 2; x++) {
+                for (int y = 0; y < 2; y++) {
+                    assertTrue(front[x][y], hinge + ": front knob pixel " + (15 + x) + "," + (15 + y));
+                    assertTrue(back[x][y], hinge + ": back knob pixel " + (15 + x) + "," + (15 + y));
+                }
+            }
+        }
+    }
+
+    private static boolean usesBrass(Resolved model, JsonObject element) {
+        for (Map.Entry<String, JsonElement> face : element.getAsJsonObject("faces").entrySet()) {
+            // Templates leave the variable unbound; finish models bind it to roundwood:block/brass.
+            String texture = face.getValue().getAsJsonObject().get("texture").getAsString();
+            if ("#brass".equals(texture) || "roundwood:block/brass".equals(model.texture(texture))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Test
+    void windowArmModelIsGlassFromTheEdgeToThePanel() {
+        Resolved arm = resolve("roundwood:block/round_window_arm");
+        assertFalse(arm.elements().isEmpty());
+        boolean reachesEdge = false;
+        for (JsonElement e : arm.elements()) {
+            JsonObject element = e.getAsJsonObject();
+            double[] from = vec(element, "from");
+            double[] to = vec(element, "to");
+            assertTrue(from[0] >= 7 && to[0] <= 9, "arm outside x 7..9");
+            assertTrue(from[2] >= 0 && to[2] <= 7.5, "arm outside z 0..7.5");
+            reachesEdge |= from[2] == 0;
+            JsonObject faces = element.getAsJsonObject("faces");
+            for (Map.Entry<String, JsonElement> face : faces.entrySet()) {
+                assertEquals("minecraft:block/glass",
+                        arm.texture(face.getValue().getAsJsonObject().get("texture").getAsString()), face.getKey());
+            }
+            if (to[2] == 7 || to[2] == 7.5) {
+                assertFalse(faces.has("south"), "buried south face on the element ending at z " + to[2]);
+            }
+        }
+        assertTrue(reachesEdge, "no arm element starts at z 0");
     }
 
     /** Every in-hand/inventory context is set, the icon is lit from the front and centred in the slot. */

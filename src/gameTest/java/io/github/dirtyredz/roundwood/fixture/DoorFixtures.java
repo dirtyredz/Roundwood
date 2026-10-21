@@ -122,6 +122,65 @@ public final class DoorFixtures {
     }
 
     /**
+     * A world point in an assembly's own frame: {@code a} blocks across from the left edge (0..2),
+     * {@code h} blocks up (0..2), {@code d} blocks deep from the front face (the placing player's
+     * side, 0) into the cells (1 = back of the cells; 1..2 is where the open leaf projects).
+     */
+    public static Vec3 point(DoorLayout.Assembly assembly, double a, double h, double d) {
+        Direction facing = assembly.facing();
+        Direction across = facing.getClockWise();
+        Direction out = facing.getOpposite();
+        BlockPos anchor = assembly.anchor();
+        // Start at the anchor cell's front-left-bottom corner.
+        double x = anchor.getX() + (across.getStepX() < 0 || out.getStepX() > 0 ? 1 : 0);
+        double z = anchor.getZ() + (across.getStepZ() < 0 || out.getStepZ() > 0 ? 1 : 0);
+        x += across.getStepX() * a - out.getStepX() * d;
+        z += across.getStepZ() * a - out.getStepZ() * d;
+        return new Vec3(x, anchor.getY() + h, z);
+    }
+
+    /**
+     * A hit on the assembly's front face (d = 0) at ({@code a}, {@code h}), credited to the cell
+     * that contains it, facing the placing player: what a player looking straight at it sends.
+     */
+    public static BlockHitResult frontHit(DoorLayout.Assembly assembly, double a, double h) {
+        Vec3 location = point(assembly, a, h, 0);
+        Direction out = assembly.facing().getOpposite();
+        BlockPos cell = BlockPos.containing(location.subtract(Vec3.atLowerCornerOf(out.getNormal()).scale(1e-4)));
+        return new BlockHitResult(location, out, cell, false);
+    }
+
+    /**
+     * Uses whatever the player holds on {@code hit} the way the client does: the main hand, then the
+     * offhand if the main hand did not act, each through the real server path
+     * ({@code ServerPlayerGameMode.useItemOn}). Returns the deciding result.
+     */
+    public static InteractionResult use(GameTestHelper helper, ServerPlayer player, BlockHitResult hit) {
+        for (InteractionHand hand : InteractionHand.values()) {
+            ItemStack stack = player.getItemInHand(hand);
+            InteractionResult result = player.gameMode.useItemOn(player, helper.getLevel(), stack, hand, hit);
+            if (result.consumesAction()) {
+                return result;
+            }
+        }
+        return InteractionResult.PASS;
+    }
+
+    /** Puts {@code main} and {@code off} in the player's hands (either may be {@link ItemStack#EMPTY}). */
+    public static void hold(ServerPlayer player, ItemStack main, ItemStack off) {
+        player.setItemInHand(InteractionHand.MAIN_HAND, main);
+        player.setItemInHand(InteractionHand.OFF_HAND, off);
+    }
+
+    /** The round-door block entity at the assembly's anchor (fails the test if missing). */
+    public static RoundDoorBlockEntity anchorEntity(GameTestHelper helper, DoorLayout.Assembly assembly) {
+        if (helper.getLevel().getBlockEntity(assembly.anchor()) instanceof RoundDoorBlockEntity entity) {
+            return entity;
+        }
+        throw new GameTestAssertException("no round-door block entity at the anchor " + assembly.anchor());
+    }
+
+    /**
      * Absolute to relative. {@code GameTestHelper.relativePos} is not the inverse of {@code absolutePos}
      * in 1.20.1, so tests use this instead.
      */

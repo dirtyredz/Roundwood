@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.door.assembly;
 
 import io.github.dirtyredz.roundwood.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
@@ -10,6 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,6 +116,24 @@ public final class DoorLayout {
         /** True when all four cells are loaded and hold this assembly's parts. */
         public boolean complete(Level level, Block block) {
             return presentParts(level, block).size() == Part.values().length;
+        }
+
+        /**
+         * A world point in the assembly's authored frame (the frame {@code DoorGeometry} is written
+         * in), in pixels: x across from the left edge (0..32), y up from the floor (0..32), z the
+         * depth with the front face (the placing player's side) at 16 and the back at 0.
+         */
+        public Vec3 toAuthored(Vec3 world) {
+            double x = (world.x - anchor.getX()) * 16;
+            double y = (world.y - anchor.getY()) * 16;
+            double z = (world.z - anchor.getZ()) * 16;
+            // Undo the facing's clockwise quarter turns about the anchor cell's centre: (x, z) <- (16 - z, x).
+            for (int i = 0; i < VoxelShapeFactory.quarterTurns(facing); i++) {
+                double turnedX = z;
+                z = 16 - x;
+                x = turnedX;
+            }
+            return new Vec3(x, y, z);
         }
 
         /**

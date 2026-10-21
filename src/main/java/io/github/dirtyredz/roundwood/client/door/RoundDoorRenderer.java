@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.client.door;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import io.github.dirtyredz.roundwood.client.camouflage.CamouflageRenderer;
 import io.github.dirtyredz.roundwood.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
@@ -32,6 +33,7 @@ import java.util.Map;
  * Draws the whole round leaf of an assembly from its anchor: the finish's baked leaf model for the
  * hinge side, turned for the facing, then swung about the hinge axis by the animated angle. Uses the
  * normal baked-model path (entity-solid block sheet, packed light, overlay), no custom shader.
+ * The static camouflage corners are drawn first, without the leaf's transforms ({@link CamouflageRenderer}).
  * Incomplete assemblies draw nothing, so a broken door never shows a phantom leaf.
  */
 public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEntity> {
@@ -56,6 +58,9 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
         if (!assembly.complete(level, door)) {
             return;
         }
+        // The corners stay in the closed door plane: drawn before any facing or swing transform.
+        CamouflageRenderer.render(entity, assembly, level, pose, buffers);
+
         DoorHingeSide hinge = state.getValue(DoorBlock.HINGE);
         BakedModel model = Minecraft.getInstance().getModelManager().getModel(leafModel(door, hinge));
         double progress = entity.swing().progress(level.getGameTime() + partialTick);

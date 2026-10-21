@@ -1,5 +1,25 @@
 # Gotchas - Roundwood
 
+- **Clearing camouflage needs both hands empty.** Forge never calls block use for a sneaking
+  player holding anything, so sneak + empty hands on a filled corner is the only clear gesture;
+  sneaking with a block item places that block as vanilla would.
+- **Empty corners are only targetable with a block item in hand.** The outline adds them while the
+  looking player holds a block item (either hand), so placing blocks "through" an empty corner
+  hits the door instead; filled corners are always targetable.
+- **The open projection is outlined but refused.** Clicking, mining or picking the projected half
+  of an open leaf does nothing (the client cancels it). A ray that crosses a door cell before the
+  projection can also stop a click on a block that sits inside the projection.
+- **Camouflage copies looks only.** Donor sounds, hardness, light, redstone, gravity, connected
+  textures and overlays (grass side tint layer) do not transfer; one sprite per face.
+- **Mirrored structure copies start without camouflage**: mirroring moves the old anchor's NBT onto a
+  non-anchor cell, which has no entity. Rotations keep it. Structure copies duplicate a stored
+  refund (structure tools are creative tools).
+- **The open leaf passes through the hinge-side corners' edge.** At its hinge the open leaf crosses
+  a sliver of the static corner region; when camouflaged the two overlap visually there.
+- **Upgrading a trial world from 0.2.0**: doors keep working (no camouflage means none). Re-place
+  existing windows so their pane connections are computed (old states load disconnected).
+- **Camouflage models are cached per donor/facing/cell** and dropped on every resource reload
+  (F3+T); a donor whose model changes on reload is rebuilt then.
 - **Placed 0.1.0 doors do not survive the 0.2.0 upgrade.** In 0.1.0 `hinge` meant the column; 0.2.0
   adds `column` (defaulting to left on load) and treats `hinge` as the physical hinge, so old
   right columns resolve to the wrong anchor and the integrity check breaks them. Break 0.1.0 doors

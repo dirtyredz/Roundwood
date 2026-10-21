@@ -3,6 +3,8 @@ package io.github.dirtyredz.roundwood.door;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.door.assembly.DoorColumn;
 import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.door.camouflage.CamouflageData;
+import io.github.dirtyredz.roundwood.fixture.DoorFixtures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -102,6 +104,11 @@ public final class DoorCollisionGameTests {
             check(free(helper, probe(assembly, 1.95, 1.95)), facing + ": upper-right corner should be open");
             // Behind the slab the cells are empty.
             check(free(helper, new AABB(point(assembly, 0.2, 0.2, 0.25), point(assembly, 1.8, 1.8, 0.95))), facing + ": cell behind the slab");
+            // Camouflaged corners are decorative: the same probes, the same answers.
+            DoorFixtures.anchorEntity(helper, assembly).setCamouflage(CamouflageData.free(Blocks.STONE.defaultBlockState()));
+            check(!free(helper, probe(assembly, 1.0, 1.0)), facing + ": camouflaged centre not solid");
+            check(free(helper, probe(assembly, 0.05, 0.05)), facing + ": camouflaged corner collides");
+            check(free(helper, probe(assembly, 1.95, 1.95)), facing + ": camouflaged corner collides");
             helper.setBlock(ANCHOR, net.minecraft.world.level.block.Blocks.AIR);
         }
         helper.succeed();
@@ -134,7 +141,8 @@ public final class DoorCollisionGameTests {
                     if (part.column != hingeColumn(assembly)) {
                         BlockPos pos = assembly.pos(part);
                         BlockState state = helper.getLevel().getBlockState(pos);
-                        check(state.getShape(helper.getLevel(), pos).isEmpty(), name + ": outline not empty at " + part);
+                        // The outline is still the whole door (it is selection only); collision is empty.
+                        check(!state.getShape(helper.getLevel(), pos).isEmpty(), name + ": no whole-door outline at " + part);
                         check(state.getCollisionShape(helper.getLevel(), pos).isEmpty(), name + ": collision not empty at " + part);
                     }
                 }
@@ -191,13 +199,22 @@ public final class DoorCollisionGameTests {
         check(corner.getType() == HitResult.Type.MISS
                         || !(helper.getLevel().getBlockState(corner.getBlockPos()).getBlock() instanceof RoundDoorBlock),
                 "ray through the empty corner hit the door");
-        // Outline bounds stay within each cell.
+        // Every part outlines the same whole door in world space; collision stays inside each cell.
+        AABB expected = null;
         for (BlockPos pos : assembly.positions()) {
-            AABB bounds = helper.getLevel().getBlockState(pos).getShape(helper.getLevel(), pos, CollisionContext.empty()).bounds();
-            check(bounds.minX >= 0 && bounds.minY >= 0 && bounds.minZ >= 0 && bounds.maxX <= 1 && bounds.maxY <= 1 && bounds.maxZ <= 1,
-                    "outline leaves its cell at " + pos + ": " + bounds);
-            check(!helper.getLevel().getBlockState(pos).getValue(DoorBlock.OPEN), "unexpected open state");
+            BlockState state = helper.getLevel().getBlockState(pos);
+            AABB outline = state.getShape(helper.getLevel(), pos, CollisionContext.empty()).bounds().move(pos);
+            if (expected == null) {
+                expected = outline;
+            }
+            check(outline.equals(expected), "part at " + pos + " outlines " + outline + ", not " + expected);
+            AABB collision = state.getCollisionShape(helper.getLevel(), pos).bounds();
+            check(collision.minX >= 0 && collision.minY >= 0 && collision.minZ >= 0 && collision.maxX <= 1 && collision.maxY <= 1
+                    && collision.maxZ <= 1, "collision leaves its cell at " + pos + ": " + collision);
+            check(!state.getValue(DoorBlock.OPEN), "unexpected open state");
         }
+        check(Math.abs(expected.getXsize() + expected.getZsize() - (2 + 3.0 / 16)) < 1e-6 && Math.abs(expected.getYsize() - 2) < 1e-6,
+                "whole-door outline has the wrong size: " + expected);
         helper.succeed();
     }
 

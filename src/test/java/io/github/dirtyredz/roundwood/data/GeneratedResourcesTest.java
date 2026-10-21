@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.data;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -83,14 +84,14 @@ class GeneratedResourcesTest {
     @Test
     void generatedModelSetIsExactlyTheExpectedManifest() throws IOException {
         Set<String> block = new TreeSet<>(List.of("template_round_door_leaf_left", "template_round_door_leaf_right",
-                "template_round_window"));
+                "template_round_window", "round_window_arm"));
         Set<String> item = new TreeSet<>(List.of("template_round_door", "template_round_window"));
         for (String finish : FINISHES) {
             block.addAll(List.of(finish + "_round_door", finish + "_round_door_leaf_left", finish + "_round_door_leaf_right",
                     finish + "_round_window"));
             item.addAll(List.of(finish + "_round_door", finish + "_round_window"));
         }
-        // Exact sets: the 0.1.0 quadrant, open-quadrant, side-fill and arm models must be gone.
+        // Exact sets: the 0.1.0 quadrant, open-quadrant and side-fill models must be gone; the 0.3.0 pane arm is present.
         assertEquals(block, names(assets("models/block")));
         assertEquals(item, names(assets("models/item")));
         assertEquals(30, allJson(assets("blockstates")).size());
@@ -120,13 +121,74 @@ class GeneratedResourcesTest {
     }
 
     @Test
-    void windowBlockstatesSelectOnlyByAxis() {
+    void windowBlockstatesAreMultipartPanes() {
+        // Parts: two cores (one per axis) plus four arms, each tied to the side across its plane.
+        List<String[]> arms = List.of(new String[] {"x", "north", "0"}, new String[] {"x", "south", "180"},
+                new String[] {"z", "east", "90"}, new String[] {"z", "west", "270"});
         for (String finish : FINISHES) {
-            JsonObject variants = json(assets("blockstates/" + finish + "_round_window.json")).getAsJsonObject("variants");
-            assertEquals(Set.of("axis=x", "axis=z"), variants.keySet(), finish + ": no connection or waterlogged keys");
-            assertEquals(90, variants.getAsJsonObject("axis=z").get("y").getAsInt(), finish);
-            assertTrue(!variants.getAsJsonObject("axis=x").has("y"), finish);
+            JsonObject state = json(assets("blockstates/" + finish + "_round_window.json"));
+            assertTrue(state.has("multipart") && !state.has("variants"), finish);
+            JsonArray parts = state.getAsJsonArray("multipart");
+            assertEquals(6, parts.size(), finish);
+            assertTrue(!state.toString().contains("waterlogged"), finish + ": no waterlogged conditions");
+            String core = "roundwood:block/" + finish + "_round_window";
+            String arm = "roundwood:block/round_window_arm";
+            assertPart(parts.get(0).getAsJsonObject(), core, 0, Map.of("axis", "x"), finish);
+            assertPart(parts.get(1).getAsJsonObject(), core, 90, Map.of("axis", "z"), finish);
+            for (int i = 0; i < arms.size(); i++) {
+                String[] a = arms.get(i);
+                assertPart(parts.get(2 + i).getAsJsonObject(), arm, Integer.parseInt(a[2]),
+                        Map.of("axis", a[0], a[1], "true"), finish);
+            }
+            // Coverage: every axis and connection combination matches one core and the across-plane arms.
+            for (String axis : List.of("x", "z")) {
+                for (int mask = 0; mask < 16; mask++) {
+                    Map<String, String> values = Map.of("axis", axis, "north", String.valueOf((mask & 1) != 0),
+                            "east", String.valueOf((mask & 2) != 0), "south", String.valueOf((mask & 4) != 0),
+                            "west", String.valueOf((mask & 8) != 0));
+                    Set<String> matchedArms = new TreeSet<>();
+                    int cores = 0;
+                    for (JsonElement p : parts) {
+                        JsonObject part = p.getAsJsonObject();
+                        if (!matches(part.getAsJsonObject("when"), values)) {
+                            continue;
+                        }
+                        if (part.getAsJsonObject("apply").get("model").getAsString().equals(core)) {
+                            cores++;
+                        } else {
+                            JsonObject when = part.getAsJsonObject("when");
+                            when.keySet().stream().filter(k -> !k.equals("axis")).forEach(matchedArms::add);
+                        }
+                    }
+                    Set<String> expected = new TreeSet<>();
+                    for (String side : axis.equals("x") ? List.of("north", "south") : List.of("east", "west")) {
+                        if (values.get(side).equals("true")) {
+                            expected.add(side);
+                        }
+                    }
+                    assertEquals(1, cores, finish + " axis " + axis + " mask " + mask + ": core parts");
+                    assertEquals(expected, matchedArms, finish + " axis " + axis + " mask " + mask + ": arms");
+                }
+            }
         }
+    }
+
+    private static void assertPart(JsonObject part, String model, int y, Map<String, String> when, String finish) {
+        JsonObject apply = part.getAsJsonObject("apply");
+        assertEquals(model, apply.get("model").getAsString(), finish);
+        assertEquals(y, apply.has("y") ? apply.get("y").getAsInt() : 0, finish + " " + model + " " + when);
+        JsonObject condition = part.getAsJsonObject("when");
+        assertEquals(when.keySet(), condition.keySet(), finish + " " + model);
+        when.forEach((k, v) -> assertEquals(v, condition.get(k).getAsString(), finish + " when " + k));
+    }
+
+    private static boolean matches(JsonObject when, Map<String, String> state) {
+        for (Map.Entry<String, JsonElement> condition : when.entrySet()) {
+            if (!condition.getValue().getAsString().equals(state.get(condition.getKey()))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Test

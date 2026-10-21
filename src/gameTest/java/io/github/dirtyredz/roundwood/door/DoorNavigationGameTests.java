@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.door;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.door.camouflage.CamouflageData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -31,6 +32,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.anchorEntity;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assembly;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
@@ -89,12 +91,26 @@ public final class DoorNavigationGameTests {
         walkThrough(helper, "nav_right", new BlockPos(3, 1, 1), new BlockPos(3, 1, 7), DoorHingeSide.RIGHT);
     }
 
+    /** Camouflaged corners are decorative: they must not change passage. */
+    @GameTest(template = TEMPLATE, timeoutTicks = 600)
+    public static void villagerWalksThroughACamouflagedDoor(GameTestHelper helper) {
+        walkThrough(helper, "nav_camo", new BlockPos(3, 1, 1), new BlockPos(3, 1, 7), DoorHingeSide.LEFT, true);
+    }
+
     private static void walkThrough(GameTestHelper helper, String name, BlockPos start, BlockPos target) {
         walkThrough(helper, name, start, target, DoorHingeSide.LEFT);
     }
 
     private static void walkThrough(GameTestHelper helper, String name, BlockPos start, BlockPos target, DoorHingeSide hinge) {
+        walkThrough(helper, name, start, target, hinge, false);
+    }
+
+    private static void walkThrough(GameTestHelper helper, String name, BlockPos start, BlockPos target, DoorHingeSide hinge,
+                                    boolean camouflaged) {
         DoorLayout.Assembly assembly = corridor(helper, name, hinge);
+        if (camouflaged) {
+            anchorEntity(helper, assembly).setCamouflage(CamouflageData.free(Blocks.STONE.defaultBlockState()));
+        }
         Villager villager = helper.spawn(EntityType.VILLAGER, start);
         BlockPos absoluteTarget = helper.absolutePos(target);
         AtomicBoolean sawOpen = new AtomicBoolean();

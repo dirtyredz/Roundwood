@@ -2,6 +2,42 @@
 
 Newest first.
 
+## 2026-10-21 - Pane windows again (0.3.0, supersedes "Windows are full wooden blocks")
+
+Windows are `IronBarsBlock` panes again: a square 16 x 16 wooden face two pixels thick (wood in
+every pixel outside the round opening, so the corners are wood), round glass recessed in it, and a
+glass arm only for connections across the plane. In-plane neighbours need no geometry: the square
+edges meet. Collision and outline are the thin panel plus arms. Tradeoff: perpendicular attachments
+show glass junctions; that keeps reciprocal vanilla pane behaviour without glass in the corners.
+Rejected: restoring 0.1.0's glass side fills (glass in the wooden corners).
+
+## 2026-10-21 - Selection is the whole door, collision stays per cell (0.3.0)
+
+`getShape` (outline) returns the whole assembly from every part; `getCollisionShape` returns the
+0.2.0 clipped piece, unchanged, so passage width, pathing and support do not move. The outline
+follows the resting `open` and includes the open leaf's projection, which stays non-colliding and
+non-interactive: the client re-credits each hit to the part that contains it and cancels hits that
+land in no part (the server only accepts hits within a block of their cell). Supersedes the shared
+collision/outline of "Collision clipped to the four cells". Rejected: extra occupied cells.
+
+## 2026-10-21 - One camouflage material for all four corners, decorative (0.3.0)
+
+The four static corners (square minus disc, door-thin, in the closed plane) take one material per
+assembly, stored on the anchor entity: survival pays one item, refunded exactly once (to the
+player on replace/clear, as a drop on teardown, never with `doTileDrops=false`, discarded on a
+creative break, not explosion-decayed); creative pays nothing. Sneak-use with both hands empty
+clears (Forge bypasses block use for a sneaking player holding anything). Corners never collide
+or occlude: solid corners would obstruct tall mobs and the column-centred door paths. Rendered by
+the existing BER as cached per-cell models in the donor's representative face sprites, lit at
+each cell; ordinary cubes look right, connected textures/overlays/dynamic models are not promised.
+Rejected: per-corner materials, full-depth wall infill, chunk-baked `ModelData` replicated across
+four cells from an anchor-only entity, Copycats+/Framed-style exact donor rendering.
+
+## 2026-10-21 - Centred knob (0.3.0)
+
+The brass knob moved from the free edge to the middle of each face (hobbit style); straps stay on
+the hinge side.
+
 ## 2026-10-20 - Client-side swing animation (0.2.0, owner request)
 
 The leaf swings over 8 ticks with a sine ease-in-out, drawn by the existing block-entity renderer
@@ -22,7 +58,7 @@ z 14.5), not the outer front edge the plan named: turning about the front edge w
 thickness outside the cells, leaving nothing to collide with or click. Supersedes "Split-leaf 2x2
 footprint" below. Placed 0.1.0 doors are not migrated (their `hinge` meant column).
 
-## 2026-10-20 - Collision clipped to the four cells; projection visual only
+## 2026-10-20 - Collision clipped to the four cells; projection visual only (outline part superseded in 0.3.0)
 
 The open leaf's outer half projects one block past the cells. Collision and outline are the turned
 leaf clipped to the four cells (free column empty, 29/16 clear). The projection reserves no cells,
@@ -39,7 +75,7 @@ Tradeoff: one entity per door and a per-frame draw (shared baked models, cached 
 per-frame geometry), and the vanilla crack overlay does not show on the leaf. Supersedes "No block
 entity, no extra state" below.
 
-## 2026-10-20 - Windows are full wooden blocks (supersedes pane inheritance)
+## 2026-10-20 - Windows are full wooden blocks (0.2.0; superseded in 0.3.0)
 
 `RoundWindowBlock extends Block implements SimpleWaterloggedBlock`: a full-depth wooden housing
 with wood in every corner and recessed round glazing; full collision and outline, sturdy faces,

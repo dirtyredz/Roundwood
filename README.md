@@ -15,8 +15,9 @@ to any modpack.
 ## Content
 
 **Round door** (one item places a 2 wide x 2 high assembly). One round leaf on one hinge, like a
-hobbit door. It swings 90 degrees away from you with a short animation; the open leaf lies along
-the hinge-side wall and leaves 29/16 of clear width.
+hobbit door, with a brass knob in the middle of each face. It swings 90 degrees away from you
+with a short animation; the open leaf lies along the hinge-side wall and leaves 29/16 of clear
+width. Looking at any part outlines the whole door.
 
 - Placement: the cell you target becomes the **lower-left** part (seen from where you stand); the
   door extends one block to your right and one up. All four cells must be empty or replaceable,
@@ -32,15 +33,24 @@ the hinge-side wall and leaves 29/16 of clear width.
   it by hand.
 - The open leaf's outer half sticks out one block in front of the hinge column. It is only drawn:
   it does not collide, cannot be clicked, and can overlap whatever is there.
-- Breaking any part removes the whole door and drops **one** door (none in creative). Losing the
+- Camouflage: the four square corners around the round leaf can take one block's look. Right-click
+  a corner holding a full, ordinary block (stone, planks, bricks...; not glass, slabs, chests or
+  light sources) to fill all four; right-click with another block to swap (you get the old one
+  back); sneak-right-click a filled corner with both hands empty to clear it. Survival uses one
+  block, returned when you clear, swap or break the door; creative uses none. An offhand block works
+  when the main hand is empty. The corners are only decoration: they do not collide, block light or
+  change redstone, and the opening is as wide as before.
+- Breaking any part removes the whole door and drops **one** door (none in creative), plus the
+  stored camouflage block. Losing the
   floor under either column breaks it the same way. Pistons cannot move it.
 - It is a normal wooden door to the game: villagers and pathfinding use it, it is in
   `minecraft:doors` / `minecraft:wooden_doors`, it burns as fuel, an axe mines it fastest.
 - Upgrading from 0.1.0: break placed 0.1.0 doors first and place them again after the update.
 
-**Round window** (single block). A full wooden block, wood in all four corners, with a round glazed
-opening through it. It faces the player who places it, builds like any solid block (full collision;
-panes and walls meet it), can be waterlogged and bucketed, and drops itself without Silk Touch.
+**Round window** (single block). A thin square wooden pane, wood in all four corners, with round
+glass in the middle. It faces the player who places it and connects like a glass pane: windows,
+panes, bars and walls in line simply meet it; one across the window's plane gets a glass arm. It can
+be waterlogged and bucketed, and drops itself without Silk Touch.
 
 **Finishes** (15 per family, 30 items): oak, spruce, birch, jungle, acacia, dark oak, mangrove,
 cherry, bamboo, crimson, warped, plus green, yellow, red and blue painted (on oak). Natural doors
@@ -73,7 +83,7 @@ Dramatic Doors from a pack instance to the GameTest runtime for compatibility ru
 
 ## Release
 
-Not released yet; 0.2.0 is a local candidate. The flow follows DankRecipeTransfer: an immutable
+Not released yet; 0.3.0 is a local candidate. The flow follows DankRecipeTransfer: an immutable
 GitHub prerelease asset, then a direct-URL `mods/roundwood.pw.toml` (with SHA-256,
 `side = "both"`) in the pack repo, rehashed with
 that repo's tools. Both steps need the owner's go-ahead.

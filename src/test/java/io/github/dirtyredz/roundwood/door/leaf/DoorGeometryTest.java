@@ -152,4 +152,23 @@ class DoorGeometryTest {
         double right = DoorGeometry.leaf(DoorHingeSide.RIGHT).stream().mapToDouble(p -> p.box().volume()).sum();
         assertEquals(left, right, EPS);
     }
+
+    @Test
+    void theKnobIsCentredOnBothFacesForBothHinges() {
+        for (DoorHingeSide hinge : DoorHingeSide.values()) {
+            List<Box> knobs = DoorGeometry.leaf(hinge).stream().filter(p -> p.texture().equals(DoorGeometry.BRASS))
+                    .map(Piece::box).filter(b -> b.maxX() - b.minX() <= 3).toList();
+            assertEquals(2, knobs.size(), hinge + ": one knob per face");
+            boolean front = false;
+            boolean back = false;
+            for (Box knob : knobs) {
+                assertEquals(16, (knob.minX() + knob.maxX()) / 2, EPS, hinge + ": knob not centred across: " + knob);
+                assertEquals(16, (knob.minY() + knob.maxY()) / 2, EPS, hinge + ": knob not centred vertically: " + knob);
+                assertEquals(DoorGeometry.KNOB_SIZE, knob.maxX() - knob.minX(), EPS);
+                front |= knob.maxZ() == DoorGeometry.FRONT;
+                back |= knob.minZ() == DoorGeometry.BACK;
+            }
+            assertTrue(front && back, hinge + ": a knob on each face");
+        }
+    }
 }

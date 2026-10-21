@@ -11,8 +11,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Minecraft collision/outline shapes for each part, from {@link DoorGeometry}'s clipped leaf slab.
- * 64 variants at most (facing x hinge x column x half x open), built once and cached.
+ * Minecraft collision shapes for each part, from {@link DoorGeometry}'s clipped leaf slab (the
+ * selection outline is the whole door, in {@code door/selection}). 64 variants at most (facing x
+ * hinge x column x half x open), built once and cached.
  */
 public final class DoorShapes {
     private static final ConcurrentHashMap<Integer, VoxelShape> SHAPES = new ConcurrentHashMap<>();

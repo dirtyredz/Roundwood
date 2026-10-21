@@ -1,11 +1,60 @@
 {
-  "variants": {
-    "axis=x": {
-      "model": "roundwood:block/crimson_round_window"
+  "multipart": [
+    {
+      "apply": {
+        "model": "roundwood:block/crimson_round_window"
+      },
+      "when": {
+        "axis": "x"
+      }
     },
-    "axis=z": {
-      "model": "roundwood:block/crimson_round_window",
-      "y": 90
+    {
+      "apply": {
+        "model": "roundwood:block/crimson_round_window",
+        "y": 90
+      },
+      "when": {
+        "axis": "z"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_arm"
+      },
+      "when": {
+        "axis": "x",
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_arm",
+        "y": 180
+      },
+      "when": {
+        "axis": "x",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_arm",
+        "y": 90
+      },
+      "when": {
+        "axis": "z",
+        "east": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_arm",
+        "y": 270
+      },
+      "when": {
+        "axis": "z",
+        "west": "true"
+      }
     }
-  }
+  ]
 }

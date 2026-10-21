@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.data.client;
 
 import io.github.dirtyredz.roundwood.geometry.Box;
+import io.github.dirtyredz.roundwood.geometry.FaceUv;
 import io.github.dirtyredz.roundwood.geometry.Piece;
 import net.minecraft.core.Direction;
 import net.minecraftforge.client.model.generators.ModelBuilder;
@@ -13,7 +14,8 @@ import java.util.List;
  * Minecraft's default UVs come straight from element coordinates, so geometry beyond one block
  * (the 32-pixel door) would sample neighbouring atlas sprites. Every piece is therefore cut at the
  * 16-pixel texture-tile boundaries, and each part gets the default UVs of its position inside its
- * own tile: the texture repeats seamlessly across tiles, keeping grain direction and continuity.
+ * own tile ({@link FaceUv}): the texture repeats seamlessly across tiles, keeping grain direction and
+ * continuity.
  */
 public final class GeometryModelWriter {
     private static final double TILE = 16;
@@ -21,26 +23,45 @@ public final class GeometryModelWriter {
     private GeometryModelWriter() {
     }
 
+    /** Which faces of a (tile-split) part to write; every face unless a model hides internal ones. */
+    @FunctionalInterface
+    public interface FaceFilter {
+        FaceFilter ALL = (part, face) -> true;
+
+        boolean draw(Box part, Direction face);
+    }
+
     /**
      * @param cullBlockFaces mark faces lying on the unit cell's boundary with a matching cullface
      *                       (only for single-block world models; never for the door leaf or items)
      */
     public static <T extends ModelBuilder<T>> T addPieces(T builder, List<Piece> pieces, boolean cullBlockFaces) {
+        return addPieces(builder, pieces, cullBlockFaces, FaceFilter.ALL);
+    }
+
+    /** As above, writing only the faces {@code faces} accepts (for faces buried against other geometry). */
+    public static <T extends ModelBuilder<T>> T addPieces(T builder, List<Piece> pieces, boolean cullBlockFaces,
+                                                          FaceFilter faces) {
         for (Piece piece : pieces) {
             String texture = "#" + piece.texture();
             for (Box part : splitAtTiles(piece.box())) {
                 Box local = part.translate(-tileOrigin(part.minX()), -tileOrigin(part.minY()), -tileOrigin(part.minZ()));
-                builder.element()
+                ModelBuilder<T>.ElementBuilder element = builder.element()
                         .from((float) part.minX(), (float) part.minY(), (float) part.minZ())
-                        .to((float) part.maxX(), (float) part.maxY(), (float) part.maxZ())
-                        .allFaces((direction, face) -> {
-                            float[] uv = uv(local, direction);
-                            face.texture(texture).uvs(uv[0], uv[1], uv[2], uv[3]);
-                            if (cullBlockFaces && onCellBoundary(part, direction)) {
-                                face.cullface(direction);
-                            }
-                        })
-                        .end();
+                        .to((float) part.maxX(), (float) part.maxY(), (float) part.maxZ());
+                for (Direction direction : Direction.values()) {
+                    if (!faces.draw(part, direction)) {
+                        continue;
+                    }
+                    float[] uv = FaceUv.of(local, direction);
+                    ModelBuilder<T>.ElementBuilder.FaceBuilder face = element.face(direction)
+                            .texture(texture).uvs(uv[0], uv[1], uv[2], uv[3]);
+                    if (cullBlockFaces && onCellBoundary(part, direction)) {
+                        face.cullface(direction);
+                    }
+                    face.end();
+                }
+                element.end();
             }
         }
         return builder;
@@ -74,19 +95,6 @@ public final class GeometryModelWriter {
 
     private static double tileOrigin(double min) {
         return Math.floor(min / TILE) * TILE;
-    }
-
-    /** Vanilla's default face UVs ({@code BlockElement.uvsByFace}) for a box inside one 0..16 tile. */
-    static float[] uv(Box b, Direction face) {
-        double[] uv = switch (face) {
-            case DOWN -> new double[] {b.minX(), TILE - b.maxZ(), b.maxX(), TILE - b.minZ()};
-            case UP -> new double[] {b.minX(), b.minZ(), b.maxX(), b.maxZ()};
-            case NORTH -> new double[] {TILE - b.maxX(), TILE - b.maxY(), TILE - b.minX(), TILE - b.minY()};
-            case SOUTH -> new double[] {b.minX(), TILE - b.maxY(), b.maxX(), TILE - b.minY()};
-            case WEST -> new double[] {b.minZ(), TILE - b.maxY(), b.maxZ(), TILE - b.minY()};
-            case EAST -> new double[] {TILE - b.maxZ(), TILE - b.maxY(), TILE - b.minZ(), TILE - b.minY()};
-        };
-        return new float[] {(float) uv[0], (float) uv[1], (float) uv[2], (float) uv[3]};
     }
 
     private static boolean onCellBoundary(Box box, Direction face) {

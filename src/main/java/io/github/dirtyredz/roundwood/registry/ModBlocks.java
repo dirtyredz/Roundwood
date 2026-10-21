@@ -68,8 +68,8 @@ public final class ModBlocks {
     }
 
     /**
-     * A wooden building block with a glazed hole: plank-like hardness and sound, but glass-like for
-     * light, vision and spawning, and never occluding its neighbours (they show through the glass).
+     * A thin wooden pane with round glazing: plank-like hardness and sound, but glass-like for light,
+     * vision and spawning, and never occluding its neighbours (they show through the glass).
      */
     private static BlockBehaviour.Properties windowProperties(Finish finish) {
         BlockBehaviour.Properties properties = BlockBehaviour.Properties.of()
