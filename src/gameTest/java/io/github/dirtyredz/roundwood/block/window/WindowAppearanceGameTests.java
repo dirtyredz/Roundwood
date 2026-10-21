@@ -3,6 +3,9 @@ package io.github.dirtyredz.roundwood.block.window;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
+import io.github.dirtyredz.roundwood.block.window.placement.WindowTargetZones;
+import io.github.dirtyredz.roundwood.fixture.WindowFixtures;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,6 +17,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CrossCollisionBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -91,6 +95,29 @@ public final class WindowAppearanceGameTests {
         expect(helper, abs, BIRCH, "unpainted");
         check(again.getCount() == 1, "unpainting should consume one plank, left " + again.getCount());
         check(state(helper, abs) == before, "the pane state changed after unpainting");
+        helper.succeed();
+    }
+
+    /** A flush window restyles like a centred one: only the look changes, the position and its glass bridge stay. */
+    @GameTest(template = TEMPLATE)
+    public static void aFlushWindowRestylesWithoutMoving(GameTestHelper helper) {
+        floor(helper);
+        ServerPlayer placer = player(helper, "flush_style_placer", GameType.SURVIVAL, Direction.NORTH);
+        BlockPos rel = new BlockPos(4, 1, 4);
+        check(WindowFixtures.place(placer, new ItemStack(ModItems.ROUND_WINDOW.get()),
+                WindowFixtures.zone(helper, rel.below(), Direction.UP, WindowTargetZones.Zone.V_MIN)).consumesAction(), "flush placement");
+        helper.setBlock(rel.east(), Blocks.GLASS_PANE);
+        BlockPos abs = helper.absolutePos(rel);
+        BlockState before = state(helper, abs);
+        check(before.getValue(RoundWindowBlock.POSITION) == WindowPosition.NORTH && before.getValue(RoundWindowBlock.EAST), "setup " + before);
+        ServerPlayer player = player(helper, "flush_style", GameType.SURVIVAL, Direction.NORTH);
+        check(use(helper, player, new ItemStack(Items.BIRCH_PLANKS), ItemStack.EMPTY, front(abs), true).consumesAction(), "sneak + birch");
+        check(use(helper, player, new ItemStack(Items.RED_DYE), ItemStack.EMPTY, front(abs), true).consumesAction(), "sneaking dye");
+        expect(helper, abs, BIRCH.painted(DyeColor.RED), "flush restyle");
+        check(state(helper, abs) == before, "restyling changed the flush window's state: " + before + " -> " + state(helper, abs));
+        use(helper, player, new ItemStack(Items.WATER_BUCKET), ItemStack.EMPTY, front(abs), false);
+        check(state(helper, abs).getValue(RoundWindowBlock.POSITION) == WindowPosition.NORTH, "a bucket moved the window");
+        helper.setBlock(rel, Blocks.AIR);
         helper.succeed();
     }
 

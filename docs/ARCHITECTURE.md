@@ -155,18 +155,84 @@ change; the 0.2.0 passage is unchanged.
 
 ## Window
 
-`RoundWindowBlock extends IronBarsBlock` (vanilla pane): `north/east/south/west/waterlogged` plus
-`axis`. Authored for `axis=x`: a square 16 x 16 wooden face at z 7..9, wood outside a centred
-12-pixel circle, glass inside it at z 7.5..8.5. In-plane connections add nothing (the square edges
-meet); connections across the plane add a 2-pixel glass arm from the block edge to the panel
-(reaching the recessed glass where the opening crosses it; buried faces omitted). Across the
-plane only genuine pane junctions connect (`WindowConnections`, applied after vanilla in
-`getStateForPlacement` and `updateShape`): panes, bars, walls, or a window whose axis crosses this
-one; vanilla's "any sturdy face" rule grew an arm towards a solid block in front (0.3.x). The
-glazing and arms use Roundwood's `window_glass` (every texel visible, translucent) in a translucent
-model: vanilla `glass.png` is transparent inside its border, which is all the round glazing sampled. Collision and
-outline are the panel plus active arms (`WindowShapes`, 32 variants). Same-block faces above/below
-are hidden only when the axes match.
+Three blocks share one pane base, `WindowPaneBlock` (a vanilla `IronBarsBlock`): `RoundWindowBlock`
+and the two single-cell arch pieces `RoundWindowArchBlock` (left, right). One block entity type,
+`roundwood:round_window`, holds the look of all three. Every state has the four horizontal
+connections and `waterlogged`.
+
+**State.** Round window: `axis` (the 0.5.0 value) plus `position` = center/north/east/south/west/
+up/down (default center). Arch: `orientation` (12: north/east/south/west upright with top up;
+`up_<dir>` / `down_<dir>` = front facing up or down with that horizontal top) and `depth`
+(center/negative/positive along the positive world axis of the pane's normal). Both reduce to a
+`WindowPose` (front, top, depth; right = top x front) in `block/window/geometry/`; a
+`WindowProfile` (ROUND, ARCH_LEFT, ARCH_RIGHT) says which pixels are glazed. `WindowGeometry` keeps
+the 0.5.0 centred round window as the regression baseline.
+
+**Pane geometry.** The slab is 2 px thick at 7..9 (centre), 0..2 (negative) or 14..16 (positive); the
+glass sits 0.5 px inside each side. The round window is a 16 x 16 pane with a 12 px glazed circle.
+The arches are two independent pieces that together form the upper half of a two-block window:
+combined face u 0..32, v 0..16, circle centre (16, 0), outer 32 px, glazed opening 28 px, pixels
+taken by their centre. Each piece is a square pane whose glass is a quarter circle in its bottom
+inner corner (square wooden corners, no mullion, nothing below the diameter); left and right are
+judged from the front and the back shows the mirrored silhouette. `WindowArchGeometry` is the arch
+circle, `WindowPaneGeometry` the panel, junctions, shapes, boundary footprints and the buried-face
+test, `WindowShapes` the cached voxel shapes and culling footprints (the Minecraft adapter).
+
+**Targeted placement** (`block/window/placement/`). `WindowTargetZones` is the one authority: a
+centre square [1/4,3/4]^2 (boundary included) and four edge trapezoids on the clicked face; outside
+the centre the larger distance from the face middle picks the edge, an exact diagonal tie the u
+edge. Face coordinates: up/down faces u = east, v = south; north/south u = east, v = up; east/west
+u = south, v = up. An edge zone names a world direction (the top and bottom zones of a wall face
+mean up and down). `WindowPlacement` adapts the ordinary use context: the destination cell is
+vanilla's (a replaceable clicked block is replaced), the zone is read on the originally clicked
+cell's face, centre = upright and centred facing the player (round window: the 0.5.0 plane across
+the line of sight), edge = flush against that side (six sides). Arches: centre = front towards the
+player; edge = front towards the player's eye (tie or no player: towards the player if the plane
+faces them, else into the cell); floor and ceiling pieces take the top the player sees as up. The
+server decides from the use context, no packet carries the zone, and sneaking changes nothing.
+Moving a window is break and replace. `client/window/WindowPlacementPreview` runs the same
+placement path read-only; `WindowPlacementOverlay` (RenderHighlightEvent.Block, receiveCanceled,
+never changes cancellation) draws the five-zone grid, the targeted zone in white and the pane
+outline in light blue (hidden when local checks refuse), with `client/render/OutlineLines` shared
+with the door highlight. Door hits go through `DoorHitResolver`.
+
+**Junctions.** Connections stay the four horizontal vanilla ones. A side whose vanilla strip (x or
+z 7..9 at the cell edge, full height) the slab already covers needs nothing (in-plane sides of a
+centred upright pane, the flush side of a flush pane). Every other connected side gets a glass arm
+from that strip to a central glass post (x/z 7..9, full height); a flush upright pane adds a stem
+from the post to its slab; floor and ceiling panes meet the post and arms as vertical glass fins.
+Everything is cut away where the slab is and reaches on to the recessed glass where it ends on the
+opening; a pane with no active junction has none.
+
+**Connection rule** (`block/window/connection/WindowConnections`). In-plane sides of a centred
+upright window follow vanilla (as 0.5.0). Every other side connects only to a pane/bars, a wall or
+a window, but not a window face to face (both upright on the same normal, across it) and not one
+continuing the same plane (same normal and depth, in plane). Solid blocks never grow glass. The
+connection package reads `WindowPaneBlock.pose` of neighbours and the block calls the rule: a
+deliberate two-way edge inside `block/window`.
+
+**Culling.** A window face on the cell boundary is skipped only when the neighbouring window's
+geometry covers everything this one draws there (half-pixel footprints), not because the blocks or
+connections match. Non-window neighbours never hide window faces. The glazing and arms use
+Roundwood's `window_glass` (every texel visible, translucent) in a translucent model; collision
+and outline are the panel plus active junction parts.
+
+**Models** (`data/client/window/`). Posed models are authored once per canonical pose (upright
+facing south, or front up/down with top north) and every other pose is a blockstate y rotation of
+one. Per canonical pose: a core (panel, oak-bound), a hub (post + stem), one arm per side needing a
+bridge, and one cap per such side (the hub faces an arm hides, drawn only while that side is open,
+so no glass face is buried behind glass). Multipart conditions are disjoint AND terms, since
+vanilla's multipart reader cannot mix OR with other keys. Names are
+`<profile>[_back|_front|_up_<floor|level|ceiling>|_down_<...>]` then `_hub`, `_arm_<side>`,
+`_cap_<side>`. The round window's centred state reuses the 0.5.0 parts; flush uses
+`round_window_back*` turned per side, ceiling `round_window_down_ceiling*`, floor
+`round_window_up_floor*`. `GeometryModelWriter` drops an element whose faces are all buried.
+
+**Client and save.** `WindowAppearanceModel` wraps round and arch states alike. The restyled item
+model cache (`client/window/WindowItemModels`) is keyed by source item model and wood, since three
+window items would otherwise share one item's geometry. Windows saved by 0.5.0 have no `position`
+and load centred with their axis, connections, water and look; aliases (`LegacyWindowBlock`)
+inherit the property, and `LegacyAppearances` and the 0.4.0 fixture are unchanged.
 
 ## Frame (round trim)
 
@@ -237,7 +303,7 @@ One canonical block and item per family; the look is data.
   every window blockstate model and swaps the `oak_planks` quads by the model data its entity hands
   it. `AppearanceItemOverrides` resolves item stacks the same way. `DonorSprites` (shared with
   camouflage) and `DonorColors` cache 512 donors; model caches hold 2048 entries keyed by look and
-  geometry variant; all of them clear together on every model bake.
+  geometry variant (the window item cache by source item model and wood); all of them clear together on every model bake.
 - **Viewers**: `client/compat/emi` replaces each canonical index entry with a stack whose identity,
   NBT and comparison are the default's and whose icon (unbatched) cycles through `AppearanceSamples`;
   it serialises as the plain stack. Styled stacks compare by appearance key. `client/compat/jei` gives
@@ -268,9 +334,10 @@ tile, so no face samples outside its sprite. A `FaceStyle` can hide buried faces
 another texture variable (a frame's sides) or explicit UVs: door panels and whole-ring frames use
 `AssemblyFaceUv`, which spreads one image across the whole 32 x 32 front and back. Door: two leaf
 templates, two oak leaves (`round_door_leaf_<hinge>`), one empty world model and a single `""`
-variant. Window: the core template, the oak core and the shared glass arm in a multipart blockstate.
+variant. Window: posed models per canonical pose (core, hub, arms, caps; see Window) in large multipart
+blockstates (about 160 KB for each arch), 211 block models in all, three window item models.
 Trim: quarter templates in two families (tiled, whole-image), oak source quarters per family, one
 empty world model and a single `""` variant. `LegacyModelProvider` gives the 49 aliases blockstates
 over the canonical models and item models parenting the canonical items. Items carry front GUI light
-and computed centred transforms. Plus three recipes and their advancements, loot (aliases drop the
+and computed centred transforms. Plus five recipes and their advancements, loot (aliases drop the
 canonical item), tags and English names.

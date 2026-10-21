@@ -2,6 +2,58 @@
 
 Newest first.
 
+## 2026-10-21 - Arch top on a floor or ceiling is the side the placer sees as up (0.6.0)
+
+The plan had the arch's top always follow the look direction. On a ceiling that would show the left
+piece as a right one to whoever placed it. Floor and ceiling pieces therefore take the top the player
+sees as up (away from them on a floor, towards them on a ceiling), so a left piece looks left to its
+placer. Tradeoff: the top depends on the placer's facing, not on the block alone.
+
+## 2026-10-21 - Posed models per canonical pose, caps for buried faces, disjoint AND conditions (0.6.0)
+
+Each profile's models are authored once per canonical pose (upright facing south, or front up/down
+with top north) and every other pose is a blockstate y rotation of one; a core, a hub and per-side
+arms and caps assemble in a multipart. A cap covers the hub faces an arm hides and is drawn only while
+that side is open, so no glass face sits behind glass. Conditions are written as disjoint AND terms
+because vanilla's multipart reader cannot mix OR with other keys. `GeometryModelWriter` drops an
+element whose faces are all buried (Minecraft rejects elements without faces). Rejected: one model
+per state (hundreds of near copies). Cost: 186 new block models and arch blockstates of about 160 KB
+each, guarded by tests that evaluate every state.
+
+## 2026-10-21 - Fixed central junctions, no vertical links (0.6.0)
+
+Connections stay the four horizontal vanilla ones. Each connected side not already covered by the slab
+gets a glass arm to a central post (plus a stem for a flush upright pane, vertical fins for floor and
+ceiling panes). Rejected: up/down links and per-position junction rules (a state explosion).
+Tradeoff (owner-visible): connected flush panes show glass reaching back to the cell centre, and
+floor and ceiling panes grow vertical fins when connected.
+
+## 2026-10-21 - Repositioning is break and replace (0.6.0)
+
+A placed window gains no reposition click; to move it, break it and place it again, and the look
+survives in the item. Rejected: a gesture that rewrites `position` or `orientation` in place (a second
+mutation path to validate for survival, water and neighbours, and one more thing competing with
+restyling clicks).
+
+## 2026-10-21 - Explicit left and right arch items (0.6.0)
+
+The arch is two items, `round_window_arch_left` and `round_window_arch_right`, each a single
+independent block with no partner lookup. Rejected: one arch item whose handedness comes from a
+gesture or from a neighbouring piece (hidden state, order-dependent placement, a partner to keep in
+sync). Cost: two advertised entries and two recipes, deliberately not mirror images so neither
+matches the other's grid (a test checks all five recipes against each other, mirrored).
+
+## 2026-10-21 - Hammer-style face targeting for windows, not sneak-click (0.6.0)
+
+Holding a window item shows a centre square and four edge trapezoids on the aimed face; the centre
+places the pane upright and centred, an edge places it flush against that side of the destination
+cell, so all six sides are reachable without a modifier key. Boundaries are deterministic: the centre
+square includes its boundary, and an exact diagonal tie picks the u edge. The server decides from the
+ordinary use context and no packet carries the zone, so client and server cannot disagree through a
+stale message; the client overlay runs the same placement path read-only. Rejected: sneak-click to
+cycle positions (sneak already means restyle in this mod), a custom packet. Limit: interactive blocks
+can take the click first, so the overlay is not a promise.
+
 ## 2026-10-21 - One block per family; the look is data (0.5.0, supersedes "Limited catalogue" and the per-finish registrations)
 
 Roundwood now registers `round_door`, `round_window` and `round_trim`; wood, paint and masonry are an

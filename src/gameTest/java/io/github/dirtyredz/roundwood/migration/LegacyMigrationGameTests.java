@@ -11,6 +11,7 @@ import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
@@ -140,6 +141,8 @@ public final class LegacyMigrationGameTests {
             check(birchState.getValue(BlockStateProperties.WATERLOGGED) && helper.getLevel().getFluidState(birch).is(Fluids.WATER),
                     "the wet window lost its water");
             check(birchState.getValue(RoundWindowBlock.EAST) && blueState.getValue(RoundWindowBlock.WEST), "window connections lost");
+            check(birchState.getValue(RoundWindowBlock.POSITION) == WindowPosition.CENTER
+                    && blueState.getValue(RoundWindowBlock.POSITION) == WindowPosition.CENTER, "converted windows are not centred");
             check(((RoundWindowBlockEntity) helper.getLevel().getBlockEntity(birch)).appearance().equals(planks("birch")), "birch window look");
             check(((RoundWindowBlockEntity) helper.getLevel().getBlockEntity(blue)).appearance().equals(oak(DyeColor.BLUE)), "blue window look");
             check(items(helper) == 0, "conversion dropped items");

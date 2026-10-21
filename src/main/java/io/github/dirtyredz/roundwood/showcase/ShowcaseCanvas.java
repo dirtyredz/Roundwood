@@ -9,8 +9,11 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowArchBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
+import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -130,16 +133,32 @@ public final class ShowcaseCanvas {
         return placed;
     }
 
-    /**
-     * Sets a window at ({@code r}, {@code y}, {@code f}) with the pane connections its neighbours give
-     * it (they update on the write), then gives it {@code appearance} through its block entity.
-     */
+    /** A centred round window across {@code axis} (see {@link #pane}). */
     public void window(Appearance appearance, int r, int y, int f, Direction.Axis axis, boolean waterlogged) {
-        RoundWindowBlock block = ModBlocks.roundWindow();
+        pane(appearance, r, y, f, ModBlocks.roundWindow().defaultBlockState().setValue(RoundWindowBlock.AXIS, axis), waterlogged);
+    }
+
+    /** A round window flush against the cell's {@code side} (a world direction; see {@link #pane}). */
+    public void flushWindow(Appearance appearance, int r, int y, int f, Direction side, boolean waterlogged) {
+        pane(appearance, r, y, f, ModBlocks.roundWindow().defaultBlockState()
+                .setValue(RoundWindowBlock.AXIS, acrossAxis())
+                .setValue(RoundWindowBlock.POSITION, WindowPosition.flush(side)), waterlogged);
+    }
+
+    /** An arch piece in {@code pose} (world directions; see {@link #pane}). */
+    public void arch(RoundWindowArchBlock piece, Appearance appearance, int r, int y, int f, WindowPose pose) {
+        pane(appearance, r, y, f, RoundWindowArchBlock.withPose(piece.defaultBlockState(), pose), false);
+    }
+
+    /**
+     * Sets a single-cell window state at ({@code r}, {@code y}, {@code f}) with the pane connections
+     * its neighbours give it (they update on the write), then gives it {@code appearance} through its
+     * block entity.
+     */
+    public void pane(Appearance appearance, int r, int y, int f, BlockState state, boolean waterlogged) {
         BlockPos pos = frame.pos(r, y, f);
-        BlockState state = block.defaultBlockState().setValue(RoundWindowBlock.AXIS, axis)
-                .setValue(BlockStateProperties.WATERLOGGED, waterlogged);
-        level.setBlock(pos, Block.updateFromNeighbourShapes(state, level, pos), Block.UPDATE_ALL);
+        BlockState wet = state.setValue(BlockStateProperties.WATERLOGGED, waterlogged);
+        level.setBlock(pos, Block.updateFromNeighbourShapes(wet, level, pos), Block.UPDATE_ALL);
         if (level.getBlockEntity(pos) instanceof RoundWindowBlockEntity entity) {
             entity.setAppearance(appearance);
         } else {

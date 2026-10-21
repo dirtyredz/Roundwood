@@ -1,7 +1,8 @@
 # Roundwood
 
-Forge 1.20.1 mod: a round 2x2 wooden door, a round window and a round 2x2 trim, hobbit-hole style.
-Each is one item you restyle in the world: any planks (vanilla or modded) set the wood, any of the
+Forge 1.20.1 mod: a round 2x2 wooden door, a round window with two arch pieces and a round 2x2
+trim, hobbit-hole style. Each is one item you restyle in the world: any planks (vanilla or modded)
+set the wood, any of the
 16 dyes paints it, and trims can also be faced with radial brick. Install on **both** the server
 and every client. Generic: not tied to any modpack.
 
@@ -15,8 +16,10 @@ and every client. Generic: not tied to any modpack.
 
 ## Content
 
-Three items: **Round Door**, **Round Window**, **Round Trim**. They are crafted (and found in the
-creative tab) in oak; their look is changed once placed and travels with them when picked or broken.
+Five items: **Round Door**, **Round Window**, **Round Window Arch, Left**, **Round Window Arch,
+Right** and **Round Trim** (creative tab order: door, window, left arch, right arch, trim). They are
+crafted (and found in the creative tab) in oak; their look is changed once placed and travels with
+them when picked or broken.
 
 **Round door** (one item places a 2 wide x 2 high assembly). One round leaf on one hinge, like a
 hobbit door: vertical boards running the full height of the door, brass straps on the hinge side
@@ -44,15 +47,56 @@ any filled camouflage corners. The knobs and straps are decoration and do not co
   plus the stored camouflage block. Pistons cannot move it. To the game it is a normal wooden door
   (villagers, pathfinding, `minecraft:doors`, fuel, axe).
 
-**Round window** (single block). A thin square wooden pane with round tinted glass in the middle,
-facing the player who places it, connecting like a glass pane (an arm only towards a real pane
-junction across its face, never towards a solid block). Waterloggable; drops itself.
+**Round window** (single block). A thin square wooden pane with round tinted glass in the middle.
+It can stand upright and centred, or flush against any side of its cell (four walls, floor,
+ceiling), and connects like a glass pane, with a short glass bridge where it meets a neighbouring
+pane, bars, wall or window (never towards a solid block). Waterloggable; drops itself. See "Placing
+windows".
+
+**Round window arches** (two single blocks, left and right). The upper half of a round window two
+blocks wide, split into two independent pieces: place them side by side and the glazed half circle
+runs across both, with square wooden corners and nothing below the diameter. Left and right are
+judged from the front: the left piece has its glass in its bottom right corner, the right piece in
+its bottom left, so they meet at the circle's centre. The back shows the mirrored shape. Each piece
+is a 16 x 16 pane 2 pixels thick; there is no partner lookup, so a single piece stands fine alone.
+They share the round window's restyling, waterlogging and drops.
 
 **Round trim** (one item places a 2 x 2 frame). A flat ring, open in the middle, purely decorative.
 Fit it to a door by **sneak-right-clicking the front of a closed round door** with it (it goes in
 the four cells in front, one pixel proud of the leaf); anywhere else it stands free, the target cell
 being its lower-left quarter. Breaking any quarter drops one trim; door and trim never remove each
 other.
+
+## Placing windows
+
+Holding a window item (round window or either arch) and aiming at a block face draws an overlay on
+that face: a centre square and four edge trapezoids, with the zone you aim at picked out in white
+and the pane that would be placed outlined in light blue at its destination. The outline is hidden
+when placement would be refused. The main hand's window wins; the offhand window is used only when
+the main hand is empty. Sneaking changes nothing.
+
+| Zone | Where on the face | Result |
+|---|---|---|
+| Centre | The middle square, from 1/4 to 3/4 across and up (edges included) | Pane upright and centred in the destination cell, facing you |
+| Edge | One of four trapezoids along the face edges | Pane flush against that side of the destination cell |
+
+- Face coordinates: on a floor or ceiling face u runs east and v south; on a north or south face u
+  runs east and v up; on an east or west face u runs south and v up. Outside the centre square, the
+  larger distance from the face middle picks the edge (an exact diagonal picks the u edge). An edge
+  zone names the world direction of that edge, so the top and bottom zones of a wall face mean up
+  and down: the six flush sides are the four walls, the floor and the ceiling.
+- The destination cell is vanilla's (a replaceable clicked block is replaced); the zone is read on
+  the face you clicked. Interactive blocks (doors, chests, levers) can still take the click first,
+  so the overlay is not a promise.
+- Arch pieces: the centre zone places them upright with the front towards you (a left piece on your
+  left); an edge zone places them flush with the front towards you; on a floor or ceiling the top
+  is the side you see as up, so a left piece looks left to whoever placed it.
+- **To move a placed window, break it and place it again**; its look survives in the item. Windows
+  saved by 0.5.0 load centred, with their axis, connections, water and look unchanged.
+- Junctions: a connected side that the pane's slab does not already reach gets a glass arm to a
+  central glass post, so connected flush panes show glass reaching back to the cell centre and
+  floor or ceiling panes show vertical fins. Panes never link up or down, and two windows face to
+  face, or continuing the same plane, do not connect.
 
 ## Restyling
 
@@ -62,7 +106,8 @@ other.
 | Door leaf | Dye (sneaking or not) | Painted, the wood kept underneath | 1 dye |
 | Door corner | Block, not sneaking (planks included) | Camouflage, as above | 1 block, refunded later |
 | Door corner | Sneak + planks or dye | Refused with a hint to aim at the leaf | nothing |
-| Window | **Sneak** + planks / dye | The wooden face only; glass and arms never change | 1 plank / dye |
+| Window or arch | **Sneak** + planks | The wooden face only; glass and bridges never change | 1 plank |
+| Window or arch | Dye (sneaking or not) | The wooden face painted; glass never changes | 1 dye |
 | Trim | **Sneak** + planks | That wood (also replaces masonry) | 1 plank |
 | Trim | **Sneak** + bricks, stone bricks, deepslate bricks or mud bricks | Radial brickwork, paint cleared | 1 block |
 | Wooden trim | Dye | Painted | 1 dye |
@@ -74,10 +119,12 @@ other.
   item on a door still fits a trim; buckets still work on windows.
 - The offhand works only when the main hand is empty.
 - **Planks** are any item tagged `minecraft:planks`, or added by a datapack to
-  `roundwood:appearance_planks`. Modded woods show their own plank texture on windows and trims and
+  `roundwood:appearance_planks`. Modded woods show their own plank texture on windows, arches and
+  trims and
   Roundwood's full-height boards tinted to that wood's colour on doors. A wood whose mod is later
   removed shows as oak and comes back when the mod returns.
-- The look is cosmetic: every door, window and trim behaves like the oak one (an axe mines all of
+- The look is cosmetic: every door, window, arch and trim behaves like the oak one (an axe mines all
+  of
   them, nether woods do not change fire behaviour, brick trims do not need a pickaxe).
 
 ## Showcase command
@@ -88,7 +135,10 @@ blocks ahead). It first clears that whole box to air and lays a stone floor, so 
 ground; it refuses if the box would leave the build limits, the world border or loaded chunks, and
 never touches blocks outside it. The layout: every vanilla wood (and up to eight installed modded
 planks) as doors closed and open on both hinges and as one connected window row; camouflaged doors;
-window junction, stacked, waterlogged and stone-behind demos; a lever-driven door; every paint on a
+window junction, stacked, waterlogged and stone-behind demos; a window positions section (centred and
+the six flush positions, connected junctions, a solid-neighbour example, waterlogging) and a window
+arches section (centred, flush, floor and ceiling pairs, single pieces, wood and paint examples);
+a lever-driven door; every paint on a
 door, a trim and a window; every wood and masonry trim fitted round a blue, a camouflaged oak and an
 open red door; and the four brick trims standing free.
 
@@ -98,12 +148,14 @@ open red door; and the four brick trims standing free.
 |---|---|
 | Round door | 8 planks (any, mixed allowed) around 1 gold nugget |
 | Round window | 4 planks around 1 glass pane (plus shape) |
+| Round window arch, left | Rows `PP` / `PG` / `P ` (P planks, G glass pane) |
+| Round window arch, right | Rows `PPP` / ` G ` / ` P ` (P planks, G glass pane) |
 | Round trim | 4 planks in the four corners of the grid |
 
 Crafting always gives the oak object; restyle it in the world. With **EMI** each item is one index
 entry whose icon cycles through example looks (the tooltip says it is a preview; taking or
 bookmarking it gives the plain oak item); styled stacks in your inventory are told apart by their
-look. With **JEI** styled stacks are separate subtypes and the three plain items are listed. Neither
+look. With **JEI** styled stacks are separate subtypes and the five plain items are listed. Neither
 viewer is required.
 
 ## Upgrading from 0.4.0
@@ -131,7 +183,8 @@ The release jar is `build/libs/roundwood-1.20.1-<version>.jar`.
 
 ## Release
 
-Not released yet; 0.5.0 is a local candidate. The flow follows DankRecipeTransfer: an immutable
+Not released yet. 0.5.0 is the baseline; 0.6.0 (targeted window placement and the arch pieces) is
+a local candidate, owner trial pending. The flow follows DankRecipeTransfer: an immutable
 GitHub prerelease asset, then a direct-URL `mods/roundwood.pw.toml` (with SHA-256, `side = "both"`)
 in the pack repo. Both steps need the owner's go-ahead.
 

@@ -11,7 +11,11 @@ import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowArchBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
+import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
+import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.section.BrickArchesSection;
 import io.github.dirtyredz.roundwood.showcase.section.CamouflageSection;
@@ -19,6 +23,8 @@ import io.github.dirtyredz.roundwood.showcase.section.DoorsSection;
 import io.github.dirtyredz.roundwood.showcase.section.PaintsSection;
 import io.github.dirtyredz.roundwood.showcase.section.RedstoneSection;
 import io.github.dirtyredz.roundwood.showcase.section.TrimCombinationsSection;
+import io.github.dirtyredz.roundwood.showcase.section.WindowArchesSection;
+import io.github.dirtyredz.roundwood.showcase.section.WindowPositionsSection;
 import io.github.dirtyredz.roundwood.showcase.section.WindowsSection;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -140,6 +146,8 @@ public final class ShowcaseGameTests {
         verifyDoors(level, frame);
         verifyCamouflage(level, frame);
         verifyWindows(level, frame);
+        verifyWindowPositions(level, frame);
+        verifyWindowArches(level, frame);
         verifyRedstone(level, frame);
         verifyTrims(level, frame);
         verifyArches(level, frame);
@@ -150,6 +158,8 @@ public final class ShowcaseGameTests {
             verifyArches(level, frame);
             verifyDoors(level, frame);
             verifyPaints(level, frame);
+            verifyWindowPositions(level, frame);
+            verifyWindowArches(level, frame);
             clearSilently(helper);
             helper.succeed();
         });
@@ -274,6 +284,83 @@ public final class ShowcaseGameTests {
         check(solid.is(oak) && level.getBlockState(frame.pos(WindowsSection.SOLID_R, 0, WindowsSection.DEMO_F + 1)).is(Blocks.STONE),
                 "stone-behind window demo missing");
         check(!connects(solid, frame.forward()), "a window grew an arm towards the stone behind it");
+    }
+
+    /** The round window in each position, the junction demos and the practice blocks, in this facing's world directions. */
+    private static void verifyWindowPositions(ServerLevel level, ShowcaseFrame frame) {
+        Direction forward = frame.forward();
+        Direction right = frame.right();
+        int f = WindowPositionsSection.ROW_F;
+        expectPosition(level, frame, WindowPositionsSection.CENTRE_R, f, WindowPosition.CENTER);
+        check(level.getBlockState(frame.pos(WindowPositionsSection.CENTRE_R, 0, f)).getValue(RoundWindowBlock.AXIS) == right.getAxis(),
+                "centred window axis");
+        expectPosition(level, frame, WindowPositionsSection.FORWARD_R, f, WindowPosition.flush(forward));
+        expectPosition(level, frame, WindowPositionsSection.BACK_R, f, WindowPosition.flush(forward.getOpposite()));
+        expectPosition(level, frame, WindowPositionsSection.RIGHT_R, f, WindowPosition.flush(right));
+        expectPosition(level, frame, WindowPositionsSection.LEFT_R, f, WindowPosition.flush(right.getOpposite()));
+        expectPosition(level, frame, WindowPositionsSection.CEILING_R, f, WindowPosition.UP);
+        expectPosition(level, frame, WindowPositionsSection.CEILING_R, WindowPositionsSection.FLOOR_F, WindowPosition.DOWN);
+        int d = WindowPositionsSection.DEMO_F;
+        BlockState pane = expectPosition(level, frame, WindowPositionsSection.PANE_R, d, WindowPosition.flush(forward));
+        check(connects(pane, right), "flush window not bridged to the glass pane on its right");
+        BlockState fin = expectPosition(level, frame, WindowPositionsSection.FIN_R, d, WindowPosition.UP);
+        check(connects(fin, forward), "ceiling window not joined to the pane beyond it");
+        BlockState mixed = expectPosition(level, frame, WindowPositionsSection.MIXED_R, d, WindowPosition.flush(forward));
+        check(connects(mixed, right), "flush window not joined to the centred one beside it");
+        BlockState solid = expectPosition(level, frame, WindowPositionsSection.SOLID_R, d, WindowPosition.flush(forward));
+        check(!connects(solid, right) && !connects(solid, forward), "stone made a flush window grow glass: " + solid);
+        BlockState wet = expectPosition(level, frame, WindowPositionsSection.WATER_R, d, WindowPosition.flush(forward));
+        check(wet.getValue(BlockStateProperties.WATERLOGGED), "flush window not waterlogged");
+        int p = WindowPositionsSection.PRACTICE_F;
+        check(level.getBlockState(frame.pos(WindowPositionsSection.SLAB_R, 0, p)).is(Blocks.OAK_SLAB)
+                && level.getBlockState(frame.pos(WindowPositionsSection.STAIRS_R, 0, p)).is(Blocks.OAK_STAIRS)
+                && level.getBlockState(frame.pos(WindowPositionsSection.WALL_R, 1, p)).is(Blocks.STONE_BRICKS), "practice blocks missing");
+    }
+
+    private static BlockState expectPosition(ServerLevel level, ShowcaseFrame frame, int r, int f, WindowPosition position) {
+        BlockState state = level.getBlockState(frame.pos(r, 0, f));
+        check(state.is(ModBlocks.roundWindow()) && state.getValue(RoundWindowBlock.POSITION) == position,
+                "expected a " + position + " window at r " + r + " f " + f + ", found " + state);
+        check(Appearance.DEFAULT.equals(windowLook(level, frame.pos(r, 0, f))), "window look at r " + r + " f " + f);
+        return state;
+    }
+
+    /** Every arch pair: left on the builder's left, the pose placement would choose, the named look. */
+    private static void verifyWindowArches(ServerLevel level, ShowcaseFrame frame) {
+        Direction forward = frame.forward();
+        int f = WindowArchesSection.ROW_F;
+        expectPair(level, frame, WindowArchesSection.CENTRED_R, f, WindowArchesSection.centred(forward), Appearance.DEFAULT);
+        expectPair(level, frame, WindowArchesSection.FLUSH_R, f, WindowArchesSection.flush(forward), Appearance.DEFAULT);
+        expectPair(level, frame, WindowArchesSection.FLOOR_R, f, WindowArchesSection.floor(forward), Appearance.DEFAULT);
+        expectPair(level, frame, WindowArchesSection.CEILING_R, f, WindowArchesSection.ceiling(forward), Appearance.DEFAULT);
+        expectArch(level, frame, ModBlocks.archLeft(), WindowArchesSection.SINGLE_LEFT_R, WindowArchesSection.SINGLES_F,
+                WindowArchesSection.centred(forward), Appearance.DEFAULT);
+        expectArch(level, frame, ModBlocks.archRight(), WindowArchesSection.SINGLE_RIGHT_R, WindowArchesSection.SINGLES_F,
+                WindowArchesSection.centred(forward), Appearance.DEFAULT);
+        List<Appearance> looks = WindowArchesSection.looks();
+        for (int i = 0; i < looks.size(); i++) {
+            expectPair(level, frame, WindowArchesSection.LOOKS_R + WindowArchesSection.LOOKS_PITCH * i, WindowArchesSection.LOOKS_F,
+                    WindowArchesSection.centred(forward), looks.get(i));
+        }
+        // Placement's own rule agrees with the showcase: a builder facing forward puts the left piece on their left.
+        check(WindowArchesSection.centred(forward).right() == frame.right(), "centred pair's right is not the builder's right");
+        check(WindowArchesSection.floor(forward).right() == frame.right(), "floor pair's right is not the builder's right");
+        check(WindowArchesSection.ceiling(forward).right() == frame.right(), "ceiling pair's right is not the builder's right");
+    }
+
+    private static void expectPair(ServerLevel level, ShowcaseFrame frame, int r, int f, WindowPose pose, Appearance look) {
+        expectArch(level, frame, ModBlocks.archLeft(), r, f, pose, look);
+        expectArch(level, frame, ModBlocks.archRight(), r + 1, f, pose, look);
+        check(!connects(level.getBlockState(frame.pos(r, 0, f)), frame.right()) || pose.depth() == WindowDepth.CENTER,
+                "a flush or floor pair bridged between its own pieces at r " + r);
+    }
+
+    private static void expectArch(ServerLevel level, ShowcaseFrame frame, RoundWindowArchBlock piece, int r, int f, WindowPose pose,
+                                   Appearance look) {
+        BlockPos pos = frame.pos(r, 0, f);
+        BlockState state = level.getBlockState(pos);
+        check(state.is(piece) && piece.pose(state).equals(pose), "expected " + piece + " in " + pose + " at r " + r + " f " + f + ", found " + state);
+        check(look.equals(windowLook(level, pos)), piece + " at r " + r + " shows " + windowLook(level, pos));
     }
 
     private static void verifyRedstone(ServerLevel level, ShowcaseFrame frame) {
