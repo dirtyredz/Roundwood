@@ -23,9 +23,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * Wraps every window blockstate model (canonical and 0.4.0 aliases) so the chunk-baked window shows
+ * Wraps every window blockstate model (round window, both arch pieces and the 0.4.0 aliases) so the chunk-baked window shows
  * its block entity's appearance ({@link WindowAppearanceData}): only the wooden face's quads (the
- * oak planks of the generated core) change sprite; the glass and the arms never do, and the
+ * oak planks of the generated core) change sprite; the glass and the junctions never do, and the
  * translucent render type, connections and waterlogging are the model's own. Results are cached per
  * state, side, render type and wood sprite (bounded, cleared on reload; safe for chunk workers).
  * Oak, unpainted, is the baked model itself.
@@ -35,7 +35,7 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
     }
 
     private static final AppearanceModelCache<Key, List<BakedQuad>> QUADS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
-    private static final AppearanceModelCache<ResourceLocation, BakedModel> ITEMS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
+    private static final WindowItemModels<BakedModel> ITEMS = new WindowItemModels<>(AppearanceModelCache.MODELS);
 
     public WindowAppearanceModel(BakedModel original) {
         super(original);
@@ -67,14 +67,14 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
         return appearance == null ? super.getParticleIcon(data) : DonorSprites.atlas(wood(appearance.appearance()));
     }
 
-    /** The window item model ({@code oakItem}) in {@code appearance}. */
+    /** A window item model ({@code oakItem}: the round window's or an arch piece's) in {@code appearance}. */
     public static BakedModel item(BakedModel oakItem, Appearance appearance) {
         ResourceLocation wood = wood(appearance);
         if (wood.equals(BuiltinWoodStyles.OAK_PLANKS)) {
             return oakItem;
         }
         TextureAtlasSprite sprite = DonorSprites.atlas(wood);
-        return ITEMS.get(wood, key -> ModelRetexturing.map(oakItem,
+        return ITEMS.get(oakItem, wood, source -> ModelRetexturing.map(source,
                 quad -> isWood(quad) ? ModelRetexturing.retexture(quad, sprite, -1) : quad, s -> s));
     }
 

@@ -12,17 +12,18 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Places a window (vanilla single-block placement, so pane connections, waterlogging and Forge's
- * placement capture are untouched) and puts the stack's appearance on its block entity inside the
- * same placement, before any rollback could happen.
+ * Places a single-cell window (the round window or an arch piece) through vanilla single-block
+ * placement, so the targeted pose ({@code WindowPaneBlock.getStateForPlacement}), pane connections,
+ * waterlogging and Forge's placement capture all apply, and puts the stack's appearance on its
+ * block entity inside the same placement, before any rollback could happen.
  */
 public class RoundWindowItem extends AppearanceBlockItem {
-    public RoundWindowItem(RoundWindowBlock block, Properties properties) {
+    public RoundWindowItem(WindowPaneBlock block, Properties properties) {
         this(block, properties, Appearance.DEFAULT, null);
     }
 
     /** @param aliasId the 0.4.0 id of a hidden alias placing {@code block} in {@code fallback}, or null */
-    public RoundWindowItem(RoundWindowBlock block, Properties properties, Appearance fallback, @Nullable String aliasId) {
+    public RoundWindowItem(WindowPaneBlock block, Properties properties, Appearance fallback, @Nullable String aliasId) {
         super(block, properties, AppearanceFamily.WINDOW, fallback, aliasId);
     }
 

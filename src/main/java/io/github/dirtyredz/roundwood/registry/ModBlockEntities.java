@@ -5,7 +5,7 @@ import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import net.minecraft.world.level.block.Block;
@@ -19,8 +19,9 @@ import java.util.List;
 
 /**
  * The anchors: the door's (id {@code round_door}, unchanged since 0.2.0 so saved camouflage loads),
- * the window's and the trim's. Each is valid for its canonical block and that family's hidden
- * 0.4.0 aliases, so saved entities load into unconverted blocks.
+ * the window's and the trim's. Each is valid for its canonical block(s) and that family's hidden
+ * 0.4.0 aliases, so saved entities load into unconverted blocks. The window entity (id
+ * {@code round_window}) also serves both arch pieces.
  */
 public final class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
@@ -34,7 +35,7 @@ public final class ModBlockEntities {
     @SuppressWarnings("DataFlowIssue")
     public static final RegistryObject<BlockEntityType<RoundWindowBlockEntity>> ROUND_WINDOW = BLOCK_ENTITIES.register("round_window",
             () -> BlockEntityType.Builder.of((pos, state) -> new RoundWindowBlockEntity(roundWindow(), pos, state),
-                    with(ModBlocks.roundWindow(), LegacyContent.windows()).toArray(RoundWindowBlock[]::new)).build(null));
+                    windows().toArray(WindowPaneBlock[]::new)).build(null));
 
     @SuppressWarnings("DataFlowIssue")
     public static final RegistryObject<BlockEntityType<RoundTrimBlockEntity>> ROUND_TRIM = BLOCK_ENTITIES.register("round_trim",
@@ -54,6 +55,14 @@ public final class ModBlockEntities {
 
     public static BlockEntityType<RoundTrimBlockEntity> roundTrim() {
         return ROUND_TRIM.get();
+    }
+
+    private static List<WindowPaneBlock> windows() {
+        List<WindowPaneBlock> out = new ArrayList<>();
+        out.add(ModBlocks.roundWindow());
+        out.addAll(ModBlocks.arches());
+        out.addAll(LegacyContent.windows());
+        return out;
     }
 
     private static <T extends Block> List<T> with(T canonical, List<? extends T> aliases) {

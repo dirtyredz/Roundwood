@@ -11,7 +11,7 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 
 /**
- * English names: the three canonical blocks, the hidden 0.4.0 aliases under their old names (old
+ * English names: the five canonical blocks, the hidden 0.4.0 aliases under their old names (old
  * stacks in chests still read "Spruce Round Door"), the creative tab, the appearance tooltip lines,
  * the restyling hints and the recipe-viewer preview note.
  */
@@ -25,6 +25,8 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("itemGroup." + Roundwood.MOD_ID, "Roundwood");
         add(ModBlocks.roundDoor(), "Round Door");
         add(ModBlocks.roundWindow(), "Round Window");
+        add(ModBlocks.archLeft(), "Round Window Arch, Left");
+        add(ModBlocks.archRight(), "Round Window Arch, Right");
         add(ModBlocks.roundTrim(), "Round Trim");
         for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
             add("block." + Roundwood.MOD_ID + "." + entry.id(), title(entry.id()));

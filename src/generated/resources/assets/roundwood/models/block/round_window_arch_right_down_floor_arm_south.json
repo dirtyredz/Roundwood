@@ -1,0 +1,61 @@
+{
+  "elements": [
+    {
+      "faces": {
+        "east": {
+          "texture": "#glass"
+        },
+        "south": {
+          "cullface": "south",
+          "texture": "#glass"
+        },
+        "up": {
+          "cullface": "up",
+          "texture": "#glass"
+        },
+        "west": {
+          "texture": "#glass"
+        }
+      },
+      "from": [
+        7,
+        2,
+        9
+      ],
+      "to": [
+        9,
+        16,
+        16
+      ]
+    },
+    {
+      "faces": {
+        "east": {
+          "texture": "#glass"
+        },
+        "south": {
+          "cullface": "south",
+          "texture": "#glass"
+        },
+        "west": {
+          "texture": "#glass"
+        }
+      },
+      "from": [
+        7,
+        1.5,
+        9
+      ],
+      "to": [
+        9,
+        2,
+        16
+      ]
+    }
+  ],
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "glass": "roundwood:block/window_glass",
+    "particle": "roundwood:block/window_glass"
+  }
+}

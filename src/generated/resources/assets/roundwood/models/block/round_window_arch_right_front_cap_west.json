@@ -1,0 +1,26 @@
+{
+  "elements": [
+    {
+      "faces": {
+        "west": {
+          "texture": "#glass"
+        }
+      },
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        16,
+        9
+      ]
+    }
+  ],
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "glass": "roundwood:block/window_glass",
+    "particle": "roundwood:block/window_glass"
+  }
+}

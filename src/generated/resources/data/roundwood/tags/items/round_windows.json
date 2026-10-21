@@ -1,5 +1,7 @@
 {
   "values": [
-    "roundwood:round_window"
+    "roundwood:round_window",
+    "roundwood:round_window_arch_left",
+    "roundwood:round_window_arch_right"
   ]
 }

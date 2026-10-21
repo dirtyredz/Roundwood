@@ -1,16 +1,14 @@
 package io.github.dirtyredz.roundwood.client.door;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorSelectionShapes;
+import io.github.dirtyredz.roundwood.client.render.OutlineLines;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -51,25 +49,7 @@ public final class DoorHighlightRenderer {
         }
         VoxelShape shape = DoorSelectionShapes.visible(state, level, pos);
         Vec3 camera = event.getCamera().getPosition();
-        draw(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.lines()), shape,
-                pos.getX() - camera.x, pos.getY() - camera.y, pos.getZ() - camera.z);
-    }
-
-    /** Vanilla's {@code LevelRenderer.renderShape}: every edge of the shape as a black line. */
-    private static void draw(PoseStack pose, VertexConsumer lines, VoxelShape shape, double x, double y, double z) {
-        PoseStack.Pose last = pose.last();
-        shape.forAllEdges((x1, y1, z1, x2, y2, z2) -> {
-            float dx = (float) (x2 - x1);
-            float dy = (float) (y2 - y1);
-            float dz = (float) (z2 - z1);
-            float length = Mth.sqrt(dx * dx + dy * dy + dz * dz);
-            dx /= length;
-            dy /= length;
-            dz /= length;
-            lines.vertex(last.pose(), (float) (x1 + x), (float) (y1 + y), (float) (z1 + z))
-                    .color(0F, 0F, 0F, ALPHA).normal(last.normal(), dx, dy, dz).endVertex();
-            lines.vertex(last.pose(), (float) (x2 + x), (float) (y2 + y), (float) (z2 + z))
-                    .color(0F, 0F, 0F, ALPHA).normal(last.normal(), dx, dy, dz).endVertex();
-        });
+        OutlineLines.edges(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.lines()), shape,
+                pos.getX() - camera.x, pos.getY() - camera.y, pos.getZ() - camera.z, 0F, 0F, 0F, ALPHA);
     }
 }

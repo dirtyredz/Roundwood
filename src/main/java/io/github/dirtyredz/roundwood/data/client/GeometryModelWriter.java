@@ -7,6 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraftforge.client.model.generators.ModelBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -67,6 +68,9 @@ public final class GeometryModelWriter {
                                                           FaceStyle style) {
         for (Piece piece : pieces) {
             for (Box part : splitAtTiles(piece.box())) {
+                if (Arrays.stream(Direction.values()).noneMatch(direction -> style.draw(part, direction))) {
+                    continue; // an element needs at least one face; a wholly buried part is simply left out
+                }
                 Box local = part.translate(-tileOrigin(part.minX()), -tileOrigin(part.minY()), -tileOrigin(part.minZ()));
                 ModelBuilder<T>.ElementBuilder element = builder.element()
                         .from((float) part.minX(), (float) part.minY(), (float) part.minZ())

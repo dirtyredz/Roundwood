@@ -11,12 +11,12 @@ import org.joml.Vector3f;
  * item renderer): front GUI lighting, and every transform computed so the model's own centre lands
  * where vanilla puts a block's, whatever the model's size.
  */
-final class ItemModelTransforms {
+public final class ItemModelTransforms {
     private ItemModelTransforms() {
     }
 
     /** A two-block-wide assembly (door, frame): drawn at half a block's scale throughout. */
-    static void assembly(ItemModelBuilder builder, Vector3f centre) {
+    public static void assembly(ItemModelBuilder builder, Vector3f centre) {
         builder.guiLight(BlockModel.GuiLight.FRONT);
         display(builder, ItemDisplayContext.GUI, 0, 0, 0, 0.5F, centre, 0, 0, 0);
         display(builder, ItemDisplayContext.FIXED, 0, 180, 0, 0.375F, centre, 0, 0, 0);
@@ -26,7 +26,7 @@ final class ItemModelTransforms {
     }
 
     /** A one-block model (window). */
-    static void block(ItemModelBuilder builder, Vector3f centre) {
+    public static void block(ItemModelBuilder builder, Vector3f centre) {
         builder.guiLight(BlockModel.GuiLight.FRONT);
         display(builder, ItemDisplayContext.GUI, 0, 0, 0, 0.875F, centre, 0, 0, 0);
         display(builder, ItemDisplayContext.FIXED, 0, 180, 0, 0.75F, centre, 0, 0, 0);

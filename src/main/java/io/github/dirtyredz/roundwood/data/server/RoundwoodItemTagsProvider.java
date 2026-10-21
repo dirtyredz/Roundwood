@@ -13,7 +13,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Item tags name only the three canonical items (the hidden 0.4.0 alias items are never advertised).
+ * Item tags name only the five canonical items (the hidden 0.4.0 alias items are never advertised).
  * {@code roundwood:appearance_planks} is deliberately not generated: a datapack creates it to let
  * plank-like items restyle wood without joining {@code minecraft:planks}.
  */
@@ -26,7 +26,8 @@ public class RoundwoodItemTagsProvider extends ItemTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         tag(ModTags.ROUND_DOOR_ITEMS).add(ModItems.ROUND_DOOR.get());
-        tag(ModTags.ROUND_WINDOW_ITEMS).add(ModItems.ROUND_WINDOW.get());
+        tag(ModTags.ROUND_WINDOW_ITEMS).add(ModItems.ROUND_WINDOW.get(), ModItems.ROUND_WINDOW_ARCH_LEFT.get(),
+                ModItems.ROUND_WINDOW_ARCH_RIGHT.get());
         tag(ModTags.ROUND_TRIM_ITEMS).add(ModItems.ROUND_TRIM.get());
         tag(ItemTags.DOORS).add(ModItems.ROUND_DOOR.get());
         tag(ItemTags.WOODEN_DOORS).add(ModItems.ROUND_DOOR.get());

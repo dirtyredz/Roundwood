@@ -3,7 +3,9 @@ package io.github.dirtyredz.roundwood.registry;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowArchBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.geometry.WindowProfile;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -17,8 +19,9 @@ import net.minecraftforge.registries.RegistryObject;
 import java.util.List;
 
 /**
- * The three canonical blocks: one round door, one round window and one round trim, whose look comes
- * from their appearance (block entity), not from the block. Their behaviour is the oak counterparts'
+ * The five canonical blocks: the round door, the round window, the two arch window pieces (left and
+ * right halves of a round window's upper semicircle) and the round trim, whose look comes from their
+ * appearance (block entity), not from the block. Their behaviour is the oak counterparts'
  * whatever the appearance. The hidden 0.4.0 aliases are registered by {@code migration/LegacyContent}
  * with the same properties.
  */
@@ -29,6 +32,10 @@ public final class ModBlocks {
             () -> new RoundDoorBlock(doorProperties(), BlockSetType.OAK, ModBlockEntities::roundDoor));
     public static final RegistryObject<RoundWindowBlock> ROUND_WINDOW = BLOCKS.register("round_window",
             () -> new RoundWindowBlock(windowProperties(), ModBlockEntities::roundWindow));
+    public static final RegistryObject<RoundWindowArchBlock> ROUND_WINDOW_ARCH_LEFT = BLOCKS.register(WindowProfile.ARCH_LEFT.id(),
+            () -> new RoundWindowArchBlock(windowProperties(), WindowProfile.ARCH_LEFT, ModBlockEntities::roundWindow));
+    public static final RegistryObject<RoundWindowArchBlock> ROUND_WINDOW_ARCH_RIGHT = BLOCKS.register(WindowProfile.ARCH_RIGHT.id(),
+            () -> new RoundWindowArchBlock(windowProperties(), WindowProfile.ARCH_RIGHT, ModBlockEntities::roundWindow));
     public static final RegistryObject<RoundTrimBlock> ROUND_TRIM = BLOCKS.register("round_trim",
             () -> new RoundTrimBlock(trimProperties(), ModBlockEntities::roundTrim));
 
@@ -43,13 +50,26 @@ public final class ModBlocks {
         return ROUND_WINDOW.get();
     }
 
+    public static RoundWindowArchBlock archLeft() {
+        return ROUND_WINDOW_ARCH_LEFT.get();
+    }
+
+    public static RoundWindowArchBlock archRight() {
+        return ROUND_WINDOW_ARCH_RIGHT.get();
+    }
+
+    /** The two arch pieces, left then right. */
+    public static List<RoundWindowArchBlock> arches() {
+        return List.of(archLeft(), archRight());
+    }
+
     public static RoundTrimBlock roundTrim() {
         return ROUND_TRIM.get();
     }
 
-    /** The three canonical blocks: door, window, trim. */
+    /** The five canonical blocks in creative order: door, window, left arch, right arch, trim. */
     public static List<Block> canonical() {
-        return List.of(roundDoor(), roundWindow(), roundTrim());
+        return List.of(roundDoor(), roundWindow(), archLeft(), archRight(), roundTrim());
     }
 
     /** The oak door's hardness, sounds and flammability; a multi-cell assembly cannot be pushed. */

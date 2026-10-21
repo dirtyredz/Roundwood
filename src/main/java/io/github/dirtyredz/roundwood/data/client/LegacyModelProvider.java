@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.data.client;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
 import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
+import io.github.dirtyredz.roundwood.data.client.window.WindowModelProvider;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.PackOutput;
@@ -15,7 +16,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 /**
  * Compatibility resources for the 49 hidden 0.4.0 aliases, kept apart from the canonical providers:
  * each alias blockstate points at its family's canonical models (empty door and trim world models,
- * the window's multipart core and arms) and each alias item model is the family's canonical item
+ * the round window's full multipart: centred core and arms plus every flush position) and each alias item model is the family's canonical item
  * model. Their historical looks come from the block's and item's default appearance at runtime, so
  * no per-finish model exists any more.
  */

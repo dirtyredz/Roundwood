@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.geometry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -45,6 +47,43 @@ public record Box(double minX, double minY, double minZ, double maxX, double max
             box = new Box(BLOCK - box.maxZ, box.minY, box.minX, BLOCK - box.minZ, box.maxY, box.maxX);
         }
         return box;
+    }
+
+    /**
+     * This box minus {@code other}: up to six disjoint boxes covering exactly what is left (the box
+     * itself when they only touch or do not meet). Deterministic order: x slices, then y, then z.
+     */
+    public List<Box> subtract(Box other) {
+        Optional<Box> overlap = intersect(other);
+        if (overlap.isEmpty()) {
+            return List.of(this);
+        }
+        Box o = overlap.get();
+        List<Box> out = new ArrayList<>();
+        if (minX < o.minX) {
+            out.add(new Box(minX, minY, minZ, o.minX, maxY, maxZ));
+        }
+        if (o.maxX < maxX) {
+            out.add(new Box(o.maxX, minY, minZ, maxX, maxY, maxZ));
+        }
+        if (minY < o.minY) {
+            out.add(new Box(o.minX, minY, minZ, o.maxX, o.minY, maxZ));
+        }
+        if (o.maxY < maxY) {
+            out.add(new Box(o.minX, o.maxY, minZ, o.maxX, maxY, maxZ));
+        }
+        if (minZ < o.minZ) {
+            out.add(new Box(o.minX, o.minY, minZ, o.maxX, o.maxY, o.minZ));
+        }
+        if (o.maxZ < maxZ) {
+            out.add(new Box(o.minX, o.minY, o.maxZ, o.maxX, o.maxY, maxZ));
+        }
+        return List.copyOf(out);
+    }
+
+    /** True when the point lies strictly inside the box. */
+    public boolean containsStrictly(double x, double y, double z) {
+        return minX < x && x < maxX && minY < y && y < maxY && minZ < z && z < maxZ;
     }
 
     public boolean within(Box bounds) {

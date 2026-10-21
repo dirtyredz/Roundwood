@@ -74,6 +74,7 @@ public final class RoundwoodClient {
         Map<net.minecraft.resources.ResourceLocation, BakedModel> models = event.getModels();
         List<Block> windows = new ArrayList<>(LegacyContent.windows());
         windows.add(ModBlocks.roundWindow());
+        windows.addAll(ModBlocks.arches());
         for (Block window : windows) {
             for (BlockState state : window.getStateDefinition().getPossibleStates()) {
                 ModelResourceLocation location = BlockModelShaper.stateToModelLocation(state);

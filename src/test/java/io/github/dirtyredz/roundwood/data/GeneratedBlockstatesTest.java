@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The checked-in blockstates of the canonical and alias blocks: doors and trims are one empty
- * variant (drawn by block-entity renderers), windows are the multipart pane. Independent of the
+ * variant (drawn by block-entity renderers), windows (round and arch) are multipart panes. Independent of the
  * mod's own code.
  */
 class GeneratedBlockstatesTest {
@@ -64,63 +64,165 @@ class GeneratedBlockstatesTest {
         assertEquals(model, variants.getAsJsonObject("").get("model").getAsString(), id);
     }
 
+
+    /**
+     * Round windows (canonical and every alias): the 0.5.0 centred parts, now also conditioned on
+     * {@code position=center}, then the posed parts of the six flush positions. Every state is
+     * checked through the multipart's own conditions.
+     */
     @Test
-    void windowBlockstatesAreMultipartPanesForCanonicalAndEveryAlias() {
+    void roundWindowBlockstatesCoverEveryPositionAxisAndConnection() {
         List<String> windows = new ArrayList<>(ModelExpectations.aliasWindows());
         windows.add("round_window");
         assertEquals(16, windows.size());
-        // Parts: two cores (one per axis) plus four arms, each tied to the side across its plane.
-        List<String[]> arms = List.of(new String[] {"x", "north", "0"}, new String[] {"x", "south", "180"},
-                new String[] {"z", "east", "90"}, new String[] {"z", "west", "270"});
         for (String id : windows) {
             JsonObject state = json(assets("blockstates/" + id + ".json"));
             assertTrue(state.has("multipart") && !state.has("variants"), id);
             JsonArray parts = state.getAsJsonArray("multipart");
-            assertEquals(6, parts.size(), id);
             assertFalse(state.toString().contains("waterlogged"), id + ": no waterlogged conditions");
-            String core = "roundwood:block/round_window";
-            String arm = "roundwood:block/round_window_arm";
-            assertPart(parts.get(0).getAsJsonObject(), core, 0, Map.of("axis", "x"), id);
-            assertPart(parts.get(1).getAsJsonObject(), core, 90, Map.of("axis", "z"), id);
-            for (int i = 0; i < arms.size(); i++) {
-                String[] a = arms.get(i);
-                assertPart(parts.get(2 + i).getAsJsonObject(), arm, Integer.parseInt(a[2]),
-                        Map.of("axis", a[0], a[1], "true"), id);
+            assertPart(parts.get(0).getAsJsonObject(), "roundwood:block/round_window", 0, Map.of("axis", "x", "position", "center"), id);
+            assertPart(parts.get(1).getAsJsonObject(), "roundwood:block/round_window", 90, Map.of("axis", "z", "position", "center"), id);
+            for (String position : List.of("center", "north", "east", "south", "west", "up", "down")) {
+                for (String axis : List.of("x", "z")) {
+                    for (int mask = 0; mask < 16; mask++) {
+                        Map<String, String> values = connections(mask);
+                        values.put("axis", axis);
+                        values.put("position", position);
+                        assertEquals(expectedRound(position, axis, mask), applied(parts, values), id + " " + values);
+                    }
+                }
             }
-            assertCoverage(parts, core, id);
         }
     }
 
-    /** Every axis and connection combination matches exactly one core and the across-plane arms. */
-    private static void assertCoverage(JsonArray parts, String core, String id) {
-        for (String axis : List.of("x", "z")) {
-            for (int mask = 0; mask < 16; mask++) {
-                Map<String, String> values = Map.of("axis", axis, "north", String.valueOf((mask & 1) != 0),
-                        "east", String.valueOf((mask & 2) != 0), "south", String.valueOf((mask & 4) != 0),
-                        "west", String.valueOf((mask & 8) != 0));
-                Set<String> matchedArms = new TreeSet<>();
-                int cores = 0;
-                for (JsonElement p : parts) {
-                    JsonObject part = p.getAsJsonObject();
-                    if (!matches(part.getAsJsonObject("when"), values)) {
-                        continue;
-                    }
-                    if (part.getAsJsonObject("apply").get("model").getAsString().equals(core)) {
-                        cores++;
-                    } else {
-                        part.getAsJsonObject("when").keySet().stream().filter(k -> !k.equals("axis")).forEach(matchedArms::add);
+    /** Both arch pieces: every orientation, depth and connection set draws exactly the expected parts. */
+    @Test
+    void archBlockstatesCoverEveryOrientationDepthAndConnection() {
+        for (String piece : List.of("round_window_arch_left", "round_window_arch_right")) {
+            JsonObject state = json(assets("blockstates/" + piece + ".json"));
+            assertTrue(state.has("multipart") && !state.has("variants"), piece);
+            assertFalse(state.toString().contains("waterlogged"), piece + ": no waterlogged conditions");
+            JsonArray parts = state.getAsJsonArray("multipart");
+            for (String orientation : ORIENTATIONS) {
+                for (String depth : List.of("center", "negative", "positive")) {
+                    for (int mask = 0; mask < 16; mask++) {
+                        Map<String, String> values = connections(mask);
+                        values.put("orientation", orientation);
+                        values.put("depth", depth);
+                        assertEquals(expectedArch(piece, orientation, depth, mask), applied(parts, values), piece + " " + values);
                     }
                 }
-                Set<String> expected = new TreeSet<>();
-                for (String side : axis.equals("x") ? List.of("north", "south") : List.of("east", "west")) {
-                    if (values.get(side).equals("true")) {
-                        expected.add(side);
-                    }
-                }
-                assertEquals(1, cores, id + " axis " + axis + " mask " + mask + ": core parts");
-                assertEquals(expected, matchedArms, id + " axis " + axis + " mask " + mask + ": arms");
             }
         }
+    }
+
+    private static final List<String> SIDES = List.of("north", "east", "south", "west");
+    private static final List<String> ORIENTATIONS = List.of("north", "east", "south", "west", "up_north", "up_east",
+            "up_south", "up_west", "down_north", "down_east", "down_south", "down_west");
+
+    /** What a round window state should draw, written independently of the generator. */
+    private static Set<String> expectedRound(String position, String axis, int mask) {
+        Set<String> out = new TreeSet<>();
+        if (position.equals("center")) {
+            out.add("roundwood:block/round_window@" + (axis.equals("x") ? 0 : 90));
+            Map<String, Integer> armTurns = Map.of("north", 0, "east", 90, "south", 180, "west", 270);
+            for (String side : axis.equals("x") ? List.of("north", "south") : List.of("east", "west")) {
+                if (connected(mask, side)) {
+                    out.add("roundwood:block/round_window_arm@" + armTurns.get(side));
+                }
+            }
+            return out;
+        }
+        if (position.equals("up") || position.equals("down")) {
+            posed(out, position.equals("up") ? "round_window_down_ceiling" : "round_window_up_floor", 0, SIDES, mask);
+            return out;
+        }
+        // Flush on a side: the north-flush pose turned so its flush side lands on that side.
+        int turns = SIDES.indexOf(position);
+        List<String> needed = SIDES.stream().filter(s -> !s.equals(position)).toList();
+        posed(out, "round_window_back", turns, needed, mask);
+        return out;
+    }
+
+    /** What an arch state should draw: its canonical model family (upright facing south or top north) turned. */
+    private static Set<String> expectedArch(String piece, String orientation, String depth, int mask) {
+        Set<String> out = new TreeSet<>();
+        if (!orientation.contains("_")) {
+            int turns = List.of("south", "west", "north", "east").indexOf(orientation);
+            Map<String, String> flush = Map.of("north", "z", "south", "z", "east", "x", "west", "x");
+            if (depth.equals("center")) {
+                out.add("roundwood:block/" + piece + "@" + 90 * turns);
+                for (String side : SIDES) {
+                    // across the plane: the two sides on the normal's axis
+                    if (flush.get(side).equals(flush.get(orientation)) && connected(mask, side)) {
+                        out.add("roundwood:block/" + piece + "_arm_" + SIDES.get(Math.floorMod(SIDES.indexOf(side) - turns, 4))
+                                + "@" + 90 * turns);
+                    }
+                }
+                return out;
+            }
+            // The slab lies against the negative or positive world side of the normal's axis.
+            String side = flush.get(orientation).equals("z") ? (depth.equals("negative") ? "north" : "south")
+                    : (depth.equals("negative") ? "west" : "east");
+            String canonicalSide = SIDES.get(Math.floorMod(SIDES.indexOf(side) - turns, 4));
+            String stem = piece + (canonicalSide.equals("north") ? "_back" : "_front");
+            posed(out, stem, turns, SIDES.stream().filter(s -> !s.equals(side)).toList(), mask);
+            return out;
+        }
+        String[] parts = orientation.split("_");
+        int turns = SIDES.indexOf(parts[1]);
+        String level = switch (depth) {
+            case "negative" -> "floor";
+            case "center" -> "level";
+            default -> "ceiling";
+        };
+        posed(out, piece + "_" + parts[0] + "_" + level, turns, SIDES, mask);
+        return out;
+    }
+
+    /** Core, hub when a needed side is connected, an arm per connected needed side, a cap per open needed side while the hub shows. */
+    private static void posed(Set<String> out, String stem, int turns, List<String> needed, int mask) {
+        int y = 90 * turns;
+        out.add("roundwood:block/" + stem + "@" + y);
+        boolean hub = needed.stream().anyMatch(side -> connected(mask, side));
+        if (hub) {
+            out.add("roundwood:block/" + stem + "_hub@" + y);
+        }
+        for (String side : needed) {
+            String authored = SIDES.get(Math.floorMod(SIDES.indexOf(side) - turns, 4));
+            if (connected(mask, side)) {
+                out.add("roundwood:block/" + stem + "_arm_" + authored + "@" + y);
+            } else if (hub) {
+                out.add("roundwood:block/" + stem + "_cap_" + authored + "@" + y);
+            }
+        }
+    }
+
+    private static boolean connected(int mask, String side) {
+        return (mask & (1 << SIDES.indexOf(side))) != 0;
+    }
+
+    private static Map<String, String> connections(int mask) {
+        Map<String, String> values = new java.util.HashMap<>();
+        for (String side : SIDES) {
+            values.put(side, String.valueOf(connected(mask, side)));
+        }
+        return values;
+    }
+
+    /** The parts a state applies, as "model@y"; a duplicate part (drawn twice) fails. */
+    static Set<String> applied(JsonArray parts, Map<String, String> state) {
+        Set<String> out = new TreeSet<>();
+        for (JsonElement p : parts) {
+            JsonObject part = p.getAsJsonObject();
+            if (!matches(part.getAsJsonObject("when"), state)) {
+                continue;
+            }
+            JsonObject apply = part.getAsJsonObject("apply");
+            String key = apply.get("model").getAsString() + "@" + (apply.has("y") ? apply.get("y").getAsInt() : 0);
+            assertTrue(out.add(key), "part applied twice: " + key + " for " + state);
+        }
+        return out;
     }
 
     private static void assertPart(JsonObject part, String model, int y, Map<String, String> when, String id) {

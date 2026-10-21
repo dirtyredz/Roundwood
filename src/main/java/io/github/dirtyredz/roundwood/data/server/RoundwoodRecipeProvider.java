@@ -13,9 +13,11 @@ import net.minecraft.world.item.Items;
 import java.util.function.Consumer;
 
 /**
- * Three recipes, the 0.4.0 shapes and yields over any planks (mixed types allowed): eight around a
- * gold nugget make a door, four around a glass pane a window, four in the grid's corners (no vanilla
- * recipe uses that shape) a trim. The result is always the default oak object; its look is chosen in
+ * Five recipes over any planks (mixed types allowed): eight around a gold nugget make a door, four
+ * around a glass pane a window, four in the grid's corners (no vanilla recipe uses that shape) a
+ * trim (the 0.4.0 shapes and yields), and four planks with a glass pane in two different shapes make
+ * the left and right arch pieces (deliberately not mirror images, so neither can match the other's
+ * grid). The result is always the default oak object; its look is chosen in
  * the world (planks and dye), so there are no per-wood, painting or masonry recipes.
  */
 public class RoundwoodRecipeProvider extends RecipeProvider {
@@ -37,6 +39,20 @@ public class RoundwoodRecipeProvider extends RecipeProvider {
                 .define('P', ItemTags.PLANKS)
                 .define('G', Items.GLASS_PANE)
                 .group(Roundwood.MOD_ID + ":round_window")
+                .unlockedBy("has_planks", has(ItemTags.PLANKS))
+                .save(writer);
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModItems.ROUND_WINDOW_ARCH_LEFT.get())
+                .pattern("PP").pattern("PG").pattern("P ")
+                .define('P', ItemTags.PLANKS)
+                .define('G', Items.GLASS_PANE)
+                .group(Roundwood.MOD_ID + ":round_window_arch")
+                .unlockedBy("has_planks", has(ItemTags.PLANKS))
+                .save(writer);
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModItems.ROUND_WINDOW_ARCH_RIGHT.get())
+                .pattern("PPP").pattern(" G ").pattern(" P ")
+                .define('P', ItemTags.PLANKS)
+                .define('G', Items.GLASS_PANE)
+                .group(Roundwood.MOD_ID + ":round_window_arch")
                 .unlockedBy("has_planks", has(ItemTags.PLANKS))
                 .save(writer);
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModItems.ROUND_TRIM.get())

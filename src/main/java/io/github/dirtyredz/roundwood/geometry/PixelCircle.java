@@ -49,6 +49,18 @@ public final class PixelCircle {
         return du * du + dv * dv <= radius * radius;
     }
 
+    /**
+     * True when pixel (u, v)'s centre lies inside the circle of {@code diameter} centred at
+     * ({@code centreU}, {@code centreV}) in pixel coordinates (which may sit on a grid corner, outside
+     * the grid being drawn: the arch windows cut one circle across two blocks).
+     */
+    public static boolean inCircle(double centreU, double centreV, double diameter, int u, int v) {
+        double radius = diameter / 2.0;
+        double du = u + 0.5 - centreU;
+        double dv = v + 0.5 - centreV;
+        return du * du + dv * dv <= radius * radius;
+    }
+
     /** A filled disc of the given diameter. */
     public static List<Rect> disc(int diameter) {
         return rasterize(diameter, diameter, (u, v) -> inDisc(diameter, diameter, u, v));

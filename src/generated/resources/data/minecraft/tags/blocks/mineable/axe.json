@@ -2,6 +2,8 @@
   "values": [
     "roundwood:round_door",
     "roundwood:round_window",
+    "roundwood:round_window_arch_left",
+    "roundwood:round_window_arch_right",
     "roundwood:round_trim",
     "roundwood:oak_round_door",
     "roundwood:spruce_round_door",
