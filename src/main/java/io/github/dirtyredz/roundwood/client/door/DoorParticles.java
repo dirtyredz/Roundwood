@@ -1,6 +1,6 @@
 package io.github.dirtyredz.roundwood.client.door;
 
-import io.github.dirtyredz.roundwood.door.leaf.DoorShapes;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorShapes;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.TerrainParticle;

@@ -11,8 +11,8 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
  * places ever touches, or sends an update across, the edge of the area that gets rewritten.
  */
 public final class ShowcaseFrame {
-    public static final int WIDTH = 44;
-    public static final int DEPTH = 34;
+    public static final int WIDTH = 60;
+    public static final int DEPTH = 70;
     public static final int HEIGHT = 6;
 
     private final BlockPos origin;

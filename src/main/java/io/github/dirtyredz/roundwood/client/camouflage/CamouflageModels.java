@@ -1,8 +1,8 @@
 package io.github.dirtyredz.roundwood.client.camouflage;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
-import io.github.dirtyredz.roundwood.door.camouflage.CamouflageGeometry;
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageGeometry;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.FaceUv;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "roundwood:painted_round_trim",
+  "ingredients": [
+    [
+      {
+        "item": "roundwood:oak_round_trim"
+      },
+      {
+        "item": "roundwood:green_round_trim"
+      },
+      {
+        "item": "roundwood:yellow_round_trim"
+      },
+      {
+        "item": "roundwood:red_round_trim"
+      }
+    ],
+    {
+      "item": "minecraft:blue_dye"
+    }
+  ],
+  "result": {
+    "item": "roundwood:blue_round_trim"
+  }
+}

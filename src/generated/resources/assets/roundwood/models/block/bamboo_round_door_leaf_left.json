@@ -2,8 +2,7 @@
   "parent": "roundwood:block/template_round_door_leaf_left",
   "textures": {
     "brass": "roundwood:block/brass",
-    "panel": "minecraft:block/bamboo_planks",
-    "particle": "minecraft:block/bamboo_planks",
-    "trim": "minecraft:block/stripped_bamboo_block"
+    "panel": "roundwood:block/door_panel_bamboo",
+    "particle": "roundwood:block/door_panel_bamboo"
   }
 }

@@ -8,9 +8,9 @@ import net.minecraft.world.level.block.Block;
 import java.util.Set;
 
 /**
- * Every block drops itself (explosion rules apply). A door assembly still yields one item: only the
- * part whose removal started the teardown is evaluated; partners are cleared with drops suppressed.
- * Windows drop themselves without Silk Touch.
+ * Every block drops itself (explosion rules apply). A door or frame assembly still yields one item:
+ * only the part whose removal started the teardown is evaluated; partners are cleared with drops
+ * suppressed. Windows drop themselves without Silk Touch; brick frames, like bricks, need a pickaxe.
  */
 public class RoundwoodBlockLoot extends BlockLootSubProvider {
     public RoundwoodBlockLoot() {

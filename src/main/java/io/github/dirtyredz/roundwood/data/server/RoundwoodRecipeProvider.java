@@ -4,6 +4,7 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.variant.Finish;
 import io.github.dirtyredz.roundwood.variant.FinishCatalog;
+import io.github.dirtyredz.roundwood.variant.TrimMaterial;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -24,7 +25,9 @@ import java.util.function.Function;
 /**
  * Natural finishes are crafted from their planks; painted finishes are dyed from oak or from another
  * painted finish. The paint ingredient lists every other paintable item (as vanilla wool dyeing
- * does), so no recipe turns an item into itself.
+ * does), so no recipe turns an item into itself. Frames: four planks or brick blocks in the corners
+ * of the grid (no vanilla recipe uses that shape) make one whole frame; painted frames are dyed the
+ * same way as doors.
  */
 public class RoundwoodRecipeProvider extends RecipeProvider {
     public RoundwoodRecipeProvider(PackOutput output) {
@@ -50,22 +53,43 @@ public class RoundwoodRecipeProvider extends RecipeProvider {
                     .save(writer);
         }
         for (Finish finish : FinishCatalog.PAINTED) {
-            paint(writer, finish, RecipeCategory.REDSTONE, ModBlocks::door, "painted_round_door");
-            paint(writer, finish, RecipeCategory.DECORATIONS, ModBlocks::window, "painted_round_window");
+            DyeItem dye = DyeItem.byColor(finish.paint().orElseThrow());
+            paint(writer, ModBlocks.door(finish), sources(FinishCatalog.PAINTED, finish, FinishCatalog.PAINT_BASE, ModBlocks::door),
+                    dye, RecipeCategory.REDSTONE, "painted_round_door");
+            paint(writer, ModBlocks.window(finish), sources(FinishCatalog.PAINTED, finish, FinishCatalog.PAINT_BASE, ModBlocks::window),
+                    dye, RecipeCategory.DECORATIONS, "painted_round_window");
+        }
+        List<TrimMaterial> paintedTrims = FinishCatalog.TRIMS.stream().filter(TrimMaterial::painted).toList();
+        for (TrimMaterial material : FinishCatalog.TRIMS) {
+            if (material.painted()) {
+                paint(writer, ModBlocks.trim(material),
+                        sources(paintedTrims, material, FinishCatalog.TRIM_PAINT_BASE, ModBlocks::trim),
+                        DyeItem.byColor(material.paint().orElseThrow()), RecipeCategory.DECORATIONS, "painted_round_trim");
+                continue;
+            }
+            ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.trim(material))
+                    .pattern("M M").pattern("   ").pattern("M M")
+                    .define('M', material.material())
+                    .group(Roundwood.MOD_ID + ":round_trim")
+                    .unlockedBy("has_material", has(material.material()))
+                    .save(writer);
         }
     }
 
-    private static void paint(Consumer<FinishedRecipe> writer, Finish finish, RecipeCategory category,
-                              Function<Finish, ? extends ItemLike> block, String group) {
+    /** The paint base plus every other painted variant of the same family: never the result itself. */
+    private static <T> List<ItemLike> sources(List<T> painted, T result, T base, Function<T, ? extends ItemLike> block) {
         List<ItemLike> sources = new ArrayList<>();
-        sources.add(block.apply(FinishCatalog.PAINT_BASE));
-        for (Finish other : FinishCatalog.PAINTED) {
-            if (other != finish) {
+        sources.add(block.apply(base));
+        for (T other : painted) {
+            if (other != result) {
                 sources.add(block.apply(other));
             }
         }
-        DyeItem dye = DyeItem.byColor(finish.paint().orElseThrow());
-        ItemLike result = block.apply(finish);
+        return sources;
+    }
+
+    private static void paint(Consumer<FinishedRecipe> writer, ItemLike result, List<ItemLike> sources, DyeItem dye,
+                              RecipeCategory category, String group) {
         ShapelessRecipeBuilder.shapeless(category, result)
                 .requires(Ingredient.of(sources.toArray(ItemLike[]::new)))
                 .requires(dye)

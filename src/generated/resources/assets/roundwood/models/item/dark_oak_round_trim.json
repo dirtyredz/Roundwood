@@ -1,0 +1,8 @@
+{
+  "parent": "roundwood:item/template_round_trim",
+  "textures": {
+    "edge": "minecraft:block/stripped_dark_oak_log",
+    "face": "minecraft:block/stripped_dark_oak_log",
+    "particle": "minecraft:block/stripped_dark_oak_log"
+  }
+}

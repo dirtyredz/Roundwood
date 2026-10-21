@@ -757,9 +757,9 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
+  "render_type": "minecraft:translucent",
   "textures": {
-    "glass": "minecraft:block/glass",
+    "glass": "roundwood:block/window_glass",
     "particle": "#frame"
   }
 }

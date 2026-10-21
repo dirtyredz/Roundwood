@@ -1,8 +1,11 @@
 package io.github.dirtyredz.roundwood.data;
 
 import io.github.dirtyredz.roundwood.data.client.DoorModelProvider;
-import io.github.dirtyredz.roundwood.data.client.RoundwoodItemModelProvider;
+import io.github.dirtyredz.roundwood.data.client.DoorItemModelProvider;
 import io.github.dirtyredz.roundwood.data.client.RoundwoodLanguageProvider;
+import io.github.dirtyredz.roundwood.data.client.TrimItemModelProvider;
+import io.github.dirtyredz.roundwood.data.client.TrimModelProvider;
+import io.github.dirtyredz.roundwood.data.client.WindowItemModelProvider;
 import io.github.dirtyredz.roundwood.data.client.WindowModelProvider;
 import io.github.dirtyredz.roundwood.data.server.RoundwoodBlockTagsProvider;
 import io.github.dirtyredz.roundwood.data.server.RoundwoodItemTagsProvider;
@@ -29,7 +32,10 @@ public final class RoundwoodDataProviders {
 
         generator.addProvider(event.includeClient(), new DoorModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new WindowModelProvider(output, existingFiles));
-        generator.addProvider(event.includeClient(), new RoundwoodItemModelProvider(output, existingFiles));
+        generator.addProvider(event.includeClient(), new TrimModelProvider(output, existingFiles));
+        generator.addProvider(event.includeClient(), new DoorItemModelProvider(output, existingFiles));
+        generator.addProvider(event.includeClient(), new WindowItemModelProvider(output, existingFiles));
+        generator.addProvider(event.includeClient(), new TrimItemModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new RoundwoodLanguageProvider(output));
 
         generator.addProvider(event.includeServer(), new RoundwoodRecipeProvider(output));

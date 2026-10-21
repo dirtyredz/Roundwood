@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
-/** The Roundwood creative tab: every door, then every window, each once. */
+/** The Roundwood creative tab: every door, then every window, then every frame, each once. */
 public final class ModCreativeTab {
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Roundwood.MOD_ID);
 

@@ -4,6 +4,7 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.variant.Finish;
 import io.github.dirtyredz.roundwood.variant.FinishCatalog;
+import io.github.dirtyredz.roundwood.variant.TrimMaterial;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.LanguageProvider;
 
@@ -19,6 +20,9 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         for (Finish finish : FinishCatalog.ALL) {
             add(ModBlocks.door(finish), finish.displayName() + " Round Door");
             add(ModBlocks.window(finish), finish.displayName() + " Round Window");
+        }
+        for (TrimMaterial material : FinishCatalog.TRIMS) {
+            add(ModBlocks.trim(material), material.displayName() + " Round Trim");
         }
     }
 }

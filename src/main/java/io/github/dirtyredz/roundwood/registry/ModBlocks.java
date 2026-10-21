@@ -1,10 +1,12 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.variant.Finish;
 import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.variant.TrimMaterial;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
@@ -18,12 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-/** One round door and one round window per finish. */
+/** One round door and one round window per finish, and one round frame per frame material. */
 public final class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Roundwood.MOD_ID);
 
     private static final Map<Finish, RegistryObject<RoundDoorBlock>> DOORS = new LinkedHashMap<>();
     private static final Map<Finish, RegistryObject<RoundWindowBlock>> WINDOWS = new LinkedHashMap<>();
+    private static final Map<TrimMaterial, RegistryObject<RoundTrimBlock>> TRIMS = new LinkedHashMap<>();
 
     static {
         for (Finish finish : FinishCatalog.ALL) {
@@ -33,6 +36,9 @@ public final class ModBlocks {
         for (Finish finish : FinishCatalog.ALL) {
             WINDOWS.put(finish, BLOCKS.register(finish.windowId(),
                     () -> new RoundWindowBlock(windowProperties(finish))));
+        }
+        for (TrimMaterial material : FinishCatalog.TRIMS) {
+            TRIMS.put(material, BLOCKS.register(material.trimId(), () -> new RoundTrimBlock(trimProperties(material))));
         }
     }
 
@@ -47,6 +53,10 @@ public final class ModBlocks {
         return WINDOWS.get(finish).get();
     }
 
+    public static RoundTrimBlock trim(TrimMaterial material) {
+        return TRIMS.get(material).get();
+    }
+
     public static List<RoundDoorBlock> doors() {
         return DOORS.values().stream().map(RegistryObject::get).toList();
     }
@@ -55,8 +65,12 @@ public final class ModBlocks {
         return WINDOWS.values().stream().map(RegistryObject::get).toList();
     }
 
+    public static List<RoundTrimBlock> trims() {
+        return TRIMS.values().stream().map(RegistryObject::get).toList();
+    }
+
     public static List<Block> all() {
-        return Stream.concat(doors().stream(), windows().stream()).map(Block.class::cast).toList();
+        return Stream.of(doors(), windows(), trims()).flatMap(List::stream).map(Block.class::cast).toList();
     }
 
     private static BlockBehaviour.Properties doorProperties(Finish finish) {
@@ -86,6 +100,24 @@ public final class ModBlocks {
             properties.ignitedByLava(); // nether woods do not burn, like their doors
         }
         finish.paint().ifPresent(dye -> properties.mapColor(dye));
+        return properties;
+    }
+
+    /**
+     * A decorative ring: the base block's hardness, sound, tool and map colour, but no collision, no
+     * occlusion (light and neighbours show through the open centre), no redstone, and a multi-cell
+     * assembly cannot be pushed.
+     */
+    private static BlockBehaviour.Properties trimProperties(TrimMaterial material) {
+        BlockBehaviour.Properties properties = BlockBehaviour.Properties.copy(material.base())
+                .noCollission()
+                .noOcclusion()
+                .pushReaction(PushReaction.BLOCK)
+                .isValidSpawn((state, level, pos, type) -> false)
+                .isRedstoneConductor((state, level, pos) -> false)
+                .isSuffocating((state, level, pos) -> false)
+                .isViewBlocking((state, level, pos) -> false);
+        material.paint().ifPresent(dye -> properties.mapColor(dye));
         return properties;
     }
 }

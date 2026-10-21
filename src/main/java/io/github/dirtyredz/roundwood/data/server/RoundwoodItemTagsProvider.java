@@ -23,6 +23,7 @@ public class RoundwoodItemTagsProvider extends ItemTagsProvider {
     protected void addTags(HolderLookup.Provider provider) {
         copy(ModTags.ROUND_DOORS, ModTags.ROUND_DOOR_ITEMS);
         copy(ModTags.ROUND_WINDOWS, ModTags.ROUND_WINDOW_ITEMS);
+        copy(ModTags.ROUND_TRIMS, ModTags.ROUND_TRIM_ITEMS);
         copy(BlockTags.DOORS, ItemTags.DOORS);
         copy(BlockTags.WOODEN_DOORS, ItemTags.WOODEN_DOORS);
     }

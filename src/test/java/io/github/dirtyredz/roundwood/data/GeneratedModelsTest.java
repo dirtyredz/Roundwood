@@ -3,125 +3,81 @@ package io.github.dirtyredz.roundwood.data;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
 
+import static io.github.dirtyredz.roundwood.data.ResolvedModels.Resolved;
+import static io.github.dirtyredz.roundwood.data.ResolvedModels.allModelIds;
+import static io.github.dirtyredz.roundwood.data.ResolvedModels.array;
+import static io.github.dirtyredz.roundwood.data.ResolvedModels.defaultUv;
+import static io.github.dirtyredz.roundwood.data.ResolvedModels.elements;
+import static io.github.dirtyredz.roundwood.data.ResolvedModels.frontCovered;
+import static io.github.dirtyredz.roundwood.data.ResolvedModels.inDisc;
+import static io.github.dirtyredz.roundwood.data.ResolvedModels.read;
+import static io.github.dirtyredz.roundwood.data.ResolvedModels.resolve;
+import static io.github.dirtyredz.roundwood.data.ResolvedModels.vec;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Resolves the checked-in models the way the game does (parent chain, texture variables) and checks
- * what the owner sees: bounded sprite UVs, whole closed doors, square wooden windows with round
- * glass, finish materials and deliberate item transforms. Independent of the mod's own code.
+ * Resolves the checked-in models the way the game does and checks what the owner sees: bounded
+ * sprite UVs (tiled per block, or one image across a whole door or frame where intended), whole
+ * closed doors with full-height board panels and prominent hardware, and deliberate item transforms.
+ * Independent of the mod's own code. Windows: {@link GeneratedWindowModelsTest}; frames:
+ * {@link GeneratedTrimModelsTest}.
  */
 class GeneratedModelsTest {
-    private static final Path MODELS = Path.of("src/generated/resources/assets/roundwood/models");
-    private static final List<String> NATURAL = List.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak",
-            "mangrove", "cherry", "bamboo", "crimson", "warped");
-    private static final List<String> PAINTED = List.of("green", "yellow", "red", "blue");
-    private static final Map<String, String> TRIMS = Map.of("bamboo", "stripped_bamboo_block",
-            "crimson", "stripped_crimson_stem", "warped", "stripped_warped_stem");
-    private static final Set<String> TRANSFORMS = Set.of("gui", "fixed", "ground", "thirdperson_righthand",
-            "firstperson_righthand");
+    private static final String BRASS = "roundwood:block/brass";
 
-    /** A model after inheritance: the nearest elements, merged textures and display, gui light. */
-    record Resolved(JsonArray elements, Map<String, String> textures, JsonObject display, String guiLight) {
-        String texture(String ref) {
-            String value = ref;
-            for (int i = 0; i < 10 && value != null && value.startsWith("#"); i++) {
-                value = textures.get(value.substring(1));
-            }
-            return value;
-        }
-    }
-
-    private static JsonObject read(String id) {
-        String[] parts = id.split(":", 2);
-        assertEquals("roundwood", parts[0], "unexpected namespace in " + id);
-        Path file = MODELS.resolve(parts[1] + ".json");
-        try {
-            return JsonParser.parseString(Files.readString(file)).getAsJsonObject();
-        } catch (IOException e) {
-            throw new AssertionError("cannot read " + file, e);
-        }
-    }
-
-    static Resolved resolve(String id) {
-        List<JsonObject> chain = new ArrayList<>();
-        String next = id;
-        while (next != null) {
-            JsonObject model = read(next);
-            chain.add(model);
-            next = model.has("parent") ? model.get("parent").getAsString() : null;
-        }
-        JsonArray elements = null;
-        Map<String, String> textures = new HashMap<>();
-        JsonObject display = new JsonObject();
-        String guiLight = null;
-        for (int i = chain.size() - 1; i >= 0; i--) { // root parent first, child overrides
-            JsonObject model = chain.get(i);
-            if (model.has("elements")) {
-                elements = model.getAsJsonArray("elements");
-            }
-            if (model.has("textures")) {
-                model.getAsJsonObject("textures").entrySet().forEach(e -> textures.put(e.getKey(), e.getValue().getAsString()));
-            }
-            if (model.has("display")) {
-                model.getAsJsonObject("display").entrySet().forEach(e -> display.add(e.getKey(), e.getValue()));
-            }
-            if (model.has("gui_light")) {
-                guiLight = model.get("gui_light").getAsString();
-            }
-        }
-        return new Resolved(elements == null ? new JsonArray() : elements, textures, display, guiLight);
-    }
-
-    private static double[] vec(JsonObject element, String key) {
-        JsonArray a = element.getAsJsonArray(key);
-        return new double[] {a.get(0).getAsDouble(), a.get(1).getAsDouble(), a.get(2).getAsDouble()};
-    }
-
-    private static List<String> allModelIds() throws IOException {
-        try (Stream<Path> walk = Files.walk(MODELS)) {
-            return walk.filter(p -> p.toString().endsWith(".json"))
-                    .map(p -> "roundwood:" + MODELS.relativize(p).toString().replace('\\', '/').replace(".json", ""))
-                    .sorted().toList();
-        }
-    }
-
-    /** Vanilla's default UVs for an element face, from tile-local coordinates. */
-    private static double[] defaultUv(String face, double[] f, double[] t) {
+    /** Assembly-mapped UVs: one image across a 32-pixel face, front (south) and back (north). */
+    static double[] assemblyUv(String face, double[] from, double[] to, double offsetX, double offsetY) {
+        double x1 = from[0] + offsetX;
+        double x2 = to[0] + offsetX;
+        double v1 = (32 - (to[1] + offsetY)) / 2;
+        double v2 = (32 - (from[1] + offsetY)) / 2;
         return switch (face) {
-            case "down" -> new double[] {f[0], 16 - t[2], t[0], 16 - f[2]};
-            case "up" -> new double[] {f[0], f[2], t[0], t[2]};
-            case "north" -> new double[] {16 - t[0], 16 - t[1], 16 - f[0], 16 - f[1]};
-            case "south" -> new double[] {f[0], 16 - t[1], t[0], 16 - f[1]};
-            case "west" -> new double[] {f[2], 16 - t[1], t[2], 16 - f[1]};
-            case "east" -> new double[] {16 - t[2], 16 - t[1], 16 - f[2], 16 - f[1]};
-            default -> throw new AssertionError(face);
+            case "south" -> new double[] {x1 / 2, v1, x2 / 2, v2};
+            case "north" -> new double[] {(32 - x2) / 2, v1, (32 - x1) / 2, v2};
+            default -> null;
         };
     }
 
+    /**
+     * Where a model spreads one image across the assembly (door panels, painted and brick frames):
+     * the texture variable that does it and the model's offset in the assembly, or null when every
+     * face is tiled.
+     */
+    private static Object[] assemblyMapping(String id) {
+        if (id.startsWith("roundwood:block/template_round_door_leaf_")) {
+            return new Object[] {"#panel", 0.0, 0.0};
+        }
+        if (id.equals("roundwood:item/template_round_trim_whole")) {
+            return new Object[] {"#face", 0.0, 0.0};
+        }
+        String quarter = "roundwood:block/template_round_trim_whole_";
+        if (id.startsWith(quarter)) {
+            String part = id.substring(quarter.length());
+            return new Object[] {"#face", part.endsWith("right") ? 16.0 : 0.0, part.startsWith("upper") ? 16.0 : 0.0};
+        }
+        return null;
+    }
+
     @Test
-    void everyFaceHasExplicitUvsInsideOneSpriteMatchingItsTilePosition() throws IOException {
-        int faces = 0;
+    void everyFaceHasExplicitUvsInsideOneSpriteInTheIntendedMapping() throws IOException {
+        int tiled = 0;
+        int assembly = 0;
         for (String id : allModelIds()) {
             JsonObject model = read(id);
             if (!model.has("elements")) {
                 continue;
             }
+            Object[] mapping = assemblyMapping(id);
             for (JsonElement e : model.getAsJsonArray("elements")) {
                 JsonObject element = e.getAsJsonObject();
                 double[] from = vec(element, "from");
@@ -137,146 +93,104 @@ class GeneratedModelsTest {
                 for (Map.Entry<String, JsonElement> face : element.getAsJsonObject("faces").entrySet()) {
                     JsonObject f = face.getValue().getAsJsonObject();
                     // Forge omits a uv equal to the vanilla default (taken from absolute coordinates).
-                    double[] absolute = defaultUv(face.getKey(), from, to);
-                    JsonArray uv = f.has("uv") ? f.getAsJsonArray("uv") : array(absolute);
+                    JsonArray uv = f.has("uv") ? f.getAsJsonArray("uv") : array(defaultUv(face.getKey(), from, to));
                     double[] expected = defaultUv(face.getKey(), localFrom, localTo);
+                    double[] whole = mapping != null && mapping[0].equals(f.get("texture").getAsString())
+                            ? assemblyUv(face.getKey(), from, to, (Double) mapping[1], (Double) mapping[2]) : null;
+                    if (whole != null) {
+                        expected = whole;
+                        assembly++;
+                    } else {
+                        tiled++;
+                    }
                     for (int i = 0; i < 4; i++) {
                         double value = uv.get(i).getAsDouble();
                         assertTrue(Double.isFinite(value) && value >= 0 && value <= 16, id + ": uv out of the sprite " + uv);
-                        // Same orientation as vanilla, continuous across tiles because each tile restarts at 0.
                         assertEquals(expected[i], value, 1e-4, id + ": uv " + face.getKey() + " " + uv);
                     }
-                    faces++;
                 }
             }
         }
-        assertTrue(faces > 1000, "suspiciously few faces: " + faces);
-    }
-
-    private static JsonArray array(double[] values) {
-        JsonArray out = new JsonArray();
-        for (double value : values) {
-            out.add(value);
-        }
-        return out;
-    }
-
-    /** Pixel (u, v) of the front plane is covered by an element with the given resolved texture. */
-    private static boolean frontCovered(Resolved model, int u, int v, String texture) {
-        for (JsonElement e : model.elements()) {
-            JsonObject element = e.getAsJsonObject();
-            double[] from = vec(element, "from");
-            double[] to = vec(element, "to");
-            if (from[0] <= u + 0.5 && u + 0.5 <= to[0] && from[1] <= v + 0.5 && v + 0.5 <= to[1]) {
-                JsonObject south = element.getAsJsonObject("faces").getAsJsonObject("south");
-                if (south != null && texture.equals(model.texture(south.get("texture").getAsString()))) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    private static boolean inDisc(int size, int diameter, int u, int v) {
-        double du = u + 0.5 - size / 2.0;
-        double dv = v + 0.5 - size / 2.0;
-        return du * du + dv * dv <= diameter * diameter / 4.0;
-    }
-
-    private static String panel(String finish) {
-        return PAINTED.contains(finish) ? "roundwood:block/panel_" + finish : "minecraft:block/" + finish + "_planks";
-    }
-
-    private static String trim(String finish) {
-        if (PAINTED.contains(finish)) {
-            return "minecraft:block/stripped_oak_log";
-        }
-        return "minecraft:block/" + TRIMS.getOrDefault(finish, "stripped_" + finish + "_log");
+        assertTrue(tiled > 1000, "suspiciously few tiled faces: " + tiled);
+        assertTrue(assembly > 200, "suspiciously few whole-image faces: " + assembly);
     }
 
     @Test
     void doorItemsAreTheWholeClosedLeafInTheirFinish() {
-        for (String finish : concat()) {
+        for (String finish : ModelExpectations.FINISHES) {
             Resolved item = resolve("roundwood:item/" + finish + "_round_door");
-            assertEquals(panel(finish), item.texture("#panel"), finish);
-            assertEquals(trim(finish), item.texture("#trim"), finish);
-            assertEquals("roundwood:block/brass", item.texture("#brass"), finish);
+            String panel = ModelExpectations.doorPanel(finish);
+            assertEquals(panel, item.texture("#panel"), finish);
+            assertNull(item.texture("#trim"), finish + ": the door has no built-in trim since 0.4.0");
+            assertEquals(BRASS, item.texture("#brass"), finish);
             for (int u = 0; u < 32; u++) {
                 for (int v = 0; v < 32; v++) {
                     boolean disc = inDisc(32, 32, u, v);
-                    boolean covered = frontCovered(item, u, v, panel(finish)) || frontCovered(item, u, v, trim(finish))
-                            || frontCovered(item, u, v, "roundwood:block/brass");
+                    boolean covered = frontCovered(item, u, v, panel) || frontCovered(item, u, v, BRASS);
                     assertEquals(disc, covered, finish + " door face at " + u + "," + v);
                 }
             }
-            assertDisplay(item, finish + " door", new double[] {16, 16, 14.5});
+            ModelExpectations.assertDisplay(item, finish + " door", new double[] {16, 16, 14.5});
         }
     }
 
+    /** The panel fills the whole disc at z 13..16 with no ring: every non-brass element is panel. */
     @Test
-    void windowItemsAreSquareWoodWithRoundGlass() {
-        for (String finish : concat()) {
-            Resolved item = resolve("roundwood:item/" + finish + "_round_window");
-            assertEquals(panel(finish), item.texture("#frame"), finish);
-            assertEquals("minecraft:block/glass", item.texture("#glass"), finish);
-            for (int u = 0; u < 16; u++) {
-                for (int v = 0; v < 16; v++) {
-                    boolean opening = inDisc(16, 12, u, v);
-                    assertEquals(!opening, frontCovered(item, u, v, panel(finish)), finish + " wood at " + u + "," + v);
-                    assertEquals(opening, frontCovered(item, u, v, "minecraft:block/glass"), finish + " glass at " + u + "," + v);
+    void doorLeavesAreOnePanelOverTheWholeDisc() {
+        for (String hinge : List.of("left", "right")) {
+            Resolved leaf = resolve("roundwood:block/template_round_door_leaf_" + hinge);
+            for (JsonObject element : elements(leaf)) {
+                boolean brass = usesBrass(leaf, element);
+                for (Map.Entry<String, JsonElement> face : element.getAsJsonObject("faces").entrySet()) {
+                    String texture = face.getValue().getAsJsonObject().get("texture").getAsString();
+                    assertTrue(brass ? texture.equals("#brass") : texture.equals("#panel"), hinge + ": unexpected " + texture);
+                }
+                if (!brass) {
+                    assertEquals(13, vec(element, "from")[2], 1e-9, hinge + ": panel back");
+                    assertEquals(16, vec(element, "to")[2], 1e-9, hinge + ": panel front");
                 }
             }
-            assertDisplay(item, finish + " window", new double[] {8, 8, 8});
-            for (JsonElement e : item.elements()) {
-                JsonObject element = e.getAsJsonObject();
-                double[] from = vec(element, "from");
-                double[] to = vec(element, "to");
-                assertTrue(from[2] >= 7 && to[2] <= 9, finish + ": window element outside the pane depth z 7..9");
-                JsonObject south = element.getAsJsonObject("faces").getAsJsonObject("south");
-                if (south == null) {
-                    continue;
-                }
-                String texture = item.texture(south.get("texture").getAsString());
-                if (panel(finish).equals(texture)) {
-                    assertEquals(9, to[2], 1e-9, finish + ": wood front face is not at z 9");
-                } else if ("minecraft:block/glass".equals(texture)) {
-                    assertEquals(7.5, from[2], 1e-9, finish + ": glass back");
-                    assertEquals(8.5, to[2], 1e-9, finish + ": glass front");
+            for (int u = 0; u < 32; u++) {
+                for (int v = 0; v < 32; v++) {
+                    assertEquals(inDisc(32, 32, u, v), frontCovered(leaf, u, v, "#panel"), hinge + " panel at " + u + "," + v);
                 }
             }
         }
     }
 
     @Test
-    void centredKnobsOnBothFacesForBothHinges() {
+    void prominentCentredKnobsAndProudStrapsOnBothFacesForBothHinges() {
         for (String hinge : List.of("left", "right")) {
             Resolved leaf = resolve("roundwood:block/template_round_door_leaf_" + hinge);
             boolean[][] front = new boolean[2][2];
             boolean[][] back = new boolean[2][2];
-            for (JsonElement e : leaf.elements()) {
-                JsonObject element = e.getAsJsonObject();
+            int straps = 0;
+            for (JsonObject element : elements(leaf)) {
                 if (!usesBrass(leaf, element)) {
                     continue;
                 }
                 double[] from = vec(element, "from");
                 double[] to = vec(element, "to");
-                double width = to[0] - from[0];
-                if (width >= 3) {
+                if (to[0] - from[0] >= 3) {
                     double centre = (from[0] + to[0]) / 2;
                     assertTrue(hinge.equals("left") ? centre < 16 : centre > 16, hinge + ": strap centre " + centre);
+                    assertTrue((from[2] == 16 && to[2] == 16.5) || (from[2] == 12.5 && to[2] == 13),
+                            hinge + ": strap not half a pixel proud: z " + from[2] + ".." + to[2]);
+                    straps++;
                     continue;
                 }
-                // A knob piece: one 1x1 quarter of the 2x2 knob at x 15..17, y 15..17.
+                // A knob piece: one quarter of the 2x2 knob at x 15..17, y 15..17, two pixels proud.
                 assertTrue(from[0] >= 15 && to[0] <= 17 && from[1] >= 15 && to[1] <= 17, hinge + ": knob piece off centre");
-                boolean isFront = to[2] == 16;
-                boolean isBack = from[2] == 13;
-                assertTrue(isFront || isBack, hinge + ": knob piece on neither face");
+                boolean isFront = from[2] >= 16 && to[2] == 18;
+                boolean isBack = from[2] == 11 && to[2] <= 13;
+                assertTrue(isFront || isBack, hinge + ": knob piece not 2 pixels proud: z " + from[2] + ".." + to[2]);
                 for (int x = (int) Math.round(from[0]); x < Math.round(to[0]); x++) {
                     for (int y = (int) Math.round(from[1]); y < Math.round(to[1]); y++) {
                         (isFront ? front : back)[x - 15][y - 15] = true;
                     }
                 }
             }
+            assertTrue(straps >= 4, hinge + ": expected two straps on each face, got " + straps + " pieces");
             for (int x = 0; x < 2; x++) {
                 for (int y = 0; y < 2; y++) {
                     assertTrue(front[x][y], hinge + ": front knob pixel " + (15 + x) + "," + (15 + y));
@@ -286,11 +200,33 @@ class GeneratedModelsTest {
         }
     }
 
+    /** The door panel's front reads the image once, left to right and top to bottom, across the cells. */
+    @Test
+    void doorPanelImageRunsUnbrokenAcrossTheMidlines() {
+        Resolved leaf = resolve("roundwood:block/template_round_door_leaf_left");
+        int checked = 0;
+        for (JsonObject element : elements(leaf)) {
+            JsonObject south = element.getAsJsonObject("faces").getAsJsonObject("south");
+            if (south == null || !"#panel".equals(south.get("texture").getAsString())) {
+                continue;
+            }
+            double[] from = vec(element, "from");
+            double[] to = vec(element, "to");
+            double[] uv = ResolvedModels.uv(element, "south");
+            // One texel per pixel of a 32 x 32 image: u = x / 2, v = (32 - y) / 2 in sprite units.
+            assertEquals(from[0] / 2, uv[0], 1e-6, "panel u at x " + from[0]);
+            assertEquals(to[0] / 2, uv[2], 1e-6, "panel u at x " + to[0]);
+            assertEquals((32 - to[1]) / 2, uv[1], 1e-6, "panel v at y " + to[1]);
+            checked++;
+        }
+        assertTrue(checked > 10, "too few panel faces: " + checked);
+    }
+
     private static boolean usesBrass(Resolved model, JsonObject element) {
         for (Map.Entry<String, JsonElement> face : element.getAsJsonObject("faces").entrySet()) {
             // Templates leave the variable unbound; finish models bind it to roundwood:block/brass.
             String texture = face.getValue().getAsJsonObject().get("texture").getAsString();
-            if ("#brass".equals(texture) || "roundwood:block/brass".equals(model.texture(texture))) {
+            if ("#brass".equals(texture) || BRASS.equals(model.texture(texture))) {
                 return true;
             }
         }
@@ -298,65 +234,18 @@ class GeneratedModelsTest {
     }
 
     @Test
-    void windowArmModelIsGlassFromTheEdgeToThePanel() {
-        Resolved arm = resolve("roundwood:block/round_window_arm");
-        assertFalse(arm.elements().isEmpty());
-        boolean reachesEdge = false;
-        for (JsonElement e : arm.elements()) {
-            JsonObject element = e.getAsJsonObject();
-            double[] from = vec(element, "from");
-            double[] to = vec(element, "to");
-            assertTrue(from[0] >= 7 && to[0] <= 9, "arm outside x 7..9");
-            assertTrue(from[2] >= 0 && to[2] <= 7.5, "arm outside z 0..7.5");
-            reachesEdge |= from[2] == 0;
-            JsonObject faces = element.getAsJsonObject("faces");
-            for (Map.Entry<String, JsonElement> face : faces.entrySet()) {
-                assertEquals("minecraft:block/glass",
-                        arm.texture(face.getValue().getAsJsonObject().get("texture").getAsString()), face.getKey());
-            }
-            if (to[2] == 7 || to[2] == 7.5) {
-                assertFalse(faces.has("south"), "buried south face on the element ending at z " + to[2]);
-            }
-        }
-        assertTrue(reachesEdge, "no arm element starts at z 0");
-    }
-
-    /** Every in-hand/inventory context is set, the icon is lit from the front and centred in the slot. */
-    private static void assertDisplay(Resolved item, String what, double[] centre) {
-        assertEquals("front", item.guiLight(), what + ": gui_light");
-        for (String context : TRANSFORMS) {
-            assertTrue(item.display().has(context), what + ": no " + context + " transform");
-        }
-        JsonObject gui = item.display().getAsJsonObject("gui");
-        JsonArray rotation = gui.has("rotation") ? gui.getAsJsonArray("rotation") : array(new double[3]);
-        for (JsonElement r : rotation) {
-            assertEquals(0, r.getAsDouble(), 1e-9, what + ": the icon should face the viewer");
-        }
-        double scale = gui.getAsJsonArray("scale").get(0).getAsDouble();
-        JsonArray translation = gui.has("translation") ? gui.getAsJsonArray("translation") : array(new double[3]);
-        for (int axis = 0; axis < 2; axis++) {
-            double placed = translation.get(axis).getAsDouble() + scale * (centre[axis] - 8);
-            assertEquals(0, placed, 1e-3, what + ": icon not centred on axis " + axis);
-        }
-        assertTrue(scale * (centre[0] * 2) <= 16.0001, what + ": icon larger than the slot");
-    }
-
-    @Test
     void doorWorldModelsAreEmptyAndLeafModelsExistForBothHinges() {
-        for (String finish : concat()) {
+        for (String finish : ModelExpectations.FINISHES) {
             Resolved world = resolve("roundwood:block/" + finish + "_round_door");
             assertEquals(0, world.elements().size(), finish + ": the world model must not draw the leaf twice");
-            assertEquals(panel(finish), world.texture("#particle"), finish + ": break particle");
+            assertEquals(ModelExpectations.doorPanel(finish), world.texture("#particle"), finish + ": break particle");
             for (String hinge : List.of("left", "right")) {
                 Resolved leaf = resolve("roundwood:block/" + finish + "_round_door_leaf_" + hinge);
                 assertFalse(leaf.elements().isEmpty(), finish + " " + hinge + " leaf has no geometry");
-                assertNotNull(leaf.texture("#panel"));
-                assertEquals(trim(finish), leaf.texture("#trim"));
+                assertEquals(ModelExpectations.doorPanel(finish), leaf.texture("#panel"), finish + " " + hinge);
+                assertNotNull(leaf.texture("#brass"));
+                assertNull(leaf.texture("#trim"), finish + " " + hinge + ": no trim binding since 0.4.0");
             }
         }
-    }
-
-    private static List<String> concat() {
-        return Stream.concat(NATURAL.stream(), PAINTED.stream()).toList();
     }
 }

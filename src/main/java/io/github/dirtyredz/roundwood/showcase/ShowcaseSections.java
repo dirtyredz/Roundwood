@@ -1,8 +1,10 @@
 package io.github.dirtyredz.roundwood.showcase;
 
+import io.github.dirtyredz.roundwood.showcase.section.BrickArchesSection;
 import io.github.dirtyredz.roundwood.showcase.section.CamouflageSection;
 import io.github.dirtyredz.roundwood.showcase.section.DoorsSection;
 import io.github.dirtyredz.roundwood.showcase.section.RedstoneSection;
+import io.github.dirtyredz.roundwood.showcase.section.TrimCombinationsSection;
 import io.github.dirtyredz.roundwood.showcase.section.WindowsSection;
 
 import java.util.List;
@@ -13,7 +15,9 @@ public final class ShowcaseSections {
             new DoorsSection(),
             new CamouflageSection(),
             new WindowsSection(),
-            new RedstoneSection());
+            new RedstoneSection(),
+            new TrimCombinationsSection(),
+            new BrickArchesSection());
 
     private ShowcaseSections() {
     }

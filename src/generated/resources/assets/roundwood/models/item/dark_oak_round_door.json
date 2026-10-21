@@ -2,8 +2,7 @@
   "parent": "roundwood:item/template_round_door",
   "textures": {
     "brass": "roundwood:block/brass",
-    "panel": "minecraft:block/dark_oak_planks",
-    "particle": "minecraft:block/dark_oak_planks",
-    "trim": "minecraft:block/stripped_dark_oak_log"
+    "panel": "roundwood:block/door_panel_dark_oak",
+    "particle": "roundwood:block/door_panel_dark_oak"
   }
 }

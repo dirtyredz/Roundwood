@@ -34,6 +34,10 @@ class GeneratedResourcesTest {
     private static final List<String> FINISHES = List.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak",
             "mangrove", "cherry", "bamboo", "crimson", "warped", "green", "yellow", "red", "blue");
     private static final List<String> PAINTED = List.of("green", "yellow", "red", "blue");
+    private static final List<String> MASONRY = List.of("brick", "stone_brick", "deepslate_brick", "mud_brick");
+    private static final List<String> TRIM_MATERIALS = Stream.concat(FINISHES.stream(), MASONRY.stream()).toList();
+    private static final List<String> PARTS = List.of("lower_left", "upper_left", "lower_right", "upper_right");
+    private static final int TOTAL = 49;
     private static final Set<String> ALLOWED_NAMESPACES = Set.of("minecraft", "roundwood", "forge");
     private static final Pattern NAMESPACED = Pattern.compile("\"#?([a-z0-9_.-]+):[a-z0-9_./-]+\"");
 
@@ -46,6 +50,9 @@ class GeneratedResourcesTest {
         }
         for (String finish : FINISHES) {
             BLOCKS.add(finish + "_round_window");
+        }
+        for (String material : TRIM_MATERIALS) {
+            BLOCKS.add(material + "_round_trim");
         }
     }
 
@@ -67,14 +74,14 @@ class GeneratedResourcesTest {
 
     @Test
     void everyBlockHasStateItemModelLootRecipeAndName() {
-        assertEquals(30, BLOCKS.size());
-        assertEquals(30, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
+        assertEquals(TOTAL, BLOCKS.size());
+        assertEquals(TOTAL, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
         JsonObject lang = json(assets("lang/en_us.json"));
         for (String block : BLOCKS) {
             assertTrue(Files.isRegularFile(assets("blockstates/" + block + ".json")), "blockstate " + block);
             assertTrue(Files.isRegularFile(assets("models/item/" + block + ".json")), "item model " + block);
             assertTrue(Files.isRegularFile(data("loot_tables/blocks/" + block + ".json")), "loot " + block);
-            String recipe = PAINTED.stream().anyMatch(p -> block.startsWith(p + "_")) ? block + "_from_painting" : block;
+            String recipe = PAINTED.stream().anyMatch(p -> block.startsWith(p + "_round_")) ? block + "_from_painting" : block;
             assertTrue(Files.isRegularFile(data("recipes/" + recipe + ".json")), "recipe " + recipe);
             assertTrue(lang.has("block.roundwood." + block), "name " + block);
         }
@@ -85,19 +92,28 @@ class GeneratedResourcesTest {
     void generatedModelSetIsExactlyTheExpectedManifest() throws IOException {
         Set<String> block = new TreeSet<>(List.of("template_round_door_leaf_left", "template_round_door_leaf_right",
                 "template_round_window", "round_window_arm"));
-        Set<String> item = new TreeSet<>(List.of("template_round_door", "template_round_window"));
+        Set<String> item = new TreeSet<>(List.of("template_round_door", "template_round_window",
+                "template_round_trim", "template_round_trim_whole"));
         for (String finish : FINISHES) {
             block.addAll(List.of(finish + "_round_door", finish + "_round_door_leaf_left", finish + "_round_door_leaf_right",
                     finish + "_round_window"));
             item.addAll(List.of(finish + "_round_door", finish + "_round_window"));
         }
+        for (String part : PARTS) {
+            block.add("template_round_trim_" + part);
+            block.add("template_round_trim_whole_" + part);
+        }
+        for (String material : TRIM_MATERIALS) {
+            PARTS.forEach(part -> block.add(material + "_round_trim_" + part));
+            item.add(material + "_round_trim");
+        }
         // Exact sets: the 0.1.0 quadrant, open-quadrant and side-fill models must be gone; the 0.3.0 pane arm is present.
         assertEquals(block, names(assets("models/block")));
         assertEquals(item, names(assets("models/item")));
-        assertEquals(30, allJson(assets("blockstates")).size());
-        assertEquals(30, allJson(data("recipes")).size());
-        assertEquals(30, allJson(data("loot_tables/blocks")).size());
-        assertEquals(30, allJson(data("advancements/recipes")).size());
+        assertEquals(TOTAL, allJson(assets("blockstates")).size());
+        assertEquals(TOTAL, allJson(data("recipes")).size());
+        assertEquals(TOTAL, allJson(data("loot_tables/blocks")).size());
+        assertEquals(TOTAL, allJson(data("advancements/recipes")).size());
     }
 
     private static Set<String> names(Path dir) throws IOException {
@@ -229,7 +245,7 @@ class GeneratedResourcesTest {
     }
 
     @Test
-    void doorTagsAndMineableTag() {
+    void doorTagsAndMineableTags() {
         Path tags = GENERATED.resolve("data/minecraft/tags");
         for (String tag : List.of("blocks/doors", "blocks/wooden_doors", "items/doors", "items/wooden_doors")) {
             String values = json(tags.resolve(tag + ".json")).getAsJsonArray("values").toString();
@@ -237,9 +253,58 @@ class GeneratedResourcesTest {
                 assertTrue(values.contains("roundwood:" + finish + "_round_door"), tag + " " + finish);
             }
             assertTrue(!values.contains("_round_window"), tag + " must not list windows");
+            assertTrue(!values.contains("_round_trim"), tag + " must not list frames");
         }
-        String axe = json(tags.resolve("blocks/mineable/axe.json")).getAsJsonArray("values").toString();
-        BLOCKS.forEach(block -> assertTrue(axe.contains("roundwood:" + block), "axe " + block));
+        Set<String> axe = tagValues(tags.resolve("blocks/mineable/axe.json"));
+        Set<String> pickaxe = tagValues(tags.resolve("blocks/mineable/pickaxe.json"));
+        for (String block : BLOCKS) {
+            boolean masonry = MASONRY.stream().anyMatch(m -> block.equals(m + "_round_trim"));
+            assertEquals(!masonry, axe.contains("roundwood:" + block), "axe " + block);
+            assertEquals(masonry, pickaxe.contains("roundwood:" + block), "pickaxe " + block);
+        }
+    }
+
+    @Test
+    void familyTagsListEachFamilyExactly() {
+        Path tags = GENERATED.resolve("data/roundwood/tags");
+        for (String kind : List.of("blocks", "items")) {
+            Set<String> expected = new TreeSet<>();
+            TRIM_MATERIALS.forEach(m -> expected.add("roundwood:" + m + "_round_trim"));
+            assertEquals(expected, tagValues(tags.resolve(kind + "/round_trims.json")), kind + " round_trims");
+            assertTrue(tagValues(tags.resolve(kind + "/round_doors.json")).stream().allMatch(v -> v.endsWith("_round_door")));
+            assertTrue(tagValues(tags.resolve(kind + "/round_windows.json")).stream().allMatch(v -> v.endsWith("_round_window")));
+        }
+    }
+
+    /** Frames: four planks or bricks in the grid corners; painted ones are dyed, never from themselves. */
+    @Test
+    void frameRecipes() {
+        for (String material : TRIM_MATERIALS) {
+            String result = "roundwood:" + material + "_round_trim";
+            if (PAINTED.contains(material)) {
+                JsonObject recipe = json(data("recipes/" + material + "_round_trim_from_painting.json"));
+                assertEquals("minecraft:crafting_shapeless", recipe.get("type").getAsString());
+                String ingredients = recipe.getAsJsonArray("ingredients").toString();
+                assertTrue(ingredients.contains("roundwood:oak_round_trim"), material + ": not dyed from oak");
+                assertTrue(ingredients.contains("minecraft:" + material + "_dye"), material + ": dye");
+                assertTrue(!ingredients.contains(result), material + ": a frame dyed from itself");
+                continue;
+            }
+            JsonObject recipe = json(data("recipes/" + material + "_round_trim.json"));
+            assertEquals("minecraft:crafting_shaped", recipe.get("type").getAsString());
+            assertEquals("[\"M M\",\"   \",\"M M\"]", recipe.getAsJsonArray("pattern").toString(), material);
+            String key = recipe.getAsJsonObject("key").getAsJsonObject("M").get("item").getAsString();
+            String expected = MASONRY.contains(material) ? "minecraft:" + material + "s" : "minecraft:" + material + "_planks";
+            assertEquals(expected, key, material + ": corner material");
+            assertEquals(result, recipe.getAsJsonObject("result").get("item").getAsString());
+            assertTrue(!recipe.getAsJsonObject("result").has("count"), material + ": one frame per craft");
+        }
+    }
+
+    private static Set<String> tagValues(Path file) {
+        Set<String> out = new TreeSet<>();
+        json(file).getAsJsonArray("values").forEach(v -> out.add(v.getAsString()));
+        return out;
     }
 
     private static Set<Path> allJson(Path root) throws IOException {

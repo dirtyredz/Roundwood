@@ -1,5 +1,5 @@
 {
   "textures": {
-    "particle": "minecraft:block/spruce_planks"
+    "particle": "roundwood:block/door_panel_spruce"
   }
 }

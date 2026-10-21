@@ -1,8 +1,11 @@
 package io.github.dirtyredz.roundwood.showcase;
 
-import io.github.dirtyredz.roundwood.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
-import io.github.dirtyredz.roundwood.door.assembly.DoorPlacement;
+import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;
+import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
+import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
+import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -62,6 +65,19 @@ public final class ShowcaseCanvas {
         boolean placed = DoorPlacement.placeAt(level, block, assembly, open);
         if (!placed) {
             problem("door not placed at " + assembly.anchor().toShortString());
+        }
+        return placed;
+    }
+
+    /**
+     * Places a frame through {@link TrimPlacement#placeAt}, its lower-left quarter at
+     * ({@code r}, 0, {@code f}), facing away from the builder like the doors.
+     */
+    public boolean trim(RoundTrimBlock block, int r, int f) {
+        TrimLayout.Assembly assembly = new TrimLayout.Assembly(frame.pos(r, 0, f), frame.forward());
+        boolean placed = TrimPlacement.placeAt(level, block, assembly);
+        if (!placed) {
+            problem("frame not placed at " + assembly.anchor().toShortString());
         }
         return placed;
     }

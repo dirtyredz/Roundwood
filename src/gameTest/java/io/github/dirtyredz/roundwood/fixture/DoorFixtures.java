@@ -1,9 +1,9 @@
 package io.github.dirtyredz.roundwood.fixture;
 
 import com.mojang.authlib.GameProfile;
-import io.github.dirtyredz.roundwood.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.door.RoundDoorBlockEntity;
-import io.github.dirtyredz.roundwood.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.variant.FinishCatalog;
 import net.minecraft.core.BlockPos;

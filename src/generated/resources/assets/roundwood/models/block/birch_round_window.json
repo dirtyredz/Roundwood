@@ -1,6 +1,6 @@
 {
   "parent": "roundwood:block/template_round_window",
-  "render_type": "minecraft:cutout",
+  "render_type": "minecraft:translucent",
   "textures": {
     "frame": "minecraft:block/birch_planks",
     "particle": "minecraft:block/birch_planks"

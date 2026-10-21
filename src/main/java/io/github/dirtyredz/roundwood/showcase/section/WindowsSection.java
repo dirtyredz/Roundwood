@@ -4,7 +4,7 @@ import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
 import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
@@ -14,7 +14,8 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Windows: every finish in one connected row, a junction with a vanilla glass pane across the middle
- * of three, a stacked pair on different axes, and one waterlogged. Occupies {@code r 28..42, f 10..17}.
+ * of three, a stacked pair on different axes, one waterlogged, and one with a stone block right
+ * behind it (a solid block on a face never grows a glass arm). Occupies {@code r 28..44, f 10..17}.
  * Each pane's plane runs along the builder's right unless stated.
  */
 public final class WindowsSection implements ShowcaseSection {
@@ -24,6 +25,7 @@ public final class WindowsSection implements ShowcaseSection {
     public static final int DEMO_F = 16;
     public static final int STACK_R = 34;
     public static final int WATER_R = 40;
+    public static final int SOLID_R = 44;
 
     @Override
     public String id() {
@@ -49,6 +51,9 @@ public final class WindowsSection implements ShowcaseSection {
         window(canvas, oak, STACK_R, 1, DEMO_F, across, false);
         canvas.sign(WATER_R, DEMO_F - 1, "Waterlogged");
         window(canvas, oak, WATER_R, 0, DEMO_F, along, true);
+        canvas.sign(SOLID_R, DEMO_F - 1, "Stone behind", "no glass arm");
+        canvas.set(SOLID_R, 0, DEMO_F + 1, Blocks.STONE.defaultBlockState());
+        window(canvas, oak, SOLID_R, 0, DEMO_F, along, false);
     }
 
     /** Sets the pane with the connections it would get from its neighbours; they update on the write. */

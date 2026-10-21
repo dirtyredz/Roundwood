@@ -1,0 +1,23 @@
+{
+  "values": [
+    "roundwood:oak_round_trim",
+    "roundwood:spruce_round_trim",
+    "roundwood:birch_round_trim",
+    "roundwood:jungle_round_trim",
+    "roundwood:acacia_round_trim",
+    "roundwood:dark_oak_round_trim",
+    "roundwood:mangrove_round_trim",
+    "roundwood:cherry_round_trim",
+    "roundwood:bamboo_round_trim",
+    "roundwood:crimson_round_trim",
+    "roundwood:warped_round_trim",
+    "roundwood:green_round_trim",
+    "roundwood:yellow_round_trim",
+    "roundwood:red_round_trim",
+    "roundwood:blue_round_trim",
+    "roundwood:brick_round_trim",
+    "roundwood:stone_brick_round_trim",
+    "roundwood:deepslate_brick_round_trim",
+    "roundwood:mud_brick_round_trim"
+  ]
+}

@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.client.door;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.door.selection.DoorHitResolver;
+import io.github.dirtyredz.roundwood.block.door.selection.DoorHitResolver;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;

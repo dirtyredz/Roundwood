@@ -13,8 +13,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * The authoritative list of finishes, in creative-tab order. Registration, recipes, models and names
- * all iterate this list; nothing else enumerates woods or paints.
+ * The authoritative lists of finishes and frame materials, in creative-tab order. Registration,
+ * recipes, models and names all iterate these lists; nothing else enumerates woods, paints or
+ * bricks (the texture generator's palettes are artwork keyed by these ids, checked by tests).
  */
 public final class FinishCatalog {
     public static final List<Finish> NATURAL = List.of(
@@ -41,12 +42,26 @@ public final class FinishCatalog {
     /** Painted finishes are built on oak: the paint recipe starts from this finish. */
     public static final Finish PAINT_BASE = NATURAL.get(0);
 
+    /** Brick frames, crafted from four brick blocks, with generated radial brickwork. */
+    public static final List<TrimMaterial> MASONRY = List.of(
+            TrimMaterial.masonry("brick", "Brick", Blocks.BRICKS),
+            TrimMaterial.masonry("stone_brick", "Stone Brick", Blocks.STONE_BRICKS),
+            TrimMaterial.masonry("deepslate_brick", "Deepslate Brick", Blocks.DEEPSLATE_BRICKS),
+            TrimMaterial.masonry("mud_brick", "Mud Brick", Blocks.MUD_BRICKS));
+
+    /** Every frame material in creative-tab order: one wooden frame per finish, then the masonry. */
+    public static final List<TrimMaterial> TRIMS = java.util.stream.Stream.concat(
+            ALL.stream().map(TrimMaterial::wood), MASONRY.stream()).toList();
+
+    /** Painted frames are dyed from the oak frame (or another painted one). */
+    public static final TrimMaterial TRIM_PAINT_BASE = TRIMS.get(0);
+
     private FinishCatalog() {
     }
 
     private static Finish natural(String id, String name, BlockSetType type, Block door, Item planks,
-                                  String planksTexture, String trimTexture) {
-        return new Finish(id, name, type, door, planks, vanilla(planksTexture), vanilla(trimTexture), Optional.empty());
+                                  String planksTexture, String strippedTexture) {
+        return new Finish(id, name, type, door, planks, vanilla(planksTexture), vanilla(strippedTexture), Optional.empty());
     }
 
     private static Finish painted(DyeColor color, String name) {
