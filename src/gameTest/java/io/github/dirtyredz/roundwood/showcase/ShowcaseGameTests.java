@@ -149,6 +149,7 @@ public final class ShowcaseGameTests {
         verifyWindows(level, frame);
         verifyWindowPositions(level, frame);
         verifyWindowArches(level, frame);
+        ShowcaseWindowChecks.verifyNewWindowSections(level, frame);
         verifyRedstone(level, frame);
         verifyTrims(level, frame);
         verifyArches(level, frame);
@@ -161,6 +162,7 @@ public final class ShowcaseGameTests {
             verifyPaints(level, frame);
             verifyWindowPositions(level, frame);
             verifyWindowArches(level, frame);
+            ShowcaseWindowChecks.verifyNewWindowSections(level, frame);
             clearSilently(helper);
             helper.succeed();
         });

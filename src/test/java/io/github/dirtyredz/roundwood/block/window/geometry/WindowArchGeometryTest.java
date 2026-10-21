@@ -1,5 +1,8 @@
 package io.github.dirtyredz.roundwood.block.window.geometry;
 
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowArchGeometry;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.Piece;
 import net.minecraft.core.Direction;
@@ -30,8 +33,8 @@ class WindowArchGeometryTest {
         // Upright facing south, seen from the front: the left piece is to the west (x 0..16), the right one east of it.
         WindowPose pose = WindowPose.upright(Direction.SOUTH, WindowDepth.CENTER);
         assertEquals(Direction.EAST, pose.right());
-        List<Piece> left = WindowPaneGeometry.panel(WindowProfile.ARCH_LEFT, pose);
-        List<Piece> right = WindowPaneGeometry.panel(WindowProfile.ARCH_RIGHT, pose);
+        List<Piece> left = WindowPaneGeometry.panel(WindowDesign.plain(WindowProfile.ARCH_LEFT), pose);
+        List<Piece> right = WindowPaneGeometry.panel(WindowDesign.plain(WindowProfile.ARCH_RIGHT), pose);
         for (int x = 0; x < 32; x++) {
             for (int y = 0; y < 16; y++) {
                 List<Piece> piece = x < 16 ? left : right;
@@ -78,9 +81,9 @@ class WindowArchGeometryTest {
     void aLeftPieceSeenFromBehindShowsTheRightSilhouette() {
         WindowPose front = WindowPose.upright(Direction.SOUTH, WindowDepth.CENTER);
         WindowPose back = WindowPose.upright(Direction.NORTH, WindowDepth.CENTER);
-        List<Box> leftFromSouth = WindowPaneGeometry.panel(WindowProfile.ARCH_LEFT, front).stream()
+        List<Box> leftFromSouth = WindowPaneGeometry.panel(WindowDesign.plain(WindowProfile.ARCH_LEFT), front).stream()
                 .filter(p -> p.texture().equals(WindowPaneGeometry.GLASS)).map(Piece::box).toList();
-        List<Box> rightFromNorth = WindowPaneGeometry.panel(WindowProfile.ARCH_RIGHT, back).stream()
+        List<Box> rightFromNorth = WindowPaneGeometry.panel(WindowDesign.plain(WindowProfile.ARCH_RIGHT), back).stream()
                 .filter(p -> p.texture().equals(WindowPaneGeometry.GLASS)).map(Piece::box).toList();
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 16; y++) {

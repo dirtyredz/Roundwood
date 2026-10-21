@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.window.geometry;
 
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowOrientation;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.geometry.Box;
@@ -15,6 +17,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Every pose of every face: panels in place, junctions that bridge exactly what they must, no
@@ -60,7 +63,7 @@ class WindowPaneGeometryTest {
         assertBox(new WindowPose(Direction.UP, Direction.NORTH, WindowDepth.NEGATIVE).slab(), 0, 0, 0, 16, 2, 16);
         assertBox(new WindowPose(Direction.DOWN, Direction.EAST, WindowDepth.POSITIVE).slab(), 0, 14, 0, 16, 16, 16);
         for (WindowPose pose : allPoses()) {
-            for (Piece piece : WindowPaneGeometry.panel(WindowProfile.ROUND, pose)) {
+            for (Piece piece : WindowPaneGeometry.panel(WindowDesign.plain(WindowProfile.ROUND), pose)) {
                 double[] n = range(piece.box(), pose.normal());
                 double min = pose.depth().slabMin();
                 if (piece.texture().equals(WindowPaneGeometry.FRAME)) {
@@ -76,7 +79,7 @@ class WindowPaneGeometryTest {
 
     @Test
     void everyPieceStaysInTheCellAndNothingOverlaps() {
-        for (WindowProfile profile : WindowProfile.values()) {
+        for (WindowDesign profile : WindowDesign.all()) {
             for (WindowPose pose : allPoses()) {
                 for (int bits = 0; bits < 16; bits++) {
                     List<Piece> pieces = WindowPaneGeometry.pieces(profile, pose, mask(bits));
@@ -87,8 +90,9 @@ class WindowPaneGeometryTest {
                         for (int x = (int) Math.round(box.minX() * 2); x < (int) Math.round(box.maxX() * 2); x++) {
                             for (int y = (int) Math.round(box.minY() * 2); y < (int) Math.round(box.maxY() * 2); y++) {
                                 for (int z = (int) Math.round(box.minZ() * 2); z < (int) Math.round(box.maxZ() * 2); z++) {
-                                    assertEquals(0, count[(x * 32 + y) * 32 + z]++,
-                                            profile + " " + pose + " " + bits + ": " + box + " overlaps another piece");
+                                    if (count[(x * 32 + y) * 32 + z]++ != 0) {
+                                        fail(profile + " " + pose + " " + bits + ": " + box + " overlaps another piece");
+                                    }
                                 }
                             }
                         }
@@ -100,7 +104,7 @@ class WindowPaneGeometryTest {
 
     @Test
     void anIsolatedPaneIsOnlyItsSlab() {
-        for (WindowProfile profile : WindowProfile.values()) {
+        for (WindowDesign profile : WindowDesign.all()) {
             for (WindowPose pose : allPoses()) {
                 assertTrue(WindowPaneGeometry.junction(profile, pose, Set.of()).isEmpty(), pose.toString());
                 assertEquals(List.of(pose.slab()), WindowPaneGeometry.boxes(profile, pose, Set.of()), pose.toString());
@@ -122,7 +126,7 @@ class WindowPaneGeometryTest {
      */
     @Test
     void positionedPanesNeverGrowGlassBeyondTheirSlab() {
-        for (WindowProfile profile : WindowProfile.values()) {
+        for (WindowDesign profile : WindowDesign.all()) {
             for (WindowPose pose : allPoses()) {
                 if (centredUpright(pose)) {
                     continue;
@@ -140,7 +144,7 @@ class WindowPaneGeometryTest {
     /** A centred upright pane only ever adds the 0.5.0 arms across its plane: no post, nothing in its own plane. */
     @Test
     void centredPanesGrowOnlyArmsAcrossTheirPlane() {
-        for (WindowProfile profile : WindowProfile.values()) {
+        for (WindowDesign profile : WindowDesign.all()) {
             for (WindowPose pose : allPoses()) {
                 if (!centredUpright(pose)) {
                     continue;
@@ -183,7 +187,7 @@ class WindowPaneGeometryTest {
      */
     @Test
     void connectedJunctionsReachFromTheVanillaStripToThePanel() {
-        for (WindowProfile profile : WindowProfile.values()) {
+        for (WindowDesign profile : WindowDesign.all()) {
             for (WindowPose pose : allPoses()) {
                 for (Direction side : WindowPaneGeometry.neededSides(pose)) {
                     Set<Direction> connected = EnumSet.of(side);
@@ -214,13 +218,13 @@ class WindowPaneGeometryTest {
     }
 
     /** Where junction glass sits on a slab face, every opening pixel under it continues into the glass. */
-    private static void assertNoRecessGap(WindowProfile profile, WindowPose pose, List<Piece> pieces) {
+    private static void assertNoRecessGap(WindowDesign profile, WindowPose pose, List<Piece> pieces) {
         Box slab = pose.slab();
         double[] n = range(slab, pose.normal());
         Voxels all = new Voxels(pieces);
         for (int u = 0; u < 16; u++) {
             for (int v = 0; v < 16; v++) {
-                if (!profile.inOpening(u, v)) {
+                if (!profile.profile().inOpening(u, v)) {
                     continue;
                 }
                 for (double[] face : new double[][] {{n[0] - 0.25, n[0] + 0.25}, {n[1] + 0.25, n[1] - 0.25}}) {
@@ -236,7 +240,7 @@ class WindowPaneGeometryTest {
 
     @Test
     void rotationTurnsTheGeometry() {
-        for (WindowProfile profile : WindowProfile.values()) {
+        for (WindowDesign profile : WindowDesign.all()) {
             for (WindowPose pose : allPoses()) {
                 assertEquals(pose, pose.rotateY(4));
                 assertEquals(pose, pose.rotateY(1).rotateY(-1));
@@ -252,7 +256,7 @@ class WindowPaneGeometryTest {
 
     @Test
     void mirroringReflectsTheGeometryAndKeepsThePiece() {
-        for (WindowProfile profile : WindowProfile.values()) {
+        for (WindowDesign profile : WindowDesign.all()) {
             for (WindowPose pose : allPoses()) {
                 for (Direction.Axis axis : new Direction.Axis[] {Direction.Axis.X, Direction.Axis.Z}) {
                     assertEquals(pose, pose.mirror(axis).mirror(axis), pose + " twice " + axis);
@@ -267,14 +271,14 @@ class WindowPaneGeometryTest {
     @Test
     void boundaryFootprintsSeeOnlyFacesOnThatSide() {
         WindowPose centred = WindowPosition.CENTER.pose(Direction.Axis.X);
-        List<Box> boxes = WindowPaneGeometry.panel(WindowProfile.ROUND, centred).stream().map(Piece::box).toList();
+        List<Box> boxes = WindowPaneGeometry.panel(WindowDesign.plain(WindowProfile.ROUND), centred).stream().map(Piece::box).toList();
         // Top: the wooden slab's full top row, x 0..16 by z 7..9 (32 x 4 half-pixel cells).
         assertEquals(32 * 4, WindowPaneGeometry.boundary(boxes, Direction.UP).cardinality());
         // East edge: the wooden rim, full height.
         assertEquals(32 * 4, WindowPaneGeometry.boundary(boxes, Direction.EAST).cardinality());
         assertEquals(0, WindowPaneGeometry.boundary(boxes, Direction.NORTH).cardinality());
         WindowPose ceiling = WindowPosition.UP.pose(Direction.Axis.X);
-        List<Box> top = WindowPaneGeometry.panel(WindowProfile.ROUND, ceiling).stream().map(Piece::box).toList();
+        List<Box> top = WindowPaneGeometry.panel(WindowDesign.plain(WindowProfile.ROUND), ceiling).stream().map(Piece::box).toList();
         // The round face's wood and glass fill the whole top except the glass recess.
         assertFalse(WindowPaneGeometry.boundary(top, Direction.UP).isEmpty());
         assertEquals(32 * 32, WindowPaneGeometry.boundary(top, Direction.UP).cardinality()

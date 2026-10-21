@@ -73,6 +73,7 @@ public final class WindowSaveCompatibilityGameTests {
             check(state.getValue(CrossCollisionBlock.NORTH) && state.getValue(CrossCollisionBlock.SOUTH)
                     && !state.getValue(CrossCollisionBlock.EAST) && !state.getValue(CrossCollisionBlock.WEST), "connections lost: " + state);
             check(state.getValue(BlockStateProperties.WATERLOGGED), "water lost: " + state);
+            check(!state.getValue(WindowPaneBlock.TRIMMED), "a 0.5.0 window loaded trimmed: " + state);
         }
         CompoundTag alias = palette050("spruce_round_window", "x", false, true, false, false, false);
         BlockState legacy = readNbt(helper, alias);
@@ -100,10 +101,45 @@ public final class WindowSaveCompatibilityGameTests {
         helper.succeed();
     }
 
-    /** Every state of every window block (round, arches, an alias) writes and reads back unchanged. */
+    /** A 0.6.x arch palette entry (orientation and depth, written by hand, no trim property) decodes as it was, untrimmed. */
+    @GameTest(template = TEMPLATE)
+    public static void a061ArchPaletteEntryDecodesUntrimmed(GameTestHelper helper) {
+        CompoundTag properties = new CompoundTag();
+        properties.putString("orientation", "up_east");
+        properties.putString("depth", "positive");
+        for (String side : List.of("north", "east", "south", "west")) {
+            properties.putString(side, "false");
+        }
+        properties.putString("waterlogged", "true");
+        CompoundTag tag = new CompoundTag();
+        tag.putString("Name", "roundwood:round_window_arch_right");
+        tag.put("Properties", properties);
+        for (BlockState state : List.of(readNbt(helper, tag), readCodec(tag))) {
+            check(state.is(ModBlocks.archRight()), "not the right arch: " + state);
+            check(ModBlocks.archRight().pose(state).equals(new io.github.dirtyredz.roundwood.block.window.geometry.WindowPose(
+                    Direction.UP, Direction.EAST, io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth.POSITIVE)), "pose lost: " + state);
+            check(state.getValue(BlockStateProperties.WATERLOGGED) && !state.getValue(WindowPaneBlock.TRIMMED), "water or trim wrong: " + state);
+        }
+        // 0.6.x entity data (the pane look only) on that window: the look loads, no trim appears.
+        BlockPos pos = helper.absolutePos(new BlockPos(4, 2, 4));
+        helper.getLevel().setBlock(pos, readNbt(helper, tag), Block.UPDATE_CLIENTS);
+        CompoundTag look = new CompoundTag();
+        look.putInt("Version", 1);
+        look.putString("Kind", "wood");
+        look.putString("Material", "minecraft:spruce_planks");
+        CompoundTag entity = new CompoundTag();
+        entity.put("RoundwoodAppearance", look);
+        helper.getLevel().getBlockEntity(pos).load(entity);
+        check(SPRUCE.equals(windowLook(helper, pos)), "saved look not read");
+        check(((RoundWindowBlockEntity) helper.getLevel().getBlockEntity(pos)).trim().isEmpty(), "an untrimmed 0.6 window shows a trim");
+        helper.succeed();
+    }
+
+    /** Every state of every window block (the ten windows and an alias) writes and reads back unchanged. */
     @GameTest(template = TEMPLATE)
     public static void everyWindowStateSurvivesSaveAndReload(GameTestHelper helper) {
-        List<Block> blocks = List.of(ModBlocks.roundWindow(), ModBlocks.archLeft(), ModBlocks.archRight());
+        List<Block> blocks = new java.util.ArrayList<>(ModBlocks.windows());
+        blocks.add(io.github.dirtyredz.roundwood.migration.LegacyContent.windows().get(0));
         for (Block block : blocks) {
             for (BlockState state : block.getStateDefinition().getPossibleStates()) {
                 CompoundTag saved = NbtUtils.writeBlockState(state);

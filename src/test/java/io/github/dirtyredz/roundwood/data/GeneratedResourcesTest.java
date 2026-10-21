@@ -10,13 +10,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,17 +26,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Validates the checked-in generated tree without starting Minecraft. Since 0.6.0 there are five
- * canonical blocks (round_door, round_window, the two arch pieces, round_trim) whose look lives on
- * block entities, plus the 49 ids of 0.4.0 kept as hidden aliases. The expected names are listed here independently of
- * the mod's catalogue, so a catalogue mistake shows up as a diff.
+ * Validates the checked-in generated tree without starting Minecraft. Since 0.7.0 there are twelve
+ * canonical blocks (round_door, ten windows, round_trim) whose look lives on block entities, the
+ * window_trim item (an item only: no blockstate, no loot table), and the 49 ids of 0.4.0 kept as
+ * hidden aliases. The expected names are listed here independently of the mod's catalogue, so a
+ * catalogue mistake shows up as a diff. Recipes are covered by {@link GeneratedRecipesTest}.
  */
 class GeneratedResourcesTest {
     private static final Path GENERATED = Path.of("src/generated/resources");
     private static final Path MAIN = Path.of("src/main/resources");
-    private static final List<String> CANONICAL = List.of("round_door", "round_window", "round_window_arch_left",
-            "round_window_arch_right", "round_trim");
-    private static final List<String> ARCHES = List.of("round_window_arch_left", "round_window_arch_right");
+    /** The ten windows in creative order. */
+    private static final List<String> WINDOWS = List.of("round_window", "round_window_cross", "round_window_arch_left",
+            "round_window_arch_left_cross", "round_window_arch_right", "round_window_arch_right_cross",
+            "round_window_bottom_left", "round_window_bottom_left_cross", "round_window_bottom_right",
+            "round_window_bottom_right_cross");
+    /** The two designs that are plain round windows; the other eight are oriented (arches and corners). */
+    private static final List<String> ROUND_DESIGNS = List.of("round_window", "round_window_cross");
+    private static final List<String> CANONICAL = Stream.of(List.of("round_door"), WINDOWS, List.of("round_trim"))
+            .flatMap(List::stream).toList();
+    /** window_trim is an item only. */
+    private static final String WINDOW_TRIM = "window_trim";
     private static final List<String> ALIASES = ModelExpectations.aliases();
     private static final List<String> BLOCKS = Stream.concat(CANONICAL.stream(), ALIASES.stream()).toList();
     private static final List<String> PARTS = ModelExpectations.PARTS;
@@ -66,10 +73,10 @@ class GeneratedResourcesTest {
         if (id.endsWith("_round_door") || id.equals("round_door")) {
             return "round_door";
         }
-        if (ARCHES.contains(id)) {
+        if (WINDOWS.contains(id)) {
             return id;
         }
-        return id.endsWith("_round_window") || id.equals("round_window") ? "round_window" : "round_trim";
+        return id.endsWith("_round_window") ? "round_window" : "round_trim";
     }
 
     /** "dark_oak_round_door" -> "Dark Oak Round Door", written independently of the mod. */
@@ -87,8 +94,10 @@ class GeneratedResourcesTest {
         assertEquals(15, ModelExpectations.aliasWindows().size());
         assertEquals(19, ModelExpectations.aliasTrims().size());
         assertEquals(49, ALIASES.size());
-        assertEquals(54, BLOCKS.size());
-        assertEquals(54, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
+        assertEquals(12, CANONICAL.size());
+        assertEquals(10, WINDOWS.size());
+        assertEquals(61, BLOCKS.size());
+        assertEquals(61, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
     }
 
     @Test
@@ -104,14 +113,22 @@ class GeneratedResourcesTest {
     }
 
     @Test
+    void windowTrimIsAnItemWithoutABlock() {
+        assertTrue(Files.isRegularFile(assets("models/item/" + WINDOW_TRIM + ".json")), "item model");
+        assertTrue(json(assets("lang/en_us.json")).has("item.roundwood." + WINDOW_TRIM), "item name");
+        assertFalse(Files.exists(assets("blockstates/" + WINDOW_TRIM + ".json")), "no blockstate");
+        assertFalse(Files.exists(data("loot_tables/blocks/" + WINDOW_TRIM + ".json")), "no loot table");
+        assertFalse(Files.exists(assets("models/block/" + WINDOW_TRIM + ".json")), "no block model");
+    }
+
+    @Test
     void generatedSetsAreExactlyTheExpectedManifests() throws IOException {
         Set<String> block = new TreeSet<>(List.of("template_round_door_leaf_left", "template_round_door_leaf_right",
-                "round_door_leaf_left", "round_door_leaf_right", "round_door", "template_round_window", "round_window",
-                "round_window_arm", "round_trim"));
-        Set<String> item = new TreeSet<>(List.of("template_round_door", "round_door", "template_round_window",
-                "round_window", "template_round_trim", "template_round_trim_whole", "round_trim", "round_trim_whole"));
-        block.addAll(windowPaneModels());
-        item.addAll(ARCHES);
+                "round_door_leaf_left", "round_door_leaf_right", "round_door", "round_trim"));
+        Set<String> item = new TreeSet<>(List.of("template_round_door", "round_door", "template_round_trim",
+                "template_round_trim_whole", "round_trim", "round_trim_whole", WINDOW_TRIM));
+        block.addAll(windowBlockModels());
+        item.addAll(WINDOWS);
         for (String part : PARTS) {
             block.add("template_round_trim_" + part);
             block.add("template_round_trim_whole_" + part);
@@ -119,45 +136,56 @@ class GeneratedResourcesTest {
             block.add("round_trim_whole_" + part);
         }
         item.addAll(ALIASES);
-        assertEquals(25 + 25, block.size());
-        assertEquals(59, item.size());
+        assertEquals(220, windowBlockModels().size());
+        assertEquals(22 + 220, block.size());
+        assertEquals(66, item.size());
         // Exact sets: no per-finish models remain; the 49 old ids are only item-model aliases.
         assertEquals(block, names(assets("models/block")));
         assertEquals(item, names(assets("models/item")));
         assertEquals(new TreeSet<>(BLOCKS), names(assets("blockstates")));
         assertEquals(new TreeSet<>(BLOCKS), names(data("loot_tables/blocks")));
-        assertEquals(new TreeSet<>(CANONICAL), names(data("recipes")));
-        assertEquals(new TreeSet<>(CANONICAL), names(data("advancements/recipes")));
-        assertEquals(54, allJson(assets("blockstates")).size());
-        assertEquals(50, allJson(assets("models/block")).size());
-        assertEquals(59, allJson(assets("models/item")).size());
-        assertEquals(5, allJson(data("recipes")).size());
-        assertEquals(54, allJson(data("loot_tables/blocks")).size());
-        assertEquals(5, allJson(data("advancements/recipes")).size());
+        Set<String> crafted = new TreeSet<>(CANONICAL);
+        crafted.add(WINDOW_TRIM);
+        assertEquals(crafted, names(data("recipes")));
+        assertEquals(crafted, names(data("advancements/recipes")));
+        assertEquals(61, allJson(assets("blockstates")).size());
+        assertEquals(242, allJson(assets("models/block")).size());
+        assertEquals(66, allJson(assets("models/item")).size());
+        assertEquals(13, allJson(data("recipes")).size());
+        assertEquals(61, allJson(data("loot_tables/blocks")).size());
+        assertEquals(13, allJson(data("advancements/recipes")).size());
     }
 
     /**
-     * The posed window models, named independently: per canonical pose a core, plus (centred upright
-     * only, since 0.6.1) an arm per side across the plane. Round window: flush against the north side
-     * ({@code _back}), on the ceiling ({@code _down_ceiling}) and on the floor ({@code _up_floor}).
-     * Each arch piece: upright centred (two across-plane arms), upright behind or in front of centre,
-     * and front up or down at each of three heights. No hub, cap or positioned arm model exists.
+     * The window block models, named independently. Per design the stems are: round designs
+     * ({@code round_window}, {@code round_window_cross}) the centred stem, {@code _back},
+     * {@code _down_ceiling} and {@code _up_floor}; oriented designs the centred stem, {@code _back},
+     * {@code _front} and front up/down at floor, level and ceiling. Every stem exists untrimmed and
+     * with {@code _trimmed}; the centred stem additionally has {@code _arms_north|south|both} in both
+     * forms. That is 14 models per round design and 24 per oriented design.
      */
-    static Set<String> windowPaneModels() {
+    static Set<String> windowBlockModels() {
         Set<String> out = new TreeSet<>();
-        out.add("round_window_back");
-        out.add("round_window_down_ceiling");
-        out.add("round_window_up_floor");
-        for (String arch : ARCHES) {
-            out.add(arch);
-            out.add(arch + "_arm_north");
-            out.add(arch + "_arm_south");
-            out.add(arch + "_back");
-            out.add(arch + "_front");
-            for (String front : List.of("up", "down")) {
-                for (String level : List.of("floor", "level", "ceiling")) {
-                    out.add(arch + "_" + front + "_" + level);
+        for (String design : WINDOWS) {
+            List<String> stems = new ArrayList<>(List.of(design, design + "_back"));
+            if (ROUND_DESIGNS.contains(design)) {
+                stems.add(design + "_down_ceiling");
+                stems.add(design + "_up_floor");
+            } else {
+                stems.add(design + "_front");
+                for (String front : List.of("up", "down")) {
+                    for (String level : List.of("floor", "level", "ceiling")) {
+                        stems.add(design + "_" + front + "_" + level);
+                    }
                 }
+            }
+            for (String stem : stems) {
+                out.add(stem);
+                out.add(stem + "_trimmed");
+            }
+            for (String arms : List.of("north", "south", "both")) {
+                out.add(design + "_arms_" + arms);
+                out.add(design + "_trimmed_arms_" + arms);
             }
         }
         return out;
@@ -240,127 +268,70 @@ class GeneratedResourcesTest {
         Path tags = GENERATED.resolve("data/roundwood/tags");
         for (String kind : List.of("blocks", "items")) {
             assertEquals(Set.of("roundwood:round_door"), tagValues(tags.resolve(kind + "/round_doors.json")), kind);
-            assertEquals(Set.of("roundwood:round_window", "roundwood:round_window_arch_left", "roundwood:round_window_arch_right"),
-                    tagValues(tags.resolve(kind + "/round_windows.json")), kind);
-            assertEquals(Set.of("roundwood:round_trim"), tagValues(tags.resolve(kind + "/round_trims.json")), kind);
+            Set<String> windows = new TreeSet<>();
+            WINDOWS.forEach(w -> windows.add("roundwood:" + w));
+            assertEquals(10, windows.size());
+            assertEquals(windows, tagValues(tags.resolve(kind + "/round_windows.json")), kind);
         }
-    }
-
-    @Test
-    void theFiveRecipesAreExactlyAsDesigned() {
-        assertRecipe("round_door", List.of("PPP", "PNP", "PPP"),
-                Map.of("P", "{\"tag\":\"minecraft:planks\"}", "N", "{\"item\":\"minecraft:gold_nugget\"}"));
-        assertRecipe("round_window", List.of(" P ", "PGP", " P "),
-                Map.of("P", "{\"tag\":\"minecraft:planks\"}", "G", "{\"item\":\"minecraft:glass_pane\"}"));
-        assertRecipe("round_trim", List.of("P P", "   ", "P P"), Map.of("P", "{\"tag\":\"minecraft:planks\"}"));
-        Map<String, String> arch = Map.of("P", "{\"tag\":\"minecraft:planks\"}", "G", "{\"item\":\"minecraft:glass_pane\"}");
-        assertRecipe("round_window_arch_left", List.of("PP", "PG", "P "), arch);
-        assertRecipe("round_window_arch_right", List.of("PPP", " G ", " P "), arch);
-    }
-
-    /**
-     * No two Roundwood recipes can fill the same crafting grid: every placement of each pattern, and
-     * of its mirror image (shaped recipes match mirrored), is compared on a 3 x 3 grid.
-     */
-    @Test
-    void noTwoRecipesMatchTheSameGridEvenMirrored() {
-        Map<String, Set<String>> grids = new TreeMap<>();
-        for (String name : CANONICAL) {
-            JsonObject recipe = json(data("recipes/" + name + ".json"));
-            List<String> rows = new ArrayList<>();
-            recipe.getAsJsonArray("pattern").forEach(row -> rows.add(row.getAsString()));
-            JsonObject key = recipe.getAsJsonObject("key");
-            Set<String> placements = new HashSet<>();
-            for (List<String> pattern : List.of(rows, mirror(rows))) {
-                placements.addAll(placements(pattern, key));
-            }
-            grids.put(name, placements);
-        }
-        for (String a : grids.keySet()) {
-            for (String b : grids.keySet()) {
-                if (a.compareTo(b) < 0) {
-                    Set<String> shared = new HashSet<>(grids.get(a));
-                    shared.retainAll(grids.get(b));
-                    assertTrue(shared.isEmpty(), a + " and " + b + " both match " + shared);
-                }
-            }
-        }
-    }
-
-    private static List<String> mirror(List<String> rows) {
-        return rows.stream().map(row -> new StringBuilder(row).reverse().toString()).toList();
-    }
-
-    /** Every 3 x 3 grid (nine cells of ingredient JSON, "." when empty) the pattern fills. */
-    private static Set<String> placements(List<String> rows, JsonObject key) {
-        Set<String> out = new HashSet<>();
-        int height = rows.size();
-        int width = rows.get(0).length();
-        for (int dy = 0; dy + height <= 3; dy++) {
-            for (int dx = 0; dx + width <= 3; dx++) {
-                String[] cells = new String[9];
-                Arrays.fill(cells, ".");
-                for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width; x++) {
-                        char c = rows.get(y).charAt(x);
-                        cells[(dy + y) * 3 + dx + x] = c == ' ' ? "." : key.get(String.valueOf(c)).toString();
-                    }
-                }
-                out.add(String.join("|", cells));
-            }
-        }
-        return out;
-    }
-
-    private static void assertRecipe(String name, List<String> pattern, Map<String, String> ingredients) {
-        JsonObject recipe = json(data("recipes/" + name + ".json"));
-        assertEquals("minecraft:crafting_shaped", recipe.get("type").getAsString(), name);
-        List<String> actualPattern = new ArrayList<>();
-        recipe.getAsJsonArray("pattern").forEach(row -> actualPattern.add(row.getAsString()));
-        assertEquals(pattern, actualPattern, name);
-        JsonObject key = recipe.getAsJsonObject("key");
-        assertEquals(ingredients.keySet(), key.keySet(), name + ": ingredient symbols");
-        ingredients.forEach((symbol, expected) -> assertEquals(expected, key.get(symbol).toString(), name + " " + symbol));
-        JsonObject result = recipe.getAsJsonObject("result");
-        assertEquals("roundwood:" + name, result.get("item").getAsString(), name);
-        assertFalse(result.has("count") && result.get("count").getAsInt() != 1, name + ": one per craft");
-    }
-
-    @Test
-    void recipeAdvancementsUnlockTheirRecipe() throws IOException {
-        for (Path file : allJson(data("advancements/recipes"))) {
-            String name = file.getFileName().toString().replace(".json", "");
-            JsonObject advancement = json(file);
-            assertEquals("roundwood:" + name, advancement.getAsJsonObject("rewards").getAsJsonArray("recipes")
-                    .get(0).getAsString(), name);
-            assertTrue(advancement.toString().contains("\"recipe\":\"roundwood:" + name + "\""), name);
-        }
+        assertEquals(Set.of("roundwood:round_trim"), tagValues(tags.resolve("blocks/round_trims.json")), "block trims");
+        assertEquals(Set.of("roundwood:round_trim", "roundwood:window_trim"),
+                tagValues(tags.resolve("items/round_trims.json")), "item trims");
     }
 
     @Test
     void lootDropsTheCanonicalItemOfTheBlocksFamily() {
         for (String block : BLOCKS) {
             JsonObject loot = json(data("loot_tables/blocks/" + block + ".json"));
+            assertEquals("minecraft:block", loot.get("type").getAsString(), block);
             JsonArray pools = loot.getAsJsonArray("pools");
-            assertEquals(1, pools.size(), block);
-            JsonArray entries = pools.get(0).getAsJsonObject().getAsJsonArray("entries");
-            assertEquals(1, entries.size(), block);
-            assertEquals("roundwood:" + family(block), entries.get(0).getAsJsonObject().get("name").getAsString(), block);
+            boolean window = WINDOWS.contains(block) || block.endsWith("_round_window");
+            assertEquals(window ? 2 : 1, pools.size(), block);
+            assertEquals(JsonParser.parseString(ownItemPool("roundwood:" + family(block))), pools.get(0), block);
+            if (window) {
+                assertEquals(JsonParser.parseString(trimPool("roundwood:" + block)), pools.get(1), block + ": trim pool");
+            }
         }
         for (String canonical : CANONICAL) { // canonical blocks drop themselves
             assertEquals("roundwood:" + canonical, json(data("loot_tables/blocks/" + canonical + ".json"))
                     .getAsJsonArray("pools").get(0).getAsJsonObject().getAsJsonArray("entries").get(0)
                     .getAsJsonObject().get("name").getAsString());
         }
+        assertEquals("roundwood:round_window", json(data("loot_tables/blocks/oak_round_window.json"))
+                .getAsJsonArray("pools").get(0).getAsJsonObject().getAsJsonArray("entries").get(0)
+                .getAsJsonObject().get("name").getAsString());
+    }
+
+    /** Pool 1: the block's own item (an alias drops its family's canonical item), once, unless blown up. */
+    private static String ownItemPool(String item) {
+        return "{\"bonus_rolls\":0.0,\"conditions\":[{\"condition\":\"minecraft:survives_explosion\"}],"
+                + "\"entries\":[{\"type\":\"minecraft:item\",\"name\":\"" + item + "\"}],\"rolls\":1.0}";
+    }
+
+    /** Pool 2: a trimmed window also drops a window_trim carrying the trim's look. */
+    private static String trimPool(String block) {
+        return "{\"bonus_rolls\":0.0,\"conditions\":[{\"block\":\"" + block + "\","
+                + "\"condition\":\"minecraft:block_state_property\",\"properties\":{\"trimmed\":\"true\"}},"
+                + "{\"condition\":\"minecraft:survives_explosion\"}],"
+                + "\"entries\":[{\"type\":\"minecraft:item\",\"functions\":[{\"function\":\"minecraft:copy_nbt\","
+                + "\"ops\":[{\"op\":\"replace\",\"source\":\"WindowTrim.RoundwoodAppearance\","
+                + "\"target\":\"RoundwoodAppearance\"}],\"source\":\"block_entity\"}],"
+                + "\"name\":\"roundwood:window_trim\"}],\"rolls\":1.0}";
     }
 
     @Test
     void langNamesCanonicalAndAliasBlocksAndKeepsTheTooltips() {
         JsonObject lang = json(assets("lang/en_us.json"));
         assertEquals("Round Door", lang.get("block.roundwood.round_door").getAsString());
-        assertEquals("Round Window", lang.get("block.roundwood.round_window").getAsString());
-        assertEquals("Round Window Arch, Left", lang.get("block.roundwood.round_window_arch_left").getAsString());
-        assertEquals("Round Window Arch, Right", lang.get("block.roundwood.round_window_arch_right").getAsString());
+        List<String> windowNames = List.of("Round Window", "Round Window with Cross Beams", "Round Window Arch, Left",
+                "Round Window Arch with Cross Beams, Left", "Round Window Arch, Right",
+                "Round Window Arch with Cross Beams, Right", "Round Window Corner, Bottom Left",
+                "Round Window Corner with Cross Beams, Bottom Left", "Round Window Corner, Bottom Right",
+                "Round Window Corner with Cross Beams, Bottom Right");
+        for (int i = 0; i < WINDOWS.size(); i++) {
+            assertEquals(windowNames.get(i), lang.get("block.roundwood." + WINDOWS.get(i)).getAsString(), WINDOWS.get(i));
+        }
+        assertEquals("Window Trim", lang.get("item.roundwood.window_trim").getAsString());
+        assertTrue(lang.has("tooltip.roundwood.window_trim"));
         assertEquals("Round Trim", lang.get("block.roundwood.round_trim").getAsString());
         for (String alias : ALIASES) {
             assertEquals(englishName(alias), lang.get("block.roundwood." + alias).getAsString(), alias);

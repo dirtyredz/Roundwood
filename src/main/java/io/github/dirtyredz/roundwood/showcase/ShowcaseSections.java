@@ -7,7 +7,10 @@ import io.github.dirtyredz.roundwood.showcase.section.PaintsSection;
 import io.github.dirtyredz.roundwood.showcase.section.RedstoneSection;
 import io.github.dirtyredz.roundwood.showcase.section.TrimCombinationsSection;
 import io.github.dirtyredz.roundwood.showcase.section.WindowArchesSection;
+import io.github.dirtyredz.roundwood.showcase.section.WindowCornersSection;
+import io.github.dirtyredz.roundwood.showcase.section.WindowMuntinsSection;
 import io.github.dirtyredz.roundwood.showcase.section.WindowPositionsSection;
+import io.github.dirtyredz.roundwood.showcase.section.WindowTrimsSection;
 import io.github.dirtyredz.roundwood.showcase.section.WindowsSection;
 
 import java.util.List;
@@ -20,6 +23,9 @@ public final class ShowcaseSections {
             new WindowsSection(),
             new WindowPositionsSection(),
             new WindowArchesSection(),
+            new WindowCornersSection(),
+            new WindowMuntinsSection(),
+            new WindowTrimsSection(),
             new RedstoneSection(),
             new PaintsSection(),
             new TrimCombinationsSection(),

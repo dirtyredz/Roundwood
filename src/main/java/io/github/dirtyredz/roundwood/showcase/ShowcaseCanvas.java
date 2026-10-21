@@ -12,6 +12,7 @@ import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
 import io.github.dirtyredz.roundwood.block.window.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
@@ -148,6 +149,16 @@ public final class ShowcaseCanvas {
     /** An arch piece in {@code pose} (world directions; see {@link #pane}). */
     public void arch(OrientedWindowBlock piece, Appearance appearance, int r, int y, int f, WindowPose pose) {
         pane(appearance, r, y, f, OrientedWindowBlock.withPose(piece.defaultBlockState(), pose), false);
+    }
+
+    /** Places {@code window} (see {@link #pane}), then fits its trim, if any, the way the window trim item does. */
+    public void window(ShowcaseWindow window) {
+        pane(window.pane(), window.r(), window.y(), window.f(), window.state(), false);
+        window.trim().ifPresent(look -> {
+            if (!WindowTrimActions.install(level, frame.pos(window.r(), window.y(), window.f()), look)) {
+                problem("trim not fitted at " + frame.pos(window.r(), window.y(), window.f()).toShortString());
+            }
+        });
     }
 
     /**

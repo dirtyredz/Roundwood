@@ -41,17 +41,34 @@ public final class WindowTrimActions {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
-        if (!(level.getBlockEntity(pos) instanceof RoundWindowBlockEntity window) || !allowed(level, pos, player)) {
+        if (!(level.getBlockEntity(pos) instanceof RoundWindowBlockEntity) || !allowed(level, pos, player)) {
             return InteractionResult.FAIL;
         }
         Appearance look = AppearanceStacks.read(stack);
-        level.setBlock(pos, state.setValue(WindowPaneBlock.TRIMMED, true), Block.UPDATE_ALL);
-        window.setTrim(look);
+        install(level, pos, look);
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);
         }
         announce(level, player, pos, look, true);
         return InteractionResult.CONSUME;
+    }
+
+    /**
+     * Fits a trim in {@code look} on the untrimmed window at {@code pos} without a player (the fit's
+     * own state and payload write; the showcase builds through it). False when there is no untrimmed
+     * window there.
+     */
+    public static boolean install(Level level, BlockPos pos, Appearance look) {
+        BlockState state = level.getBlockState(pos);
+        if (!(state.getBlock() instanceof WindowPaneBlock) || WindowPaneBlock.trimmed(state)) {
+            return false;
+        }
+        level.setBlock(pos, state.setValue(WindowPaneBlock.TRIMMED, true), Block.UPDATE_ALL);
+        if (!(level.getBlockEntity(pos) instanceof RoundWindowBlockEntity window)) {
+            return false;
+        }
+        window.setTrim(look);
+        return true;
     }
 
     public static InteractionResult remove(Level level, BlockPos pos, Player player, InteractionHand hand, ItemStack shears) {

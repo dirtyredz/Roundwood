@@ -30,6 +30,13 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
+import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimItem;
+import net.minecraft.world.item.BlockItem;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -41,9 +48,9 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 
 /**
- * Registrations, tags, recipes, loot and the creative tab, as loaded by a dedicated server: five
- * advertised entries (door, round window, the two arch pieces, trim), 49 hidden 0.4.0 aliases that
- * keep their looks, and nothing else.
+ * Registrations, tags, recipes, loot and the creative tab, as loaded by a dedicated server: twelve
+ * canonical blocks (door, ten windows, round trim), thirteen advertised items (those plus the window
+ * trim, which is not a block), 49 hidden 0.4.0 aliases that keep their looks, and nothing else.
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -52,14 +59,19 @@ public final class ContentGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void fiveEntriesAndFortyNineHiddenAliasesAreRegistered(GameTestHelper helper) {
+    public static void canonicalEntriesAndFortyNineHiddenAliasesAreRegistered(GameTestHelper helper) {
         long blocks = ForgeRegistries.BLOCKS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         long items = ForgeRegistries.ITEMS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(blocks == 54, "expected 5 + 49 blocks, found " + blocks);
-        check(items == 54, "expected 5 + 49 items, found " + items);
-        for (String id : List.of("round_door", "round_window", "round_window_arch_left", "round_window_arch_right", "round_trim")) {
+        check(blocks == 61, "expected 12 + 49 blocks, found " + blocks);
+        check(items == 62, "expected 13 + 49 items, found " + items);
+        for (String id : CANONICAL_BLOCKS) {
             check(ForgeRegistries.BLOCKS.containsKey(id(id)) && ForgeRegistries.ITEMS.containsKey(id(id)), "missing " + id);
+            check(ForgeRegistries.BLOCKS.getValue(id(id)).asItem() == ForgeRegistries.ITEMS.getValue(id(id)), id + ": item mapping");
         }
+        check(ForgeRegistries.ITEMS.containsKey(id("window_trim")) && !ForgeRegistries.BLOCKS.containsKey(id("window_trim")),
+                "the window trim is an item without a block");
+        check(ModItems.WINDOW_TRIM.get() instanceof WindowTrimItem trim && trim.appearanceFamily() == AppearanceFamily.TRIM
+                && !(ModItems.WINDOW_TRIM.get() instanceof BlockItem), "the window trim is a trim-family attachment item");
         check(ModBlocks.roundDoor().asItem() == ModItems.ROUND_DOOR.get(), "an alias took the door's item mapping");
         check(ModBlocks.roundWindow().asItem() == ModItems.ROUND_WINDOW.get(), "an alias took the window's item mapping");
         check(ModBlocks.roundTrim().asItem() == ModItems.ROUND_TRIM.get(), "an alias took the trim's item mapping");
@@ -84,8 +96,9 @@ public final class ContentGameTests {
             check(!ModBlockEntities.roundWindow().isValid(door.defaultBlockState())
                     && !ModBlockEntities.roundTrim().isValid(door.defaultBlockState()), door + " valid for another family");
         }
-        List<Block> windows = with(ModBlocks.roundWindow(), LegacyContent.windows());
-        windows.addAll(ModBlocks.arches());
+        List<Block> windows = new java.util.ArrayList<>(ModBlocks.windows());
+        windows.addAll(LegacyContent.windows());
+        check(windows.size() == 25, "expected 10 + 15 window blocks, found " + windows.size());
         for (Block window : windows) {
             check(ModBlockEntities.roundWindow().isValid(window.defaultBlockState()), window + " cannot carry the window entity");
             check(!ModBlockEntities.roundDoor().isValid(window.defaultBlockState()), window + " valid for the door entity");
@@ -108,13 +121,15 @@ public final class ContentGameTests {
         check(ModBlocks.roundDoor().defaultBlockState().is(ModTags.ROUND_DOORS), "door family tag");
         check(ModBlocks.roundWindow().defaultBlockState().is(ModTags.ROUND_WINDOWS)
                 && new ItemStack(ModItems.ROUND_WINDOW.get()).is(ModTags.ROUND_WINDOW_ITEMS), "window family tags");
-        for (Block arch : ModBlocks.arches()) {
-            check(arch.defaultBlockState().is(ModTags.ROUND_WINDOWS) && new ItemStack(arch).is(ModTags.ROUND_WINDOW_ITEMS)
-                    && arch.defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE) && !arch.defaultBlockState().is(BlockTags.DOORS),
-                    arch + " window family tags");
+        for (Block window : ModBlocks.windows()) {
+            check(window.defaultBlockState().is(ModTags.ROUND_WINDOWS) && new ItemStack(window).is(ModTags.ROUND_WINDOW_ITEMS)
+                    && window.defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE) && !window.defaultBlockState().is(BlockTags.DOORS),
+                    window + " window family tags");
         }
         check(ModBlocks.roundTrim().defaultBlockState().is(ModTags.ROUND_TRIMS)
                 && new ItemStack(ModItems.ROUND_TRIM.get()).is(ModTags.ROUND_TRIM_ITEMS), "trim family tags");
+        check(new ItemStack(ModItems.WINDOW_TRIM.get()).is(ModTags.ROUND_TRIM_ITEMS)
+                && !new ItemStack(ModItems.WINDOW_TRIM.get()).is(ModTags.ROUND_WINDOW_ITEMS), "window trim item tags");
         for (Block block : with(ModBlocks.roundWindow(), LegacyContent.windows())) {
             check(block.defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE) && !block.defaultBlockState().is(BlockTags.DOORS), block + " window tags");
         }
@@ -154,8 +169,57 @@ public final class ContentGameTests {
                 "a painting recipe is still loaded");
         long count = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
                 .filter(r -> r.getId().getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(count == 5, "expected 5 roundwood crafting recipes, loaded " + count);
+        check(count == 13, "expected 13 roundwood crafting recipes, loaded " + count);
         helper.succeed();
+    }
+
+    /**
+     * Every 0.7.0 shape, in mixed planks, mirrored and moved within the grid where it fits, makes its
+     * own default item against everything the server loaded (no vanilla or Roundwood recipe takes it).
+     */
+    @GameTest(template = TEMPLATE)
+    public static void theNewWindowRecipesMatchOnlyThemselves(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        expectShape(level, ModItems.window(design(WindowProfile.BOTTOM_LEFT, WindowPattern.PLAIN)), "P ", "PG", "PP");
+        expectShape(level, ModItems.window(design(WindowProfile.BOTTOM_RIGHT, WindowPattern.PLAIN)), " P ", " G ", "PPP");
+        expectShape(level, ModItems.window(design(WindowProfile.ROUND, WindowPattern.CROSS)), "SPS", "PGP", "SPS");
+        expectShape(level, ModItems.window(design(WindowProfile.ARCH_LEFT, WindowPattern.CROSS)), "PPS", "PGS", "P  ");
+        expectShape(level, ModItems.window(design(WindowProfile.ARCH_RIGHT, WindowPattern.CROSS)), "PPP", "SGS", " P ");
+        expectShape(level, ModItems.window(design(WindowProfile.BOTTOM_LEFT, WindowPattern.CROSS)), "P  ", "PGS", "PPS");
+        expectShape(level, ModItems.window(design(WindowProfile.BOTTOM_RIGHT, WindowPattern.CROSS)), " P ", "SGS", "PPP");
+        expectShape(level, ModItems.WINDOW_TRIM.get(), " P ", "PSP", " P ");
+        helper.succeed();
+    }
+
+    private static WindowDesign design(WindowProfile profile, WindowPattern pattern) {
+        return new WindowDesign(profile, pattern);
+    }
+
+    /** {@code rows} (P planks, G glass pane, S stick), and its mirror image, at every position it fits in the 3 x 3 grid. */
+    private static void expectShape(ServerLevel level, Item result, String... rows) {
+        List<ItemStack> planks = List.of(new ItemStack(Items.OAK_PLANKS), new ItemStack(Items.SPRUCE_PLANKS), new ItemStack(Items.WARPED_PLANKS));
+        for (boolean mirrored : new boolean[] {false, true}) {
+            int width = rows[0].length();
+            for (int dx = 0; dx + width <= 3; dx++) {
+                for (int dy = 0; dy + rows.length <= 3; dy++) {
+                    ItemStack[] stacks = new ItemStack[9];
+                    java.util.Arrays.fill(stacks, ItemStack.EMPTY);
+                    int n = 0;
+                    for (int y = 0; y < rows.length; y++) {
+                        for (int x = 0; x < width; x++) {
+                            char c = rows[y].charAt(mirrored ? width - 1 - x : x);
+                            stacks[(y + dy) * 3 + x + dx] = switch (c) {
+                                case 'P' -> planks.get(n++ % planks.size());
+                                case 'G' -> new ItemStack(Items.GLASS_PANE);
+                                case 'S' -> new ItemStack(Items.STICK);
+                                default -> ItemStack.EMPTY;
+                            };
+                        }
+                    }
+                    expect(level, grid(stacks), result, result + (mirrored ? " mirrored" : "") + " at " + dx + "," + dy);
+                }
+            }
+        }
     }
 
     /** With no appearance in the world, canonical blocks drop their default item; aliases drop the canonical item in their old look. */
@@ -166,6 +230,15 @@ public final class ContentGameTests {
             List<ItemStack> drops = Block.getDrops(block.defaultBlockState(), helper.getLevel(), pos, null);
             check(drops.size() == 1 && drops.get(0).is(block.asItem()) && drops.get(0).getCount() == 1 && !drops.get(0).hasTag(),
                     block + " loot is " + drops);
+        }
+        // A trimmed window (canonical or alias) also drops one oak window trim through its second pool.
+        List<Block> windows = new java.util.ArrayList<>(ModBlocks.windows());
+        windows.addAll(LegacyContent.windows());
+        for (Block window : windows) {
+            List<ItemStack> drops = Block.getDrops(window.defaultBlockState().setValue(WindowPaneBlock.TRIMMED, true),
+                    helper.getLevel(), pos, null);
+            check(drops.size() == 2 && drops.stream().filter(d -> d.is(ModItems.WINDOW_TRIM.get()) && !d.hasTag()).count() == 1,
+                    window + " trimmed loot is " + drops);
         }
         for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
             Block alias = ForgeRegistries.BLOCKS.getValue(id(entry.id()));
@@ -178,18 +251,25 @@ public final class ContentGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void creativeTabHoldsExactlyTheFiveDefaults(GameTestHelper helper) {
+    public static void creativeTabHoldsExactlyTheThirteenDefaults(GameTestHelper helper) {
         CreativeModeTab tab = ModCreativeTab.ROUNDWOOD.get();
         tab.buildContents(new CreativeModeTab.ItemDisplayParameters(helper.getLevel().enabledFeatures(), false,
                 helper.getLevel().registryAccess()));
         List<ItemStack> shown = List.copyOf(tab.getDisplayItems());
-        check(shown.stream().map(ItemStack::getItem).toList().equals(List.of(ModItems.ROUND_DOOR.get(), ModItems.ROUND_WINDOW.get(),
-                ModItems.ROUND_WINDOW_ARCH_LEFT.get(), ModItems.ROUND_WINDOW_ARCH_RIGHT.get(), ModItems.ROUND_TRIM.get())),
-                "tab is not door, window, left arch, right arch, trim: " + shown);
+        List<String> expected = new java.util.ArrayList<>(CANONICAL_BLOCKS);
+        expected.add(expected.size() - 1, "window_trim");
+        check(shown.stream().map(stack -> ForgeRegistries.ITEMS.getKey(stack.getItem()).getPath()).toList().equals(expected),
+                "tab is not door, the ten windows (each plain then crossed), window trim, round trim: " + shown);
         check(shown.stream().noneMatch(ItemStack::hasTag), "tab entries carry an appearance: " + shown);
         check(AppearanceStacks.read(shown.get(0)).equals(Appearance.DEFAULT), "the tab's door is not oak");
         helper.succeed();
     }
+
+    /** The twelve canonical blocks in creative order, written out. */
+    private static final List<String> CANONICAL_BLOCKS = List.of("round_door",
+            "round_window", "round_window_cross", "round_window_arch_left", "round_window_arch_left_cross",
+            "round_window_arch_right", "round_window_arch_right_cross", "round_window_bottom_left", "round_window_bottom_left_cross",
+            "round_window_bottom_right", "round_window_bottom_right_cross", "round_trim");
 
     /** The canonical block of a family's 0.4.0 aliases (written out, not read from list positions). */
     private static Block canonicalBlock(io.github.dirtyredz.roundwood.appearance.AppearanceFamily family) {

@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.window.geometry;
 
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.Piece;
@@ -18,11 +20,36 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The centred round window (the 0.5.0 geometry, kept as the baseline): the thin wooden pane, its
- * round glazing and the glass arms that reach across the plane, and the general pane geometry
- * reproducing it exactly for both axes.
+ * The centred round window (the 0.5.0 geometry): the thin wooden pane, its round glazing and the
+ * glass arms that reach across the plane, for both axes. Since 0.7.0 the logical volumes come from
+ * {@link WindowPaneGeometry} alone (the 0.5.0 baseline class wrote models that are now generated as
+ * visible surfaces); these checks pin that the plain round design still has exactly that shape.
  */
 class WindowGeometryTest {
+    /** The 0.5.0 centred round window, read from the general geometry. */
+    private static final class Baseline {
+        static final int OPENING = 12;
+        static final double PANEL_BACK = 7;
+        static final double PANEL_FRONT = 9;
+        static final double GLASS_BACK = 7.5;
+        static final double GLASS_FRONT = 8.5;
+        static final String FRAME = WindowPaneGeometry.FRAME;
+        static final String GLASS = WindowPaneGeometry.GLASS;
+
+        static List<Piece> pieces() {
+            return WindowPaneGeometry.panel(ROUND, AXIS_X);
+        }
+
+        static List<Piece> arm() {
+            return WindowPaneGeometry.arm(ROUND, AXIS_X, Direction.NORTH);
+        }
+
+        static boolean inOpening(int u, int v) {
+            return PixelCircle.inDisc(16, OPENING, u, v);
+        }
+    }
+
+    private static final WindowDesign ROUND = WindowDesign.plain(WindowProfile.ROUND);
     private static final WindowPose AXIS_X = WindowPosition.CENTER.pose(Direction.Axis.X);
     private static final WindowPose AXIS_Z = WindowPosition.CENTER.pose(Direction.Axis.Z);
 
@@ -41,28 +68,26 @@ class WindowGeometryTest {
         if (west) {
             connected.add(Direction.WEST);
         }
-        return WindowPaneGeometry.boxes(WindowProfile.ROUND, axisZ ? AXIS_Z : AXIS_X, connected);
+        return WindowPaneGeometry.boxes(ROUND, axisZ ? AXIS_Z : AXIS_X, connected);
     }
 
     @Test
-    void thePaneGeometryReproducesTheCentredBaselineExactly() {
-        assertEquals(WindowGeometry.pieces(), WindowPaneGeometry.panel(WindowProfile.ROUND, AXIS_X));
-        assertEquals(WindowGeometry.pieces().stream().map(p -> p.rotateY(1)).toList(),
-                WindowPaneGeometry.panel(WindowProfile.ROUND, AXIS_Z));
-        assertEquals(WindowGeometry.arm(), WindowPaneGeometry.arm(WindowProfile.ROUND, AXIS_X, Direction.NORTH));
+    void theZAxisWindowIsTheXAxisWindowTurned() {
+        assertEquals(Baseline.pieces().stream().map(p -> p.rotateY(1)).toList(),
+                WindowPaneGeometry.panel(ROUND, AXIS_Z));
         for (int turns = 0; turns < 4; turns++) {
             Direction side = Direction.from2DDataValue((turns + 2) % 4); // north, east, south, west
             WindowPose pose = side.getAxis() == Direction.Axis.Z ? AXIS_X : AXIS_Z;
             int t = turns;
-            assertEquals(new HashSet<>(WindowGeometry.arm().stream().map(p -> p.rotateY(t)).toList()),
-                    new HashSet<>(WindowPaneGeometry.arm(WindowProfile.ROUND, pose, side)), side.toString());
+            assertEquals(new HashSet<>(Baseline.arm().stream().map(p -> p.rotateY(t)).toList()),
+                    new HashSet<>(WindowPaneGeometry.arm(ROUND, pose, side)), side.toString());
         }
-        assertTrue(WindowPaneGeometry.arm(WindowProfile.ROUND, AXIS_X, Direction.EAST).isEmpty(), "in-plane arms are buried");
+        assertTrue(WindowPaneGeometry.arm(ROUND, AXIS_X, Direction.EAST).isEmpty(), "in-plane arms are buried");
     }
     private static final double EPS = 1e-9;
 
     private static List<Box> textured(String texture) {
-        return WindowGeometry.pieces().stream().filter(p -> p.texture().equals(texture)).map(Piece::box).toList();
+        return Baseline.pieces().stream().filter(p -> p.texture().equals(texture)).map(Piece::box).toList();
     }
 
     private static List<Box> boxesOf(List<Piece> pieces) {
@@ -86,10 +111,10 @@ class WindowGeometryTest {
 
     @Test
     void woodFillsEveryPixelOutsideTheOpeningAtPaneDepthOnly() {
-        List<Box> frame = textured(WindowGeometry.FRAME);
+        List<Box> frame = textured(Baseline.FRAME);
         for (int u = 0; u < 16; u++) {
             for (int v = 0; v < 16; v++) {
-                boolean opening = PixelCircle.inDisc(16, WindowGeometry.OPENING, u, v);
+                boolean opening = PixelCircle.inDisc(16, Baseline.OPENING, u, v);
                 assertEquals(!opening, covers(frame, u + 0.5, v + 0.5, 8), "frame at " + u + "," + v);
                 for (double z : new double[] {3, 12}) {
                     assertFalse(covers(frame, u + 0.5, v + 0.5, z), "wood outside the pane at " + u + "," + v + " z " + z);
@@ -103,10 +128,10 @@ class WindowGeometryTest {
 
     @Test
     void glassFillsExactlyTheOpeningWithinTheGlassDepth() {
-        List<Box> glass = textured(WindowGeometry.GLASS);
+        List<Box> glass = textured(Baseline.GLASS);
         for (int u = 0; u < 16; u++) {
             for (int v = 0; v < 16; v++) {
-                boolean opening = PixelCircle.inDisc(16, WindowGeometry.OPENING, u, v);
+                boolean opening = PixelCircle.inDisc(16, Baseline.OPENING, u, v);
                 assertEquals(opening, covers(glass, u + 0.5, v + 0.5, 8), "glass at " + u + "," + v);
                 for (double z : new double[] {3, 7.25, 8.75, 12}) {
                     assertFalse(covers(glass, u + 0.5, v + 0.5, z), "glass outside 7.5..8.5 at " + u + "," + v + " z " + z);
@@ -114,35 +139,35 @@ class WindowGeometryTest {
             }
         }
         for (Box box : glass) {
-            assertTrue(box.minZ() >= WindowGeometry.GLASS_BACK - EPS && box.maxZ() <= WindowGeometry.GLASS_FRONT + EPS,
+            assertTrue(box.minZ() >= Baseline.GLASS_BACK - EPS && box.maxZ() <= Baseline.GLASS_FRONT + EPS,
                     "glass piece outside the glass depth " + box);
         }
     }
 
     @Test
     void onlyWoodAndGlassInsideThePaneSlab() {
-        for (Piece piece : WindowGeometry.pieces()) {
-            assertTrue(piece.texture().equals(WindowGeometry.FRAME) || piece.texture().equals(WindowGeometry.GLASS),
+        for (Piece piece : Baseline.pieces()) {
+            assertTrue(piece.texture().equals(Baseline.FRAME) || piece.texture().equals(Baseline.GLASS),
                     "unexpected texture " + piece.texture());
             Box box = piece.box();
             assertTrue(box.within(Box.cell()), "outside the cell " + box);
-            assertTrue(box.minZ() >= WindowGeometry.PANEL_BACK - EPS && box.maxZ() <= WindowGeometry.PANEL_FRONT + EPS,
+            assertTrue(box.minZ() >= Baseline.PANEL_BACK - EPS && box.maxZ() <= Baseline.PANEL_FRONT + EPS,
                     "outside the z 7..9 slab " + box);
         }
     }
 
     @Test
     void armIsGlassFromTheEdgeToThePanelAndNeverIntoTheWood() {
-        List<Box> arm = boxesOf(WindowGeometry.arm());
-        for (Piece piece : WindowGeometry.arm()) {
-            assertEquals(WindowGeometry.GLASS, piece.texture());
+        List<Box> arm = boxesOf(Baseline.arm());
+        for (Piece piece : Baseline.arm()) {
+            assertEquals(Baseline.GLASS, piece.texture());
             Box box = piece.box();
             assertTrue(box.minX() >= 7 - EPS && box.maxX() <= 9 + EPS, "arm outside x 7..9 " + box);
-            assertTrue(box.minZ() >= -EPS && box.maxZ() <= WindowGeometry.GLASS_BACK + EPS, "arm outside z 0..7.5 " + box);
-            if (box.maxZ() > WindowGeometry.PANEL_BACK + EPS) {
+            assertTrue(box.minZ() >= -EPS && box.maxZ() <= Baseline.GLASS_BACK + EPS, "arm outside z 0..7.5 " + box);
+            if (box.maxZ() > Baseline.PANEL_BACK + EPS) {
                 // Past the wood's back face the arm may only sit where the opening is.
                 for (int v = (int) Math.round(box.minY()); v < (int) Math.round(box.maxY()); v++) {
-                    assertTrue(WindowGeometry.inOpening(7, v) && WindowGeometry.inOpening(8, v),
+                    assertTrue(Baseline.inOpening(7, v) && Baseline.inOpening(8, v),
                             "glass reaches into wood at row " + v);
                 }
             }
@@ -155,8 +180,8 @@ class WindowGeometryTest {
 
     @Test
     void noGlassFillsACornerPixel() {
-        List<Box> glass = textured(WindowGeometry.GLASS);
-        List<Box> arm = boxesOf(WindowGeometry.arm());
+        List<Box> glass = textured(Baseline.GLASS);
+        List<Box> arm = boxesOf(Baseline.arm());
         for (int[] c : new int[][] {{0, 0}, {15, 0}, {0, 15}, {15, 15}}) {
             assertFalse(coversPixelAtAnyDepth(glass, c[0], c[1]), "glass in the pane at corner " + c[0] + "," + c[1]);
             assertFalse(coversPixelAtAnyDepth(arm, c[0], c[1]), "glass in the arm at corner " + c[0] + "," + c[1]);
