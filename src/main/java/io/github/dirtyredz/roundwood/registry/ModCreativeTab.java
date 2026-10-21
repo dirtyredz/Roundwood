@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
-/** The Roundwood creative tab: exactly the five default items, door, window, left and right arch, trim (never the hidden aliases). */
+/** The Roundwood creative tab: exactly the thirteen default items, in {@link ModItems#all()} order (never the hidden aliases). */
 public final class ModCreativeTab {
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Roundwood.MOD_ID);
 

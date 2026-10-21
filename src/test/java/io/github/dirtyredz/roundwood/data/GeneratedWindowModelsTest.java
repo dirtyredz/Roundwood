@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /** The generated window models: square wooden face, visible round glazing, glass arms. */
 class GeneratedWindowModelsTest {
     private static final String GLASS = ModelExpectations.GLASS;
+    private static final Set<String> GLASS_TEXTURES = Set.of(ModelExpectations.GLASS, ModelExpectations.GLASS + "_clear");
 
     /** The oak item model is the placeholder: only its oak_planks faces are swapped at runtime, glass never. */
     @Test
@@ -145,6 +146,52 @@ class GeneratedWindowModelsTest {
                 }
             }
         }
+    }
+
+    /**
+     * Owner report (0.6.1, screenshots 01-03): horizontal lines across the glazing. The opening was
+     * rasterised into stacked glass boxes and every face of every box was drawn, so translucent sheets
+     * sat inside the glass where two rows meet (heights 3, 4, 6, 10, 12, 13 in the round window). No
+     * glass face of any window block model may lie against other glass of the same model.
+     */
+    @Test
+    void noGlassFaceIsDrawnInsideGlass() throws IOException {
+        List<String> failures = new java.util.ArrayList<>();
+        for (String id : ResolvedModels.allModelIds()) {
+            if (!id.startsWith("roundwood:block/") || !id.contains("window")) {
+                continue;
+            }
+            Resolved model = resolve(id);
+            List<double[][]> glass = new java.util.ArrayList<>();
+            for (JsonObject element : elements(model)) {
+                for (Map.Entry<String, JsonElement> face : element.getAsJsonObject("faces").entrySet()) {
+                    if (isGlass(model, face.getValue().getAsJsonObject().get("texture").getAsString())) {
+                        glass.add(new double[][] {vec(element, "from"), vec(element, "to")});
+                        break;
+                    }
+                }
+            }
+            for (JsonObject element : elements(model)) {
+                double[] from = vec(element, "from");
+                double[] to = vec(element, "to");
+                for (Map.Entry<String, JsonElement> face : element.getAsJsonObject("faces").entrySet()) {
+                    if (!isGlass(model, face.getValue().getAsJsonObject().get("texture").getAsString())) {
+                        continue;
+                    }
+                    double[] p = ResolvedModels.insideAnother(face.getKey(), from, to, glass);
+                    if (p != null) {
+                        failures.add(id + " " + face.getKey() + " face of " + java.util.Arrays.toString(from) + "->"
+                                + java.util.Arrays.toString(to) + " lies inside glass at " + java.util.Arrays.toString(p));
+                    }
+                }
+            }
+        }
+        assertTrue(failures.isEmpty(), failures.size() + " glass sheets inside glass:\n" + String.join("\n",
+                failures.subList(0, Math.min(40, failures.size()))));
+    }
+
+    private static boolean isGlass(Resolved model, String ref) {
+        return ref.equals("#glass") || GLASS_TEXTURES.contains(String.valueOf(model.texture(ref)));
     }
 
     @Test

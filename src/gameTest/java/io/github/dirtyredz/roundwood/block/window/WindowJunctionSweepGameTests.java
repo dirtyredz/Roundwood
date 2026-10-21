@@ -93,9 +93,9 @@ public final class WindowJunctionSweepGameTests {
                 .setValue(RoundWindowBlock.AXIS, axis);
     }
 
-    private static BlockState arch(RoundWindowArchBlock block, WindowPose pose) {
-        return block.defaultBlockState().setValue(RoundWindowArchBlock.ORIENTATION, WindowOrientation.of(pose))
-                .setValue(RoundWindowArchBlock.DEPTH, pose.depth());
+    private static BlockState arch(OrientedWindowBlock block, WindowPose pose) {
+        return block.defaultBlockState().setValue(OrientedWindowBlock.ORIENTATION, WindowOrientation.of(pose))
+                .setValue(OrientedWindowBlock.DEPTH, pose.depth());
     }
 
     private static BlockState pane() {

@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.client.window;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.block.window.WindowAppearanceData;
+import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.BuiltinWoodStyles;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
@@ -23,15 +24,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * Wraps every window blockstate model (round window, both arch pieces and the 0.4.0 aliases) so the chunk-baked window shows
- * its block entity's appearance ({@link WindowAppearanceData}): only the wooden face's quads (the
- * oak planks of the generated core) change sprite; the glass and the junctions never do, and the
- * translucent render type, connections and waterlogging are the model's own. Results are cached per
- * state, side, render type and wood sprite (bounded, cleared on reload; safe for chunk workers).
- * Oak, unpainted, is the baked model itself.
+ * Wraps every window blockstate model (the ten windows and the 0.4.0 aliases) so the chunk-baked
+ * window shows its block entity's looks ({@link WindowAppearanceData}): the wooden face and beams
+ * (the oak planks of the generated model) take the pane's wood or paint, and a fitted trim's marker
+ * quads take the trim's look ({@link WindowTrimModels}, always, since its markers are never final
+ * art). Glass and junctions never change, and the translucent render type, connections and
+ * waterlogging are the model's own. Results are cached per state, side, render type, wood sprite and
+ * trim look (bounded, cleared on reload; safe for chunk workers). Oak with no trim is the baked model
+ * itself.
  */
 public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
-    private record Key(BlockState state, Direction side, RenderType renderType, ResourceLocation wood) {
+    private record Key(BlockState state, Direction side, RenderType renderType, ResourceLocation wood,
+                       @Nullable WindowTrimModels.Look trim) {
     }
 
     private static final AppearanceModelCache<Key, List<BakedQuad>> QUADS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
@@ -54,11 +58,27 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource random, ModelData data,
                                     @Nullable RenderType renderType) {
         List<BakedQuad> quads = super.getQuads(state, side, random, data, renderType);
-        ResourceLocation wood = wood(appearance(state, data));
-        if (state == null || wood.equals(BuiltinWoodStyles.OAK_PLANKS)) {
+        if (state == null || !(state.getBlock() instanceof WindowPaneBlock block)) {
             return quads;
         }
-        return QUADS.get(new Key(state, side, renderType, wood), key -> retexture(quads, DonorSprites.atlas(wood)));
+        ResourceLocation wood = wood(appearance(state, data));
+        WindowTrimModels.Look trim = WindowPaneBlock.trimmed(state)
+                ? WindowTrimModels.look(trimAppearance(data), block.profile()) : null;
+        if (trim == null && wood.equals(BuiltinWoodStyles.OAK_PLANKS)) {
+            return quads;
+        }
+        return QUADS.get(new Key(state, side, renderType, wood, trim), key -> {
+            TextureAtlasSprite woodSprite = DonorSprites.atlas(wood);
+            return quads.stream().map(quad -> {
+                if (isWood(quad)) {
+                    return wood.equals(BuiltinWoodStyles.OAK_PLANKS) ? quad : ModelRetexturing.retexture(quad, woodSprite, -1);
+                }
+                if (trim != null && WindowTrimModels.isTrim(quad)) {
+                    return WindowTrimModels.paint(quad, trim, block.profile(), block.pose(state));
+                }
+                return quad;
+            }).toList();
+        });
     }
 
     @Override
@@ -67,7 +87,7 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
         return appearance == null ? super.getParticleIcon(data) : DonorSprites.atlas(wood(appearance.appearance()));
     }
 
-    /** A window item model ({@code oakItem}: the round window's or an arch piece's) in {@code appearance}. */
+    /** A window item model ({@code oakItem}: any window piece's) in {@code appearance}; window items never carry a trim. */
     public static BakedModel item(BakedModel oakItem, Appearance appearance) {
         ResourceLocation wood = wood(appearance);
         if (wood.equals(BuiltinWoodStyles.OAK_PLANKS)) {
@@ -78,16 +98,15 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
                 quad -> isWood(quad) ? ModelRetexturing.retexture(quad, sprite, -1) : quad, s -> s));
     }
 
-    private static Appearance appearance(@Nullable BlockState state, ModelData data) {
+    private static Appearance appearance(BlockState state, ModelData data) {
         WindowAppearanceData stored = data.get(WindowAppearanceData.PROPERTY);
-        if (stored != null) {
-            return stored.appearance();
-        }
-        return state == null ? Appearance.DEFAULT : AppearanceDefaults.of(state.getBlock());
+        return stored != null ? stored.appearance() : AppearanceDefaults.of(state.getBlock());
     }
 
-    private static List<BakedQuad> retexture(List<BakedQuad> quads, TextureAtlasSprite wood) {
-        return quads.stream().map(quad -> isWood(quad) ? ModelRetexturing.retexture(quad, wood, -1) : quad).toList();
+    /** The trim's look, oak until the entity's data arrives. */
+    private static Appearance trimAppearance(ModelData data) {
+        WindowAppearanceData stored = data.get(WindowAppearanceData.PROPERTY);
+        return stored == null ? Appearance.DEFAULT : stored.trim().orElse(Appearance.DEFAULT);
     }
 
     private static boolean isWood(BakedQuad quad) {

@@ -21,7 +21,7 @@ import java.util.List;
  * The anchors: the door's (id {@code round_door}, unchanged since 0.2.0 so saved camouflage loads),
  * the window's and the trim's. Each is valid for its canonical block(s) and that family's hidden
  * 0.4.0 aliases, so saved entities load into unconverted blocks. The window entity (id
- * {@code round_window}) also serves both arch pieces.
+ * {@code round_window}) serves all ten canonical windows and the fifteen window aliases.
  */
 public final class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
@@ -59,8 +59,7 @@ public final class ModBlockEntities {
 
     private static List<WindowPaneBlock> windows() {
         List<WindowPaneBlock> out = new ArrayList<>();
-        out.add(ModBlocks.roundWindow());
-        out.addAll(ModBlocks.arches());
+        out.addAll(ModBlocks.windows());
         out.addAll(LegacyContent.windows());
         return out;
     }

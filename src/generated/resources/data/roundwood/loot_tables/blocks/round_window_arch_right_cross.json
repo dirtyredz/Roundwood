@@ -1,0 +1,56 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "roundwood:round_window_arch_right_cross"
+        }
+      ],
+      "rolls": 1.0
+    },
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "block": "roundwood:round_window_arch_right_cross",
+          "condition": "minecraft:block_state_property",
+          "properties": {
+            "trimmed": "true"
+          }
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "WindowTrim.RoundwoodAppearance",
+                  "target": "RoundwoodAppearance"
+                }
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "roundwood:window_trim"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "roundwood:blocks/round_window_arch_right_cross"
+}

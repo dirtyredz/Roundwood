@@ -3,12 +3,14 @@ package io.github.dirtyredz.roundwood.data.client;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.FaceUv;
 import io.github.dirtyredz.roundwood.geometry.Piece;
+import io.github.dirtyredz.roundwood.geometry.Surface;
 import net.minecraft.core.Direction;
 import net.minecraftforge.client.model.generators.ModelBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Writes geometry pieces as model elements with explicit UVs. A sprite only spans UV 0..16, and
@@ -90,6 +92,35 @@ public final class GeometryModelWriter {
                 }
                 element.end();
             }
+        }
+        return builder;
+    }
+
+    /**
+     * Writes visible surfaces ({@link Surface}): one element per surface, its backing box with only that
+     * face, the texture variable {@code texture} names, the tiled default UVs of its position and, on a
+     * single-block world model, a cullface when it lies on the cell boundary. Surfaces never reach
+     * outside the unit cell (windows), so no tile splitting is needed; one that does is refused.
+     */
+    public static <T extends ModelBuilder<T>> T addSurfaces(T builder, List<Surface> surfaces, boolean cullBlockFaces,
+                                                            Function<Surface, String> texture) {
+        for (Surface surface : surfaces) {
+            Box box = surface.backing();
+            if (!box.within(Box.cell())) {
+                throw new IllegalArgumentException("surface outside the cell: " + box);
+            }
+            Direction direction = surface.face();
+            float[] uv = FaceUv.of(box, direction);
+            ModelBuilder<T>.ElementBuilder element = builder.element()
+                    .from((float) box.minX(), (float) box.minY(), (float) box.minZ())
+                    .to((float) box.maxX(), (float) box.maxY(), (float) box.maxZ());
+            ModelBuilder<T>.ElementBuilder.FaceBuilder face = element.face(direction)
+                    .texture("#" + texture.apply(surface)).uvs(uv[0], uv[1], uv[2], uv[3]);
+            if (cullBlockFaces && onCellBoundary(box, direction)) {
+                face.cullface(direction);
+            }
+            face.end();
+            element.end();
         }
         return builder;
     }

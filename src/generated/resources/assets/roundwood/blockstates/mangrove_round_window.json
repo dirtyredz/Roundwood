@@ -6,7 +6,94 @@
       },
       "when": {
         "axis": "x",
-        "position": "center"
+        "north": "false",
+        "position": "center",
+        "south": "false",
+        "trimmed": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_arms_north"
+      },
+      "when": {
+        "axis": "x",
+        "north": "true",
+        "position": "center",
+        "south": "false",
+        "trimmed": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_arms_south"
+      },
+      "when": {
+        "axis": "x",
+        "north": "false",
+        "position": "center",
+        "south": "true",
+        "trimmed": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_arms_both"
+      },
+      "when": {
+        "axis": "x",
+        "north": "true",
+        "position": "center",
+        "south": "true",
+        "trimmed": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_trimmed"
+      },
+      "when": {
+        "axis": "x",
+        "north": "false",
+        "position": "center",
+        "south": "false",
+        "trimmed": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_trimmed_arms_north"
+      },
+      "when": {
+        "axis": "x",
+        "north": "true",
+        "position": "center",
+        "south": "false",
+        "trimmed": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_trimmed_arms_south"
+      },
+      "when": {
+        "axis": "x",
+        "north": "false",
+        "position": "center",
+        "south": "true",
+        "trimmed": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_trimmed_arms_both"
+      },
+      "when": {
+        "axis": "x",
+        "north": "true",
+        "position": "center",
+        "south": "true",
+        "trimmed": "true"
       }
     },
     {
@@ -16,49 +103,100 @@
       },
       "when": {
         "axis": "z",
-        "position": "center"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arm"
-      },
-      "when": {
-        "axis": "x",
-        "north": "true",
-        "position": "center"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arm",
-        "y": 180
-      },
-      "when": {
-        "axis": "x",
+        "east": "false",
         "position": "center",
-        "south": "true"
+        "trimmed": "false",
+        "west": "false"
       }
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arm",
+        "model": "roundwood:block/round_window_arms_north",
         "y": 90
       },
       "when": {
         "axis": "z",
         "east": "true",
-        "position": "center"
+        "position": "center",
+        "trimmed": "false",
+        "west": "false"
       }
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arm",
-        "y": 270
+        "model": "roundwood:block/round_window_arms_south",
+        "y": 90
       },
       "when": {
         "axis": "z",
+        "east": "false",
         "position": "center",
+        "trimmed": "false",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_arms_both",
+        "y": 90
+      },
+      "when": {
+        "axis": "z",
+        "east": "true",
+        "position": "center",
+        "trimmed": "false",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_trimmed",
+        "y": 90
+      },
+      "when": {
+        "axis": "z",
+        "east": "false",
+        "position": "center",
+        "trimmed": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_trimmed_arms_north",
+        "y": 90
+      },
+      "when": {
+        "axis": "z",
+        "east": "true",
+        "position": "center",
+        "trimmed": "true",
+        "west": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_trimmed_arms_south",
+        "y": 90
+      },
+      "when": {
+        "axis": "z",
+        "east": "false",
+        "position": "center",
+        "trimmed": "true",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_trimmed_arms_both",
+        "y": 90
+      },
+      "when": {
+        "axis": "z",
+        "east": "true",
+        "position": "center",
+        "trimmed": "true",
         "west": "true"
       }
     },
@@ -67,7 +205,17 @@
         "model": "roundwood:block/round_window_back"
       },
       "when": {
-        "position": "north"
+        "position": "north",
+        "trimmed": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_back_trimmed"
+      },
+      "when": {
+        "position": "north",
+        "trimmed": "true"
       }
     },
     {
@@ -76,7 +224,18 @@
         "y": 90
       },
       "when": {
-        "position": "east"
+        "position": "east",
+        "trimmed": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_back_trimmed",
+        "y": 90
+      },
+      "when": {
+        "position": "east",
+        "trimmed": "true"
       }
     },
     {
@@ -85,7 +244,18 @@
         "y": 180
       },
       "when": {
-        "position": "south"
+        "position": "south",
+        "trimmed": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_back_trimmed",
+        "y": 180
+      },
+      "when": {
+        "position": "south",
+        "trimmed": "true"
       }
     },
     {
@@ -94,7 +264,18 @@
         "y": 270
       },
       "when": {
-        "position": "west"
+        "position": "west",
+        "trimmed": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_back_trimmed",
+        "y": 270
+      },
+      "when": {
+        "position": "west",
+        "trimmed": "true"
       }
     },
     {
@@ -102,7 +283,17 @@
         "model": "roundwood:block/round_window_down_ceiling"
       },
       "when": {
-        "position": "up"
+        "position": "up",
+        "trimmed": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_down_ceiling_trimmed"
+      },
+      "when": {
+        "position": "up",
+        "trimmed": "true"
       }
     },
     {
@@ -110,7 +301,17 @@
         "model": "roundwood:block/round_window_up_floor"
       },
       "when": {
-        "position": "down"
+        "position": "down",
+        "trimmed": "false"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/round_window_up_floor_trimmed"
+      },
+      "when": {
+        "position": "down",
+        "trimmed": "true"
       }
     }
   ]

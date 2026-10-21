@@ -6,6 +6,7 @@ import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.BuiltinWoodStyles;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
+import io.github.dirtyredz.roundwood.client.material.MasonryStyles;
 import io.github.dirtyredz.roundwood.client.material.ModelRetexturing;
 import io.github.dirtyredz.roundwood.client.material.PaintStyles;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
@@ -28,7 +29,7 @@ import java.util.function.UnaryOperator;
  *     <li>vanilla woods: their stripped log, tiled like a block (as since 0.4.0);</li>
  *     <li>other woods: the donor plank sprite, tiled;</li>
  *     <li>paint: the painted board panel spread across the whole ring;</li>
- *     <li>masonry: its radial brick face across the ring and granular edge;</li>
+ *     <li>masonry: its thin-mortar radial brick face across the ring (0.7.0) and granular edge;</li>
  *     <li>an unavailable material: oak.</li>
  * </ul>
  */
@@ -54,7 +55,7 @@ public final class TrimAppearanceModels {
         }
         if (!appearance.isWood()) {
             return MasonryMaterials.byBlock(appearance.material())
-                    .map(m -> new Look(true, PaintStyles.masonryFace(m), PaintStyles.masonryEdge(m)))
+                    .map(m -> new Look(true, MasonryStyles.doorFace(m), MasonryStyles.edge(m)))
                     .orElse(OAK);
         }
         Optional<BuiltinWoodStyles.Style> builtin = BuiltinWoodStyles.of(appearance.material());

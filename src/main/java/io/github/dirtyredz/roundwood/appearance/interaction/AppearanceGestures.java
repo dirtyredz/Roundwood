@@ -22,7 +22,9 @@ import java.util.Optional;
  *     <li>sneak + one of the four masonry blocks: trims only.</li>
  * </ul>
  * The main hand wins: the offhand is only considered while the main hand is empty. Anything else is
- * no gesture, and the block's ordinary use (or the item's) proceeds.
+ * no gesture, and the block's ordinary use (or the item's) proceeds. {@link #donor} recognises the
+ * same donors without the sneak requirement, for targets where a plain click means restyling (a
+ * window trim's band, 0.7.0).
  */
 public final class AppearanceGestures {
     public enum Type {
@@ -45,6 +47,15 @@ public final class AppearanceGestures {
 
     /** The gesture {@code player}'s {@code hand} makes on a {@code family} block, if any. */
     public static Optional<Gesture> of(AppearanceFamily family, Player player, InteractionHand hand) {
+        return recognise(family, player, hand, player.isSecondaryUseActive());
+    }
+
+    /** The donor {@code player}'s {@code hand} holds for a {@code family} target, sneaking or not. */
+    public static Optional<Gesture> donor(AppearanceFamily family, Player player, InteractionHand hand) {
+        return recognise(family, player, hand, true);
+    }
+
+    private static Optional<Gesture> recognise(AppearanceFamily family, Player player, InteractionHand hand, boolean materials) {
         if (hand == InteractionHand.OFF_HAND && !player.getMainHandItem().isEmpty()) {
             return Optional.empty();
         }
@@ -55,7 +66,7 @@ public final class AppearanceGestures {
         if (stack.getItem() instanceof DyeItem dye) {
             return Optional.of(new Gesture(Type.PAINT, null, dye.getDyeColor(), hand, stack));
         }
-        if (!player.isSecondaryUseActive()) {
+        if (!materials) {
             return Optional.empty();
         }
         Optional<ResourceLocation> planks = PlankMaterials.fromStack(stack);

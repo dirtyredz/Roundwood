@@ -7,7 +7,7 @@ import com.google.gson.JsonParser;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPaneGeometry;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
-import io.github.dirtyredz.roundwood.block.window.geometry.WindowProfile;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowOrientation;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.geometry.Box;

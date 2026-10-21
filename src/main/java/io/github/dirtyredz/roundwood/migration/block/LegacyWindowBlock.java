@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.migration.block;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
 import io.github.dirtyredz.roundwood.migration.LegacyAppearances;
 import io.github.dirtyredz.roundwood.migration.LegacyChunkMigration;
 import net.minecraft.core.BlockPos;
@@ -28,7 +29,7 @@ public class LegacyWindowBlock extends RoundWindowBlock {
 
     public LegacyWindowBlock(Properties properties, LegacyAppearances.Entry entry, Supplier<RoundWindowBlock> canonical,
                              Supplier<BlockEntityType<RoundWindowBlockEntity>> entityType) {
-        super(properties, entityType);
+        super(properties, WindowPattern.PLAIN, entityType);
         this.entry = entry;
         this.canonical = canonical;
     }

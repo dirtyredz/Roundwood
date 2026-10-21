@@ -1,6 +1,8 @@
 package io.github.dirtyredz.roundwood.data.client;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
 import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
 import io.github.dirtyredz.roundwood.data.client.window.WindowModelProvider;
@@ -16,7 +18,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 /**
  * Compatibility resources for the 49 hidden 0.4.0 aliases, kept apart from the canonical providers:
  * each alias blockstate points at its family's canonical models (empty door and trim world models,
- * the round window's full multipart: centred core and arms plus every flush position) and each alias item model is the family's canonical item
+ * the plain round window's full multipart: every position, arm combination and trim state) and each alias item model is the family's canonical item
  * model. Their historical looks come from the block's and item's default appearance at runtime, so
  * no per-finish model exists any more.
  */
@@ -37,11 +39,10 @@ public class LegacyModelProvider extends BlockStateProvider {
             getVariantBuilder(block).partialState().setModels(new ConfiguredModel(door));
             item(block, DoorLeafModels.DOOR_ID);
         }
-        ModelFile core = existing("block/" + WindowModelProvider.CORE);
-        ModelFile arm = existing("block/" + WindowModelProvider.ARM);
+        WindowDesign round = WindowDesign.plain(WindowProfile.ROUND);
         for (Block block : LegacyContent.windows()) {
-            WindowModelProvider.panes(this, block, core, arm);
-            item(block, WindowModelProvider.CORE);
+            WindowModelProvider.panes(this, block, round);
+            item(block, round.id());
         }
         ModelFile trim = existing("block/" + TrimModelNames.TRIM_ID);
         for (Block block : LegacyContent.trims()) {

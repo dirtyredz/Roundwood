@@ -1,7 +1,9 @@
 package io.github.dirtyredz.roundwood.block.window;
 
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
-import io.github.dirtyredz.roundwood.block.window.geometry.WindowProfile;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPlacement;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import net.minecraft.core.Direction;
@@ -18,7 +20,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
- * The round window: a square wooden pane with round glazing. Its state keeps the 0.5.0 encoding
+ * The round window: a square wooden pane with round glazing, plain or crossed (fixed per registration). Its state keeps the 0.5.0 encoding
  * (the four connections, {@code waterlogged} and {@link #AXIS}) and adds {@link #POSITION}: centred
  * (the default, so windows saved before 0.6.0 load centred and {@code axis} keeps its meaning) or
  * flush against one of the six sides of the cell, which alone fixes the plane.
@@ -27,8 +29,8 @@ public class RoundWindowBlock extends WindowPaneBlock {
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
     public static final EnumProperty<WindowPosition> POSITION = EnumProperty.create("position", WindowPosition.class);
 
-    public RoundWindowBlock(Properties properties, Supplier<BlockEntityType<RoundWindowBlockEntity>> entityType) {
-        super(properties, WindowProfile.ROUND, entityType);
+    public RoundWindowBlock(Properties properties, WindowPattern pattern, Supplier<BlockEntityType<RoundWindowBlockEntity>> entityType) {
+        super(properties, new WindowDesign(WindowProfile.ROUND, pattern), entityType);
         // Extend the inherited default (connections off, dry) rather than replacing it.
         registerDefaultState(defaultBlockState().setValue(AXIS, Direction.Axis.X).setValue(POSITION, WindowPosition.CENTER));
     }

@@ -46,11 +46,11 @@ public final class WindowArchGameTests {
     private WindowArchGameTests() {
     }
 
-    private static RoundWindowArchBlock left() {
+    private static OrientedWindowBlock left() {
         return ModBlocks.archLeft();
     }
 
-    private static RoundWindowArchBlock right() {
+    private static OrientedWindowBlock right() {
         return ModBlocks.archRight();
     }
 
@@ -102,7 +102,7 @@ public final class WindowArchGameTests {
         helper.succeed();
     }
 
-    private static void place(GameTestHelper helper, ServerPlayer player, RoundWindowArchBlock piece, BlockHitResult hit) {
+    private static void place(GameTestHelper helper, ServerPlayer player, OrientedWindowBlock piece, BlockHitResult hit) {
         BlockState predicted = WindowFixtures.predict(player, new ItemStack(piece), hit);
         check(WindowFixtures.place(player, new ItemStack(piece), hit).consumesAction(), piece + " not placed");
         BlockPos at = hit.getBlockPos().relative(hit.getDirection());
@@ -112,7 +112,7 @@ public final class WindowArchGameTests {
     /** Rotation and mirroring move the geometry and keep the piece; four turns or two mirrors are identity. */
     @GameTest(template = TEMPLATE)
     public static void transformsRoundTripAndKeepThePiece(GameTestHelper helper) {
-        for (RoundWindowArchBlock piece : ModBlocks.arches()) {
+        for (OrientedWindowBlock piece : ModBlocks.arches()) {
             for (BlockState state : piece.getStateDefinition().getPossibleStates()) {
                 BlockState turned = state;
                 for (int i = 0; i < 4; i++) {
@@ -127,7 +127,7 @@ public final class WindowArchGameTests {
             }
         }
         // A left piece facing south, mirrored north-south, is a left piece facing south seen from behind: front unchanged.
-        BlockState south = RoundWindowArchBlock.withPose(left().defaultBlockState(), WindowPose.upright(Direction.SOUTH, WindowDepth.NEGATIVE));
+        BlockState south = OrientedWindowBlock.withPose(left().defaultBlockState(), WindowPose.upright(Direction.SOUTH, WindowDepth.NEGATIVE));
         WindowPose mirrored = left().pose(south.mirror(Mirror.LEFT_RIGHT));
         check(mirrored.equals(WindowPose.upright(Direction.SOUTH, WindowDepth.POSITIVE)), "mirrored pose " + mirrored);
         helper.succeed();

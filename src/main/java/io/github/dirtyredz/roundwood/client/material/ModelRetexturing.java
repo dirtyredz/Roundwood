@@ -23,7 +23,7 @@ import java.util.function.UnaryOperator;
  * Immutable transformations of baked quads: another sprite (UVs remapped from the source sprite's
  * rectangle to the target's, so tiled and whole-assembly mappings both survive), a tint index, and
  * quarter turns about the block's vertical axis (positions, normals, face and vertex winding, as a
- * blockstate {@code y} rotation bakes them). Every result is a new quad over a copied vertex array:
+ * blockstate {@code y} rotation bakes them), and UVs computed from positions. Every result is a new quad over a copied vertex array:
  * shared donor and template quads are never mutated. The array arithmetic is plain and unit-tested.
  */
 public final class ModelRetexturing {
@@ -42,6 +42,27 @@ public final class ModelRetexturing {
                 new float[] {source.getU0(), source.getV0(), source.getU1(), source.getV1()},
                 new float[] {target.getU0(), target.getV0(), target.getU1(), target.getV1()});
         return new BakedQuad(vertices, tintIndex, quad.getDirection(), target, quad.isShade(), quad.hasAmbientOcclusion());
+    }
+
+    /** Where a corner samples its sprite (0..16 sprite units) from its block-local position (0..1 blocks). */
+    @FunctionalInterface
+    public interface PositionUv {
+        float[] at(float x, float y, float z);
+    }
+
+    /**
+     * {@code quad} drawn with {@code target}, untinted, every corner's UV computed from its position by
+     * {@code uv} (artwork spread over a whole assembly rather than remapped from the source tile).
+     */
+    public static BakedQuad retexture(BakedQuad quad, TextureAtlasSprite target, PositionUv uv) {
+        int[] vertices = quad.getVertices().clone();
+        for (int i = 0; i + STRIDE <= vertices.length; i += STRIDE) {
+            float[] st = uv.at(Float.intBitsToFloat(vertices[i]), Float.intBitsToFloat(vertices[i + 1]),
+                    Float.intBitsToFloat(vertices[i + 2]));
+            vertices[i + UV] = Float.floatToRawIntBits(target.getU(st[0]));
+            vertices[i + UV + 1] = Float.floatToRawIntBits(target.getV(st[1]));
+        }
+        return new BakedQuad(vertices, -1, quad.getDirection(), target, quad.isShade(), quad.hasAmbientOcclusion());
     }
 
     /** {@code quad} turned clockwise (seen from above) by {@code turns} quarter turns about the block centre. */

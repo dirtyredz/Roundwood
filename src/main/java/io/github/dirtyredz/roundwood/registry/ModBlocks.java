@@ -3,9 +3,11 @@ package io.github.dirtyredz.roundwood.registry;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowArchBlock;
+import io.github.dirtyredz.roundwood.block.window.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
-import io.github.dirtyredz.roundwood.block.window.geometry.WindowProfile;
+import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -16,60 +18,90 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * The five canonical blocks: the round door, the round window, the two arch window pieces (left and
- * right halves of a round window's upper semicircle) and the round trim, whose look comes from their
- * appearance (block entity), not from the block. Their behaviour is the oak counterparts'
- * whatever the appearance. The hidden 0.4.0 aliases are registered by {@code migration/LegacyContent}
- * with the same properties.
+ * The twelve canonical blocks: the round door, ten windows (the round window, the two arch pieces and
+ * the two bottom corners that complete a 2 x 2 arched-top window, each plain and with cross beams)
+ * and the round trim, whose look comes from their appearance (block entity), not from the block.
+ * Their behaviour is the oak counterparts' whatever the appearance. The hidden 0.4.0 aliases are
+ * registered by {@code migration/LegacyContent} with the same properties.
  */
 public final class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Roundwood.MOD_ID);
 
     public static final RegistryObject<RoundDoorBlock> ROUND_DOOR = BLOCKS.register("round_door",
             () -> new RoundDoorBlock(doorProperties(), BlockSetType.OAK, ModBlockEntities::roundDoor));
-    public static final RegistryObject<RoundWindowBlock> ROUND_WINDOW = BLOCKS.register("round_window",
-            () -> new RoundWindowBlock(windowProperties(), ModBlockEntities::roundWindow));
-    public static final RegistryObject<RoundWindowArchBlock> ROUND_WINDOW_ARCH_LEFT = BLOCKS.register(WindowProfile.ARCH_LEFT.id(),
-            () -> new RoundWindowArchBlock(windowProperties(), WindowProfile.ARCH_LEFT, ModBlockEntities::roundWindow));
-    public static final RegistryObject<RoundWindowArchBlock> ROUND_WINDOW_ARCH_RIGHT = BLOCKS.register(WindowProfile.ARCH_RIGHT.id(),
-            () -> new RoundWindowArchBlock(windowProperties(), WindowProfile.ARCH_RIGHT, ModBlockEntities::roundWindow));
+    /** The ten windows by design, in creative order (each plain piece, then its crossed variant). */
+    private static final Map<WindowDesign, RegistryObject<WindowPaneBlock>> WINDOWS = registerWindows();
     public static final RegistryObject<RoundTrimBlock> ROUND_TRIM = BLOCKS.register("round_trim",
             () -> new RoundTrimBlock(trimProperties(), ModBlockEntities::roundTrim));
 
     private ModBlocks() {
     }
 
+    private static Map<WindowDesign, RegistryObject<WindowPaneBlock>> registerWindows() {
+        Map<WindowDesign, RegistryObject<WindowPaneBlock>> out = new LinkedHashMap<>();
+        for (WindowDesign design : WindowDesign.all()) {
+            out.put(design, BLOCKS.register(design.id(), () -> design.profile().oriented()
+                    ? new OrientedWindowBlock(windowProperties(), design, ModBlockEntities::roundWindow)
+                    : new RoundWindowBlock(windowProperties(), design.pattern(), ModBlockEntities::roundWindow)));
+        }
+        return Collections.unmodifiableMap(out);
+    }
+
     public static RoundDoorBlock roundDoor() {
         return ROUND_DOOR.get();
     }
 
+    /** The plain round window (the block id since 0.3). */
     public static RoundWindowBlock roundWindow() {
-        return ROUND_WINDOW.get();
+        return (RoundWindowBlock) window(WindowDesign.plain(WindowProfile.ROUND));
     }
 
-    public static RoundWindowArchBlock archLeft() {
-        return ROUND_WINDOW_ARCH_LEFT.get();
+    public static OrientedWindowBlock archLeft() {
+        return (OrientedWindowBlock) window(WindowDesign.plain(WindowProfile.ARCH_LEFT));
     }
 
-    public static RoundWindowArchBlock archRight() {
-        return ROUND_WINDOW_ARCH_RIGHT.get();
+    public static OrientedWindowBlock archRight() {
+        return (OrientedWindowBlock) window(WindowDesign.plain(WindowProfile.ARCH_RIGHT));
     }
 
-    /** The two arch pieces, left then right. */
-    public static List<RoundWindowArchBlock> arches() {
+    /** The two plain arch pieces, left then right. */
+    public static List<OrientedWindowBlock> arches() {
         return List.of(archLeft(), archRight());
+    }
+
+    /** The window block with {@code design}. */
+    public static WindowPaneBlock window(WindowDesign design) {
+        return WINDOWS.get(design).get();
+    }
+
+    /** All ten canonical windows, in creative order. */
+    public static List<WindowPaneBlock> windows() {
+        return WINDOWS.values().stream().map(RegistryObject::get).toList();
+    }
+
+    /** The eight oriented windows (arches and corners, plain and crossed). */
+    public static List<OrientedWindowBlock> orientedWindows() {
+        return windows().stream().filter(OrientedWindowBlock.class::isInstance).map(OrientedWindowBlock.class::cast).toList();
     }
 
     public static RoundTrimBlock roundTrim() {
         return ROUND_TRIM.get();
     }
 
-    /** The five canonical blocks in creative order: door, window, left arch, right arch, trim. */
+    /** The twelve canonical blocks in creative order: door, the ten windows, trim. */
     public static List<Block> canonical() {
-        return List.of(roundDoor(), roundWindow(), archLeft(), archRight(), roundTrim());
+        List<Block> out = new ArrayList<>();
+        out.add(roundDoor());
+        out.addAll(windows());
+        out.add(roundTrim());
+        return List.copyOf(out);
     }
 
     /** The oak door's hardness, sounds and flammability; a multi-cell assembly cannot be pushed. */

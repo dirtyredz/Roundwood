@@ -9,7 +9,7 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowArchBlock;
+import io.github.dirtyredz.roundwood.block.window.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
@@ -146,8 +146,8 @@ public final class ShowcaseCanvas {
     }
 
     /** An arch piece in {@code pose} (world directions; see {@link #pane}). */
-    public void arch(RoundWindowArchBlock piece, Appearance appearance, int r, int y, int f, WindowPose pose) {
-        pane(appearance, r, y, f, RoundWindowArchBlock.withPose(piece.defaultBlockState(), pose), false);
+    public void arch(OrientedWindowBlock piece, Appearance appearance, int r, int y, int f, WindowPose pose) {
+        pane(appearance, r, y, f, OrientedWindowBlock.withPose(piece.defaultBlockState(), pose), false);
     }
 
     /**

@@ -76,6 +76,17 @@ public record WindowPose(Direction front, Direction top, WindowDepth depth) {
         return range(box, top);
     }
 
+    /** The face pixel {u, v} (as seen from the front) of a block-local point in pixels. */
+    public double[] facePoint(double x, double y, double z) {
+        double[] p = {x, y, z};
+        return new double[] {along(p, right()), along(p, top)};
+    }
+
+    private static double along(double[] p, Direction direction) {
+        double at = p[index(direction.getAxis())];
+        return direction.getAxisDirection() == Direction.AxisDirection.POSITIVE ? at : SIZE - at;
+    }
+
     /** Turns the pose clockwise (seen from above) by quarter turns, as {@link Box#rotateY} turns geometry. */
     public WindowPose rotateY(int quarterTurns) {
         int turns = Math.floorMod(quarterTurns, 4);

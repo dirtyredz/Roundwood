@@ -1,9 +1,8 @@
 package io.github.dirtyredz.roundwood.data.client.window;
 
-import io.github.dirtyredz.roundwood.data.client.ItemModelTransforms;
-
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.window.geometry.WindowGeometry;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.data.client.ItemModelTransforms;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
@@ -12,14 +11,12 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import org.joml.Vector3f;
 
 /**
- * The window's inventory model: the whole square housing with its round glazing (the core template,
- * translucent like the block), bound to oak; the client swaps the wood per stack appearance.
+ * The ten window items' inventory models: each piece's upright, centred, unconnected and untrimmed
+ * block model (front towards the viewer, so a left piece reads as the left half), bound to oak, with
+ * the one-block transforms; the client swaps the wood per stack appearance.
  */
 public class WindowItemModelProvider extends ItemModelProvider {
-    static final String TEMPLATE = "template_round_window";
-    /** The window block's middle, in model pixels. */
-    private static final Vector3f CENTRE = new Vector3f(WindowGeometry.SIZE / 2F, WindowGeometry.SIZE / 2F,
-            WindowGeometry.SIZE / 2F);
+    private static final Vector3f CENTRE = new Vector3f(8, 8, 8);
 
     public WindowItemModelProvider(PackOutput output, ExistingFileHelper existingFiles) {
         super(output, Roundwood.MOD_ID, existingFiles);
@@ -32,11 +29,10 @@ public class WindowItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        ItemModelBuilder template = getBuilder(TEMPLATE)
-                .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + WindowModelProvider.TEMPLATE)));
-        ItemModelTransforms.block(template, CENTRE);
-        getBuilder(WindowModelProvider.CORE).parent(template)
-                .texture(WindowGeometry.FRAME, WindowModelProvider.OAK_PLANKS)
-                .texture("particle", WindowModelProvider.OAK_PLANKS);
+        for (WindowDesign design : WindowDesign.all()) {
+            ItemModelBuilder item = getBuilder(design.id())
+                    .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + design.id())));
+            ItemModelTransforms.block(item, CENTRE);
+        }
     }
 }

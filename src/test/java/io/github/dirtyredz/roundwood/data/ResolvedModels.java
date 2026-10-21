@@ -174,6 +174,37 @@ final class ResolvedModels {
         return covered(model, u, v, "south", texture);
     }
 
+    /**
+     * A half-pixel sample point just outside {@code face} of the box {@code from..to} that lies
+     * strictly inside one of {@code boxes} ({from, to} pairs), or null when there is none.
+     */
+    static double[] insideAnother(String face, double[] from, double[] to, List<double[][]> boxes) {
+        int n = switch (face) {
+            case "west", "east" -> 0;
+            case "down", "up" -> 1;
+            default -> 2;
+        };
+        boolean positive = face.equals("east") || face.equals("up") || face.equals("south");
+        double plane = (positive ? to[n] : from[n]) + (positive ? 1e-3 : -1e-3);
+        int a = (n + 1) % 3;
+        int b = (n + 2) % 3;
+        for (double x = from[a] + 0.25; x < to[a]; x += 0.5) {
+            for (double y = from[b] + 0.25; y < to[b]; y += 0.5) {
+                double[] p = new double[3];
+                p[n] = plane;
+                p[a] = x;
+                p[b] = y;
+                for (double[][] box : boxes) {
+                    if (box[0][0] < p[0] && p[0] < box[1][0] && box[0][1] < p[1] && p[1] < box[1][1]
+                            && box[0][2] < p[2] && p[2] < box[1][2]) {
+                        return p;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     static List<JsonObject> elements(Resolved model) {
         List<JsonObject> out = new ArrayList<>();
         for (JsonElement e : model.elements()) {

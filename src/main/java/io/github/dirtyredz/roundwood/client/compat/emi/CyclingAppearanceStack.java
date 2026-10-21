@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.client.compat.emi;
 
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.ItemEmiStack;
-import io.github.dirtyredz.roundwood.appearance.item.AppearanceBlockItem;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceTooltip;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
@@ -68,7 +68,7 @@ public final class CyclingAppearanceStack extends ItemEmiStack {
         if (!samples.isEmpty()) {
             List<Component> lines = new ArrayList<>();
             lines.add(Component.translatable("tooltip.roundwood.preview").withStyle(ChatFormatting.GOLD));
-            lines.addAll(AppearanceBlockItem.describe(AppearanceStacks.read(samples.get(current()))));
+            lines.addAll(AppearanceTooltip.describe(AppearanceStacks.read(samples.get(current()))));
             lines.add(Component.translatable("tooltip.roundwood.preview_note").withStyle(ChatFormatting.GOLD));
             lines.forEach(line -> tooltip.add(ClientTooltipComponent.create(line.getVisualOrderText())));
         }

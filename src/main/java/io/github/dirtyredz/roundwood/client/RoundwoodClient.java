@@ -5,6 +5,7 @@ import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceBlockItem;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimItem;
 import io.github.dirtyredz.roundwood.client.camouflage.CamouflageModels;
 import io.github.dirtyredz.roundwood.client.door.DoorAppearanceModels;
 import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
@@ -15,6 +16,7 @@ import io.github.dirtyredz.roundwood.client.trim.RoundTrimRenderer;
 import io.github.dirtyredz.roundwood.client.trim.TrimAppearanceModels;
 import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
 import io.github.dirtyredz.roundwood.client.window.WindowAppearanceModel;
+import io.github.dirtyredz.roundwood.client.window.WindowTrimModels;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
@@ -42,7 +44,7 @@ import java.util.stream.Stream;
 /**
  * Client-only wiring on the mod bus: the door and trim renderers, the source models they draw (no
  * blockstate references them, so they are registered for baking here), the appearance-aware window
- * blockstate and item models, the door items' panel tint, and dropping every appearance, donor and
+ * blockstate and item models (the window trim item's too), the door items' panel tint, and dropping every appearance, donor and
  * camouflage cache whenever models are re-baked. Never loaded on a server.
  */
 @Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -73,8 +75,7 @@ public final class RoundwoodClient {
     public static void wrapModels(ModelEvent.ModifyBakingResult event) {
         Map<net.minecraft.resources.ResourceLocation, BakedModel> models = event.getModels();
         List<Block> windows = new ArrayList<>(LegacyContent.windows());
-        windows.add(ModBlocks.roundWindow());
-        windows.addAll(ModBlocks.arches());
+        windows.addAll(ModBlocks.windows());
         for (Block window : windows) {
             for (BlockState state : window.getStateDefinition().getPossibleStates()) {
                 ModelResourceLocation location = BlockModelShaper.stateToModelLocation(state);
@@ -85,12 +86,16 @@ public final class RoundwoodClient {
             }
         }
         for (Item item : Stream.concat(ModItems.all().stream(), LegacyContent.items().stream()).toList()) {
-            if (!(item instanceof AppearanceBlockItem family)) {
-                continue;
-            }
             ModelResourceLocation location = new ModelResourceLocation(ForgeRegistries.ITEMS.getKey(item), "inventory");
             BakedModel model = models.get(location);
             if (model == null) {
+                continue;
+            }
+            if (item instanceof WindowTrimItem) {
+                models.put(location, AppearanceItemOverrides.wrap(model, WindowTrimModels::item));
+                continue;
+            }
+            if (!(item instanceof AppearanceBlockItem family)) {
                 continue;
             }
             models.put(location, AppearanceItemOverrides.wrap(model, switch (family.appearanceFamily()) {

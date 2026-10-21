@@ -11,7 +11,7 @@ import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowArchBlock;
+import io.github.dirtyredz.roundwood.block.window.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
@@ -359,7 +359,7 @@ public final class ShowcaseGameTests {
                 "a flush or floor pair bridged between its own pieces at r " + r);
     }
 
-    private static void expectArch(ServerLevel level, ShowcaseFrame frame, RoundWindowArchBlock piece, int r, int f, WindowPose pose,
+    private static void expectArch(ServerLevel level, ShowcaseFrame frame, OrientedWindowBlock piece, int r, int f, WindowPose pose,
                                    Appearance look) {
         BlockPos pos = frame.pos(r, 0, f);
         BlockState state = level.getBlockState(pos);

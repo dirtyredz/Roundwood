@@ -1,5 +1,8 @@
 package io.github.dirtyredz.roundwood.block.window.geometry;
 
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowMuntinGeometry;
+import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimGeometry;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.Piece;
 import io.github.dirtyredz.roundwood.geometry.PixelCircle;
@@ -12,12 +15,16 @@ import java.util.List;
 
 /**
  * Every single-cell window pane in any pose ({@link WindowPose}) with any face
- * ({@link WindowProfile}): the panel, and the glass that joins it to vanilla pane connections.
+ * ({@link WindowDesign}: profile and pattern): the panel, and the glass that joins it to vanilla pane
+ * connections. These are logical volumes; what a model draws of them is
+ * {@link WindowSurfaceGeometry}'s job (only the visible surfaces, never glass inside glass).
  * Models (datagen), shapes and culling all read this, so what is drawn, what collides and what
  * hides a neighbour's face are one description. Plain Java apart from {@link Direction}.
  *
  * <p><b>Panel.</b> A two-pixel wooden slab over the whole face, wood in every pixel outside the
- * opening and glass, recessed half a pixel on each side, inside it.
+ * opening and glass, recessed half a pixel on each side, inside it; a crossed design's beams
+ * ({@link WindowMuntinGeometry}) are wood at the slab's full depth, the glass cut away under them.
+ * Built on the half-pixel grid the beams need.
  *
  * <p><b>Junctions.</b> Only a centred upright pane (the 0.5.0 window) bridges: a connection across
  * its plane gets the vanilla-pane <em>arm</em>, a two-pixel glass strip (x or z 7..9, full height)
@@ -30,25 +37,34 @@ import java.util.List;
 public final class WindowPaneGeometry {
     public static final String FRAME = "frame";
     public static final String GLASS = "glass";
+    /** Half-pixel cells across a face. */
+    static final int HALF = 32;
     private static final Box ARM_NORTH = new Box(7, 0, 0, 9, 16, 7);
     private static final double EPS = 1e-3;
 
     private WindowPaneGeometry() {
     }
 
-    /** Wooden face and recessed glass, block-local. */
-    public static List<Piece> panel(WindowProfile profile, WindowPose pose) {
+    /** Wooden face (frame, then any beams) and recessed glass, block-local. */
+    public static List<Piece> panel(WindowDesign design, WindowPose pose) {
         List<Piece> pieces = new ArrayList<>();
         WindowDepth depth = pose.depth();
-        for (PixelCircle.Rect rect : PixelCircle.rasterize(WindowProfile.SIZE, WindowProfile.SIZE,
-                (u, v) -> !profile.inOpening(u, v))) {
-            pieces.add(new Piece(pose.toWorld(rect.u1(), rect.v1(), rect.u2(), rect.v2(), depth.slabMin(), depth.slabMax()), FRAME));
-        }
-        for (PixelCircle.Rect rect : PixelCircle.rasterize(WindowProfile.SIZE, WindowProfile.SIZE, profile::inOpening)) {
-            pieces.add(new Piece(pose.toWorld(rect.u1(), rect.v1(), rect.u2(), rect.v2(),
-                    depth.slabMin() + WindowDepth.GLASS_INSET, depth.slabMax() - WindowDepth.GLASS_INSET), GLASS));
-        }
+        addHalfRects(pieces, (hu, hv) -> !design.profile().inOpening(hu / 2, hv / 2), pose,
+                depth.slabMin(), depth.slabMax(), FRAME);
+        addHalfRects(pieces, (hu, hv) -> WindowMuntinGeometry.isBeam(design, hu, hv), pose,
+                depth.slabMin(), depth.slabMax(), FRAME);
+        addHalfRects(pieces, design::glazed, pose,
+                depth.slabMin() + WindowDepth.GLASS_INSET, depth.slabMax() - WindowDepth.GLASS_INSET, GLASS);
         return List.copyOf(pieces);
+    }
+
+    /** The cells passing {@code test} on the half-pixel face grid, merged into rectangles, extruded over {@code [n1,n2]}. */
+    static void addHalfRects(List<Piece> out, PixelCircle.PixelTest test, WindowPose pose, double n1, double n2,
+                             String texture) {
+        for (PixelCircle.Rect rect : PixelCircle.rasterize(HALF, HALF, test)) {
+            out.add(new Piece(pose.toWorld(rect.u1() / 2.0, rect.v1() / 2.0, rect.u2() / 2.0, rect.v2() / 2.0, n1, n2),
+                    texture));
+        }
     }
 
     /** True for the one pose family that bridges to its neighbours: upright, slab in the middle of the cell. */
@@ -74,34 +90,55 @@ public final class WindowPaneGeometry {
     }
 
     /** The arm towards {@code side} (empty when that side needs none). */
-    public static List<Piece> arm(WindowProfile profile, WindowPose pose, Direction side) {
+    public static List<Piece> arm(WindowDesign design, WindowPose pose, Direction side) {
         if (!neededSides(pose).contains(side)) {
             return List.of();
         }
-        return withReach(armBox(side).subtract(pose.slab()), profile, pose);
+        return withReach(armBox(side).subtract(pose.slab()), design, pose);
     }
 
     /** The arms for the connected sides that need one; nothing when none does. */
-    public static List<Piece> junction(WindowProfile profile, WindowPose pose, Collection<Direction> connected) {
+    public static List<Piece> junction(WindowDesign design, WindowPose pose, Collection<Direction> connected) {
         List<Piece> pieces = new ArrayList<>();
         for (Direction side : neededSides(pose).stream().filter(connected::contains).toList()) {
-            pieces.addAll(arm(profile, pose, side));
+            pieces.addAll(arm(design, pose, side));
         }
         return List.copyOf(pieces);
     }
 
-    /** Everything drawn for a state: panel then junction. */
-    public static List<Piece> pieces(WindowProfile profile, WindowPose pose, Collection<Direction> connected) {
-        List<Piece> pieces = new ArrayList<>(panel(profile, pose));
-        pieces.addAll(junction(profile, pose, connected));
+    /** Everything drawn for an untrimmed state: panel then junction. */
+    public static List<Piece> pieces(WindowDesign design, WindowPose pose, Collection<Direction> connected) {
+        return pieces(design, pose, connected, false);
+    }
+
+    /**
+     * Everything drawn for a state: panel, junction, then (when {@code trimmed}) the trim
+     * ({@link WindowTrimGeometry}). Later pieces win where they overlap: a flush trim's skin
+     * replaces the wood under it ({@link WindowSurfaceGeometry}).
+     */
+    public static List<Piece> pieces(WindowDesign design, WindowPose pose, Collection<Direction> connected, boolean trimmed) {
+        List<Piece> pieces = new ArrayList<>(panel(design, pose));
+        pieces.addAll(junction(design, pose, connected));
+        if (trimmed) {
+            pieces.addAll(WindowTrimGeometry.pieces(design.profile(), pose));
+        }
         return List.copyOf(pieces);
     }
 
-    /** Collision and outline boxes: the whole slab plus the active junction. */
-    public static List<Box> boxes(WindowProfile profile, WindowPose pose, Collection<Direction> connected) {
+    /** Collision boxes: the whole slab plus the active junction (a trim never collides). */
+    public static List<Box> boxes(WindowDesign design, WindowPose pose, Collection<Direction> connected) {
         List<Box> boxes = new ArrayList<>();
         boxes.add(pose.slab());
-        junction(profile, pose, connected).forEach(piece -> boxes.add(piece.box()));
+        junction(design, pose, connected).forEach(piece -> boxes.add(piece.box()));
+        return List.copyOf(boxes);
+    }
+
+    /** Outline and target boxes: the collision boxes plus the trim when there is one. */
+    public static List<Box> selection(WindowDesign design, WindowPose pose, Collection<Direction> connected, boolean trimmed) {
+        List<Box> boxes = new ArrayList<>(boxes(design, pose, connected));
+        if (trimmed) {
+            WindowTrimGeometry.pieces(design.profile(), pose).forEach(piece -> boxes.add(piece.box()));
+        }
         return List.copyOf(boxes);
     }
 
@@ -165,10 +202,10 @@ public final class WindowPaneGeometry {
     }
 
     /**
-     * The boxes as glass, plus, where one ends on the slab's face over the opening, glass reaching on
-     * through the half-pixel recess to the pane's glass.
+     * The boxes as glass, plus, where one ends on the slab's face over the glazing, glass reaching on
+     * through the half-pixel recess to the pane's glass (never into a beam, which fills the recess).
      */
-    private static List<Piece> withReach(List<Box> boxes, WindowProfile profile, WindowPose pose) {
+    private static List<Piece> withReach(List<Box> boxes, WindowDesign design, WindowPose pose) {
         Box slab = pose.slab();
         int n = WindowPose.index(pose.normal());
         List<Piece> pieces = new ArrayList<>();
@@ -187,13 +224,13 @@ public final class WindowPaneGeometry {
             }
             double[] u = pose.uRange(box);
             double[] v = pose.vRange(box);
-            int u0 = (int) Math.round(u[0]);
-            int v0 = (int) Math.round(v[0]);
-            int width = (int) Math.round(u[1]) - u0;
-            int height = (int) Math.round(v[1]) - v0;
-            for (PixelCircle.Rect rect : PixelCircle.rasterize(width, height, (pu, pv) -> profile.inOpening(u0 + pu, v0 + pv))) {
+            int u0 = (int) Math.round(u[0] * 2);
+            int v0 = (int) Math.round(v[0] * 2);
+            int width = (int) Math.round(u[1] * 2) - u0;
+            int height = (int) Math.round(v[1] * 2) - v0;
+            for (PixelCircle.Rect rect : PixelCircle.rasterize(width, height, (pu, pv) -> design.glazed(u0 + pu, v0 + pv))) {
                 PixelCircle.Rect at = rect.offset(u0, v0);
-                pieces.add(new Piece(pose.toWorld(at.u1(), at.v1(), at.u2(), at.v2(), r1, r2), GLASS));
+                pieces.add(new Piece(pose.toWorld(at.u1() / 2.0, at.v1() / 2.0, at.u2() / 2.0, at.v2() / 2.0, r1, r2), GLASS));
             }
         }
         return List.copyOf(pieces);

@@ -5,7 +5,6 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -79,24 +78,7 @@ public class AppearanceBlockItem extends BlockItem implements AppearanceDefaults
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
-        tooltip.addAll(describe(AppearanceStacks.read(stack)));
+        tooltip.addAll(AppearanceTooltip.describe(AppearanceStacks.read(stack)));
         tooltip.add(Component.translatable("tooltip.roundwood.restyle").withStyle(ChatFormatting.DARK_GRAY));
-    }
-
-    /** Tooltip lines naming an appearance's material and paint. */
-    public static List<Component> describe(Appearance appearance) {
-        String kind = appearance.isWood() ? "tooltip.roundwood.wood" : "tooltip.roundwood.masonry";
-        Component material;
-        if (BuiltInRegistries.BLOCK.containsKey(appearance.material())) {
-            material = BuiltInRegistries.BLOCK.get(appearance.material()).getName();
-        } else {
-            return List.of(Component.translatable("tooltip.roundwood.unavailable", appearance.material().toString())
-                    .withStyle(ChatFormatting.RED));
-        }
-        Component line = Component.translatable(kind, material).withStyle(ChatFormatting.GRAY);
-        return appearance.paint()
-                .map(dye -> List.of(line, Component.translatable("tooltip.roundwood.paint",
-                        Component.translatable("color.minecraft." + dye.getName())).withStyle(ChatFormatting.GRAY)))
-                .orElse(List.of(line));
     }
 }

@@ -15,6 +15,41 @@
         }
       ],
       "rolls": 1.0
+    },
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "block": "roundwood:crimson_round_window",
+          "condition": "minecraft:block_state_property",
+          "properties": {
+            "trimmed": "true"
+          }
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "WindowTrim.RoundwoodAppearance",
+                  "target": "RoundwoodAppearance"
+                }
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "roundwood:window_trim"
+        }
+      ],
+      "rolls": 1.0
     }
   ],
   "random_sequence": "roundwood:blocks/crimson_round_window"
