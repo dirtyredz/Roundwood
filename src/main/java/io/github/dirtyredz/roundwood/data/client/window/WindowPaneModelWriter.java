@@ -29,12 +29,11 @@ import java.util.function.Consumer;
  * {@link WindowPaneGeometry}, and every other pose is a blockstate quarter turn of one of them, so
  * the shapes the block computes and the models drawn are the same geometry.
  *
- * <p>Per canonical pose: the panel (core), the hub (post and stem, when the pose has one), one arm
- * per side that needs a bridge, and one cap per such side: the hub faces an arm hides, drawn only
- * while that side is not connected, so no glass face is ever buried behind other glass. Names are
- * {@code <profile>[<pose>]}, then {@code _hub}, {@code _arm_<side>}, {@code _cap_<side>}, sides
- * named in the canonical frame. Faces against other always-present geometry are omitted; faces on
- * the cell boundary cull against their side.
+ * <p>Per canonical pose: the panel (core), and for a centred upright pose one arm per side across
+ * its plane (positioned poses grow no glass, {@link WindowPaneGeometry}). Names are
+ * {@code <profile>[<pose>]}, then {@code _arm_<side>}, sides named in the canonical frame. Faces
+ * against other always-present geometry are omitted; faces on the cell boundary cull against their
+ * side.
  */
 public final class WindowPaneModelWriter {
     /** The wood the core binds: the template the client retextures from. */
@@ -111,21 +110,11 @@ public final class WindowPaneModelWriter {
                 .texture(WindowPaneGeometry.FRAME, OAK_PLANKS)
                 .texture(WindowPaneGeometry.GLASS, glass)
                 .texture("particle", OAK_PLANKS);
-        List<Piece> hub = WindowPaneGeometry.hub(profile, canonical);
-        List<Box> fixed = boxes(panel, hub);
-        if (!hub.isEmpty()) {
-            glass(models.getBuilder(stem + "_hub"), hub, glass, (part, face) ->
-                    !WindowPaneGeometry.buried(part, face, fixed) && capSide(profile, canonical, hub, part, face) == null);
-        }
         for (Direction side : WindowPaneGeometry.neededSides(canonical)) {
             List<Piece> arm = WindowPaneGeometry.arm(profile, canonical, side);
-            List<Box> solid = boxes(panel, hub, arm);
+            List<Box> solid = boxes(panel, arm);
             glass(models.getBuilder(stem + "_arm_" + side(side)), arm, glass,
                     (part, face) -> !WindowPaneGeometry.buried(part, face, solid));
-            if (hasCap(profile, canonical, side)) {
-                glass(models.getBuilder(stem + "_cap_" + side(side)), hub, glass,
-                        (part, face) -> capSide(profile, canonical, hub, part, face) == side);
-            }
         }
     }
 
@@ -142,67 +131,13 @@ public final class WindowPaneModelWriter {
         MultiPartBlockStateBuilder.PartBuilder core = states.part().modelFile(model(stem)).rotationY(rotation).addModel();
         poseCondition.accept(core);
         core.end();
-        List<Direction> needed = WindowPaneGeometry.neededSides(pose);
-        if (!WindowPaneGeometry.hub(profile, canonical.pose()).isEmpty()) {
-            // "any needed side connected" as disjoint terms: side i true, every earlier side false.
-            for (int i = 0; i < needed.size(); i++) {
-                MultiPartBlockStateBuilder.PartBuilder hub = states.part().modelFile(model(stem + "_hub")).rotationY(rotation).addModel();
-                poseCondition.accept(hub);
-                for (int j = 0; j < i; j++) {
-                    hub.condition(PipeBlock.PROPERTY_BY_DIRECTION.get(needed.get(j)), false);
-                }
-                hub.condition(PipeBlock.PROPERTY_BY_DIRECTION.get(needed.get(i)), true).end();
-            }
-        }
-        for (Direction side : needed) {
+        for (Direction side : WindowPaneGeometry.neededSides(pose)) {
             Direction authored = rotate(side, -canonical.turns());
             MultiPartBlockStateBuilder.PartBuilder arm = states.part().modelFile(model(stem + "_arm_" + side(authored)))
                     .rotationY(rotation).addModel();
             poseCondition.accept(arm);
             arm.condition(PipeBlock.PROPERTY_BY_DIRECTION.get(side), true).end();
-            if (!hasCap(profile, canonical.pose(), authored)) {
-                continue;
-            }
-            // The cap shows while this side is open and the hub is there (another needed side connected).
-            List<Direction> others = needed.stream().filter(other -> other != side).toList();
-            for (int i = 0; i < others.size(); i++) {
-                MultiPartBlockStateBuilder.PartBuilder cap = states.part().modelFile(model(stem + "_cap_" + side(authored)))
-                        .rotationY(rotation).addModel();
-                poseCondition.accept(cap);
-                cap.condition(PipeBlock.PROPERTY_BY_DIRECTION.get(side), false);
-                for (int j = 0; j < i; j++) {
-                    cap.condition(PipeBlock.PROPERTY_BY_DIRECTION.get(others.get(j)), false);
-                }
-                cap.condition(PipeBlock.PROPERTY_BY_DIRECTION.get(others.get(i)), true).end();
-            }
         }
-    }
-
-    /** Whether the canonical pose has a cap towards {@code side} (some hub face an arm there hides). */
-    public static boolean hasCap(WindowProfile profile, WindowPose canonical, Direction side) {
-        List<Piece> hub = WindowPaneGeometry.hub(profile, canonical);
-        for (Piece piece : hub) {
-            if (capSide(profile, canonical, hub, piece.box(), side) == side) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * The side whose arm buries this hub face (it is exposed without that arm), or null for a face
-     * that is always drawn or always buried.
-     */
-    private static Direction capSide(WindowProfile profile, WindowPose canonical, List<Piece> hub, Box part, Direction face) {
-        if (!face.getAxis().isHorizontal() || !WindowPaneGeometry.neededSides(canonical).contains(face)) {
-            return null;
-        }
-        List<Piece> panel = WindowPaneGeometry.panel(profile, canonical);
-        if (WindowPaneGeometry.buried(part, face, boxes(panel, hub))) {
-            return null;
-        }
-        List<Box> withArm = boxes(panel, hub, WindowPaneGeometry.arm(profile, canonical, face));
-        return WindowPaneGeometry.buried(part, face, withArm) ? face : null;
     }
 
     private interface Faces {

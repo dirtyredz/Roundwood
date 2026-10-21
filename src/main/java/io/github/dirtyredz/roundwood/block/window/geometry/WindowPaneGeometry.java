@@ -19,19 +19,17 @@ import java.util.List;
  * <p><b>Panel.</b> A two-pixel wooden slab over the whole face, wood in every pixel outside the
  * opening and glass, recessed half a pixel on each side, inside it.
  *
- * <p><b>Junctions.</b> Vanilla panes always reach for the middle of the cell's side: a two-pixel
- * strip at x or z 7..9, full height. A side whose strip the slab already covers (the in-plane sides
- * of a centred upright pane, the flush side of a flush one) needs nothing. Every other connected
- * side gets an <em>arm</em> from that strip to a central glass <em>post</em> (x and z 7..9, full
- * height); a flush upright pane adds a <em>stem</em> from the post to its slab; a floor or ceiling
- * pane meets the post and arms as vertical fins. Post and stem together are the <em>hub</em>. All
- * of it is cut away where the slab is, and wherever it ends on the slab over the opening it reaches
- * on to the recessed glass. The pieces never leave the cell. A pane with no active junction has none.
+ * <p><b>Junctions.</b> Only a centred upright pane (the 0.5.0 window) bridges: a connection across
+ * its plane gets the vanilla-pane <em>arm</em>, a two-pixel glass strip (x or z 7..9, full height)
+ * from the cell edge to the slab, reaching on to the recessed glass where it ends over the opening.
+ * Its in-plane sides need nothing (the slab already meets the neighbour). A positioned pane (flush,
+ * floor or ceiling) never grows glass beyond its slab, whatever it is connected to (0.6.1 owner
+ * ruling: the 0.6.0 posts, stems and fins back to the cell's middle filled corners where flush
+ * windows met). The pieces never leave the cell. A pane with no active junction has none.
  */
 public final class WindowPaneGeometry {
     public static final String FRAME = "frame";
     public static final String GLASS = "glass";
-    public static final Box POST = new Box(7, 0, 7, 9, 16, 9);
     private static final Box ARM_NORTH = new Box(7, 0, 0, 9, 16, 7);
     private static final double EPS = 1e-3;
 
@@ -53,29 +51,26 @@ public final class WindowPaneGeometry {
         return List.copyOf(pieces);
     }
 
-    /** The horizontal sides (north, east, south, west order) whose vanilla strip the slab does not cover. */
+    /** True for the one pose family that bridges to its neighbours: upright, slab in the middle of the cell. */
+    public static boolean bridges(WindowPose pose) {
+        return pose.upright() && pose.depth() == WindowDepth.CENTER;
+    }
+
+    /**
+     * The horizontal sides (north, east, south, west order) a connection gets an arm on: the two
+     * across a centred upright pane's plane; none for a positioned pane.
+     */
     public static List<Direction> neededSides(WindowPose pose) {
-        Box slab = pose.slab();
+        if (!bridges(pose)) {
+            return List.of();
+        }
         List<Direction> sides = new ArrayList<>();
         for (Direction side : Direction.Plane.HORIZONTAL) {
-            if (!coversStrip(slab, side)) {
+            if (side.getAxis() == pose.normal()) {
                 sides.add(side);
             }
         }
         return List.copyOf(sides);
-    }
-
-    /** The post and stem (empty when the slab already contains the post, as for centred upright panes). */
-    public static List<Piece> hub(WindowProfile profile, WindowPose pose) {
-        if (neededSides(pose).isEmpty()) {
-            return List.of();
-        }
-        Box slab = pose.slab();
-        List<Box> boxes = new ArrayList<>(POST.subtract(slab));
-        if (pose.upright() && slab.intersect(POST).isEmpty()) {
-            boxes.add(stem(pose, slab));
-        }
-        return withReach(boxes, profile, pose);
     }
 
     /** The arm towards {@code side} (empty when that side needs none). */
@@ -86,14 +81,10 @@ public final class WindowPaneGeometry {
         return withReach(armBox(side).subtract(pose.slab()), profile, pose);
     }
 
-    /** Hub plus arms for the connected sides that need one; nothing when none does. */
+    /** The arms for the connected sides that need one; nothing when none does. */
     public static List<Piece> junction(WindowProfile profile, WindowPose pose, Collection<Direction> connected) {
-        List<Direction> active = neededSides(pose).stream().filter(connected::contains).toList();
-        if (active.isEmpty()) {
-            return List.of();
-        }
-        List<Piece> pieces = new ArrayList<>(hub(profile, pose));
-        for (Direction side : active) {
+        List<Piece> pieces = new ArrayList<>();
+        for (Direction side : neededSides(pose).stream().filter(connected::contains).toList()) {
             pieces.addAll(arm(profile, pose, side));
         }
         return List.copyOf(pieces);
@@ -126,7 +117,7 @@ public final class WindowPaneGeometry {
 
     /**
      * True when the {@code face} side of {@code part} is entirely against other solid geometry in
-     * {@code solids} (its own pieces, the panel, the hub): such a face is never seen and is not drawn.
+     * {@code solids} (its own pieces, the panel): such a face is never seen and is not drawn.
      * Checked on the half-pixel grid every piece is aligned to.
      */
     public static boolean buried(Box part, Direction face, Collection<Box> solids) {
@@ -171,27 +162,6 @@ public final class WindowPaneGeometry {
             }
         }
         return out;
-    }
-
-    private static Box stem(WindowPose pose, Box slab) {
-        if (pose.normal() == Direction.Axis.Z) {
-            return slab.maxZ() <= POST.minZ() ? new Box(7, 0, slab.maxZ(), 9, 16, POST.minZ())
-                    : new Box(7, 0, POST.maxZ(), 9, 16, slab.minZ());
-        }
-        return slab.maxX() <= POST.minX() ? new Box(slab.maxX(), 0, 7, POST.minX(), 16, 9)
-                : new Box(POST.maxX(), 0, 7, slab.minX(), 16, 9);
-    }
-
-    /** Whether the slab covers the vanilla pane strip on {@code side} (two pixels wide, full height, at the boundary). */
-    private static boolean coversStrip(Box slab, Direction side) {
-        boolean fullHeight = slab.minY() <= 0 && slab.maxY() >= Box.BLOCK;
-        return fullHeight && switch (side) {
-            case NORTH -> slab.minZ() == 0 && slab.minX() <= 7 && slab.maxX() >= 9;
-            case SOUTH -> slab.maxZ() == Box.BLOCK && slab.minX() <= 7 && slab.maxX() >= 9;
-            case WEST -> slab.minX() == 0 && slab.minZ() <= 7 && slab.maxZ() >= 9;
-            case EAST -> slab.maxX() == Box.BLOCK && slab.minZ() <= 7 && slab.maxZ() >= 9;
-            default -> true;
-        };
     }
 
     /**

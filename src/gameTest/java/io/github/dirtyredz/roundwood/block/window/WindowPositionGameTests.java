@@ -34,9 +34,9 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 
 /**
- * Flush and floor/ceiling round windows among other blocks: which junctions connect (in both
- * placement orders), the glass bridges they grow and collide with, what never connects (parallel
- * windows face to face, coplanar windows, solid blocks), removal, culling, outlines and water.
+ * Flush and floor/ceiling round windows among other blocks: they never connect or grow glass (in both
+ * placement orders; parallel windows face to face, coplanar windows, solid blocks), culling, outlines
+ * and water.
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -76,9 +76,12 @@ public final class WindowPositionGameTests {
                 (Supplier<ItemStack>) () -> new ItemStack(Items.COBBLESTONE_WALL)};
     }
 
-    /** A far-flush window joins panes, bars and walls on its free sides, whichever is placed first. */
+    /**
+     * A far-flush window keeps no connection to panes, bars or walls, whichever is placed first, and
+     * grows nothing back to the middle (0.6.1; the full combination sweep is {@link WindowJunctionSweepGameTests}).
+     */
     @GameTest(template = TEMPLATE)
-    public static void flushWindowsJoinPanesBarsAndWallsInBothOrders(GameTestHelper helper) {
+    public static void positionedWindowsNeverConnectInEitherOrder(GameTestHelper helper) {
         floor(helper);
         ServerPlayer player = player(helper, "pos_join", GameType.CREATIVE, Direction.NORTH);
         Supplier<ItemStack>[] stacks = junctions();
@@ -87,49 +90,22 @@ public final class WindowPositionGameTests {
             BlockState window = placeWindow(helper, player, a, WindowTargetZones.Zone.V_MIN);
             check(window.getValue(RoundWindowBlock.POSITION) == WindowPosition.NORTH, "setup: flush north");
             placeItem(helper, player, stacks[i].get(), a.east());
-            check(connects(helper.getBlockState(a), Direction.EAST), i + " a: window did not join its east neighbour");
-            if (i != 2) {
-                check(connects(helper.getBlockState(a.east()), Direction.WEST), i + " a: neighbour did not join back");
-            }
+            check(WindowPaneBlock.connections(helper.getBlockState(a)).isEmpty(), i + " a: a flush window kept a connection");
+            check(!collides(helper, a, 0.45, 0.3, 0.45, 0.55, 0.7, 0.55), i + " a: glass grew in the middle");
+            check(!collides(helper, a, 0.7, 0.3, 0.45, 0.95, 0.7, 0.55), i + " a: glass grew towards the neighbour");
             BlockPos b = new BlockPos(5, 1, 1 + 3 * i);
             placeItem(helper, player, stacks[i].get(), b.south());
             placeWindow(helper, player, b, WindowTargetZones.Zone.V_MIN);
-            check(connects(helper.getBlockState(b), Direction.SOUTH), i + " b: window did not join its south neighbour");
-            if (i != 2) {
-                check(connects(helper.getBlockState(b.south()), Direction.NORTH), i + " b: neighbour did not join back");
-            }
+            check(WindowPaneBlock.connections(helper.getBlockState(b)).isEmpty(), i + " b: a flush window kept a connection");
+            check(!collides(helper, b, 0.45, 0.3, 0.45, 0.55, 0.7, 0.55), i + " b: glass grew in the middle");
         }
-        helper.succeed();
-    }
-
-    /** The bridge: a flush window joined to an east pane collides at the cell's middle and along the east arm, nowhere else. */
-    @GameTest(template = TEMPLATE)
-    public static void shiftedJunctionsGrowGlassBackToTheMiddle(GameTestHelper helper) {
-        floor(helper);
-        ServerPlayer player = player(helper, "pos_bridge", GameType.CREATIVE, Direction.NORTH);
-        BlockPos flush = new BlockPos(2, 1, 2);
-        placeWindow(helper, player, flush, WindowTargetZones.Zone.V_MIN);
-        check(!collides(helper, flush, 0.45, 0.3, 0.45, 0.55, 0.7, 0.55), "an unconnected flush window collides in the middle");
-        placeItem(helper, player, new ItemStack(Items.GLASS_PANE), flush.east());
-        check(collides(helper, flush, 0.45, 0.3, 0.45, 0.55, 0.7, 0.55), "no glass post in the middle");
-        check(collides(helper, flush, 0.45, 0.3, 0.2, 0.55, 0.7, 0.4), "no stem back to the panel");
-        check(collides(helper, flush, 0.7, 0.3, 0.45, 0.95, 0.7, 0.55), "no arm to the east pane");
-        check(!collides(helper, flush, 0.05, 0.3, 0.45, 0.3, 0.7, 0.55), "glass towards the open west side");
-        check(!collides(helper, flush, 0.45, 0.3, 0.7, 0.55, 0.7, 0.95), "glass towards the open south side");
-        // A ceiling window with a pane beyond its north edge: a fin hangs down along the north arm.
-        BlockPos ceiling = new BlockPos(6, 1, 4);
+        // A ceiling window with a pane beyond its north edge: no fin.
+        BlockPos ceiling = new BlockPos(7, 1, 4);
         placeItem(helper, player, new ItemStack(Items.GLASS_PANE), ceiling.north());
         BlockState hung = placeFromWall(helper, player, ceiling);
-        check(hung.getValue(RoundWindowBlock.POSITION) == WindowPosition.UP && connects(hung, Direction.NORTH), "ceiling setup " + hung);
-        check(collides(helper, ceiling, 0.45, 0.1, 0.1, 0.55, 0.3, 0.3), "no fin below the ceiling pane");
-        check(collides(helper, ceiling, 0.1, 0.9, 0.1, 0.9, 0.99, 0.9), "no ceiling pane");
-        // A flush window beside a centred one: the bridge meets the centred pane's edge.
-        BlockPos mixed = new BlockPos(2, 1, 6);
-        placeWindow(helper, player, mixed.east(), WindowTargetZones.Zone.CENTER);
-        BlockState shifted = placeWindow(helper, player, mixed, WindowTargetZones.Zone.V_MIN);
-        check(connects(shifted, Direction.EAST) && connects(helper.getBlockState(mixed.east()), Direction.WEST),
-                "a flush and a centred window side by side did not join");
-        check(collides(helper, mixed, 0.7, 0.3, 0.45, 0.95, 0.7, 0.55), "no arm towards the centred window");
+        check(hung.getValue(RoundWindowBlock.POSITION) == WindowPosition.UP && WindowPaneBlock.connections(hung).isEmpty(),
+                "ceiling window " + hung);
+        check(!collides(helper, ceiling, 0.45, 0.1, 0.1, 0.55, 0.3, 0.3), "a fin hangs below the ceiling pane");
         helper.succeed();
     }
 
@@ -160,7 +136,7 @@ public final class WindowPositionGameTests {
         placeWindow(helper, player, first, WindowTargetZones.Zone.V_MIN);
         BlockState second = placeWindow(helper, player, first.east(), WindowTargetZones.Zone.V_MIN);
         check(!connects(second, Direction.WEST) && !connects(helper.getBlockState(first), Direction.EAST), "coplanar flush windows bridged");
-        check(!collides(helper, first, 0.45, 0.3, 0.45, 0.55, 0.7, 0.55), "coplanar flush windows grew a post");
+        check(!collides(helper, first, 0.45, 0.3, 0.45, 0.55, 0.7, 0.55), "coplanar flush windows grew glass");
         // Two ceiling windows side by side.
         BlockPos c1 = new BlockPos(1, 1, 6);
         placeFromWall(helper, player, c1);
@@ -173,20 +149,6 @@ public final class WindowPositionGameTests {
         BlockState lone = placeWindow(helper, player, solid, WindowTargetZones.Zone.V_MIN);
         check(!connects(lone, Direction.EAST) && !connects(lone, Direction.SOUTH), "a solid block made a flush window grow glass: " + lone);
         check(!collides(helper, solid, 0.45, 0.3, 0.45, 0.55, 0.7, 0.55), "solid neighbours made a post");
-        helper.succeed();
-    }
-
-    @GameTest(template = TEMPLATE)
-    public static void removingTheNeighbourRemovesTheBridge(GameTestHelper helper) {
-        floor(helper);
-        ServerPlayer player = player(helper, "pos_remove", GameType.CREATIVE, Direction.NORTH);
-        BlockPos pos = new BlockPos(3, 1, 3);
-        placeWindow(helper, player, pos, WindowTargetZones.Zone.U_MIN);
-        placeItem(helper, player, new ItemStack(Items.GLASS_PANE), pos.north());
-        check(connects(helper.getBlockState(pos), Direction.NORTH) && collides(helper, pos, 0.45, 0.3, 0.45, 0.55, 0.7, 0.55), "setup");
-        helper.setBlock(pos.north(), Blocks.AIR);
-        check(!connects(helper.getBlockState(pos), Direction.NORTH), "still connected after removal");
-        check(!collides(helper, pos, 0.45, 0.3, 0.45, 0.55, 0.7, 0.55), "the bridge still collides after removal");
         helper.succeed();
     }
 

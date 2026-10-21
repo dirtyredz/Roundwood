@@ -119,7 +119,7 @@ class GeneratedResourcesTest {
             block.add("round_trim_whole_" + part);
         }
         item.addAll(ALIASES);
-        assertEquals(25 + 186, block.size());
+        assertEquals(25 + 25, block.size());
         assertEquals(59, item.size());
         // Exact sets: no per-finish models remain; the 49 old ids are only item-model aliases.
         assertEquals(block, names(assets("models/block")));
@@ -129,7 +129,7 @@ class GeneratedResourcesTest {
         assertEquals(new TreeSet<>(CANONICAL), names(data("recipes")));
         assertEquals(new TreeSet<>(CANONICAL), names(data("advancements/recipes")));
         assertEquals(54, allJson(assets("blockstates")).size());
-        assertEquals(211, allJson(assets("models/block")).size());
+        assertEquals(50, allJson(assets("models/block")).size());
         assertEquals(59, allJson(assets("models/item")).size());
         assertEquals(5, allJson(data("recipes")).size());
         assertEquals(54, allJson(data("loot_tables/blocks")).size());
@@ -137,42 +137,30 @@ class GeneratedResourcesTest {
     }
 
     /**
-     * The posed window models (0.6.0), named independently: per canonical pose a core, a hub, and an
-     * arm and a cap per side that needs a bridge. Round window: flush against the north side
+     * The posed window models, named independently: per canonical pose a core, plus (centred upright
+     * only, since 0.6.1) an arm per side across the plane. Round window: flush against the north side
      * ({@code _back}), on the ceiling ({@code _down_ceiling}) and on the floor ({@code _up_floor}).
-     * Each arch piece: upright centred (two across-plane arms, no hub), upright behind or in front
-     * of centre, and front up or down at each of three heights.
+     * Each arch piece: upright centred (two across-plane arms), upright behind or in front of centre,
+     * and front up or down at each of three heights. No hub, cap or positioned arm model exists.
      */
     static Set<String> windowPaneModels() {
         Set<String> out = new TreeSet<>();
-        List<String> all = List.of("north", "east", "south", "west");
-        addPose(out, "round_window_back", List.of("east", "south", "west"), true);
-        addPose(out, "round_window_down_ceiling", all, true);
-        addPose(out, "round_window_up_floor", all, true);
+        out.add("round_window_back");
+        out.add("round_window_down_ceiling");
+        out.add("round_window_up_floor");
         for (String arch : ARCHES) {
-            addPose(out, arch, List.of("north", "south"), false);
-            addPose(out, arch + "_back", List.of("east", "south", "west"), true);
-            addPose(out, arch + "_front", List.of("north", "east", "west"), true);
+            out.add(arch);
+            out.add(arch + "_arm_north");
+            out.add(arch + "_arm_south");
+            out.add(arch + "_back");
+            out.add(arch + "_front");
             for (String front : List.of("up", "down")) {
                 for (String level : List.of("floor", "level", "ceiling")) {
-                    addPose(out, arch + "_" + front + "_" + level, all, true);
+                    out.add(arch + "_" + front + "_" + level);
                 }
             }
         }
         return out;
-    }
-
-    private static void addPose(Set<String> out, String stem, List<String> sides, boolean hub) {
-        out.add(stem);
-        if (hub) {
-            out.add(stem + "_hub");
-        }
-        for (String side : sides) {
-            out.add(stem + "_arm_" + side);
-            if (hub) {
-                out.add(stem + "_cap_" + side);
-            }
-        }
     }
 
     private static Set<String> names(Path dir) throws IOException {

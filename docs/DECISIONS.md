@@ -2,6 +2,28 @@
 
 Newest first.
 
+## 2026-10-21 - Positioned windows never grow glass bridges (0.6.1, owner ruling; supersedes "Fixed central junctions")
+
+Owner trial of 0.6.0: two flush windows meeting in an L grew a glass post, stems and arms filling
+the corner. Only a centred upright pane (the 0.5.0 window, round or arch) still bridges: an arm
+across its plane towards a pane, bars, a wall or a centred window crossing it. A flush, floor or
+ceiling pane keeps no connection and its model and shape are its slab, so flush windows meeting at
+a corner or edge simply abut frame to frame. Rejected: per-neighbour corner pieces (the owner wants
+no extra glass at all). Tradeoff: a vanilla pane beside a flush window still reaches the cell edge
+(vanilla connects to any pane-family block) and ends there without meeting the flush slab. The
+hub, cap, flush-arm and fin models are gone (161 block models fewer; arch blockstates are small
+again).
+
+## 2026-10-21 - Door highlight follows the swing (0.6.1, owner report)
+
+The visible outline was read from the blockstate, whose `open` switches instantly while the leaf
+turns for eight ticks, so the outline jumped to the final pose ahead of the leaf. While the anchor's
+`DoorSwing` is moving, the highlight now draws the closed leaf's silhouette turned by the same
+angle the renderer uses (`DoorGeometry.swingDegrees`) plus the filled corners; at rest it is the
+0.4.0 visible shape. Rejected: delaying the blockstate (server authority, collision and redstone
+would lag) and hiding the outline while moving (the owner asked that it follow). The ray target
+still switches instantly (clicks hit the final pose).
+
 ## 2026-10-21 - Arch top on a floor or ceiling is the side the placer sees as up (0.6.0)
 
 The plan had the arch's top always follow the look direction. On a ceiling that would show the left
@@ -9,7 +31,7 @@ piece as a right one to whoever placed it. Floor and ceiling pieces therefore ta
 sees as up (away from them on a floor, towards them on a ceiling), so a left piece looks left to its
 placer. Tradeoff: the top depends on the placer's facing, not on the block alone.
 
-## 2026-10-21 - Posed models per canonical pose, caps for buried faces, disjoint AND conditions (0.6.0)
+## 2026-10-21 - Posed models per canonical pose, caps for buried faces, disjoint AND conditions (0.6.0; hubs and caps removed in 0.6.1)
 
 Each profile's models are authored once per canonical pose (upright facing south, or front up/down
 with top north) and every other pose is a blockstate y rotation of one; a core, a hub and per-side
@@ -20,7 +42,7 @@ element whose faces are all buried (Minecraft rejects elements without faces). R
 per state (hundreds of near copies). Cost: 186 new block models and arch blockstates of about 160 KB
 each, guarded by tests that evaluate every state.
 
-## 2026-10-21 - Fixed central junctions, no vertical links (0.6.0)
+## 2026-10-21 - Fixed central junctions, no vertical links (0.6.0, superseded by 0.6.1 for positioned windows)
 
 Connections stay the four horizontal vanilla ones. Each connected side not already covered by the slab
 gets a glass arm to a central post (plus a stem for a flush upright pane, vertical fins for floor and

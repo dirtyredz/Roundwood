@@ -25,8 +25,8 @@ import net.minecraftforge.common.data.ExistingFileHelper;
  * The round window's blockstate and models, multipart like a vanilla pane. Centred (the 0.5.0
  * models, unchanged): the core (wooden face with round glass) per axis, turned 90 degrees for
  * {@code axis=z}, plus one shared glass arm for each connected side across the plane; in-plane
- * connections add nothing. Flush against a side: the posed core, hub, arms and caps of
- * {@link WindowPaneModelWriter} (three canonical poses, turned per side). The cores bind oak planks;
+ * connections add nothing. Flush against a side, floor or ceiling: the posed core of
+ * {@link WindowPaneModelWriter} (three canonical poses, turned per side), with no glass bridge. The cores bind oak planks;
  * the client swaps only those quads' sprite per window appearance. All models are translucent
  * (Roundwood's tinted glazing); {@code waterlogged} never selects a model.
  */

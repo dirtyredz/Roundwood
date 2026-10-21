@@ -110,15 +110,69 @@ class WindowPaneGeometryTest {
         }
     }
 
+    /** True for the 0.5.0 pose family: upright, slab in the middle of the cell. */
+    static boolean centredUpright(WindowPose pose) {
+        return pose.upright() && pose.depth() == WindowDepth.CENTER;
+    }
+
+    /**
+     * 0.6.1 owner ruling: a positioned pane (flush, floor or ceiling) never grows glass beyond its own
+     * slab, whatever it is connected to. Two flush windows meeting in an L showed a glass post, stems
+     * and arms filling the corner (0.6.0); they now simply meet frame to frame.
+     */
     @Test
-    void neededSidesAreThoseTheSlabDoesNotCover() {
+    void positionedPanesNeverGrowGlassBeyondTheirSlab() {
+        for (WindowProfile profile : WindowProfile.values()) {
+            for (WindowPose pose : allPoses()) {
+                if (centredUpright(pose)) {
+                    continue;
+                }
+                for (int bits = 0; bits < 16; bits++) {
+                    assertEquals(WindowPaneGeometry.panel(profile, pose), WindowPaneGeometry.pieces(profile, pose, mask(bits)),
+                            profile + " " + pose + " " + bits + ": glass outside the panel");
+                    assertEquals(List.of(pose.slab()), WindowPaneGeometry.boxes(profile, pose, mask(bits)),
+                            profile + " " + pose + " " + bits + ": shape outside the slab");
+                }
+            }
+        }
+    }
+
+    /** A centred upright pane only ever adds the 0.5.0 arms across its plane: no post, nothing in its own plane. */
+    @Test
+    void centredPanesGrowOnlyArmsAcrossTheirPlane() {
+        for (WindowProfile profile : WindowProfile.values()) {
+            for (WindowPose pose : allPoses()) {
+                if (!centredUpright(pose)) {
+                    continue;
+                }
+                List<Piece> junction = WindowPaneGeometry.junction(profile, pose, mask(0b1111));
+                assertFalse(junction.isEmpty(), pose.toString());
+                for (Piece piece : junction) {
+                    boolean inAnArm = false;
+                    for (Direction side : Direction.Plane.HORIZONTAL) {
+                        // The arm's strip from that edge to the cell's middle (its reach on to the recessed glass included).
+                        Box half = new Box(7, 0, 0, 9, 16, 8).rotateY(switch (side) {
+                            case EAST -> 1;
+                            case SOUTH -> 2;
+                            case WEST -> 3;
+                            default -> 0;
+                        });
+                        inAnArm |= side.getAxis() == pose.normal() && piece.box().within(half);
+                    }
+                    assertTrue(inAnArm, profile + " " + pose + ": " + piece.box() + " is not inside an across-plane arm");
+                }
+            }
+        }
+    }
+
+    @Test
+    void onlyCentredPanesNeedArmsAndOnlyAcrossTheirPlane() {
         assertEquals(List.of(Direction.NORTH, Direction.SOUTH), WindowPaneGeometry.neededSides(WindowPosition.CENTER.pose(Direction.Axis.X)));
         assertEquals(List.of(Direction.EAST, Direction.WEST), WindowPaneGeometry.neededSides(WindowPosition.CENTER.pose(Direction.Axis.Z)));
-        assertEquals(List.of(Direction.EAST, Direction.SOUTH, Direction.WEST), WindowPaneGeometry.neededSides(WindowPosition.NORTH.pose(Direction.Axis.X)));
-        assertEquals(List.of(Direction.NORTH, Direction.SOUTH, Direction.WEST), WindowPaneGeometry.neededSides(WindowPosition.EAST.pose(Direction.Axis.X)));
-        for (WindowPosition position : new WindowPosition[] {WindowPosition.UP, WindowPosition.DOWN}) {
-            assertEquals(List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST),
-                    WindowPaneGeometry.neededSides(position.pose(Direction.Axis.X)), position.toString());
+        for (WindowPosition position : WindowPosition.values()) {
+            if (position != WindowPosition.CENTER) {
+                assertEquals(List.of(), WindowPaneGeometry.neededSides(position.pose(Direction.Axis.X)), position.toString());
+            }
         }
     }
 

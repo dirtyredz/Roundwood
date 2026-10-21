@@ -70,7 +70,7 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
         double pivotX = DoorGeometry.pivotX(hinge) / 16.0;
         double pivotZ = DoorGeometry.PIVOT_Z / 16.0;
         pose.translate(pivotX, 0, pivotZ);
-        pose.mulPose(Axis.YP.rotationDegrees((float) (DoorGeometry.openDegrees(hinge) * progress)));
+        pose.mulPose(Axis.YP.rotationDegrees((float) DoorGeometry.swingDegrees(hinge, progress)));
         pose.translate(-pivotX, 0, -pivotZ);
         blocks.getModelRenderer().renderModel(pose.last(), buffers.getBuffer(Sheets.solidBlockSheet()), state, model,
                 red, green, blue, light, overlay, ModelData.EMPTY, RenderType.solid());

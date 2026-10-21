@@ -49,8 +49,9 @@ any filled camouflage corners. The knobs and straps are decoration and do not co
 
 **Round window** (single block). A thin square wooden pane with round tinted glass in the middle.
 It can stand upright and centred, or flush against any side of its cell (four walls, floor,
-ceiling), and connects like a glass pane, with a short glass bridge where it meets a neighbouring
-pane, bars, wall or window (never towards a solid block). Waterloggable; drops itself. See "Placing
+ceiling). Centred, it connects like a glass pane, with a short glass arm across its plane where it
+meets a pane, bars, wall or crossing window (never towards a solid block); flush, floor and ceiling
+windows grow no glass, so where they meet each other their frames simply abut. Waterloggable; drops itself. See "Placing
 windows".
 
 **Round window arches** (two single blocks, left and right). The upper half of a round window two
@@ -93,10 +94,9 @@ the main hand is empty. Sneaking changes nothing.
   is the side you see as up, so a left piece looks left to whoever placed it.
 - **To move a placed window, break it and place it again**; its look survives in the item. Windows
   saved by 0.5.0 load centred, with their axis, connections, water and look unchanged.
-- Junctions: a connected side that the pane's slab does not already reach gets a glass arm to a
-  central glass post, so connected flush panes show glass reaching back to the cell centre and
-  floor or ceiling panes show vertical fins. Panes never link up or down, and two windows face to
-  face, or continuing the same plane, do not connect.
+- Junctions: only a centred window grows glass, an arm across its plane towards a pane, bars, a
+  wall or a centred window crossing it. Flush, floor and ceiling windows never connect, so two of
+  them meeting at a corner or edge just meet frame to frame. Panes never link up or down.
 
 ## Restyling
 
@@ -106,7 +106,7 @@ the main hand is empty. Sneaking changes nothing.
 | Door leaf | Dye (sneaking or not) | Painted, the wood kept underneath | 1 dye |
 | Door corner | Block, not sneaking (planks included) | Camouflage, as above | 1 block, refunded later |
 | Door corner | Sneak + planks or dye | Refused with a hint to aim at the leaf | nothing |
-| Window or arch | **Sneak** + planks | The wooden face only; glass and bridges never change | 1 plank |
+| Window or arch | **Sneak** + planks | The wooden face only; glass and arms never change | 1 plank |
 | Window or arch | Dye (sneaking or not) | The wooden face painted; glass never changes | 1 dye |
 | Trim | **Sneak** + planks | That wood (also replaces masonry) | 1 plank |
 | Trim | **Sneak** + bricks, stone bricks, deepslate bricks or mud bricks | Radial brickwork, paint cleared | 1 block |
@@ -183,8 +183,9 @@ The release jar is `build/libs/roundwood-1.20.1-<version>.jar`.
 
 ## Release
 
-Not released yet. 0.5.0 is the baseline; 0.6.0 (targeted window placement and the arch pieces) is
-a local candidate, owner trial pending. The flow follows DankRecipeTransfer: an immutable
+Not released yet. 0.5.0 is the baseline; 0.6.0 (targeted window placement and the arch pieces) was
+trialled by the owner; 0.6.1 (no glass bridges on positioned windows, the door highlight follows
+the swing) is a local candidate, owner trial pending. The flow follows DankRecipeTransfer: an immutable
 GitHub prerelease asset, then a direct-URL `mods/roundwood.pw.toml` (with SHA-256, `side = "both"`)
 in the pack repo. Both steps need the owner's go-ahead.
 

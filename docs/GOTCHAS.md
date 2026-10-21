@@ -2,20 +2,21 @@
 
 - **Interactive targets take the click before placement.** Aiming a window item at a door, chest or
   lever uses that block first; the overlay still shows the zone, so it is not a promise.
-- **Flush and floor/ceiling panes need glass bridges to meet vanilla panes.** The slab does not reach
-  the vanilla strip, so connected sides get an arm to a central post, a stem (flush upright) or
-  vertical fins (floor and ceiling). That glass is visible by design; connections stay the four
-  horizontal ones, with no up/down links.
+- **Flush and floor/ceiling windows never connect** (0.6.1). Their slab does not reach the middle
+  of the cell edge where vanilla panes meet, and they grow no glass to get there, so all four
+  connection properties stay false. A vanilla pane beside one still connects (vanilla links to any
+  pane-family block) and ends at the cell edge, short of the flush slab. Only centred upright
+  windows grow arms, across their plane; there are no up/down links.
 - **0.5.0 windows load centred.** `position` defaults to center when absent, so saved windows keep
   their axis, connections, water and look. Aliases inherit the property.
-- **Restyling changes the wood only.** Glass, arms, posts and fins never change with planks or dye.
-- **Arch blockstates are big multipart files** (about 160 KB each, disjoint AND terms). After any
-  pose or geometry change rerun `runData`; `GeneratedWindowArchModelsTest` compares every posed
+- **Restyling changes the wood only.** Glass and arms never change with planks or dye.
+- **Arch blockstates are multipart files over every pose** (36 orientation and depth pairs). After
+  any pose or geometry change rerun `runData`; `GeneratedWindowArchModelsTest` compares every posed
   state's parts with the block geometry and fails on a stale file.
 - **A junction face partly against wood is still drawn** (harmless, opposite-facing); a wholly
   buried one is not.
-- **The strip where an arch's glazed edge reaches the cell edge keeps the 0.5 px glass recess.** No
-  fin fills it.
+- **The strip where an arch's glazed edge reaches the cell edge keeps the 0.5 px glass recess.**
+  Nothing fills it.
 - **Sneak-use reaches Roundwood blocks only for restyling.** Forge never calls block use for a
   sneaking player holding anything; since 0.5.0 `AppearanceUseEvents` lets exactly sneak + planks,
   sneak + dye and (trims) sneak + masonry through to the block and denies the item use, so a plank
@@ -51,6 +52,9 @@
   shows empty corners (it draws the visible shape, `DoorHighlightRenderer`), so the aim can land on
   an outline-less corner. Code that needs "what is drawn" must use `DoorSelectionShapes.visible`,
   never `getShape`.
+- **The highlight follows the swing, the target does not.** While a leaf turns, the outline is the
+  leaf at its drawn angle (client `DoorSwing`), but rays and collision already use the final
+  blockstate, so a click mid-swing lands on the final pose.
 - **The open projection is outlined but refused.** Clicking, mining or picking the projected half
   of an open leaf does nothing (the client cancels it). A ray that crosses a door cell before the
   projection can also stop a click on a block that sits inside the projection.

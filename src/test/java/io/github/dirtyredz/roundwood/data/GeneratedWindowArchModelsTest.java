@@ -91,7 +91,7 @@ class GeneratedWindowArchModelsTest {
             for (String applied : GeneratedBlockstatesTest.applied(parts, values)) {
                 String[] split = applied.split("@");
                 int turns = Integer.parseInt(split[1]) / 90;
-                boolean junction = split[0].contains("_hub") || split[0].contains("_arm_") || split[0].contains("_cap_");
+                boolean junction = split[0].contains("_arm_");
                 for (Element element : ELEMENTS.computeIfAbsent(split[0], GeneratedWindowArchModelsTest::load)) {
                     Box box = element.box().rotateY(turns);
                     assertTrue(geometry.containsAll(box), what + ": " + split[0] + " draws outside the geometry: " + box);
@@ -145,7 +145,7 @@ class GeneratedWindowArchModelsTest {
             String id = "roundwood:block/" + name;
             assertEquals("minecraft:translucent", renderType(id), id);
             Resolved model = resolve(id);
-            boolean core = !(name.contains("_hub") || name.contains("_arm_") || name.contains("_cap_"));
+            boolean core = !name.contains("_arm_");
             assertFalse(model.elements().isEmpty(), id + ": no elements");
             for (JsonObject element : elements(model)) {
                 JsonObject faces = element.getAsJsonObject("faces");

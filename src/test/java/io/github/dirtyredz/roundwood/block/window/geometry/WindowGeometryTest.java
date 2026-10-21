@@ -57,7 +57,6 @@ class WindowGeometryTest {
             assertEquals(new HashSet<>(WindowGeometry.arm().stream().map(p -> p.rotateY(t)).toList()),
                     new HashSet<>(WindowPaneGeometry.arm(WindowProfile.ROUND, pose, side)), side.toString());
         }
-        assertTrue(WindowPaneGeometry.hub(WindowProfile.ROUND, AXIS_X).isEmpty(), "a centred window has no hub");
         assertTrue(WindowPaneGeometry.arm(WindowProfile.ROUND, AXIS_X, Direction.EAST).isEmpty(), "in-plane arms are buried");
     }
     private static final double EPS = 1e-9;

@@ -13,6 +13,7 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowArchBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
@@ -302,11 +303,14 @@ public final class ShowcaseGameTests {
         expectPosition(level, frame, WindowPositionsSection.CEILING_R, WindowPositionsSection.FLOOR_F, WindowPosition.DOWN);
         int d = WindowPositionsSection.DEMO_F;
         BlockState pane = expectPosition(level, frame, WindowPositionsSection.PANE_R, d, WindowPosition.flush(forward));
-        check(connects(pane, right), "flush window not bridged to the glass pane on its right");
-        BlockState fin = expectPosition(level, frame, WindowPositionsSection.FIN_R, d, WindowPosition.UP);
-        check(connects(fin, forward), "ceiling window not joined to the pane beyond it");
+        check(WindowPaneBlock.connections(pane).isEmpty(), "flush window bridged to the glass pane on its right: " + pane);
+        BlockState corner = expectPosition(level, frame, WindowPositionsSection.CORNER_R, d, WindowPosition.flush(forward));
+        BlockState cornerSide = expectPosition(level, frame, WindowPositionsSection.CORNER_R + 1, d,
+                WindowPosition.flush(right.getOpposite()));
+        check(WindowPaneBlock.connections(corner).isEmpty() && WindowPaneBlock.connections(cornerSide).isEmpty(),
+                "flush windows in an L kept connections: " + corner + " / " + cornerSide);
         BlockState mixed = expectPosition(level, frame, WindowPositionsSection.MIXED_R, d, WindowPosition.flush(forward));
-        check(connects(mixed, right), "flush window not joined to the centred one beside it");
+        check(WindowPaneBlock.connections(mixed).isEmpty(), "flush window bridged to the centred one beside it");
         BlockState solid = expectPosition(level, frame, WindowPositionsSection.SOLID_R, d, WindowPosition.flush(forward));
         check(!connects(solid, right) && !connects(solid, forward), "stone made a flush window grow glass: " + solid);
         BlockState wet = expectPosition(level, frame, WindowPositionsSection.WATER_R, d, WindowPosition.flush(forward));

@@ -91,7 +91,11 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   take camouflage. The **visible** shape adds only filled corners. Vanilla highlights `getShape`,
   which outlined an open door as the closed frame whenever a block was held (0.3.x), so
   `client/door/DoorHighlightRenderer` cancels `RenderHighlightEvent.Block` for round doors and draws
-  the visible shape's edges with vanilla's line style (nothing for an incomplete assembly).
+  the visible shape's edges with vanilla's line style (nothing for an incomplete assembly). While
+  the anchor's swing is moving it draws `selection/DoorSwingOutline` instead: the closed leaf's
+  silhouette turned by `DoorGeometry.swingDegrees` of the swing's progress (the renderer's own
+  angle), plus the filled corners alone (`DoorSelectionShapes.visibleCorners`), so the outline never
+  leads the leaf (0.6.1).
 - **Hit re-attribution** (`selection/DoorHitResolver`, client `DoorTargetingEvents` on
   `InputEvent.InteractionKeyMappingTriggered`): a ray is credited to the first part it passes,
   which may not contain the hit point (looking through an empty corner). Before use, attack,
@@ -196,18 +200,17 @@ never changes cancellation) draws the five-zone grid, the targeted zone in white
 outline in light blue (hidden when local checks refuse), with `client/render/OutlineLines` shared
 with the door highlight. Door hits go through `DoorHitResolver`.
 
-**Junctions.** Connections stay the four horizontal vanilla ones. A side whose vanilla strip (x or
-z 7..9 at the cell edge, full height) the slab already covers needs nothing (in-plane sides of a
-centred upright pane, the flush side of a flush pane). Every other connected side gets a glass arm
-from that strip to a central glass post (x/z 7..9, full height); a flush upright pane adds a stem
-from the post to its slab; floor and ceiling panes meet the post and arms as vertical glass fins.
-Everything is cut away where the slab is and reaches on to the recessed glass where it ends on the
-opening; a pane with no active junction has none.
+**Junctions.** Connections stay the four horizontal vanilla ones. Only a centred upright pane
+bridges (`WindowPaneGeometry.bridges`): a connected side across its plane gets the vanilla-pane
+glass arm (x or z 7..9, full height) from the cell edge to the slab, reaching on to the recessed
+glass where it ends on the opening; its in-plane sides need nothing. A positioned pane (flush,
+floor, ceiling) never grows glass beyond its slab (0.6.1; 0.6.0's post, stem and fins filled the
+corner where two flush windows met).
 
 **Connection rule** (`block/window/connection/WindowConnections`). In-plane sides of a centred
-upright window follow vanilla (as 0.5.0). Every other side connects only to a pane/bars, a wall or
-a window, but not a window face to face (both upright on the same normal, across it) and not one
-continuing the same plane (same normal and depth, in plane). Solid blocks never grow glass. The
+upright window follow vanilla (as 0.5.0). A side across its plane connects only to a pane/bars, a
+wall or a centred upright window crossing it (different normal); never a window face to face, a
+positioned window or a solid block. A positioned window keeps no connection at all. The
 connection package reads `WindowPaneBlock.pose` of neighbours and the block calls the rule: a
 deliberate two-way edge inside `block/window`.
 
@@ -219,12 +222,9 @@ and outline are the panel plus active junction parts.
 
 **Models** (`data/client/window/`). Posed models are authored once per canonical pose (upright
 facing south, or front up/down with top north) and every other pose is a blockstate y rotation of
-one. Per canonical pose: a core (panel, oak-bound), a hub (post + stem), one arm per side needing a
-bridge, and one cap per such side (the hub faces an arm hides, drawn only while that side is open,
-so no glass face is buried behind glass). Multipart conditions are disjoint AND terms, since
-vanilla's multipart reader cannot mix OR with other keys. Names are
-`<profile>[_back|_front|_up_<floor|level|ceiling>|_down_<...>]` then `_hub`, `_arm_<side>`,
-`_cap_<side>`. The round window's centred state reuses the 0.5.0 parts; flush uses
+one. Per canonical pose: a core (panel, oak-bound), and for a centred upright pose one arm per
+side across its plane. Names are `<profile>[_back|_front|_up_<floor|level|ceiling>|_down_<...>]`,
+arms `_arm_<side>`. The round window's centred state reuses the 0.5.0 parts; flush uses
 `round_window_back*` turned per side, ceiling `round_window_down_ceiling*`, floor
 `round_window_up_floor*`. `GeometryModelWriter` drops an element whose faces are all buried.
 
@@ -334,8 +334,8 @@ tile, so no face samples outside its sprite. A `FaceStyle` can hide buried faces
 another texture variable (a frame's sides) or explicit UVs: door panels and whole-ring frames use
 `AssemblyFaceUv`, which spreads one image across the whole 32 x 32 front and back. Door: two leaf
 templates, two oak leaves (`round_door_leaf_<hinge>`), one empty world model and a single `""`
-variant. Window: posed models per canonical pose (core, hub, arms, caps; see Window) in large multipart
-blockstates (about 160 KB for each arch), 211 block models in all, three window item models.
+variant. Window: posed models per canonical pose (core, plus arms for centred poses; see Window) in
+multipart blockstates, 50 block models in all, three window item models.
 Trim: quarter templates in two families (tiled, whole-image), oak source quarters per family, one
 empty world model and a single `""` variant. `LegacyModelProvider` gives the 49 aliases blockstates
 over the canonical models and item models parenting the canonical items. Items carry front GUI light

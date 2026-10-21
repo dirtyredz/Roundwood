@@ -79,6 +79,14 @@ public final class DoorGeometry {
     }
 
     /**
+     * The leaf's angle at swing {@code progress} (0 closed .. 1 open), degrees about +Y: what the
+     * renderer turns the leaf by and what the swinging highlight follows.
+     */
+    public static double swingDegrees(DoorHingeSide hinge, double progress) {
+        return openDegrees(hinge) * progress;
+    }
+
+    /**
      * Turns the point (x, z) about the hinge's swing axis by {@code degrees} about +Y. Returns {x, z}.
      * This is the transform the renderer applies to the leaf model.
      */

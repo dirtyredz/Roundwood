@@ -134,13 +134,11 @@ class GeneratedBlockstatesTest {
             return out;
         }
         if (position.equals("up") || position.equals("down")) {
-            posed(out, position.equals("up") ? "round_window_down_ceiling" : "round_window_up_floor", 0, SIDES, mask);
+            posed(out, position.equals("up") ? "round_window_down_ceiling" : "round_window_up_floor", 0);
             return out;
         }
         // Flush on a side: the north-flush pose turned so its flush side lands on that side.
-        int turns = SIDES.indexOf(position);
-        List<String> needed = SIDES.stream().filter(s -> !s.equals(position)).toList();
-        posed(out, "round_window_back", turns, needed, mask);
+        posed(out, "round_window_back", SIDES.indexOf(position));
         return out;
     }
 
@@ -166,7 +164,7 @@ class GeneratedBlockstatesTest {
                     : (depth.equals("negative") ? "west" : "east");
             String canonicalSide = SIDES.get(Math.floorMod(SIDES.indexOf(side) - turns, 4));
             String stem = piece + (canonicalSide.equals("north") ? "_back" : "_front");
-            posed(out, stem, turns, SIDES.stream().filter(s -> !s.equals(side)).toList(), mask);
+            posed(out, stem, turns);
             return out;
         }
         String[] parts = orientation.split("_");
@@ -176,26 +174,13 @@ class GeneratedBlockstatesTest {
             case "center" -> "level";
             default -> "ceiling";
         };
-        posed(out, piece + "_" + parts[0] + "_" + level, turns, SIDES, mask);
+        posed(out, piece + "_" + parts[0] + "_" + level, turns);
         return out;
     }
 
-    /** Core, hub when a needed side is connected, an arm per connected needed side, a cap per open needed side while the hub shows. */
-    private static void posed(Set<String> out, String stem, int turns, List<String> needed, int mask) {
-        int y = 90 * turns;
-        out.add("roundwood:block/" + stem + "@" + y);
-        boolean hub = needed.stream().anyMatch(side -> connected(mask, side));
-        if (hub) {
-            out.add("roundwood:block/" + stem + "_hub@" + y);
-        }
-        for (String side : needed) {
-            String authored = SIDES.get(Math.floorMod(SIDES.indexOf(side) - turns, 4));
-            if (connected(mask, side)) {
-                out.add("roundwood:block/" + stem + "_arm_" + authored + "@" + y);
-            } else if (hub) {
-                out.add("roundwood:block/" + stem + "_cap_" + authored + "@" + y);
-            }
-        }
+    /** A positioned pose draws its core only, whatever is connected (0.6.1: no glass bridges). */
+    private static void posed(Set<String> out, String stem, int turns) {
+        out.add("roundwood:block/" + stem + "@" + 90 * turns);
     }
 
     private static boolean connected(int mask, String side) {

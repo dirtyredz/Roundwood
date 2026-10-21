@@ -11,8 +11,8 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 
 /**
  * Where a round window can sit since 0.6.0: centred and flush against each of the six sides of its
- * cell, junctions where flush panes meet vanilla panes and other windows (the glass bridges back to
- * the cell's middle), a flush window beside stone (no bridge) and a waterlogged one, plus blocks to
+ * cell, flush windows meeting vanilla panes, each other in a corner and a centred window (never any
+ * glass bridge since 0.6.1: frames simply abut), beside stone and waterlogged, plus blocks to
  * practise targeting on (a full block, a slab, stairs, a two-high wall). Occupies
  * {@code r 50..61, f 0..17}. Directions in the constant names are the builder's: forward is away
  * from them, back towards them.
@@ -31,7 +31,7 @@ public final class WindowPositionsSection implements ShowcaseSection {
     /** Junction and neighbour demos. */
     public static final int DEMO_F = 6;
     public static final int PANE_R = 50;
-    public static final int FIN_R = 53;
+    public static final int CORNER_R = 53;
     public static final int MIXED_R = 56;
     public static final int SOLID_R = 59;
     public static final int WATER_R = 61;
@@ -67,15 +67,15 @@ public final class WindowPositionsSection implements ShowcaseSection {
         canvas.sign(CEILING_R, FLOOR_F - 1, "Floor", "aim at a", "floor's edge");
         canvas.flushWindow(oak, CEILING_R, 0, FLOOR_F, Direction.DOWN, false);
 
-        // A far-flush window joined to a glass pane on its right: stem and arm back to the middle.
-        canvas.sign(PANE_R, DEMO_F - 1, "Glass bridge", "to a pane");
+        // A far-flush window beside a glass pane: no glass grows back to the middle.
+        canvas.sign(PANE_R, DEMO_F - 1, "Flush by", "a pane");
         canvas.flushWindow(oak, PANE_R, 0, DEMO_F, forward, false);
         canvas.set(PANE_R + 1, 0, DEMO_F, Blocks.GLASS_PANE.defaultBlockState());
-        // A ceiling window with a pane beyond it: a glass fin hangs down to the pane.
-        canvas.sign(FIN_R, DEMO_F - 1, "Ceiling fin", "to a pane");
-        canvas.set(FIN_R, 0, DEMO_F + 1, Blocks.GLASS_PANE.defaultBlockState());
-        canvas.flushWindow(oak, FIN_R, 0, DEMO_F, Direction.UP, false);
-        // A far-flush window beside a centred one: different depths meet through the bridge.
+        // Two flush windows meeting in an L: the frames abut at the corner, nothing else.
+        canvas.sign(CORNER_R, DEMO_F - 1, "Flush corner", "frames meet");
+        canvas.flushWindow(oak, CORNER_R, 0, DEMO_F, forward, false);
+        canvas.flushWindow(oak, CORNER_R + 1, 0, DEMO_F, right.getOpposite(), false);
+        // A far-flush window beside a centred one: different depths, no bridge between them.
         canvas.sign(MIXED_R, DEMO_F - 1, "Flush meets", "centred");
         canvas.window(oak, MIXED_R + 1, 0, DEMO_F, canvas.acrossAxis(), false);
         canvas.flushWindow(oak, MIXED_R, 0, DEMO_F, forward, false);

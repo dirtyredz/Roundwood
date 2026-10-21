@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.block.door.selection;
 
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageGeometry;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class DoorSelectionShapes {
     private static final ConcurrentHashMap<Integer, VoxelShape> SHAPES = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Integer, VoxelShape> CORNERS = new ConcurrentHashMap<>();
 
     private DoorSelectionShapes() {
     }
@@ -46,6 +49,19 @@ public final class DoorSelectionShapes {
     /** What is there to highlight: the leaf at rest, plus the corners only once they are filled. */
     public static VoxelShape visible(BlockState state, BlockGetter level, BlockPos pos) {
         return shape(state, filled(level, DoorLayout.of(pos, state)));
+    }
+
+    /** The filled corners alone, relative to this part (empty when none are filled): what stays put while the leaf swings. */
+    public static VoxelShape visibleCorners(BlockState state, BlockGetter level, BlockPos pos) {
+        if (!filled(level, DoorLayout.of(pos, state))) {
+            return Shapes.empty();
+        }
+        int turns = VoxelShapeFactory.quarterTurns(state.getValue(DoorBlock.FACING));
+        DoorLayout.Part part = DoorLayout.partOf(state);
+        int column = part.column.index();
+        int row = part.row();
+        return CORNERS.computeIfAbsent((turns << 2) | (column << 1) | row, k -> VoxelShapeFactory.shape(VoxelShapeFactory.rotate(
+                DoorOutlineGeometry.relativeTo(CamouflageGeometry.corners(), column, row), turns)));
     }
 
     private static VoxelShape shape(BlockState state, boolean corners) {
