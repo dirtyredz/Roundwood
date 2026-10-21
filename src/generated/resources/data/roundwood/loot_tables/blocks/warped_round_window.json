@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "roundwood:warped_round_window"
+          "name": "roundwood:round_window"
         }
       ],
       "rolls": 1.0

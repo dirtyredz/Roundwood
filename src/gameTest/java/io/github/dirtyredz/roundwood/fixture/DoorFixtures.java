@@ -1,11 +1,12 @@
 package io.github.dirtyredz.roundwood.fixture;
 
 import com.mojang.authlib.GameProfile;
+import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestAssertException;
@@ -17,6 +18,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
@@ -62,8 +64,14 @@ public final class DoorFixtures {
         floor(helper, 9, 9);
     }
 
+    /** The (one, canonical) round door; its default look is oak. */
     public static RoundDoorBlock oakDoor() {
-        return ModBlocks.door(FinishCatalog.PAINT_BASE);
+        return ModBlocks.roundDoor();
+    }
+
+    /** One {@code item} carrying {@code appearance}. */
+    public static ItemStack styled(ItemLike item, Appearance appearance) {
+        return AppearanceStacks.create(item.asItem(), appearance);
     }
 
     /** A fake server player in the given game mode, facing {@code facing}, with an empty inventory. */
@@ -103,12 +111,17 @@ public final class DoorFixtures {
      */
     public static InteractionResult placeDoor(GameTestHelper helper, ServerPlayer player, Item item, BlockPos anchor,
                                               DoorHingeSide hinge) {
+        return placeDoor(helper, player, new ItemStack(item), anchor, hinge);
+    }
+
+    /** As above, placing {@code stack} (for instance a door with an appearance). */
+    public static InteractionResult placeDoor(GameTestHelper helper, ServerPlayer player, ItemStack stack, BlockPos anchor,
+                                              DoorHingeSide hinge) {
         Direction across = player.getDirection().getClockWise();
         double along = hinge == DoorHingeSide.LEFT ? 0.25 : 0.75;
         BlockPos floor = helper.absolutePos(anchor.below());
         Vec3 hit = Vec3.atCenterOf(floor).add(0, 0.5, 0)
                 .add(across.getStepX() * (along - 0.5), 0, across.getStepZ() * (along - 0.5));
-        ItemStack stack = new ItemStack(item);
         player.setItemInHand(InteractionHand.MAIN_HAND, stack);
         return stack.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, new BlockHitResult(hit, Direction.UP, floor, false)));
     }
@@ -238,6 +251,24 @@ public final class DoorFixtures {
         List<ItemEntity> entities = helper.getLevel().getEntitiesOfClass(ItemEntity.class, area,
                 entity -> entity.getItem().is(item));
         return entities.stream().mapToInt(entity -> entity.getItem().getCount()).sum();
+    }
+
+    /**
+     * Dropped {@code item}s showing {@code appearance}: tests that must not count a neighbouring
+     * test's drops give their objects a look nobody else uses.
+     */
+    public static int dropped(GameTestHelper helper, Item item, Appearance appearance) {
+        return helper.getLevel().getEntitiesOfClass(ItemEntity.class, area(helper),
+                        entity -> entity.getItem().is(item) && AppearanceStacks.read(entity.getItem()).equals(appearance))
+                .stream().mapToInt(entity -> entity.getItem().getCount()).sum();
+    }
+
+    /** Where each counted drop of {@code item}{@code appearance} lies (for failure messages). */
+    public static String dropReport(GameTestHelper helper, Item item, Appearance appearance) {
+        return helper.getLevel().getEntitiesOfClass(ItemEntity.class, area(helper),
+                        entity -> entity.getItem().is(item) && AppearanceStacks.read(entity.getItem()).equals(appearance)).stream()
+                .map(entity -> entity.getItem().getCount() + "@" + rel(helper, entity.blockPosition()).toShortString() + " age " + entity.getAge())
+                .toList().toString();
     }
 
     /** Where each counted drop of {@code item} lies, relative to the test origin (for failure messages). */

@@ -1,7 +1,3 @@
 {
-  "parent": "roundwood:item/template_round_window",
-  "textures": {
-    "frame": "roundwood:block/panel_green",
-    "particle": "roundwood:block/panel_green"
-  }
+  "parent": "roundwood:item/round_window"
 }

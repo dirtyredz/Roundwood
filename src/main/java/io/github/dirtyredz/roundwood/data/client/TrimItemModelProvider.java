@@ -2,8 +2,7 @@ package io.github.dirtyredz.roundwood.data.client;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.trim.geometry.TrimGeometry;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.variant.TrimMaterial;
+import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.client.model.generators.ItemModelBuilder;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
@@ -11,9 +10,10 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import org.joml.Vector3f;
 
 /**
- * Frame inventory models: the complete ring with its open centre, face-on, as one baked model. Two
- * templates (tiled and whole-image faces, as for the quarters in {@link TrimModelProvider}) carry the
- * ring geometry and the display transforms; each material only binds textures.
+ * The trim's inventory models: the complete ring with its open centre, face-on, as one baked model.
+ * Two templates (tiled and whole-image faces, as for the quarters in {@link TrimModelProvider}) carry
+ * the ring geometry and the display transforms. The item itself is the tiled oak ring; the whole-ring
+ * oak model is the source the client retextures for painted and masonry stacks.
  */
 public class TrimItemModelProvider extends ItemModelProvider {
     static final String TEMPLATE = "template_round_trim";
@@ -33,14 +33,15 @@ public class TrimItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        ItemModelBuilder tiled = template(TEMPLATE, false);
-        ItemModelBuilder whole = template(WHOLE_TEMPLATE, true);
-        for (TrimMaterial material : FinishCatalog.TRIMS) {
-            getBuilder(material.trimId()).parent(material.wholeFace() ? whole : tiled)
-                    .texture(TrimGeometry.FACE, material.faceTexture())
-                    .texture(TrimGeometry.EDGE, material.edgeTexture())
-                    .texture("particle", material.edgeTexture());
-        }
+        bind(TrimModelNames.TRIM_ID, template(TEMPLATE, false), TrimModelProvider.OAK_LOG);
+        bind(TrimModelNames.WHOLE_ITEM, template(WHOLE_TEMPLATE, true), TrimModelProvider.OAK_PANEL);
+    }
+
+    private void bind(String name, ItemModelBuilder template, String texture) {
+        getBuilder(name).parent(template)
+                .texture(TrimGeometry.FACE, texture)
+                .texture(TrimGeometry.EDGE, texture)
+                .texture("particle", texture);
     }
 
     private ItemModelBuilder template(String name, boolean wholeFace) {

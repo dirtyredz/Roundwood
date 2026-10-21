@@ -32,7 +32,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.assertNoTrim;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.assertTrim;
-import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.brickTrim;
+import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.brickStack;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.fitToDoor;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.fittedTo;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.oakTrim;
@@ -84,11 +84,11 @@ public final class TrimPlacementGameTests {
             for (double[] q : QUARTERS) {
                 String name = facing + " quarter " + q[0] + "," + q[1];
                 ServerPlayer player = player(helper, "fitter", GameType.SURVIVAL, facing);
-                ItemStack stack = two(brickTrim());
+                ItemStack stack = brickStack().copyWithCount(2);
                 InteractionResult result = fitToDoor(helper, player, stack, door, q[0], q[1]);
                 check(result.consumesAction(), name + ": fitting refused: " + result);
                 TrimLayout.Assembly fitted = fittedTo(door);
-                assertTrim(helper, fitted, brickTrim());
+                assertTrim(helper, fitted, oakTrim());
                 check(stack.getCount() == 1, name + ": expected one item consumed, have " + stack.getCount());
                 assertAssembly(helper, door, oakDoor(), false);
                 helper.getLevel().setBlockAndUpdate(fitted.anchor(), Blocks.AIR.defaultBlockState());

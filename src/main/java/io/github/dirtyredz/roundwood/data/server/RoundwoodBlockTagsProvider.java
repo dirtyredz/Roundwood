@@ -1,25 +1,23 @@
 package io.github.dirtyredz.roundwood.data.server;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModTags;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.variant.TrimMaterial;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.data.BlockTagsProvider;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Doors join the vanilla door tags (villager door use, pathing, furnace fuel); doors, windows and
- * wooden frames are axe mineable, brick frames pickaxe mineable. Windows are deliberately not tagged
- * as glass panes, and frames are not doors.
+ * Gameplay tags cover the canonical blocks and the hidden 0.4.0 aliases (an unconverted alias still
+ * behaves like a door for villagers and pathing, and mines with an axe); Roundwood's family tags
+ * name only the three canonical blocks. Doors join the vanilla door tags; windows are deliberately
+ * not glass panes and trims are not doors. Every family mines with an axe whatever its look.
  */
 public class RoundwoodBlockTagsProvider extends BlockTagsProvider {
     public RoundwoodBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup,
@@ -29,17 +27,20 @@ public class RoundwoodBlockTagsProvider extends BlockTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        RoundDoorBlock[] doors = ModBlocks.doors().toArray(RoundDoorBlock[]::new);
-        RoundWindowBlock[] windows = ModBlocks.windows().toArray(RoundWindowBlock[]::new);
-        tag(ModTags.ROUND_DOORS).add(doors);
-        tag(ModTags.ROUND_WINDOWS).add(windows);
+        tag(ModTags.ROUND_DOORS).add(ModBlocks.roundDoor());
+        tag(ModTags.ROUND_WINDOWS).add(ModBlocks.roundWindow());
+        tag(ModTags.ROUND_TRIMS).add(ModBlocks.roundTrim());
+        Block[] doors = concat(ModBlocks.roundDoor(), LegacyContent.doors().toArray(Block[]::new));
         tag(BlockTags.DOORS).add(doors);
         tag(BlockTags.WOODEN_DOORS).add(doors);
-        tag(BlockTags.MINEABLE_WITH_AXE).add(doors).add(windows);
-        for (TrimMaterial material : FinishCatalog.TRIMS) {
-            RoundTrimBlock trim = ModBlocks.trim(material);
-            tag(ModTags.ROUND_TRIMS).add(trim);
-            tag(material.masonry() ? BlockTags.MINEABLE_WITH_PICKAXE : BlockTags.MINEABLE_WITH_AXE).add(trim);
-        }
+        tag(BlockTags.MINEABLE_WITH_AXE).add(ModBlocks.canonical().toArray(Block[]::new))
+                .add(LegacyContent.blocks().toArray(Block[]::new));
+    }
+
+    private static Block[] concat(Block first, Block[] rest) {
+        Block[] out = new Block[rest.length + 1];
+        out[0] = first;
+        System.arraycopy(rest, 0, out, 1, rest.length);
+        return out;
     }
 }

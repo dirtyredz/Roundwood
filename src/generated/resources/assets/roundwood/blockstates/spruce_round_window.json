@@ -2,7 +2,7 @@
   "multipart": [
     {
       "apply": {
-        "model": "roundwood:block/spruce_round_window"
+        "model": "roundwood:block/round_window"
       },
       "when": {
         "axis": "x"
@@ -10,7 +10,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/spruce_round_window",
+        "model": "roundwood:block/round_window",
         "y": 90
       },
       "when": {

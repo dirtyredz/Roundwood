@@ -40,7 +40,8 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.point;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.rel;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.assertTrim;
-import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.brickTrim;
+import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.BRICK;
+import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.brickStack;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.fitToDoor;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.fittedTo;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.oakTrim;
@@ -69,7 +70,7 @@ public final class TrimNavigationGameTests {
         floor(helper);
         for (Direction facing : FACINGS) {
             TrimLayout.Assembly assembly = trimAssembly(helper, new BlockPos(4, 1, 4), facing);
-            check(TrimPlacement.placeAt(helper.getLevel(), brickTrim(), assembly), facing + ": placement failed");
+            check(TrimPlacement.placeAt(helper.getLevel(), oakTrim(), assembly, BRICK), facing + ": placement failed");
             for (BlockPos pos : assembly.positions()) {
                 check(free(helper, new AABB(pos).deflate(0.001)), facing + ": whole cell " + pos + " collides");
                 // Thin probes across the cell, front to back and side to side, to catch any ring segment.
@@ -94,7 +95,7 @@ public final class TrimNavigationGameTests {
         floor(helper);
         for (Direction facing : FACINGS) {
             TrimLayout.Assembly assembly = trimAssembly(helper, new BlockPos(4, 1, 4), facing);
-            check(TrimPlacement.placeAt(helper.getLevel(), brickTrim(), assembly), facing + ": placement failed");
+            check(TrimPlacement.placeAt(helper.getLevel(), oakTrim(), assembly, BRICK), facing + ": placement failed");
             for (BlockPos pos : assembly.positions()) {
                 BlockState state = helper.getLevel().getBlockState(pos);
                 check(state.getCollisionShape(helper.getLevel(), pos).isEmpty(), facing + ": collision shape not empty at " + pos);
@@ -189,8 +190,8 @@ public final class TrimNavigationGameTests {
     public static void villagerWalksThroughAFreestandingBrickFrame(GameTestHelper helper) {
         corridor(helper);
         ServerPlayer player = player(helper, "walk_freestanding", GameType.SURVIVAL, Direction.NORTH);
-        check(placeFreestanding(helper, player, new ItemStack(brickTrim()), ANCHOR).consumesAction(), "frame placement failed");
-        assertTrim(helper, trimAssembly(helper, ANCHOR, Direction.NORTH), brickTrim());
+        check(placeFreestanding(helper, player, brickStack(), ANCHOR).consumesAction(), "frame placement failed");
+        assertTrim(helper, trimAssembly(helper, ANCHOR, Direction.NORTH), oakTrim());
         walkThrough(helper, null, new BlockPos(3, 1, 1), new BlockPos(3, 1, 7), false);
     }
 

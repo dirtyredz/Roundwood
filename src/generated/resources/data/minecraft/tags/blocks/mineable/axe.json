@@ -1,5 +1,8 @@
 {
   "values": [
+    "roundwood:round_door",
+    "roundwood:round_window",
+    "roundwood:round_trim",
     "roundwood:oak_round_door",
     "roundwood:spruce_round_door",
     "roundwood:birch_round_door",
@@ -44,6 +47,10 @@
     "roundwood:green_round_trim",
     "roundwood:yellow_round_trim",
     "roundwood:red_round_trim",
-    "roundwood:blue_round_trim"
+    "roundwood:blue_round_trim",
+    "roundwood:brick_round_trim",
+    "roundwood:stone_brick_round_trim",
+    "roundwood:deepslate_brick_round_trim",
+    "roundwood:mud_brick_round_trim"
   ]
 }

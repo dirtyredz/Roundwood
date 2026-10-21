@@ -4,8 +4,11 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
@@ -13,12 +16,10 @@ import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.section.BrickArchesSection;
 import io.github.dirtyredz.roundwood.showcase.section.CamouflageSection;
 import io.github.dirtyredz.roundwood.showcase.section.DoorsSection;
+import io.github.dirtyredz.roundwood.showcase.section.PaintsSection;
 import io.github.dirtyredz.roundwood.showcase.section.RedstoneSection;
 import io.github.dirtyredz.roundwood.showcase.section.TrimCombinationsSection;
 import io.github.dirtyredz.roundwood.showcase.section.WindowsSection;
-import io.github.dirtyredz.roundwood.variant.Finish;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.variant.TrimMaterial;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -37,23 +38,28 @@ import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 
 /**
- * The showcase builder in a 76 x 10 x 76 template filled with gold: everything it promises is
- * present and complete, and no gold outside its bounds was touched (in each facing).
+ * The showcase builder in an 86 x 10 x 86 template filled with gold: everything it promises is
+ * present, complete and in the appearance its section names, and no gold outside its bounds was
+ * touched (in each facing).
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class ShowcaseGameTests {
     private static final String TEMPLATE = "showcase";
-    private static final int SIZE = 76;
+    private static final int SIZE = 86;
     private static final int HEIGHT = 10;
 
     private ShowcaseGameTests() {
@@ -126,7 +132,8 @@ public final class ShowcaseGameTests {
         BoundingBox bounds = result.bounds();
         int across = Math.min(bounds.getXSpan(), bounds.getZSpan());
         int along = Math.max(bounds.getXSpan(), bounds.getZSpan());
-        check(across == 62 && along == 72 && bounds.getYSpan() == 8, "bounds are not 62 x 8 x 72: " + bounds);
+        check(across == ShowcaseFrame.WIDTH + 2 && along == ShowcaseFrame.DEPTH + 2 && bounds.getYSpan() == 8,
+                "bounds are not 78 x 8 x 82: " + bounds);
 
         ShowcaseFrame frame = ShowcaseFrame.at(feet, facing);
         verifyBounds(helper, bounds);
@@ -136,11 +143,13 @@ public final class ShowcaseGameTests {
         verifyRedstone(level, frame);
         verifyTrims(level, frame);
         verifyArches(level, frame);
+        verifyPaints(level, frame);
         // Integrity checks run a tick later: everything must still be whole afterwards.
         helper.runAfterDelay(3, () -> {
             verifyTrims(level, frame);
             verifyArches(level, frame);
             verifyDoors(level, frame);
+            verifyPaints(level, frame);
             clearSilently(helper);
             helper.succeed();
         });
@@ -176,28 +185,58 @@ public final class ShowcaseGameTests {
         }
     }
 
+    private static List<Appearance> woods() {
+        return ShowcaseCanvas.sampleSet().stream().filter(a -> a.isWood() && !a.isPainted()).toList();
+    }
+
+    private static List<Appearance> paints() {
+        return ShowcaseCanvas.sampleSet().stream().filter(Appearance::isPainted).toList();
+    }
+
+    private static List<Appearance> masonry() {
+        return ShowcaseCanvas.sampleSet().stream().filter(a -> !a.isWood()).toList();
+    }
+
+    private static Appearance doorLook(ServerLevel level, BlockPos anchor) {
+        return level.getBlockEntity(anchor) instanceof RoundDoorBlockEntity entity ? entity.appearance() : null;
+    }
+
+    private static Appearance trimLook(ServerLevel level, BlockPos anchor) {
+        return level.getBlockEntity(anchor) instanceof RoundTrimBlockEntity entity ? entity.appearance() : null;
+    }
+
+    private static Appearance windowLook(ServerLevel level, BlockPos pos) {
+        return level.getBlockEntity(pos) instanceof RoundWindowBlockEntity entity ? entity.appearance() : null;
+    }
+
+    private static boolean signSays(ServerLevel level, BlockPos pos, String first) {
+        return level.getBlockEntity(pos) instanceof SignBlockEntity sign
+                && sign.getFrontText().getMessage(0, false).getString().startsWith(first);
+    }
+
     private static void verifyDoors(ServerLevel level, ShowcaseFrame frame) {
-        for (int i = 0; i < FinishCatalog.ALL.size(); i++) {
-            Finish finish = FinishCatalog.ALL.get(i);
-            RoundDoorBlock block = ModBlocks.door(finish);
+        RoundDoorBlock block = ModBlocks.roundDoor();
+        List<Appearance> woods = woods();
+        check(woods.size() >= 11, "fewer than the eleven vanilla woods: " + woods.size());
+        for (int i = 0; i < woods.size(); i++) {
+            Appearance wood = woods.get(i);
             for (int variant = 0; variant < 4; variant++) {
                 int r = DoorsSection.r(i, variant);
                 int f = DoorsSection.f(i);
                 DoorLayout.Assembly assembly = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), DoorsSection.hinge(variant));
-                check(assembly.complete(level, block), finish.id() + " variant " + variant + ": door missing or incomplete");
-                check(level.getBlockState(assembly.anchor()).getValue(DoorBlock.OPEN) == DoorsSection.open(variant),
-                        finish.id() + " variant " + variant + ": wrong open state");
-                check(level.getBlockEntity(assembly.anchor()) instanceof RoundDoorBlockEntity, finish.id() + ": no anchor entity");
-                check(level.getBlockEntity(frame.pos(r, 0, f - 1)) instanceof SignBlockEntity sign
-                                && sign.getFrontText().getMessage(0, false).getString().equals(finish.displayName()),
-                        finish.id() + " variant " + variant + ": label sign missing");
+                String what = wood.key() + " variant " + variant;
+                check(assembly.complete(level, block), what + ": door missing or incomplete");
+                check(level.getBlockState(assembly.anchor()).getValue(DoorBlock.OPEN) == DoorsSection.open(variant), what + ": wrong open state");
+                check(wood.equals(doorLook(level, assembly.anchor())), what + ": anchor shows " + doorLook(level, assembly.anchor()));
+                check(signSays(level, frame.pos(r, 0, f - 1), ShowcaseCanvas.label(wood)), what + ": label sign missing");
             }
-            RoundWindowBlock window = ModBlocks.window(finish);
-            BlockState state = level.getBlockState(frame.pos(WindowsSection.ROW_R + i, 0, WindowsSection.ROW_F));
-            check(state.is(window), finish.id() + ": window missing from the row");
-            check(state.getValue(RoundWindowBlock.AXIS) == frame.right().getAxis(), finish.id() + ": window axis");
-            check(connects(state, frame.right()) == (i < FinishCatalog.ALL.size() - 1), finish.id() + ": right-hand connection");
-            check(connects(state, frame.right().getOpposite()) == (i > 0), finish.id() + ": left-hand connection");
+            BlockPos windowPos = frame.pos(WindowsSection.ROW_R + i, 0, WindowsSection.ROW_F);
+            BlockState state = level.getBlockState(windowPos);
+            check(state.is(ModBlocks.roundWindow()), wood.key() + ": window missing from the row");
+            check(wood.equals(windowLook(level, windowPos)), wood.key() + ": window shows " + windowLook(level, windowPos));
+            check(state.getValue(RoundWindowBlock.AXIS) == frame.right().getAxis(), wood.key() + ": window axis");
+            check(connects(state, frame.right()) == (i < woods.size() - 1), wood.key() + ": right-hand connection");
+            check(connects(state, frame.right().getOpposite()) == (i > 0), wood.key() + ": left-hand connection");
         }
     }
 
@@ -208,7 +247,7 @@ public final class ShowcaseGameTests {
                 int f = CamouflageSection.f(row);
                 BlockPos anchor = frame.pos(r, 0, f);
                 BlockState door = level.getBlockState(anchor);
-                check(door.is(ModBlocks.door(FinishCatalog.PAINT_BASE)) && door.getValue(DoorBlock.OPEN) == (row == 1),
+                check(door.is(ModBlocks.roundDoor()) && door.getValue(DoorBlock.OPEN) == (row == 1),
                         "camouflage door missing or wrong state at row " + row + " index " + i);
                 check(level.getBlockEntity(anchor) instanceof RoundDoorBlockEntity entity
                                 && entity.camouflage().isPresent()
@@ -220,7 +259,7 @@ public final class ShowcaseGameTests {
 
     private static void verifyWindows(ServerLevel level, ShowcaseFrame frame) {
         Direction right = frame.right();
-        RoundWindowBlock oak = ModBlocks.window(FinishCatalog.PAINT_BASE);
+        RoundWindowBlock oak = ModBlocks.roundWindow();
         BlockState middle = level.getBlockState(frame.pos(WindowsSection.JUNCTION_R + 1, 0, WindowsSection.DEMO_F));
         check(middle.is(oak) && connects(middle, frame.forward()), "junction window does not connect to the glass pane");
         check(level.getBlockState(frame.pos(WindowsSection.JUNCTION_R + 1, 0, WindowsSection.DEMO_F + 1)).is(Blocks.GLASS_PANE),
@@ -248,36 +287,56 @@ public final class ShowcaseGameTests {
     }
 
     private static void verifyTrims(ServerLevel level, ShowcaseFrame frame) {
-        for (int i = 0; i < FinishCatalog.TRIMS.size(); i++) {
-            TrimMaterial material = FinishCatalog.TRIMS.get(i);
+        List<Appearance> materials = new ArrayList<>(woods());
+        materials.addAll(masonry());
+        for (int i = 0; i < materials.size(); i++) {
+            Appearance material = materials.get(i);
             for (int j = 0; j < TrimCombinationsSection.SAMPLES; j++) {
                 int r = TrimCombinationsSection.r(i, j);
                 int f = TrimCombinationsSection.f(i);
-                String what = material.id() + " sample " + j;
-                RoundDoorBlock door = ModBlocks.door(TrimCombinationsSection.finish(j));
+                String what = material.key() + " sample " + j;
                 DoorLayout.Assembly assembly = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(),
                         TrimCombinationsSection.hinge(i, j));
-                check(assembly.complete(level, door), what + ": door missing or incomplete");
+                check(assembly.complete(level, ModBlocks.roundDoor()), what + ": door missing or incomplete");
+                check(TrimCombinationsSection.door(j).equals(doorLook(level, assembly.anchor())), what + ": door look");
                 check(level.getBlockState(assembly.anchor()).getValue(DoorBlock.OPEN) == TrimCombinationsSection.open(j), what + ": open state");
                 boolean camouflaged = level.getBlockEntity(assembly.anchor()) instanceof RoundDoorBlockEntity entity
                         && entity.camouflage().map(c -> c.material().is(Blocks.STONE_BRICKS)).orElse(false);
                 check(camouflaged == TrimCombinationsSection.camouflaged(j), what + ": camouflage");
                 TrimLayout.Assembly trim = new TrimLayout.Assembly(frame.pos(r, 0, f - 1), frame.forward());
-                check(trim.complete(level, ModBlocks.trim(material)), what + ": frame missing or incomplete");
-                check(level.getBlockEntity(frame.pos(r, 0, f - 2)) instanceof SignBlockEntity sign
-                                && sign.getFrontText().getMessage(0, false).getString().startsWith(material.displayName()),
-                        what + ": label sign missing");
+                check(trim.complete(level, ModBlocks.roundTrim()), what + ": frame missing or incomplete");
+                check(material.equals(trimLook(level, trim.anchor())), what + ": frame shows " + trimLook(level, trim.anchor()));
+                check(signSays(level, frame.pos(r, 0, f - 2), ShowcaseCanvas.label(material)), what + ": label sign missing");
             }
         }
     }
 
     private static void verifyArches(ServerLevel level, ShowcaseFrame frame) {
-        for (int i = 0; i < FinishCatalog.MASONRY.size(); i++) {
-            TrimMaterial material = FinishCatalog.MASONRY.get(i);
+        List<Appearance> masonry = masonry();
+        check(masonry.size() == 4, "expected four masonry arches, have " + masonry.size());
+        for (int i = 0; i < masonry.size(); i++) {
             TrimLayout.Assembly trim = new TrimLayout.Assembly(frame.pos(BrickArchesSection.r(i), 0, BrickArchesSection.F), frame.forward());
-            check(trim.complete(level, ModBlocks.trim(material)), material.id() + ": freestanding arch missing");
+            check(trim.complete(level, ModBlocks.roundTrim()), masonry.get(i).key() + ": freestanding arch missing");
+            check(masonry.get(i).equals(trimLook(level, trim.anchor())), masonry.get(i).key() + ": arch look");
             check(level.getBlockEntity(frame.pos(BrickArchesSection.r(i) - 1, 0, BrickArchesSection.F)) instanceof SignBlockEntity,
-                    material.id() + ": arch label missing");
+                    masonry.get(i).key() + ": arch label missing");
+        }
+    }
+
+    private static void verifyPaints(ServerLevel level, ShowcaseFrame frame) {
+        List<Appearance> paints = paints();
+        check(paints.size() == 16, "expected all sixteen paints, have " + paints.size());
+        for (int i = 0; i < paints.size(); i++) {
+            Appearance paint = paints.get(i);
+            int r = PaintsSection.r(i);
+            int f = PaintsSection.f(i);
+            DoorLayout.Assembly door = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), DoorHingeSide.LEFT);
+            check(door.complete(level, ModBlocks.roundDoor()) && paint.equals(doorLook(level, door.anchor())), paint.key() + ": door");
+            TrimLayout.Assembly trim = new TrimLayout.Assembly(frame.pos(r + PaintsSection.TRIM_OFFSET, 0, f), frame.forward());
+            check(trim.complete(level, ModBlocks.roundTrim()) && paint.equals(trimLook(level, trim.anchor())), paint.key() + ": trim");
+            BlockPos window = frame.pos(r + PaintsSection.WINDOW_OFFSET, 0, f);
+            check(level.getBlockState(window).is(ModBlocks.roundWindow()) && paint.equals(windowLook(level, window)), paint.key() + ": window");
+            check(signSays(level, frame.pos(r, 0, f - 1), ShowcaseCanvas.label(paint)), paint.key() + ": label sign missing");
         }
     }
 

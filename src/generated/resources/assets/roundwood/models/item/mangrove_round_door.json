@@ -1,8 +1,3 @@
 {
-  "parent": "roundwood:item/template_round_door",
-  "textures": {
-    "brass": "roundwood:block/brass",
-    "panel": "roundwood:block/door_panel_mangrove",
-    "particle": "roundwood:block/door_panel_mangrove"
-  }
+  "parent": "roundwood:item/round_door"
 }

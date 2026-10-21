@@ -1,64 +1,7 @@
 {
   "variants": {
-    "facing=east,part=lower_left": {
-      "model": "roundwood:block/crimson_round_trim_lower_left",
-      "y": 90
-    },
-    "facing=east,part=lower_right": {
-      "model": "roundwood:block/crimson_round_trim_lower_right",
-      "y": 90
-    },
-    "facing=east,part=upper_left": {
-      "model": "roundwood:block/crimson_round_trim_upper_left",
-      "y": 90
-    },
-    "facing=east,part=upper_right": {
-      "model": "roundwood:block/crimson_round_trim_upper_right",
-      "y": 90
-    },
-    "facing=north,part=lower_left": {
-      "model": "roundwood:block/crimson_round_trim_lower_left"
-    },
-    "facing=north,part=lower_right": {
-      "model": "roundwood:block/crimson_round_trim_lower_right"
-    },
-    "facing=north,part=upper_left": {
-      "model": "roundwood:block/crimson_round_trim_upper_left"
-    },
-    "facing=north,part=upper_right": {
-      "model": "roundwood:block/crimson_round_trim_upper_right"
-    },
-    "facing=south,part=lower_left": {
-      "model": "roundwood:block/crimson_round_trim_lower_left",
-      "y": 180
-    },
-    "facing=south,part=lower_right": {
-      "model": "roundwood:block/crimson_round_trim_lower_right",
-      "y": 180
-    },
-    "facing=south,part=upper_left": {
-      "model": "roundwood:block/crimson_round_trim_upper_left",
-      "y": 180
-    },
-    "facing=south,part=upper_right": {
-      "model": "roundwood:block/crimson_round_trim_upper_right",
-      "y": 180
-    },
-    "facing=west,part=lower_left": {
-      "model": "roundwood:block/crimson_round_trim_lower_left",
-      "y": 270
-    },
-    "facing=west,part=lower_right": {
-      "model": "roundwood:block/crimson_round_trim_lower_right",
-      "y": 270
-    },
-    "facing=west,part=upper_left": {
-      "model": "roundwood:block/crimson_round_trim_upper_left",
-      "y": 270
-    },
-    "facing=west,part=upper_right": {
-      "model": "roundwood:block/crimson_round_trim_upper_right",
-      "y": 270
+    "": {
+      "model": "roundwood:block/round_trim"
     }
   }
 }

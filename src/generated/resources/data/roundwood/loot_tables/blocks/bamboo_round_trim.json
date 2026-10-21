@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "roundwood:bamboo_round_trim"
+          "name": "roundwood:round_trim"
         }
       ],
       "rolls": 1.0

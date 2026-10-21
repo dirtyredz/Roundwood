@@ -1,18 +1,18 @@
 package io.github.dirtyredz.roundwood.showcase.section;
 
-import io.github.dirtyredz.roundwood.registry.ModBlocks;
+import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.variant.TrimMaterial;
+
+import java.util.List;
 
 /**
- * The masonry frames standing free, nothing behind them, so the radial brickwork, the open centre
- * and both faces can be inspected (walk round the back). Each has a sign to its left. Occupies
- * {@code r 3..35, f 66}.
+ * The four masonry trims standing free, nothing behind them, so the radial brickwork, the open
+ * centre and both faces can be inspected (walk round the back). Each has a sign to its left.
+ * Occupies {@code r 3..35, f 78}.
  */
 public final class BrickArchesSection implements ShowcaseSection {
-    public static final int F = 66;
+    public static final int F = 78;
     private static final int R0 = 4;
     private static final int PITCH = 10;
 
@@ -28,10 +28,10 @@ public final class BrickArchesSection implements ShowcaseSection {
 
     @Override
     public void build(ShowcaseCanvas canvas) {
-        for (int i = 0; i < FinishCatalog.MASONRY.size(); i++) {
-            TrimMaterial material = FinishCatalog.MASONRY.get(i);
-            canvas.trim(ModBlocks.trim(material), r(i), F);
-            canvas.sign(r(i) - 1, F, material.displayName(), "round trim", "freestanding");
+        List<Appearance> masonry = canvas.masonry();
+        for (int i = 0; i < masonry.size(); i++) {
+            canvas.trim(masonry.get(i), r(i), F);
+            canvas.sign(r(i) - 1, F, ShowcaseCanvas.label(masonry.get(i)), "round trim", "freestanding");
         }
     }
 }

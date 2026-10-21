@@ -1,12 +1,14 @@
 package io.github.dirtyredz.roundwood.block.trim;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,12 +34,14 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropped;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.hold;
+import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.rel;
+import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.assertNoTrim;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.assertTrim;
-import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.brickTrim;
+import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.BRICK;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.fitToDoor;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.fittedTo;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.oakTrim;
@@ -52,6 +56,20 @@ public final class TrimRemovalGameTests {
     private static final BlockPos DOOR_ANCHOR = new BlockPos(3, 1, 3);
 
     private TrimRemovalGameTests() {
+    }
+
+    /** A spruce door: other suites drop oak doors, and the drop count reaches into neighbouring test areas. */
+    private static final Appearance SPRUCE = Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", "spruce_planks"));
+
+    /** Places a freestanding brick frame with a real item use and clears the drops. */
+    private static TrimLayout.Assembly placeBrick(GameTestHelper helper, String name) {
+        floor(helper);
+        ServerPlayer player = player(helper, name, GameType.SURVIVAL, Direction.NORTH);
+        check(placeFreestanding(helper, player, styled(oakTrim(), BRICK), ANCHOR).consumesAction(), name + ": placement failed");
+        TrimLayout.Assembly assembly = trimAssembly(helper, ANCHOR, Direction.NORTH);
+        assertTrim(helper, assembly, oakTrim());
+        clearDrops(helper);
+        return assembly;
     }
 
     /** Places a freestanding frame with a real item use and clears the drops. */
@@ -78,27 +96,23 @@ public final class TrimRemovalGameTests {
         helper.succeed();
     }
 
+    /**
+     * Appearance is cosmetic (0.5.0): a brick-faced trim is the oak trim's block, so any tool (or none)
+     * harvests it, and the one dropped trim keeps its brick look, from whichever quarter.
+     */
     @GameTest(template = TEMPLATE)
-    public static void masonryNeedsAPickaxeForTheDrop(GameTestHelper helper) {
-        floor(helper);
+    public static void masonryLookDropsWithAnyToolKeepingItsLook(GameTestHelper helper) {
         for (TrimPart part : TrimPart.values()) {
-            TrimLayout.Assembly assembly = place(helper, brickTrim(), "brick_pick_" + part);
-            ServerPlayer breaker = player(helper, "brick_pick_breaker", GameType.SURVIVAL, Direction.NORTH);
-            hold(breaker, new ItemStack(Items.IRON_PICKAXE), ItemStack.EMPTY);
-            check(breaker.gameMode.destroyBlock(assembly.pos(part)), part + ": break refused");
-            assertNoTrim(helper, assembly);
-            check(dropped(helper, brickTrim().asItem()) == 1,
-                    part + ": expected one brick frame with a pickaxe, got " + dropped(helper, brickTrim().asItem()));
-            clearDrops(helper);
-
-            assembly = place(helper, brickTrim(), "brick_hand_" + part);
-            ServerPlayer bare = player(helper, "brick_hand_breaker", GameType.SURVIVAL, Direction.NORTH);
-            hold(bare, ItemStack.EMPTY, ItemStack.EMPTY);
-            check(bare.gameMode.destroyBlock(assembly.pos(part)), part + ": bare-handed break refused");
-            assertNoTrim(helper, assembly); // the frame is gone either way, only the drop depends on the tool
-            check(dropped(helper, brickTrim().asItem()) == 0,
-                    part + ": bare-handed break dropped " + dropped(helper, brickTrim().asItem()));
-            clearDrops(helper);
+            for (ItemStack tool : new ItemStack[] {new ItemStack(Items.IRON_PICKAXE), ItemStack.EMPTY}) {
+                TrimLayout.Assembly assembly = placeBrick(helper, "brick_" + part);
+                ServerPlayer breaker = player(helper, "brick_breaker", GameType.SURVIVAL, Direction.NORTH);
+                hold(breaker, tool, ItemStack.EMPTY);
+                check(breaker.gameMode.destroyBlock(assembly.pos(part)), part + ": break refused");
+                assertNoTrim(helper, assembly);
+                check(dropped(helper, oakTrim().asItem(), BRICK) == 1,
+                        part + " with " + tool + ": expected one brick trim, got " + dropped(helper, oakTrim().asItem(), BRICK));
+                clearDrops(helper);
+            }
         }
         helper.succeed();
     }
@@ -106,13 +120,13 @@ public final class TrimRemovalGameTests {
     @GameTest(template = TEMPLATE)
     public static void creativeBreakOfAnyQuarterDropsNothing(GameTestHelper helper) {
         floor(helper);
-        for (RoundTrimBlock block : new RoundTrimBlock[] {oakTrim(), brickTrim()}) {
+        for (boolean brick : new boolean[] {false, true}) {
             for (TrimPart part : TrimPart.values()) {
-                TrimLayout.Assembly assembly = place(helper, block, "creative_" + part);
+                TrimLayout.Assembly assembly = brick ? placeBrick(helper, "creative_" + part) : place(helper, oakTrim(), "creative_" + part);
                 ServerPlayer breaker = player(helper, "creative_breaker", GameType.CREATIVE, Direction.NORTH);
                 check(breaker.gameMode.destroyBlock(assembly.pos(part)), part + ": break refused");
                 assertNoTrim(helper, assembly);
-                check(dropped(helper, block.asItem()) == 0, part + ": creative break dropped " + dropped(helper, block.asItem()));
+                check(dropped(helper, oakTrim().asItem()) == 0, part + ": creative break dropped " + dropped(helper, oakTrim().asItem()));
             }
         }
         helper.succeed();
@@ -203,7 +217,7 @@ public final class TrimRemovalGameTests {
     private static DoorLayout.Assembly doorWithCamouflage(GameTestHelper helper, String name) {
         floor(helper);
         ServerPlayer player = player(helper, name, GameType.SURVIVAL, Direction.NORTH);
-        check(placeDoor(helper, player, spruceDoor().asItem(), DOOR_ANCHOR, DoorHingeSide.LEFT).consumesAction(), "door placement failed");
+        check(placeStyledDoor(helper, player, DOOR_ANCHOR).consumesAction(), "door placement failed");
         DoorLayout.Assembly door = assembly(helper, DOOR_ANCHOR, Direction.NORTH, DoorHingeSide.LEFT);
         anchorEntity(helper, door).setCamouflage(
                 CamouflageData.free(Blocks.STONE.defaultBlockState()));
@@ -223,7 +237,7 @@ public final class TrimRemovalGameTests {
             check(breaker.gameMode.destroyBlock(frame.pos(part)), part + ": break refused");
             assertNoTrim(helper, frame);
             check(dropped(helper, oakTrim().asItem()) == 1, part + ": expected one frame, got " + dropped(helper, oakTrim().asItem()));
-            assertAssembly(helper, door, spruceDoor(), false);
+            assertAssembly(helper, door, oakDoor(), false);
             check(anchorEntity(helper, door).camouflage().isPresent(), part + ": the door lost its camouflage");
         }
         helper.succeed();
@@ -251,8 +265,8 @@ public final class TrimRemovalGameTests {
         helper.succeed();
     }
 
-    /** A spruce door: other suites drop oak doors, and the drop count reaches into neighbouring test areas. */
-    private static io.github.dirtyredz.roundwood.block.door.RoundDoorBlock spruceDoor() {
-        return io.github.dirtyredz.roundwood.registry.ModBlocks.door(io.github.dirtyredz.roundwood.variant.FinishCatalog.NATURAL.get(1));
+    /** Places the spruce door through a real item use, its anchor at {@code anchor}, hinge left. */
+    private static net.minecraft.world.InteractionResult placeStyledDoor(GameTestHelper helper, ServerPlayer player, BlockPos anchor) {
+        return placeDoor(helper, player, styled(oakDoor(), SPRUCE), anchor, DoorHingeSide.LEFT);
     }
 }

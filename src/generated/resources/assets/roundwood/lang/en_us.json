@@ -38,6 +38,9 @@
   "block.roundwood.red_round_door": "Red Round Door",
   "block.roundwood.red_round_trim": "Red Round Trim",
   "block.roundwood.red_round_window": "Red Round Window",
+  "block.roundwood.round_door": "Round Door",
+  "block.roundwood.round_trim": "Round Trim",
+  "block.roundwood.round_window": "Round Window",
   "block.roundwood.spruce_round_door": "Spruce Round Door",
   "block.roundwood.spruce_round_trim": "Spruce Round Trim",
   "block.roundwood.spruce_round_window": "Spruce Round Window",
@@ -48,5 +51,14 @@
   "block.roundwood.yellow_round_door": "Yellow Round Door",
   "block.roundwood.yellow_round_trim": "Yellow Round Trim",
   "block.roundwood.yellow_round_window": "Yellow Round Window",
-  "itemGroup.roundwood": "Roundwood"
+  "itemGroup.roundwood": "Roundwood",
+  "message.roundwood.aim_at_leaf": "Aim at the door leaf to restyle or paint it",
+  "message.roundwood.masonry_unpaintable": "Masonry trims cannot be painted",
+  "tooltip.roundwood.masonry": "Masonry: %s",
+  "tooltip.roundwood.paint": "Paint: %s",
+  "tooltip.roundwood.preview": "Preview of a possible look",
+  "tooltip.roundwood.preview_note": "Crafting gives oak; restyle it in the world",
+  "tooltip.roundwood.restyle": "Restyle placed: sneak + planks, or dye",
+  "tooltip.roundwood.unavailable": "Material %s is not installed (shown as oak)",
+  "tooltip.roundwood.wood": "Wood: %s"
 }

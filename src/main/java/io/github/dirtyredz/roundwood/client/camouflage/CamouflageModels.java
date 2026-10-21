@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.client.camouflage;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageGeometry;
+import io.github.dirtyredz.roundwood.client.material.DonorSprites;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.FaceUv;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
@@ -52,14 +53,13 @@ public final class CamouflageModels {
     }
 
     /** The corner model for {@code part} of a door facing {@code facing}, in {@code donor}'s materials. */
-    public static BakedModel quarter(BlockState donor, Direction facing, DoorLayout.Part part) {
+    public static synchronized BakedModel quarter(BlockState donor, Direction facing, DoorLayout.Part part) {
         return CACHE.computeIfAbsent(new Key(donor, facing, part), CamouflageModels::build);
     }
 
-    /** Resource reload: sprites and donor models may all have changed. */
-    public static void clear() {
+    /** Resource reload: sprites and donor models may all have changed (the donor sprites are cleared with them). */
+    public static synchronized void clear() {
         CACHE.clear();
-        CamouflageMaterials.clear();
     }
 
     private static BakedModel build(Key key) {
@@ -68,7 +68,7 @@ public final class CamouflageModels {
         for (CamouflageGeometry.Face face : CamouflageGeometry.exposedFaces(key.part().column.index(), key.part().row())) {
             Box box = face.box().rotateY(turns);
             Direction side = turn(direction(face.side()), turns);
-            CamouflageMaterials.FaceMaterial material = CamouflageMaterials.face(key.donor(), side);
+            DonorSprites.FaceMaterial material = DonorSprites.face(key.donor(), side);
             BlockElementFace element = new BlockElementFace(null, material.tintIndex(), "", new BlockFaceUV(FaceUv.of(box, side), 0));
             quads.add(BAKERY.bakeQuad(
                     new Vector3f((float) box.minX(), (float) box.minY(), (float) box.minZ()),
@@ -80,7 +80,7 @@ public final class CamouflageModels {
             culled.put(side, List.of());
         }
         return new SimpleBakedModel(List.copyOf(quads), culled, true, true, false,
-                CamouflageMaterials.face(key.donor(), Direction.NORTH).sprite(), ItemTransforms.NO_TRANSFORMS, ItemOverrides.EMPTY);
+                DonorSprites.face(key.donor(), Direction.NORTH).sprite(), ItemTransforms.NO_TRANSFORMS, ItemOverrides.EMPTY);
     }
 
     private static Direction direction(CamouflageGeometry.Side side) {

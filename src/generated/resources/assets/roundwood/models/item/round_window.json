@@ -1,0 +1,7 @@
+{
+  "parent": "roundwood:item/template_round_window",
+  "textures": {
+    "frame": "minecraft:block/oak_planks",
+    "particle": "minecraft:block/oak_planks"
+  }
+}

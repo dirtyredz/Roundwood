@@ -1,8 +1,0 @@
-{
-  "parent": "roundwood:block/template_round_trim_upper_left",
-  "textures": {
-    "edge": "minecraft:block/stripped_cherry_log",
-    "face": "minecraft:block/stripped_cherry_log",
-    "particle": "minecraft:block/stripped_cherry_log"
-  }
-}

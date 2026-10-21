@@ -1,8 +1,17 @@
-// Artwork parameters keyed by Roundwood's content ids. These are NOT a second catalogue: the finish
-// and trim-material lists live only in variant/FinishCatalog and variant/TrimMaterial (Java), and
-// GeneratedTexturesTest checks that every id there has exactly one generated texture here.
+// Artwork parameters keyed by artwork name. These are NOT a content list: what a door, window or trim
+// can look like is decided in Java (appearance/, client/material/BuiltinWoodStyles, PaintStyles);
+// GeneratedTexturesTest checks the exact texture manifest independently.
+//
+// Order matters: each door palette's seed comes from its position, so the eleven woods and the four
+// 0.4.0 paints keep their places (their door boards stay byte-identical) and new entries only append.
 import { PAINT } from './legacy.mjs';
+import { NEW_PAINT } from './paint-panels.mjs';
 import { shade } from './noise.mjs';
+
+const painted = (base) => ({ dark: shade(base, 0.68), mid: base, light: shade(base, 1.14) });
+
+/** The neutral grey boards tinted at runtime with an unfamiliar wood's average colour. */
+export const NEUTRAL = painted([196, 196, 196]);
 
 /** Door panel wood tones (dark grain/seams, mid board, light highlights), close to each vanilla plank. */
 export const DOOR_WOOD = {
@@ -17,8 +26,9 @@ export const DOOR_WOOD = {
   bamboo: { dark: [147, 129, 60], mid: [199, 179, 77], light: [228, 205, 107] },
   crimson: { dark: [64, 31, 46], mid: [102, 51, 72], light: [134, 62, 90] },
   warped: { dark: [21, 59, 56], mid: [42, 107, 96], light: [58, 141, 140] },
-  ...Object.fromEntries(Object.entries(PAINT).map(([id, base]) => [id,
-    { dark: shade(base, 0.68), mid: base, light: shade(base, 1.14) }])),
+  ...Object.fromEntries(Object.entries(PAINT).map(([id, base]) => [id, painted(base)])),
+  ...Object.fromEntries(Object.entries(NEW_PAINT).map(([id, base]) => [id, painted(base)])),
+  neutral: NEUTRAL,
 };
 
 /** Radial masonry: brick body, its darker and lighter tones, and the mortar between bricks. */

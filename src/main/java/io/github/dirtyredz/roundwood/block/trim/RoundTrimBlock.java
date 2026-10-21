@@ -1,5 +1,15 @@
 package io.github.dirtyredz.roundwood.block.trim;
 
+import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
+import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
+import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
+import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceGestures;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceDrops;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
+import io.github.dirtyredz.roundwood.block.trim.appearance.TrimAppearance;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimIntegrity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimRemoval;
@@ -8,39 +18,114 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+
 /**
- * One quarter of a round frame: a static, purely decorative ring piece (no block entity, no
- * collision, no occlusion, no redstone). Its identity is the {@link #FACING} the placing player
- * looked along plus which {@link #PART} it is. The callbacks hand off to the frame's assembly
- * services; placement only ever happens whole, through {@link RoundTrimItem}.
+ * One quarter of a round frame: a purely decorative ring piece (no collision, no occlusion, no
+ * redstone). Its identity is the {@link #FACING} the placing player looked along plus which
+ * {@link #PART} it is. The anchor (lower-left) quarter carries the {@link RoundTrimBlockEntity}
+ * that holds the frame's appearance and that the client draws all four quarters from (the world
+ * model itself is empty). The callbacks hand off to the frame's assembly services; placement only
+ * ever happens whole, through {@link RoundTrimItem}.
  */
-public class RoundTrimBlock extends Block {
+public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefaults {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<TrimPart> PART = EnumProperty.create("part", TrimPart.class);
 
-    public RoundTrimBlock(Properties properties) {
+    private final Supplier<BlockEntityType<RoundTrimBlockEntity>> entityType;
+
+    public RoundTrimBlock(Properties properties, Supplier<BlockEntityType<RoundTrimBlockEntity>> entityType) {
         super(properties);
+        this.entityType = entityType;
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, TrimPart.LOWER_LEFT));
+    }
+
+    @Override
+    public AppearanceFamily appearanceFamily() {
+        return AppearanceFamily.TRIM;
+    }
+
+    @Override
+    public Appearance defaultAppearance() {
+        return Appearance.DEFAULT;
+    }
+
+    /** The item picks and drops are made of (the hidden aliases name the canonical trim's). */
+    public Item familyItem() {
+        return asItem();
+    }
+
+    @Override
+    @Nullable
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return state.getValue(PART) == TrimPart.LOWER_LEFT ? new RoundTrimBlockEntity(entityType.get(), pos, state) : null;
+    }
+
+    /** Sneak + planks or masonry, or dye, restyles the whole frame; everything else is the item's own use. */
+    @Override
+    @SuppressWarnings("deprecation")
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        Optional<AppearanceGestures.Gesture> gesture = AppearanceGestures.of(AppearanceFamily.TRIM, player, hand);
+        if (gesture.isEmpty()) {
+            return InteractionResult.PASS;
+        }
+        return AppearanceActions.apply(level, player, gesture.get(), () -> TrimAppearance.target(this, state, level, pos));
+    }
+
+    /** A survival harvest keeps the quarter until its loot has read the anchor ({@link AssemblyHarvest}). */
+    @Override
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+        return AssemblyHarvest.destroyedByPlayer(this, state, level, pos, player, willHarvest,
+                () -> super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid));
+    }
+
+    @Override
+    public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity entity, ItemStack tool) {
+        AssemblyHarvest.playerDestroy(level, pos, () -> super.playerDestroy(level, player, pos, state, entity, tool));
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        return AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.TRIM, TrimAppearance.forDrops(builder, state));
+    }
+
+    @Override
+    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+        return AppearanceStacks.create(familyItem(), TrimAppearance.of(level, pos, state));
     }
 
     @Override
@@ -96,6 +181,9 @@ public class RoundTrimBlock extends Block {
     @SuppressWarnings("deprecation")
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
                                   BlockPos pos, BlockPos neighborPos) {
+        if (AssemblyMutationBatch.isMutating(level, pos)) {
+            return state; // Roundwood is rewriting this frame (placement, migration): no reactions
+        }
         if (direction == Direction.DOWN && !canSurvive(state, level, pos)) {
             return Blocks.AIR.defaultBlockState();
         }

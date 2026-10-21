@@ -3,12 +3,25 @@ package io.github.dirtyredz.roundwood.registry;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
+import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.migration.LegacyContent;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-/** The one block-entity type: the anchor of a round door, valid for every finish. */
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * The anchors: the door's (id {@code round_door}, unchanged since 0.2.0 so saved camouflage loads),
+ * the window's and the trim's. Each is valid for its canonical block and that family's hidden
+ * 0.4.0 aliases, so saved entities load into unconverted blocks.
+ */
 public final class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
             DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Roundwood.MOD_ID);
@@ -16,12 +29,37 @@ public final class ModBlockEntities {
     @SuppressWarnings("DataFlowIssue") // the data fixer type is unused for mod block entities
     public static final RegistryObject<BlockEntityType<RoundDoorBlockEntity>> ROUND_DOOR = BLOCK_ENTITIES.register("round_door",
             () -> BlockEntityType.Builder.of((pos, state) -> new RoundDoorBlockEntity(roundDoor(), pos, state),
-                    ModBlocks.doors().toArray(RoundDoorBlock[]::new)).build(null));
+                    with(ModBlocks.roundDoor(), LegacyContent.doors()).toArray(RoundDoorBlock[]::new)).build(null));
+
+    @SuppressWarnings("DataFlowIssue")
+    public static final RegistryObject<BlockEntityType<RoundWindowBlockEntity>> ROUND_WINDOW = BLOCK_ENTITIES.register("round_window",
+            () -> BlockEntityType.Builder.of((pos, state) -> new RoundWindowBlockEntity(roundWindow(), pos, state),
+                    with(ModBlocks.roundWindow(), LegacyContent.windows()).toArray(RoundWindowBlock[]::new)).build(null));
+
+    @SuppressWarnings("DataFlowIssue")
+    public static final RegistryObject<BlockEntityType<RoundTrimBlockEntity>> ROUND_TRIM = BLOCK_ENTITIES.register("round_trim",
+            () -> BlockEntityType.Builder.of((pos, state) -> new RoundTrimBlockEntity(roundTrim(), pos, state),
+                    with(ModBlocks.roundTrim(), LegacyContent.trims()).toArray(RoundTrimBlock[]::new)).build(null));
 
     private ModBlockEntities() {
     }
 
     public static BlockEntityType<RoundDoorBlockEntity> roundDoor() {
         return ROUND_DOOR.get();
+    }
+
+    public static BlockEntityType<RoundWindowBlockEntity> roundWindow() {
+        return ROUND_WINDOW.get();
+    }
+
+    public static BlockEntityType<RoundTrimBlockEntity> roundTrim() {
+        return ROUND_TRIM.get();
+    }
+
+    private static <T extends Block> List<T> with(T canonical, List<? extends T> aliases) {
+        List<T> out = new ArrayList<>();
+        out.add(canonical);
+        out.addAll(aliases);
+        return out;
     }
 }

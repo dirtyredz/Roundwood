@@ -1,19 +1,43 @@
 package io.github.dirtyredz.roundwood.block.window;
 
+import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
+import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
+import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
+import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceGestures;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceDrops;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A single-block framed round window: a thin square wooden pane with round glazing. It stays in the
@@ -21,15 +45,67 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * bars, walls and other windows connect to it and it connects to them, and waterlogging, buckets,
  * fluid ticks and water left behind are inherited. It adds the plane orientation ({@link #AXIS},
  * facing the placing player), its own geometry ({@link WindowShapes}, models from datagen) and
- * stricter connections on its two faces ({@link WindowConnections}).
+ * stricter connections on its two faces ({@link WindowConnections}). Its wooden face's appearance
+ * lives on a {@link RoundWindowBlockEntity}; glass and arms are never restyled.
  */
-public class RoundWindowBlock extends IronBarsBlock {
+public class RoundWindowBlock extends IronBarsBlock implements EntityBlock, AppearanceDefaults {
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 
-    public RoundWindowBlock(Properties properties) {
+    private final Supplier<BlockEntityType<RoundWindowBlockEntity>> entityType;
+
+    public RoundWindowBlock(Properties properties, Supplier<BlockEntityType<RoundWindowBlockEntity>> entityType) {
         super(properties);
+        this.entityType = entityType;
         // Extend the inherited default (connections off, dry) rather than replacing it.
         registerDefaultState(defaultBlockState().setValue(AXIS, Direction.Axis.X));
+    }
+
+    @Override
+    public AppearanceFamily appearanceFamily() {
+        return AppearanceFamily.WINDOW;
+    }
+
+    @Override
+    public Appearance defaultAppearance() {
+        return Appearance.DEFAULT;
+    }
+
+    /** The item picks and drops are made of (the hidden aliases name the canonical window's). */
+    public Item familyItem() {
+        return asItem();
+    }
+
+    @Override
+    @Nullable
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new RoundWindowBlockEntity(entityType.get(), pos, state);
+    }
+
+    /** Sneak + planks or dye restyles the wooden face; anything else (buckets included) is the item's own use. */
+    @Override
+    @SuppressWarnings("deprecation")
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        Optional<AppearanceGestures.Gesture> gesture = AppearanceGestures.of(AppearanceFamily.WINDOW, player, hand);
+        if (gesture.isEmpty()) {
+            return InteractionResult.PASS;
+        }
+        return AppearanceActions.apply(level, player, gesture.get(),
+                () -> level.getBlockEntity(pos) instanceof RoundWindowBlockEntity entity ? Optional.of(entity) : Optional.empty());
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        BlockEntity entity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+        Appearance appearance = entity instanceof RoundWindowBlockEntity window ? window.appearance() : defaultAppearance();
+        return AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.WINDOW, appearance);
+    }
+
+    @Override
+    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+        Appearance appearance = level.getBlockEntity(pos) instanceof RoundWindowBlockEntity window
+                ? window.appearance() : defaultAppearance();
+        return AppearanceStacks.create(familyItem(), appearance);
     }
 
     @Override

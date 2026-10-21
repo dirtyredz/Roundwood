@@ -1,6 +1,10 @@
 package io.github.dirtyredz.roundwood;
 
+import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceUseEvents;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
 import io.github.dirtyredz.roundwood.data.RoundwoodDataProviders;
+import io.github.dirtyredz.roundwood.migration.LegacyChunkMigration;
+import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModCreativeTab;
@@ -11,18 +15,30 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-/** Bootstrap only: registers content, the datagen listener and the showcase command. */
+/**
+ * Bootstrap only: registers content (the three canonical entries and the hidden 0.4.0 aliases), the
+ * datagen listener, the showcase command and the game-bus hooks (restyling gestures, deferred
+ * harvests, legacy migration).
+ */
 @Mod(Roundwood.MOD_ID)
 public final class Roundwood {
     public static final String MOD_ID = "roundwood";
 
     public Roundwood() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        LegacyContent.register(ModBlocks.BLOCKS, ModItems.ITEMS);
         ModBlocks.BLOCKS.register(modBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
         ModItems.ITEMS.register(modBus);
         ModCreativeTab.TABS.register(modBus);
         modBus.addListener(RoundwoodDataProviders::gatherData);
-        MinecraftForge.EVENT_BUS.addListener(ShowcaseCommand::register);
+
+        IEventBus gameBus = MinecraftForge.EVENT_BUS;
+        gameBus.addListener(ShowcaseCommand::register);
+        gameBus.addListener(AppearanceUseEvents::onRightClickBlock);
+        gameBus.addListener(AssemblyHarvest::onLevelTick);
+        gameBus.addListener(LegacyChunkMigration::onChunkLoad);
+        gameBus.addListener(LegacyChunkMigration::onLevelTick);
+        gameBus.addListener(LegacyChunkMigration::onLevelUnload);
     }
 }

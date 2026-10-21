@@ -1,8 +1,0 @@
-{
-  "parent": "roundwood:block/template_round_door_leaf_left",
-  "textures": {
-    "brass": "roundwood:block/brass",
-    "panel": "roundwood:block/door_panel_spruce",
-    "particle": "roundwood:block/door_panel_spruce"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "parent": "roundwood:block/template_round_trim_whole_upper_left",
-  "textures": {
-    "edge": "roundwood:block/door_panel_blue",
-    "face": "roundwood:block/door_panel_blue",
-    "particle": "roundwood:block/door_panel_blue"
-  }
-}

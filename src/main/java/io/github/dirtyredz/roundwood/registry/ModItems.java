@@ -3,43 +3,33 @@ package io.github.dirtyredz.roundwood.registry;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorItem;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimItem;
-import io.github.dirtyredz.roundwood.variant.Finish;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.variant.TrimMaterial;
-import net.minecraft.world.item.BlockItem;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
-/** The block item of every round door, window and frame, in creative-tab order. */
+/**
+ * The three advertised items (door, window, trim), in creative-tab order. Their appearance travels
+ * in the stack; the hidden 0.4.0 alias items are registered by {@code migration/LegacyContent}.
+ */
 public final class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Roundwood.MOD_ID);
 
-    private static final List<RegistryObject<Item>> ALL = new ArrayList<>();
-
-    static {
-        for (Finish finish : FinishCatalog.ALL) {
-            ALL.add(ITEMS.register(finish.doorId(),
-                    () -> new RoundDoorItem(ModBlocks.door(finish), new Item.Properties())));
-        }
-        for (Finish finish : FinishCatalog.ALL) {
-            ALL.add(ITEMS.register(finish.windowId(),
-                    () -> new BlockItem(ModBlocks.window(finish), new Item.Properties())));
-        }
-        for (TrimMaterial material : FinishCatalog.TRIMS) {
-            ALL.add(ITEMS.register(material.trimId(),
-                    () -> new RoundTrimItem(ModBlocks.trim(material), new Item.Properties())));
-        }
-    }
+    public static final RegistryObject<RoundDoorItem> ROUND_DOOR = ITEMS.register("round_door",
+            () -> new RoundDoorItem(ModBlocks.roundDoor(), new Item.Properties()));
+    public static final RegistryObject<RoundWindowItem> ROUND_WINDOW = ITEMS.register("round_window",
+            () -> new RoundWindowItem(ModBlocks.roundWindow(), new Item.Properties()));
+    public static final RegistryObject<RoundTrimItem> ROUND_TRIM = ITEMS.register("round_trim",
+            () -> new RoundTrimItem(ModBlocks.roundTrim(), new Item.Properties()));
 
     private ModItems() {
     }
 
+    /** The canonical items: door, window, trim. */
     public static List<Item> all() {
-        return ALL.stream().map(RegistryObject::get).toList();
+        return List.of(ROUND_DOOR.get(), ROUND_WINDOW.get(), ROUND_TRIM.get());
     }
 }

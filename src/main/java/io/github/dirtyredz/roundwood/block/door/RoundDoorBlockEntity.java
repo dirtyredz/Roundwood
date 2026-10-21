@@ -1,5 +1,9 @@
 package io.github.dirtyredz.roundwood.block.door;
 
+import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
+import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
+import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorSwing;
@@ -21,17 +25,22 @@ import java.util.Optional;
 
 /**
  * The anchor (lower-left part) of every assembly carries this entity, so the client has one place
- * to draw the whole leaf from, and the assembly has one place to keep its camouflage. It never
+ * to draw the whole leaf from, and the assembly has one place to keep its appearance (wood and
+ * paint, {@link Appearance}) and its camouflage. It never
  * ticks: the blockstate stays authoritative for open/closed, and the client-side {@link DoorSwing}
  * only animates between states it is told about through {@link #setBlockState}.
  *
- * <p>Camouflage travels with the vanilla block-entity update packet: clients get the material,
- * never the refund. Loading always replaces the previous value, so a clear reaches clients too.
+ * <p>Appearance and camouflage travel with the vanilla block-entity update packet: clients get the
+ * camouflage material, never the refund. Loading always replaces both previous values (a clear or
+ * a paint removal reaches clients too) and never touches the swing.
  */
 public class RoundDoorBlockEntity extends BlockEntity {
     private final DoorSwing swing;
     @Nullable
     private CamouflageData camouflage;
+    /** Null: the block's default (oak, or a hidden alias's historical finish). */
+    @Nullable
+    private Appearance appearance;
 
     public RoundDoorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -41,6 +50,20 @@ public class RoundDoorBlockEntity extends BlockEntity {
 
     public DoorSwing swing() {
         return swing;
+    }
+
+    /** The door's look: what is stored, else the block's default. */
+    public Appearance appearance() {
+        return appearance != null ? appearance : AppearanceDefaults.of(getBlockState().getBlock());
+    }
+
+    /** Server: replaces the appearance (stored only when it differs from the default), saves and tells the clients. */
+    public void setAppearance(Appearance next) {
+        appearance = next.equals(AppearanceDefaults.of(getBlockState().getBlock())) ? null : next;
+        setChanged();
+        if (level != null && !level.isClientSide) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
+        }
     }
 
     public Optional<CamouflageData> camouflage() {
@@ -72,20 +95,30 @@ public class RoundDoorBlockEntity extends BlockEntity {
         if (camouflage != null) {
             tag.put(CamouflageData.TAG, camouflage.write(true));
         }
+        if (appearance != null) {
+            AppearanceNbt.write(tag, appearance);
+        }
     }
 
-    /** Replaces the camouflage with whatever the tag holds (nothing when absent or not acceptable). */
+    /** Replaces camouflage and appearance with whatever the tag holds (nothing when absent or not acceptable). */
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
         camouflage = CamouflageData.read(tag).orElse(null);
+        appearance = AppearanceNbt.read(tag).filter(AppearanceFamily.DOOR::accepts).orElse(null);
     }
 
-    /** Appearance only, and always carrying the camouflage key (possibly empty) so that a clear is sent too. */
+    /**
+     * Looks only, always carrying the camouflage key (possibly empty) so that a clear is sent too; the
+     * appearance is omitted when it is the default, which the client then reads as the default.
+     */
     @Override
     public CompoundTag getUpdateTag() {
         CompoundTag tag = new CompoundTag();
         tag.put(CamouflageData.TAG, camouflage == null ? new CompoundTag() : camouflage.write(false));
+        if (appearance != null) {
+            AppearanceNbt.write(tag, appearance);
+        }
         return tag;
     }
 

@@ -1,12 +1,20 @@
 package io.github.dirtyredz.roundwood.block.door;
 
+import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
+import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceDrops;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
+import io.github.dirtyredz.roundwood.block.door.appearance.DoorAppearance;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorColumn;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorIntegrity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorRemoval;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorStateController;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageDrops;
-import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageInteraction;
+import io.github.dirtyredz.roundwood.block.door.interaction.DoorInteraction;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorShapes;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorSelectionShapes;
 import io.github.dirtyredz.roundwood.client.door.DoorParticles;
@@ -19,6 +27,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -36,6 +45,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -43,6 +53,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -51,9 +62,9 @@ import java.util.function.Supplier;
  * opening) so villager AI, pathfinding and other mods see an ordinary wooden door; it adds only the
  * {@link #COLUMN} identity. The callbacks here hand off to the assembly, selection and camouflage
  * services; the lower-left part carries the {@link RoundDoorBlockEntity} the client draws the leaf
- * and the camouflage from.
+ * and the camouflage from, and which holds the door's appearance (picked and dropped with the item).
  */
-public class RoundDoorBlock extends DoorBlock implements EntityBlock {
+public class RoundDoorBlock extends DoorBlock implements EntityBlock, AppearanceDefaults {
     public static final EnumProperty<DoorColumn> COLUMN = EnumProperty.create("column", DoorColumn.class);
 
     private final Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType;
@@ -63,6 +74,22 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock {
         this.entityType = entityType;
         // Extend the inherited default (never stateDefinition.any()): other mods inject properties into DoorBlock.
         registerDefaultState(defaultBlockState().setValue(COLUMN, DoorColumn.LEFT));
+    }
+
+    @Override
+    public AppearanceFamily appearanceFamily() {
+        return AppearanceFamily.DOOR;
+    }
+
+    /** Oak, unpainted; the hidden 0.4.0 aliases override this with their historical finish. */
+    @Override
+    public Appearance defaultAppearance() {
+        return Appearance.DEFAULT;
+    }
+
+    /** The item picks and drops are made of: this block's own (the aliases name the canonical door's). */
+    public Item familyItem() {
+        return asItem();
     }
 
     @Override
@@ -112,19 +139,41 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock {
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
     }
 
+    /** Restyling, then camouflage, then the toggle ({@link DoorInteraction}). */
     @Override
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        InteractionResult camouflage = CamouflageInteraction.use(this, state, level, pos, player, hand, hit);
-        return camouflage != null ? camouflage : DoorStateController.use(this, state, level, pos, player);
+        return DoorInteraction.use(this, state, level, pos, player, hand, hit);
     }
 
-    /** A creative player's break discards stored camouflage instead of dropping it. */
+    /**
+     * A creative player's break discards stored camouflage instead of dropping it. A survival harvest
+     * keeps the part in place until its loot has read the anchor ({@link AssemblyHarvest}).
+     */
     @Override
     public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
         if (player.getAbilities().instabuild) {
             return CamouflageDrops.discardingRefunds(level, () -> super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid));
         }
-        return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
+        return AssemblyHarvest.destroyedByPlayer(this, state, level, pos, player, willHarvest,
+                () -> super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid));
+    }
+
+    @Override
+    public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity entity, ItemStack tool) {
+        AssemblyHarvest.playerDestroy(level, pos, () -> super.playerDestroy(level, player, pos, state, entity, tool));
+    }
+
+    /** The ordinary loot (one door per assembly), carrying the door's appearance. */
+    @Override
+    @SuppressWarnings("deprecation")
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        return AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.DOOR, DoorAppearance.forDrops(builder, state));
+    }
+
+    /** Picking any part gives the door in its appearance. */
+    @Override
+    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+        return AppearanceStacks.create(familyItem(), DoorAppearance.of(level, pos, state));
     }
 
     @Override
@@ -144,6 +193,9 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock {
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
                                   BlockPos pos, BlockPos neighborPos) {
+        if (AssemblyMutationBatch.isMutating(level, pos)) {
+            return state; // Roundwood is rewriting this assembly (placement, migration): no reactions
+        }
         boolean lower = state.getValue(HALF) == DoubleBlockHalf.LOWER;
         if (direction.getAxis() == Direction.Axis.Y && lower == (direction == Direction.UP) && !verticalPartner(state, neighbor)) {
             return Blocks.AIR.defaultBlockState();

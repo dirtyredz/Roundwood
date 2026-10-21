@@ -1,14 +1,15 @@
 package io.github.dirtyredz.roundwood.fixture;
 
+import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.variant.TrimMaterial;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -31,17 +32,17 @@ public final class TrimFixtures {
     private TrimFixtures() {
     }
 
+    /** Brick masonry, the look the masonry tests give the (one, canonical) trim. */
+    public static final Appearance BRICK = Appearance.masonry(ResourceLocation.fromNamespaceAndPath("minecraft", "bricks"));
+
+    /** The canonical round trim; its default look is oak. */
     public static RoundTrimBlock oakTrim() {
-        return ModBlocks.trim(FinishCatalog.TRIM_PAINT_BASE);
+        return ModBlocks.roundTrim();
     }
 
-    public static RoundTrimBlock brickTrim() {
-        return ModBlocks.trim(FinishCatalog.MASONRY.get(0));
-    }
-
-    public static RoundTrimBlock trim(String id) {
-        TrimMaterial material = FinishCatalog.TRIMS.stream().filter(m -> m.id().equals(id)).findFirst().orElseThrow();
-        return ModBlocks.trim(material);
+    /** One trim item in brick masonry. */
+    public static ItemStack brickStack() {
+        return AppearanceStacks.create(oakTrim().asItem(), BRICK);
     }
 
     /** The frame anchored at a relative position, in absolute coordinates. */

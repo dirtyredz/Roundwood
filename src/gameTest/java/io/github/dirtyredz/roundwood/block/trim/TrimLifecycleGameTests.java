@@ -181,14 +181,15 @@ public final class TrimLifecycleGameTests {
     public static void aLoneLowerQuarterIsRemovedByTheIntegrityTick(GameTestHelper helper) {
         floor(helper);
         TrimLayout.Assembly assembly = trimAssembly(helper, ANCHOR, Direction.NORTH);
-        helper.setBlock(ANCHOR, assembly.stateFor(TrimPart.LOWER_LEFT, birchTrim()));
+        helper.setBlock(ANCHOR, assembly.stateFor(TrimPart.LOWER_LEFT, oakTrim()));
+        lookOnAnchor(helper, assembly, BIRCH);
         clearDrops(helper);
         helper.runAfterDelay(3, () -> {
             assertNoTrim(helper, assembly);
             for (BlockPos pos : assembly.positions()) {
                 check(helper.getLevel().getBlockState(pos).isAir(), "a quarter was created or left at " + pos);
             }
-            check(dropped(helper, birchTrim().asItem()) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropReport(helper, birchTrim().asItem()));
+            check(dropped(helper, oakTrim().asItem(), BIRCH) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropReport(helper, oakTrim().asItem(), BIRCH));
             helper.succeed();
         });
     }
@@ -198,13 +199,14 @@ public final class TrimLifecycleGameTests {
         floor(helper);
         TrimLayout.Assembly assembly = trimAssembly(helper, ANCHOR, Direction.NORTH);
         for (TrimPart part : new TrimPart[] {TrimPart.LOWER_LEFT, TrimPart.UPPER_LEFT, TrimPart.LOWER_RIGHT}) {
-            helper.setBlock(ANCHOR.relative(Direction.EAST, part.column).above(part.row), assembly.stateFor(part, spruceTrim()));
+            helper.setBlock(ANCHOR.relative(Direction.EAST, part.column).above(part.row), assembly.stateFor(part, oakTrim()));
         }
+        lookOnAnchor(helper, assembly, SPRUCE);
         clearDrops(helper);
         helper.runAfterDelay(3, () -> {
             assertNoTrim(helper, assembly);
             check(helper.getLevel().getBlockState(assembly.pos(TrimPart.UPPER_RIGHT)).isAir(), "the missing quarter was created");
-            check(dropped(helper, spruceTrim().asItem()) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropReport(helper, spruceTrim().asItem()));
+            check(dropped(helper, oakTrim().asItem(), SPRUCE) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropReport(helper, oakTrim().asItem(), SPRUCE));
             helper.succeed();
         });
     }
@@ -235,14 +237,21 @@ public final class TrimLifecycleGameTests {
     }
 
     /**
-     * Materials no other test drops (birch: the lone quarter, spruce: three quarters): the drop count
+     * Looks no other test drops (birch: the lone quarter, spruce: three quarters): the drop count
      * reaches past a 9-wide template, so a neighbouring test's oak drops are never counted.
      */
-    private static RoundTrimBlock birchTrim() {
-        return io.github.dirtyredz.roundwood.fixture.TrimFixtures.trim("birch");
-    }
+    private static final io.github.dirtyredz.roundwood.appearance.Appearance BIRCH = io.github.dirtyredz.roundwood.appearance.Appearance
+            .wood(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("minecraft", "birch_planks"));
+    private static final io.github.dirtyredz.roundwood.appearance.Appearance SPRUCE = io.github.dirtyredz.roundwood.appearance.Appearance
+            .wood(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("minecraft", "spruce_planks"));
 
-    private static RoundTrimBlock spruceTrim() {
-        return io.github.dirtyredz.roundwood.fixture.TrimFixtures.trim("spruce");
+    /** Gives the anchor quarter's block entity {@code look}, as a placed frame in that look would have. */
+    private static void lookOnAnchor(GameTestHelper helper, TrimLayout.Assembly assembly,
+                                     io.github.dirtyredz.roundwood.appearance.Appearance look) {
+        if (helper.getLevel().getBlockEntity(assembly.anchor()) instanceof RoundTrimBlockEntity entity) {
+            entity.setAppearance(look);
+        } else {
+            throw new net.minecraft.gametest.framework.GameTestAssertException("no trim block entity at the anchor");
+        }
     }
 }

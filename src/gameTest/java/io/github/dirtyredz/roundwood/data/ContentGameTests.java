@@ -1,15 +1,17 @@
 package io.github.dirtyredz.roundwood.data;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.trim.RoundTrimItem;
+import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceBlockItem;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.migration.LegacyAppearances;
+import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModCreativeTab;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import io.github.dirtyredz.roundwood.registry.ModTags;
-import io.github.dirtyredz.roundwood.variant.Finish;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.variant.TrimMaterial;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -21,7 +23,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -33,15 +34,16 @@ import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 
-/** Registrations, tags, recipes, loot and the creative tab, as loaded by a dedicated server. */
+/**
+ * Registrations, tags, recipes, loot and the creative tab, as loaded by a dedicated server: three
+ * advertised entries, 49 hidden 0.4.0 aliases that keep their looks, and nothing else.
+ */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class ContentGameTests {
@@ -49,138 +51,135 @@ public final class ContentGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void fortyNineBlocksAndItemsAreRegistered(GameTestHelper helper) {
+    public static void threeEntriesAndFortyNineHiddenAliasesAreRegistered(GameTestHelper helper) {
         long blocks = ForgeRegistries.BLOCKS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         long items = ForgeRegistries.ITEMS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(blocks == 49, "expected 49 blocks, found " + blocks);
-        check(items == 49, "expected 49 items, found " + items);
-        for (TrimMaterial material : FinishCatalog.TRIMS) {
-            check(ForgeRegistries.BLOCKS.containsKey(id(material.trimId())), "missing " + material.trimId());
-            check(ModBlocks.trim(material).asItem() instanceof RoundTrimItem, "missing frame item for " + material.id());
+        check(blocks == 52, "expected 3 + 49 blocks, found " + blocks);
+        check(items == 52, "expected 3 + 49 items, found " + items);
+        for (String id : List.of("round_door", "round_window", "round_trim")) {
+            check(ForgeRegistries.BLOCKS.containsKey(id(id)) && ForgeRegistries.ITEMS.containsKey(id(id)), "missing " + id);
         }
-        for (Finish finish : FinishCatalog.ALL) {
-            check(ForgeRegistries.BLOCKS.containsKey(id(finish.doorId())), "missing " + finish.doorId());
-            check(ForgeRegistries.BLOCKS.containsKey(id(finish.windowId())), "missing " + finish.windowId());
-            check(ModBlocks.door(finish).asItem() != Items.AIR && ModBlocks.window(finish).asItem() != Items.AIR, "missing item for " + finish.id());
+        check(ModBlocks.roundDoor().asItem() == ModItems.ROUND_DOOR.get(), "an alias took the door's item mapping");
+        check(ModBlocks.roundWindow().asItem() == ModItems.ROUND_WINDOW.get(), "an alias took the window's item mapping");
+        check(ModBlocks.roundTrim().asItem() == ModItems.ROUND_TRIM.get(), "an alias took the trim's item mapping");
+        for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
+            Block block = ForgeRegistries.BLOCKS.getValue(id(entry.id()));
+            Item item = ForgeRegistries.ITEMS.getValue(id(entry.id()));
+            check(block != null && AppearanceDefaults.of(block).equals(entry.appearance()), entry.id() + ": alias block look");
+            check(item instanceof AppearanceBlockItem alias && alias.isAlias(), entry.id() + ": not a hidden alias item");
+            check(AppearanceStacks.read(new ItemStack(item)).equals(entry.appearance()), entry.id() + ": alias stack look");
+            check(((AppearanceBlockItem) item).getBlock() == ModBlocks.canonical().get(entry.family().ordinal()),
+                    entry.id() + ": alias item does not place the canonical block");
         }
         helper.succeed();
     }
 
     @GameTest(template = TEMPLATE)
-    public static void blockEntityTypeCoversEveryDoorFinish(GameTestHelper helper) {
-        for (Block door : ModBlocks.doors()) {
-            check(ModBlockEntities.ROUND_DOOR.get().isValid(door.defaultBlockState()), door + " cannot carry the round-door block entity");
+    public static void blockEntityTypesCoverTheirFamilyAndItsAliases(GameTestHelper helper) {
+        for (Block door : with(ModBlocks.roundDoor(), LegacyContent.doors())) {
+            check(ModBlockEntities.roundDoor().isValid(door.defaultBlockState()), door + " cannot carry the door entity");
+            check(!ModBlockEntities.roundWindow().isValid(door.defaultBlockState())
+                    && !ModBlockEntities.roundTrim().isValid(door.defaultBlockState()), door + " valid for another family");
         }
-        for (Block window : ModBlocks.windows()) {
-            check(!ModBlockEntities.ROUND_DOOR.get().isValid(window.defaultBlockState()), window + " must not be valid for the door entity");
+        for (Block window : with(ModBlocks.roundWindow(), LegacyContent.windows())) {
+            check(ModBlockEntities.roundWindow().isValid(window.defaultBlockState()), window + " cannot carry the window entity");
+            check(!ModBlockEntities.roundDoor().isValid(window.defaultBlockState()), window + " valid for the door entity");
         }
-        for (Block trim : ModBlocks.trims()) {
-            check(!ModBlockEntities.ROUND_DOOR.get().isValid(trim.defaultBlockState()), trim + " must not be valid for the door entity");
-            check(!(trim instanceof net.minecraft.world.level.block.EntityBlock), trim + " must not have a block entity");
+        for (Block trim : with(ModBlocks.roundTrim(), LegacyContent.trims())) {
+            check(ModBlockEntities.roundTrim().isValid(trim.defaultBlockState()), trim + " cannot carry the trim entity");
+            check(!ModBlockEntities.roundDoor().isValid(trim.defaultBlockState()), trim + " valid for the door entity");
         }
         helper.succeed();
     }
 
     @GameTest(template = TEMPLATE)
     public static void tagsAreLoaded(GameTestHelper helper) {
-        for (Block door : ModBlocks.doors()) {
-            check(door.defaultBlockState().is(BlockTags.WOODEN_DOORS) && door.defaultBlockState().is(BlockTags.DOORS), door + " not a door");
-            check(door.defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE) && door.defaultBlockState().is(ModTags.ROUND_DOORS), door + " tags");
-            ItemStack stack = new ItemStack(door);
-            check(stack.is(ItemTags.WOODEN_DOORS) && stack.is(ItemTags.DOORS) && stack.is(ModTags.ROUND_DOOR_ITEMS), door + " item tags");
+        for (Block door : with(ModBlocks.roundDoor(), LegacyContent.doors())) {
+            BlockState state = door.defaultBlockState();
+            check(state.is(BlockTags.WOODEN_DOORS) && state.is(BlockTags.DOORS) && state.is(BlockTags.MINEABLE_WITH_AXE), door + " door tags");
         }
-        for (Block window : ModBlocks.windows()) {
-            check(window.defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE) && window.defaultBlockState().is(ModTags.ROUND_WINDOWS), window + " tags");
-            check(!window.defaultBlockState().is(BlockTags.DOORS), window + " must not be a door");
-            check(new ItemStack(window).is(ModTags.ROUND_WINDOW_ITEMS), window + " item tag");
+        ItemStack door = new ItemStack(ModItems.ROUND_DOOR.get());
+        check(door.is(ItemTags.WOODEN_DOORS) && door.is(ItemTags.DOORS) && door.is(ModTags.ROUND_DOOR_ITEMS), "door item tags");
+        check(ModBlocks.roundDoor().defaultBlockState().is(ModTags.ROUND_DOORS), "door family tag");
+        check(ModBlocks.roundWindow().defaultBlockState().is(ModTags.ROUND_WINDOWS)
+                && new ItemStack(ModItems.ROUND_WINDOW.get()).is(ModTags.ROUND_WINDOW_ITEMS), "window family tags");
+        check(ModBlocks.roundTrim().defaultBlockState().is(ModTags.ROUND_TRIMS)
+                && new ItemStack(ModItems.ROUND_TRIM.get()).is(ModTags.ROUND_TRIM_ITEMS), "trim family tags");
+        for (Block block : with(ModBlocks.roundWindow(), LegacyContent.windows())) {
+            check(block.defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE) && !block.defaultBlockState().is(BlockTags.DOORS), block + " window tags");
         }
-        for (TrimMaterial material : FinishCatalog.TRIMS) {
-            BlockState trim = ModBlocks.trim(material).defaultBlockState();
-            check(trim.is(ModTags.ROUND_TRIMS) && new ItemStack(trim.getBlock()).is(ModTags.ROUND_TRIM_ITEMS), material.id() + " frame tags");
-            check(!trim.is(BlockTags.DOORS) && !trim.is(BlockTags.WOODEN_DOORS), material.id() + " frame must not be a door");
-            check(trim.is(BlockTags.MINEABLE_WITH_PICKAXE) == material.masonry(), material.id() + " pickaxe tag");
-            check(trim.is(BlockTags.MINEABLE_WITH_AXE) == !material.masonry(), material.id() + " axe tag");
+        for (Block block : with(ModBlocks.roundTrim(), LegacyContent.trims())) {
+            BlockState state = block.defaultBlockState();
+            check(state.is(BlockTags.MINEABLE_WITH_AXE) && !state.is(BlockTags.MINEABLE_WITH_PICKAXE), block + " trims mine with an axe");
+            check(!state.is(BlockTags.DOORS), block + " a trim must not be a door");
+        }
+        for (Block alias : LegacyContent.blocks()) {
+            check(!alias.defaultBlockState().is(ModTags.ROUND_DOORS) && !alias.defaultBlockState().is(ModTags.ROUND_WINDOWS)
+                    && !alias.defaultBlockState().is(ModTags.ROUND_TRIMS), alias + ": family tags name only the canonical blocks");
         }
         helper.succeed();
     }
 
+    /** Any planks, mixed, make the default (oak, untagged) object; there are exactly three recipes. */
     @GameTest(template = TEMPLATE)
-    public static void craftingRecipesProduceTheRightItems(GameTestHelper helper) {
+    public static void craftingAcceptsMixedPlanksAndMakesTheDefault(GameTestHelper helper) {
         ServerLevel level = helper.getLevel();
-        for (Finish finish : FinishCatalog.NATURAL) {
-            ItemStack p = new ItemStack(finish.planks());
-            ItemStack nugget = new ItemStack(Items.GOLD_NUGGET);
-            expect(level, grid(p, p, p, p, nugget, p, p, p, p), ModBlocks.door(finish).asItem(), finish.id() + " door");
-            ItemStack e = ItemStack.EMPTY;
-            expect(level, grid(e, p, e, p, new ItemStack(Items.GLASS_PANE), p, e, p, e), ModBlocks.window(finish).asItem(), finish.id() + " window");
-        }
+        ItemStack o = new ItemStack(Items.OAK_PLANKS);
+        ItemStack s = new ItemStack(Items.SPRUCE_PLANKS);
+        ItemStack w = new ItemStack(Items.WARPED_PLANKS);
         ItemStack e = ItemStack.EMPTY;
-        for (TrimMaterial material : FinishCatalog.TRIMS) {
-            if (material.painted()) {
-                continue;
-            }
-            ItemStack m = new ItemStack(material.material());
-            expect(level, grid(m, e, m, e, e, e, m, e, m), ModBlocks.trim(material).asItem(), material.id() + " frame");
-            check(find(level, grid(m, m, m, m, e, m, m, m, m)).map(r -> !r.getId().getNamespace().equals(Roundwood.MOD_ID)).orElse(true),
-                    material.id() + ": a ring of eight makes a frame");
-        }
+        expect(level, grid(o, s, w, s, new ItemStack(Items.GOLD_NUGGET), o, w, o, s), ModItems.ROUND_DOOR.get(), "mixed-plank door");
+        expect(level, grid(e, w, e, s, new ItemStack(Items.GLASS_PANE), o, e, s, e), ModItems.ROUND_WINDOW.get(), "mixed-plank window");
+        expect(level, grid(o, e, s, e, e, e, w, e, o), ModItems.ROUND_TRIM.get(), "mixed-plank trim");
+        expect(level, grid(s, e, s, e, e, e, s, e, s), ModItems.ROUND_TRIM.get(), "spruce trim");
+        check(find(level, grid(o, o, o, o, e, o, o, o, o)).map(r -> !r.getId().getNamespace().equals(Roundwood.MOD_ID)).orElse(true),
+                "a ring of eight makes a trim");
+        ItemStack b = new ItemStack(Items.BRICKS);
+        check(find(level, grid(b, e, b, e, e, e, b, e, b)).isEmpty(), "bricks still craft a trim");
+        check(find(level, grid(new ItemStack(ModItems.ROUND_DOOR.get()), new ItemStack(Items.RED_DYE), e, e, e, e, e, e, e)).isEmpty(),
+                "a painting recipe is still loaded");
         long count = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
                 .filter(r -> r.getId().getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(count == 49, "expected 49 roundwood crafting recipes, loaded " + count);
+        check(count == 3, "expected 3 roundwood crafting recipes, loaded " + count);
         helper.succeed();
     }
 
+    /** With no appearance in the world, canonical blocks drop their default item; aliases drop the canonical item in their old look. */
     @GameTest(template = TEMPLATE)
-    public static void paintingAndRepainting(GameTestHelper helper) {
-        ServerLevel level = helper.getLevel();
-        Finish red = FinishCatalog.PAINTED.get(2);
-        Finish green = FinishCatalog.PAINTED.get(0);
-        Item redDye = DyeItem.byColor(red.paint().orElseThrow());
-        ItemStack e = ItemStack.EMPTY;
-        expect(level, grid(new ItemStack(ModBlocks.door(FinishCatalog.PAINT_BASE)), new ItemStack(redDye), e, e, e, e, e, e, e),
-                ModBlocks.door(red).asItem(), "oak door + red dye");
-        expect(level, grid(new ItemStack(ModBlocks.door(green)), new ItemStack(redDye), e, e, e, e, e, e, e),
-                ModBlocks.door(red).asItem(), "green door + red dye");
-        expect(level, grid(new ItemStack(ModBlocks.window(FinishCatalog.PAINT_BASE)), new ItemStack(redDye), e, e, e, e, e, e, e),
-                ModBlocks.window(red).asItem(), "oak window + red dye");
-        check(find(level, grid(new ItemStack(ModBlocks.door(red)), new ItemStack(redDye), e, e, e, e, e, e, e)).isEmpty(),
-                "a red door can be 'repainted' red");
-        TrimMaterial oakTrim = FinishCatalog.TRIM_PAINT_BASE;
-        TrimMaterial redTrim = FinishCatalog.TRIMS.stream().filter(t -> t.id().equals("red")).findFirst().orElseThrow();
-        TrimMaterial brickTrim = FinishCatalog.MASONRY.get(0);
-        expect(level, grid(new ItemStack(ModBlocks.trim(oakTrim)), new ItemStack(redDye), e, e, e, e, e, e, e),
-                ModBlocks.trim(redTrim).asItem(), "oak frame + red dye");
-        check(find(level, grid(new ItemStack(ModBlocks.trim(redTrim)), new ItemStack(redDye), e, e, e, e, e, e, e)).isEmpty(),
-                "a red frame can be 'repainted' red");
-        check(find(level, grid(new ItemStack(ModBlocks.trim(brickTrim)), new ItemStack(redDye), e, e, e, e, e, e, e)).isEmpty(),
-                "a brick frame can be painted");
-        check(find(level, grid(new ItemStack(ModBlocks.door(FinishCatalog.NATURAL.get(1))), new ItemStack(redDye), e, e, e, e, e, e, e)).isEmpty(),
-                "a spruce door can be painted");
-        helper.succeed();
-    }
-
-    @GameTest(template = TEMPLATE)
-    public static void everyBlockDropsItself(GameTestHelper helper) {
+    public static void lootIsTheCanonicalItemInTheRightLook(GameTestHelper helper) {
         BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
-        for (Block block : ModBlocks.all()) {
+        for (Block block : ModBlocks.canonical()) {
             List<ItemStack> drops = Block.getDrops(block.defaultBlockState(), helper.getLevel(), pos, null);
-            check(drops.size() == 1 && drops.get(0).is(block.asItem()) && drops.get(0).getCount() == 1,
+            check(drops.size() == 1 && drops.get(0).is(block.asItem()) && drops.get(0).getCount() == 1 && !drops.get(0).hasTag(),
                     block + " loot is " + drops);
+        }
+        for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
+            Block alias = ForgeRegistries.BLOCKS.getValue(id(entry.id()));
+            List<ItemStack> drops = Block.getDrops(alias.defaultBlockState(), helper.getLevel(), pos, null);
+            Item canonical = ModItems.all().get(entry.family().ordinal());
+            check(drops.size() == 1 && drops.get(0).is(canonical) && AppearanceStacks.read(drops.get(0)).equals(entry.appearance()),
+                    entry.id() + " loot is " + drops);
         }
         helper.succeed();
     }
 
     @GameTest(template = TEMPLATE)
-    public static void creativeTabHoldsEveryItemOnce(GameTestHelper helper) {
+    public static void creativeTabHoldsExactlyTheThreeDefaults(GameTestHelper helper) {
         CreativeModeTab tab = ModCreativeTab.ROUNDWOOD.get();
         tab.buildContents(new CreativeModeTab.ItemDisplayParameters(helper.getLevel().enabledFeatures(), false,
                 helper.getLevel().registryAccess()));
-        List<Item> shown = tab.getDisplayItems().stream().map(ItemStack::getItem).toList();
-        Set<Item> unique = new HashSet<>(shown);
-        check(shown.size() == 49 && unique.size() == 49, "tab shows " + shown.size() + " stacks, " + unique.size() + " distinct");
-        check(shown.equals(ModItems.all()), "tab order is not doors, windows, frames: " + shown);
-        check(shown.get(30) == ModBlocks.trim(FinishCatalog.TRIMS.get(0)).asItem(), "frames do not follow the windows");
+        List<ItemStack> shown = List.copyOf(tab.getDisplayItems());
+        check(shown.stream().map(ItemStack::getItem).toList().equals(ModItems.all()), "tab is not door, window, trim: " + shown);
+        check(shown.stream().noneMatch(ItemStack::hasTag), "tab entries carry an appearance: " + shown);
+        check(AppearanceStacks.read(shown.get(0)).equals(Appearance.DEFAULT), "the tab's door is not oak");
         helper.succeed();
+    }
+
+    private static List<Block> with(Block canonical, List<? extends Block> aliases) {
+        List<Block> out = new java.util.ArrayList<>();
+        out.add(canonical);
+        out.addAll(aliases);
+        return out;
     }
 
     private static ResourceLocation id(String path) {
@@ -213,6 +212,6 @@ public final class ContentGameTests {
         Optional<CraftingRecipe> recipe = find(level, grid);
         check(recipe.isPresent(), what + ": no recipe matched");
         ItemStack out = recipe.get().assemble(grid, level.registryAccess());
-        check(out.is(result) && out.getCount() == 1, what + ": produced " + out);
+        check(out.is(result) && out.getCount() == 1 && !out.hasTag(), what + ": produced " + out);
     }
 }

@@ -2,7 +2,6 @@ package io.github.dirtyredz.roundwood.block.window;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -45,7 +44,7 @@ public final class WindowGameTests {
     }
 
     private static RoundWindowBlock window() {
-        return ModBlocks.window(FinishCatalog.PAINT_BASE);
+        return ModBlocks.roundWindow();
     }
 
     /** Places an item on top of the floor cell below {@code pos}, as a player facing {@code facing}. */

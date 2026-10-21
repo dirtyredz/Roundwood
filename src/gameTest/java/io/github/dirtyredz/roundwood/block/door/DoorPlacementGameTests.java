@@ -1,12 +1,11 @@
 package io.github.dirtyredz.roundwood.block.door;
 
+import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.AppearanceSamples;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorColumn;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.fixture.PlacementCanceller;
-import io.github.dirtyredz.roundwood.registry.ModBlocks;
-import io.github.dirtyredz.roundwood.variant.Finish;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -20,11 +19,13 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.STRIP;
@@ -35,7 +36,9 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assertNoDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assertOneAnchorEntity;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.anchorEntity;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
+import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.useItemOn;
@@ -130,16 +133,26 @@ public final class DoorPlacementGameTests {
         helper.succeed();
     }
 
+    /** Every vanilla wood and every paint places the one door block, carrying the stack's look onto the anchor. */
     @GameTest(template = TEMPLATE)
-    public static void everyFinishPlacesAndTearsDown(GameTestHelper helper) {
+    public static void everyLookPlacesAndTearsDown(GameTestHelper helper) {
         floor(helper);
-        ServerPlayer player = player(helper, "finishes", GameType.CREATIVE, Direction.NORTH);
+        ServerPlayer player = player(helper, "looks", GameType.CREATIVE, Direction.NORTH);
         BlockPos anchor = new BlockPos(3, 1, 3);
-        for (Finish finish : FinishCatalog.ALL) {
-            RoundDoorBlock door = ModBlocks.door(finish);
-            check(placeDoor(helper, player, door.asItem(), anchor).consumesAction(), finish.id() + ": placement failed");
+        List<Appearance> looks = new ArrayList<>();
+        AppearanceSamples.VANILLA_WOODS
+                .forEach(id -> looks.add(Appearance.wood(id)));
+        for (DyeColor dye : DyeColor.values()) {
+            looks.add(Appearance.DEFAULT.painted(dye));
+        }
+        RoundDoorBlock door = oakDoor();
+        for (Appearance look : looks) {
+            check(placeDoor(helper, player, styled(door, look), anchor,
+                    DoorHingeSide.LEFT).consumesAction(), look.key() + ": placement failed");
             DoorLayout.Assembly assembly = assembly(helper, anchor, Direction.NORTH);
             assertAssembly(helper, assembly, door, false);
+            check(anchorEntity(helper, assembly).appearance().equals(look),
+                    look.key() + ": the anchor does not carry the stack's look");
             helper.setBlock(anchor.above(), Blocks.AIR); // removing any part removes all
             assertNoDoor(helper, assembly);
         }

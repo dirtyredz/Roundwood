@@ -1,7 +1,3 @@
 {
-  "parent": "roundwood:item/template_round_window",
-  "textures": {
-    "frame": "minecraft:block/warped_planks",
-    "particle": "minecraft:block/warped_planks"
-  }
+  "parent": "roundwood:item/round_window"
 }

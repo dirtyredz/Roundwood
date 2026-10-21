@@ -1,8 +1,0 @@
-{
-  "parent": "roundwood:block/template_round_trim_whole_lower_right",
-  "textures": {
-    "edge": "roundwood:block/trim_edge_mud_brick",
-    "face": "roundwood:block/trim_radial_mud_brick",
-    "particle": "roundwood:block/trim_edge_mud_brick"
-  }
-}

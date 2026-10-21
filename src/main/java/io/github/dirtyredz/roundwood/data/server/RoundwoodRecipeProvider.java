@@ -1,33 +1,22 @@
 package io.github.dirtyredz.roundwood.data.server;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.registry.ModBlocks;
-import io.github.dirtyredz.roundwood.variant.Finish;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
-import io.github.dirtyredz.roundwood.variant.TrimMaterial;
+import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.data.recipes.ShapelessRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.DyeItem;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.ItemLike;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
- * Natural finishes are crafted from their planks; painted finishes are dyed from oak or from another
- * painted finish. The paint ingredient lists every other paintable item (as vanilla wool dyeing
- * does), so no recipe turns an item into itself. Frames: four planks or brick blocks in the corners
- * of the grid (no vanilla recipe uses that shape) make one whole frame; painted frames are dyed the
- * same way as doors.
+ * Three recipes, the 0.4.0 shapes and yields over any planks (mixed types allowed): eight around a
+ * gold nugget make a door, four around a glass pane a window, four in the grid's corners (no vanilla
+ * recipe uses that shape) a trim. The result is always the default oak object; its look is chosen in
+ * the world (planks and dye), so there are no per-wood, painting or masonry recipes.
  */
 public class RoundwoodRecipeProvider extends RecipeProvider {
     public RoundwoodRecipeProvider(PackOutput output) {
@@ -36,65 +25,25 @@ public class RoundwoodRecipeProvider extends RecipeProvider {
 
     @Override
     protected void buildRecipes(Consumer<FinishedRecipe> writer) {
-        for (Finish finish : FinishCatalog.NATURAL) {
-            ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModBlocks.door(finish))
-                    .pattern("PPP").pattern("PNP").pattern("PPP")
-                    .define('P', finish.planks())
-                    .define('N', Items.GOLD_NUGGET)
-                    .group(Roundwood.MOD_ID + ":round_door")
-                    .unlockedBy("has_planks", has(finish.planks()))
-                    .save(writer);
-            ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.window(finish))
-                    .pattern(" P ").pattern("PGP").pattern(" P ")
-                    .define('P', finish.planks())
-                    .define('G', Items.GLASS_PANE)
-                    .group(Roundwood.MOD_ID + ":round_window")
-                    .unlockedBy("has_planks", has(finish.planks()))
-                    .save(writer);
-        }
-        for (Finish finish : FinishCatalog.PAINTED) {
-            DyeItem dye = DyeItem.byColor(finish.paint().orElseThrow());
-            paint(writer, ModBlocks.door(finish), sources(FinishCatalog.PAINTED, finish, FinishCatalog.PAINT_BASE, ModBlocks::door),
-                    dye, RecipeCategory.REDSTONE, "painted_round_door");
-            paint(writer, ModBlocks.window(finish), sources(FinishCatalog.PAINTED, finish, FinishCatalog.PAINT_BASE, ModBlocks::window),
-                    dye, RecipeCategory.DECORATIONS, "painted_round_window");
-        }
-        List<TrimMaterial> paintedTrims = FinishCatalog.TRIMS.stream().filter(TrimMaterial::painted).toList();
-        for (TrimMaterial material : FinishCatalog.TRIMS) {
-            if (material.painted()) {
-                paint(writer, ModBlocks.trim(material),
-                        sources(paintedTrims, material, FinishCatalog.TRIM_PAINT_BASE, ModBlocks::trim),
-                        DyeItem.byColor(material.paint().orElseThrow()), RecipeCategory.DECORATIONS, "painted_round_trim");
-                continue;
-            }
-            ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModBlocks.trim(material))
-                    .pattern("M M").pattern("   ").pattern("M M")
-                    .define('M', material.material())
-                    .group(Roundwood.MOD_ID + ":round_trim")
-                    .unlockedBy("has_material", has(material.material()))
-                    .save(writer);
-        }
-    }
-
-    /** The paint base plus every other painted variant of the same family: never the result itself. */
-    private static <T> List<ItemLike> sources(List<T> painted, T result, T base, Function<T, ? extends ItemLike> block) {
-        List<ItemLike> sources = new ArrayList<>();
-        sources.add(block.apply(base));
-        for (T other : painted) {
-            if (other != result) {
-                sources.add(block.apply(other));
-            }
-        }
-        return sources;
-    }
-
-    private static void paint(Consumer<FinishedRecipe> writer, ItemLike result, List<ItemLike> sources, DyeItem dye,
-                              RecipeCategory category, String group) {
-        ShapelessRecipeBuilder.shapeless(category, result)
-                .requires(Ingredient.of(sources.toArray(ItemLike[]::new)))
-                .requires(dye)
-                .group(Roundwood.MOD_ID + ":" + group)
-                .unlockedBy("has_dye", has(dye))
-                .save(writer, ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, getItemName(result) + "_from_painting"));
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModItems.ROUND_DOOR.get())
+                .pattern("PPP").pattern("PNP").pattern("PPP")
+                .define('P', ItemTags.PLANKS)
+                .define('N', Items.GOLD_NUGGET)
+                .group(Roundwood.MOD_ID + ":round_door")
+                .unlockedBy("has_planks", has(ItemTags.PLANKS))
+                .save(writer);
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModItems.ROUND_WINDOW.get())
+                .pattern(" P ").pattern("PGP").pattern(" P ")
+                .define('P', ItemTags.PLANKS)
+                .define('G', Items.GLASS_PANE)
+                .group(Roundwood.MOD_ID + ":round_window")
+                .unlockedBy("has_planks", has(ItemTags.PLANKS))
+                .save(writer);
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModItems.ROUND_TRIM.get())
+                .pattern("P P").pattern("   ").pattern("P P")
+                .define('P', ItemTags.PLANKS)
+                .group(Roundwood.MOD_ID + ":round_trim")
+                .unlockedBy("has_planks", has(ItemTags.PLANKS))
+                .save(writer);
     }
 }

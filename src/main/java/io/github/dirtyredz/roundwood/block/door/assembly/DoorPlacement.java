@@ -1,7 +1,10 @@
 package io.github.dirtyredz.roundwood.block.door.assembly;
 
+import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorItem;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -28,7 +31,8 @@ import java.util.Optional;
  * Places a complete assembly or nothing. The clicked (or replaceable) cell becomes the lower-left
  * part; every cell is checked before any is written. Writes go through ordinary {@code setBlock}
  * calls, so Forge's block-snapshot capture fires one multi-place event for the four cells and rolls
- * all of them (and the item count) back if it is cancelled.
+ * all of them (and the item count) back if it is cancelled. The stack's appearance is installed on
+ * the new anchor inside the same transaction, so a rollback discards it with the cells.
  */
 public final class DoorPlacement {
     private DoorPlacement() {
@@ -51,10 +55,10 @@ public final class DoorPlacement {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS; // the server writes the cells; nothing is predicted
         }
-        install(level, assembly, plan.get());
+        ItemStack stack = context.getItemInHand();
+        install(level, assembly, plan.get(), AppearanceStacks.read(stack));
 
         Player player = context.getPlayer();
-        ItemStack stack = context.getItemInHand();
         if (player instanceof ServerPlayer serverPlayer) {
             CriteriaTriggers.PLACED_BLOCK.trigger(serverPlayer, anchor, stack);
         }
@@ -117,6 +121,12 @@ public final class DoorPlacement {
      * in the requested open state.
      */
     public static boolean placeAt(Level level, RoundDoorBlock block, DoorLayout.Assembly assembly, boolean open) {
+        return placeAt(level, block, assembly, open, block.defaultAppearance());
+    }
+
+    /** As {@link #placeAt(Level, RoundDoorBlock, DoorLayout.Assembly, boolean)}, in {@code appearance}. */
+    public static boolean placeAt(Level level, RoundDoorBlock block, DoorLayout.Assembly assembly, boolean open,
+                                  Appearance appearance) {
         Map<DoorLayout.Part, BlockState> states = new EnumMap<>(DoorLayout.Part.class);
         for (DoorLayout.Part part : DoorLayout.Part.values()) {
             BlockPos pos = assembly.pos(part);
@@ -131,15 +141,19 @@ public final class DoorPlacement {
             }
             states.put(part, state);
         }
-        install(level, assembly, states);
+        install(level, assembly, states, appearance);
         return true;
     }
 
-    private static void install(Level level, DoorLayout.Assembly assembly, Map<DoorLayout.Part, BlockState> states) {
+    private static void install(Level level, DoorLayout.Assembly assembly, Map<DoorLayout.Part, BlockState> states,
+                                Appearance appearance) {
         AssemblyMutationBatch.run(level, assembly.positions(), () -> {
             for (DoorLayout.Part part : DoorLayout.Part.values()) {
                 level.setBlock(assembly.pos(part), states.get(part), Block.UPDATE_ALL);
             }
         });
+        if (level.getBlockEntity(assembly.anchor()) instanceof RoundDoorBlockEntity entity) {
+            entity.setAppearance(appearance);
+        }
     }
 }

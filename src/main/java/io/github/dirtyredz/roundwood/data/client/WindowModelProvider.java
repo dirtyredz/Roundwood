@@ -5,10 +5,9 @@ import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.WindowGeometry;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
-import io.github.dirtyredz.roundwood.variant.Finish;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CrossCollisionBlock;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraftforge.client.model.generators.BlockModelBuilder;
@@ -18,15 +17,19 @@ import net.minecraftforge.client.model.generators.MultiPartBlockStateBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 /**
- * Round window blockstates and models, multipart like a vanilla pane: the core (wooden face with
+ * The round window's blockstate and models, multipart like a vanilla pane: the core (wooden face with
  * round glass) for every state of an axis, turned 90 degrees for {@code axis=z}, plus one shared
- * glass arm for each connected side across the plane. In-plane connections add nothing (the
- * square face already meets its neighbour). The item uses the core template. All models are
- * translucent (Roundwood's tinted glazing); {@code waterlogged} never selects a model.
+ * glass arm for each connected side across the plane. In-plane connections add nothing (the square
+ * face already meets its neighbour). The core binds oak planks; the client swaps only those quads'
+ * sprite per window appearance. All models are translucent (Roundwood's tinted glazing);
+ * {@code waterlogged} never selects a model.
  */
 public class WindowModelProvider extends BlockStateProvider {
     public static final String TEMPLATE = "template_round_window";
     public static final String ARM = "round_window_arm";
+    public static final String CORE = "round_window";
+    /** The wood bound into the core: the template the client retextures from. */
+    public static final String OAK_PLANKS = "minecraft:block/oak_planks";
     /** Translucent: the glazing is see-through tinted glass (the wood is opaque either way). */
     static final String RENDER_TYPE = "translucent";
     /** Roundwood's own glazing: vanilla glass.png is transparent inside its border, where the round glass samples. */
@@ -58,22 +61,24 @@ public class WindowModelProvider extends BlockStateProvider {
                         })
                 .texture(WindowGeometry.GLASS, modLoc(GLASS))
                 .texture("particle", modLoc(GLASS));
+        BlockModelBuilder core = models().getBuilder(CORE)
+                .parent(template)
+                .renderType(RENDER_TYPE)
+                .texture(WindowGeometry.FRAME, OAK_PLANKS)
+                .texture("particle", OAK_PLANKS);
+        panes(this, ModBlocks.roundWindow(), core, arm);
+    }
 
-        for (Finish finish : FinishCatalog.ALL) {
-            BlockModelBuilder core = models().getBuilder(finish.windowId())
-                    .parent(template)
-                    .renderType(RENDER_TYPE)
-                    .texture(WindowGeometry.FRAME, finish.panelTexture())
-                    .texture("particle", finish.panelTexture());
-            MultiPartBlockStateBuilder states = getMultipartBuilder(ModBlocks.window(finish));
-            states.part().modelFile(core).addModel().condition(RoundWindowBlock.AXIS, Direction.Axis.X).end();
-            states.part().modelFile(core).rotationY(90).addModel().condition(RoundWindowBlock.AXIS, Direction.Axis.Z).end();
-            // The arm is authored towards the north edge; each side across the plane turns it.
-            arm(states, arm, Direction.Axis.X, CrossCollisionBlock.NORTH, 0);
-            arm(states, arm, Direction.Axis.X, CrossCollisionBlock.SOUTH, 180);
-            arm(states, arm, Direction.Axis.Z, CrossCollisionBlock.EAST, 90);
-            arm(states, arm, Direction.Axis.Z, CrossCollisionBlock.WEST, 270);
-        }
+    /** The multipart blockstate of a window block (canonical or alias) over the shared core and arm. */
+    static void panes(BlockStateProvider provider, Block window, ModelFile core, ModelFile arm) {
+        MultiPartBlockStateBuilder states = provider.getMultipartBuilder(window);
+        states.part().modelFile(core).addModel().condition(RoundWindowBlock.AXIS, Direction.Axis.X).end();
+        states.part().modelFile(core).rotationY(90).addModel().condition(RoundWindowBlock.AXIS, Direction.Axis.Z).end();
+        // The arm is authored towards the north edge; each side across the plane turns it.
+        arm(states, arm, Direction.Axis.X, CrossCollisionBlock.NORTH, 0);
+        arm(states, arm, Direction.Axis.X, CrossCollisionBlock.SOUTH, 180);
+        arm(states, arm, Direction.Axis.Z, CrossCollisionBlock.EAST, 90);
+        arm(states, arm, Direction.Axis.Z, CrossCollisionBlock.WEST, 270);
     }
 
     private static void arm(MultiPartBlockStateBuilder states, ModelFile arm, Direction.Axis axis, BooleanProperty side,

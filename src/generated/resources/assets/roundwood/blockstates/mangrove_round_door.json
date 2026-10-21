@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "roundwood:block/mangrove_round_door"
+      "model": "roundwood:block/round_door"
     }
   }
 }

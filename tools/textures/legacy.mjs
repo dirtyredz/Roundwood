@@ -13,7 +13,8 @@ export const PAINT = {
   blue: [50, 86, 138],
 };
 
-function paintedPlanks(base, seed) {
+/** Four horizontal painted boards with staggered butt joints (also used for the newer paints, see paint-panels.mjs). */
+export function paintedPlanks(base, seed) {
   const rand = rng(seed);
   const px = [];
   const joints = [5, 11, 2, 9]; // butt joint column per board

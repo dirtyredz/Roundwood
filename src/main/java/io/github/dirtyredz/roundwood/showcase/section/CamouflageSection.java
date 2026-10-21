@@ -1,12 +1,11 @@
 package io.github.dirtyredz.roundwood.showcase.section;
 
+import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageMaterial;
-import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
-import io.github.dirtyredz.roundwood.variant.FinishCatalog;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
@@ -45,7 +44,7 @@ public final class CamouflageSection implements ShowcaseSection {
                 Block material = MATERIALS.get(i);
                 int r = r(i);
                 canvas.sign(r, f(row) - 1, "Camouflage", material.getName().getString(), row == 0 ? "closed" : "open");
-                if (canvas.door(ModBlocks.door(FinishCatalog.PAINT_BASE), r, f(row), DoorHingeSide.LEFT, row == 1)
+                if (canvas.door(Appearance.DEFAULT, r, f(row), DoorHingeSide.LEFT, row == 1)
                         && CamouflageMaterial.isValid(material.defaultBlockState())
                         && canvas.level().getBlockEntity(canvas.pos(r, 0, f(row))) instanceof RoundDoorBlockEntity entity) {
                     entity.setCamouflage(CamouflageData.free(material.defaultBlockState()));

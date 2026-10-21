@@ -1,9 +1,12 @@
 package io.github.dirtyredz.roundwood.block.trim.assembly;
 
+import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
+import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimItem;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -38,7 +41,8 @@ import java.util.Optional;
  *     frame extends right and up, facing away from the player.</li>
  * </ul>
  * Every cell is checked first: loaded, inside the world, editable, replaceable and dry, and both
- * lower quarters need a sturdy floor. Entities do not block it (the ring never collides).
+ * lower quarters need a sturdy floor. Entities do not block it (the ring never collides). The
+ * stack's appearance goes on the new anchor inside the same transaction.
  */
 public final class TrimPlacement {
     private TrimPlacement() {
@@ -70,10 +74,10 @@ public final class TrimPlacement {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS; // the server writes the cells; nothing is predicted
         }
-        install(level, assembly, plan.get());
+        ItemStack stack = context.getItemInHand();
+        install(level, assembly, plan.get(), AppearanceStacks.read(stack));
 
         Player player = context.getPlayer();
-        ItemStack stack = context.getItemInHand();
         BlockPos anchor = assembly.anchor();
         if (player instanceof ServerPlayer serverPlayer) {
             CriteriaTriggers.PLACED_BLOCK.trigger(serverPlayer, anchor, stack);
@@ -129,13 +133,18 @@ public final class TrimPlacement {
      * Returns false, writing nothing, if any check fails.
      */
     public static boolean placeAt(Level level, RoundTrimBlock block, TrimLayout.Assembly assembly) {
+        return placeAt(level, block, assembly, block.defaultAppearance());
+    }
+
+    /** As {@link #placeAt(Level, RoundTrimBlock, TrimLayout.Assembly)}, in {@code appearance}. */
+    public static boolean placeAt(Level level, RoundTrimBlock block, TrimLayout.Assembly assembly, Appearance appearance) {
         for (BlockPos pos : assembly.positions()) {
             if (!inWorld(level, pos) || !level.getBlockState(pos).canBeReplaced()) {
                 return false;
             }
         }
         Optional<Map<TrimPart, BlockState>> states = states(level, block, assembly);
-        states.ifPresent(plan -> install(level, assembly, plan));
+        states.ifPresent(plan -> install(level, assembly, plan, appearance));
         return states.isPresent();
     }
 
@@ -157,11 +166,15 @@ public final class TrimPlacement {
         return Optional.of(states);
     }
 
-    private static void install(Level level, TrimLayout.Assembly assembly, Map<TrimPart, BlockState> states) {
+    private static void install(Level level, TrimLayout.Assembly assembly, Map<TrimPart, BlockState> states,
+                                Appearance appearance) {
         AssemblyMutationBatch.run(level, assembly.positions(), () -> {
             for (TrimPart part : TrimPart.values()) {
                 level.setBlock(assembly.pos(part), states.get(part), Block.UPDATE_ALL);
             }
         });
+        if (level.getBlockEntity(assembly.anchor()) instanceof RoundTrimBlockEntity entity) {
+            entity.setAppearance(appearance);
+        }
     }
 }
