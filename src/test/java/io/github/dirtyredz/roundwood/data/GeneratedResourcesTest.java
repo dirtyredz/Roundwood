@@ -136,8 +136,8 @@ class GeneratedResourcesTest {
             block.add("round_trim_whole_" + part);
         }
         item.addAll(ALIASES);
-        assertEquals(220, windowBlockModels().size());
-        assertEquals(22 + 220, block.size());
+        assertEquals(110, windowBlockModels().size());
+        assertEquals(22 + 110, block.size());
         assertEquals(66, item.size());
         // Exact sets: no per-finish models remain; the 49 old ids are only item-model aliases.
         assertEquals(block, names(assets("models/block")));
@@ -149,7 +149,7 @@ class GeneratedResourcesTest {
         assertEquals(crafted, names(data("recipes")));
         assertEquals(crafted, names(data("advancements/recipes")));
         assertEquals(61, allJson(assets("blockstates")).size());
-        assertEquals(242, allJson(assets("models/block")).size());
+        assertEquals(22 + 110, allJson(assets("models/block")).size());
         assertEquals(66, allJson(assets("models/item")).size());
         assertEquals(13, allJson(data("recipes")).size());
         assertEquals(61, allJson(data("loot_tables/blocks")).size());
@@ -160,9 +160,9 @@ class GeneratedResourcesTest {
      * The window block models, named independently. Per design the stems are: round designs
      * ({@code round_window}, {@code round_window_cross}) the centred stem, {@code _back},
      * {@code _down_ceiling} and {@code _up_floor}; oriented designs the centred stem, {@code _back},
-     * {@code _front} and front up/down at floor, level and ceiling. Every stem exists untrimmed and
-     * with {@code _trimmed}; the centred stem additionally has {@code _arms_north|south|both} in both
-     * forms. That is 14 models per round design and 24 per oriented design.
+     * {@code _front} and front up/down at floor, level and ceiling. The centred stem additionally has
+     * {@code _arms_north|south|both}. Since 0.8.0 there are no {@code _trimmed} models (trims are
+     * block-entity parts): 7 models per round design and 12 per oriented design, 110 in all.
      */
     static Set<String> windowBlockModels() {
         Set<String> out = new TreeSet<>();
@@ -179,13 +179,9 @@ class GeneratedResourcesTest {
                     }
                 }
             }
-            for (String stem : stems) {
-                out.add(stem);
-                out.add(stem + "_trimmed");
-            }
+            out.addAll(stems);
             for (String arms : List.of("north", "south", "both")) {
                 out.add(design + "_arms_" + arms);
-                out.add(design + "_trimmed_arms_" + arms);
             }
         }
         return out;
@@ -285,10 +281,14 @@ class GeneratedResourcesTest {
             assertEquals("minecraft:block", loot.get("type").getAsString(), block);
             JsonArray pools = loot.getAsJsonArray("pools");
             boolean window = WINDOWS.contains(block) || block.endsWith("_round_window");
-            assertEquals(window ? 2 : 1, pools.size(), block);
+            boolean door = block.equals("round_door") || block.endsWith("_round_door");
+            assertEquals(window || door ? 3 : 1, pools.size(), block);
             assertEquals(JsonParser.parseString(ownItemPool("roundwood:" + family(block))), pools.get(0), block);
-            if (window) {
-                assertEquals(JsonParser.parseString(trimPool("roundwood:" + block)), pools.get(1), block + ": trim pool");
+            if (window || door) {
+                String item = window ? "roundwood:window_trim" : "roundwood:round_trim";
+                String tag = window ? "WindowTrim" : "DoorTrim";
+                assertEquals(JsonParser.parseString(trimFacePool("front", item, tag + ".Front")), pools.get(1), block + ": front trim pool");
+                assertEquals(JsonParser.parseString(trimFacePool("back", item, tag + ".Back")), pools.get(2), block + ": back trim pool");
             }
         }
         for (String canonical : CANONICAL) { // canonical blocks drop themselves
@@ -307,15 +307,17 @@ class GeneratedResourcesTest {
                 + "\"entries\":[{\"type\":\"minecraft:item\",\"name\":\"" + item + "\"}],\"rolls\":1.0}";
     }
 
-    /** Pool 2: a trimmed window also drops a window_trim carrying the trim's look. */
-    private static String trimPool(String block) {
-        return "{\"bonus_rolls\":0.0,\"conditions\":[{\"block\":\"" + block + "\","
-                + "\"condition\":\"minecraft:block_state_property\",\"properties\":{\"trimmed\":\"true\"}},"
+    /**
+     * Pools 2 and 3 of every window and door table (0.8.0): one per face, each dropping that face's trim
+     * item (window_trim for windows, round_trim for doors) with the face's look copied from the block entity.
+     */
+    private static String trimFacePool(String face, String item, String source) {
+        return "{\"bonus_rolls\":0.0,\"conditions\":[{\"condition\":\"roundwood:trim_face\",\"face\":\"" + face + "\"},"
                 + "{\"condition\":\"minecraft:survives_explosion\"}],"
                 + "\"entries\":[{\"type\":\"minecraft:item\",\"functions\":[{\"function\":\"minecraft:copy_nbt\","
-                + "\"ops\":[{\"op\":\"replace\",\"source\":\"WindowTrim.RoundwoodAppearance\","
+                + "\"ops\":[{\"op\":\"replace\",\"source\":\"" + source + ".RoundwoodAppearance\","
                 + "\"target\":\"RoundwoodAppearance\"}],\"source\":\"block_entity\"}],"
-                + "\"name\":\"roundwood:window_trim\"}],\"rolls\":1.0}";
+                + "\"name\":\"" + item + "\"}],\"rolls\":1.0}";
     }
 
     @Test
@@ -332,7 +334,7 @@ class GeneratedResourcesTest {
         }
         assertEquals("Window Trim", lang.get("item.roundwood.window_trim").getAsString());
         assertTrue(lang.has("tooltip.roundwood.window_trim"));
-        assertEquals("Round Trim", lang.get("block.roundwood.round_trim").getAsString());
+        assertEquals("Door Trim", lang.get("block.roundwood.round_trim").getAsString());
         for (String alias : ALIASES) {
             assertEquals(englishName(alias), lang.get("block.roundwood." + alias).getAsString(), alias);
         }

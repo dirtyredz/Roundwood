@@ -38,16 +38,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Every window model against the geometry the blocks collide with and target (0.7.0: all ten designs,
- * untrimmed and trimmed). For every pose, connection set and trim state, the parts the checked-in
+ * Every window model against the geometry the blocks collide with and target (0.8.0: all ten designs,
+ * no trimmed variants: trims are block-entity parts). For every pose and connection set, the parts the checked-in
  * blockstate applies, turned as it turns them, must draw exactly the visible surfaces of
- * {@link WindowPaneGeometry} (painted in order, so a flush trim's skin replaces wood):
+ * {@link WindowPaneGeometry}:
  * <ul>
  *     <li>every face of solid material that meets air is drawn, exactly once;</li>
  *     <li>no glass face is drawn against anything (the 0.6.1 horizontal seams were glass faces
  *     between stacked glass boxes, and arm ends inside the panel's glass);</li>
- *     <li>no opaque face is drawn against opaque material (wood against trim included);</li>
- *     <li>a wood, beam or trim face against glass is drawn (the reveal seen through the glazing).</li>
+ *     <li>no opaque face is drawn against opaque material;</li>
+ *     <li>a wood or beam face against glass is drawn (the reveal seen through the glazing).</li>
  * </ul>
  * Plus render types, textures, and the item models.
  */
@@ -90,57 +90,63 @@ class GeneratedWindowPaneModelsTest {
     private static void check(JsonArray parts, Map<String, String> pose, WindowDesign design, WindowPose windowPose) {
         // Connections the geometry ignores must not change the model; each distinct (model, geometry) pair is checked once.
         Set<String> seen = new HashSet<>();
-        for (boolean trimmed : new boolean[] {false, true}) {
-            for (int mask = 0; mask < 16; mask++) {
-                Map<String, String> values = new HashMap<>(pose);
-                values.put("trimmed", String.valueOf(trimmed));
-                Set<Direction> connected = EnumSet.noneOf(Direction.class);
-                for (int i = 0; i < 4; i++) {
-                    boolean on = (mask & (1 << i)) != 0;
-                    values.put(SIDES.get(i).getSerializedName(), String.valueOf(on));
-                    if (on) {
-                        connected.add(SIDES.get(i));
+        for (int mask = 0; mask < 16; mask++) {
+            Map<String, String> values = new HashMap<>(pose);
+            values.putAll(GeneratedBlockstatesTest.flagValues("false,false"));
+            Set<Direction> connected = EnumSet.noneOf(Direction.class);
+            for (int i = 0; i < 4; i++) {
+                boolean on = (mask & (1 << i)) != 0;
+                values.put(SIDES.get(i).getSerializedName(), String.valueOf(on));
+                if (on) {
+                    connected.add(SIDES.get(i));
+                }
+            }
+            String what = design.id() + " " + values;
+            Set<String> applied = GeneratedBlockstatesTest.applied(parts, values);
+            assertEquals(1, applied.size(), what + ": one complete model per state, got " + applied);
+            // The trimmed and face_reversed properties never select a model (0.8.0: trims are block-entity parts).
+            for (String flags : GeneratedBlockstatesTest.FLAG_STATES) {
+                Map<String, String> flagged = new HashMap<>(values);
+                flagged.putAll(GeneratedBlockstatesTest.flagValues(flags));
+                if (!applied.equals(GeneratedBlockstatesTest.applied(parts, flagged))) {
+                    fail(what + ": flags " + flags + " change the applied models");
+                }
+            }
+            Set<Direction> effective = EnumSet.noneOf(Direction.class);
+            connected.stream().filter(WindowPaneGeometry.neededSides(windowPose)::contains).forEach(effective::add);
+            if (!seen.add(applied + " " + effective)) {
+                continue;
+            }
+            Cells geometry = new Cells();
+            for (Piece piece : WindowPaneGeometry.pieces(design, windowPose, connected)) {
+                geometry.fill(piece.box(), piece.texture().equals(WindowPaneGeometry.GLASS) ? GLASS : SOLID);
+            }
+            Set<Long> drawn = new HashSet<>();
+            for (String part : applied) {
+                String[] split = part.split("@");
+                int turns = Integer.parseInt(split[1]) / 90;
+                for (Element element : ELEMENTS.computeIfAbsent(split[0], GeneratedWindowPaneModelsTest::load)) {
+                    Box box = element.box().rotateY(turns);
+                    if (!geometry.containsAll(box)) {
+                        fail(what + ": " + split[0] + " draws outside the geometry: " + box);
                     }
-                }
-                String what = design.id() + " " + values;
-                Set<String> applied = GeneratedBlockstatesTest.applied(parts, values);
-                assertEquals(1, applied.size(), what + ": one complete model per state, got " + applied);
-                Set<Direction> effective = EnumSet.noneOf(Direction.class);
-                connected.stream().filter(WindowPaneGeometry.neededSides(windowPose)::contains).forEach(effective::add);
-                if (!seen.add(applied + " " + effective + " " + trimmed)) {
-                    continue;
-                }
-                Cells geometry = new Cells();
-                for (Piece piece : WindowPaneGeometry.pieces(design, windowPose, connected, trimmed)) {
-                    geometry.fill(piece.box(), piece.texture().equals(WindowPaneGeometry.GLASS) ? GLASS : SOLID);
-                }
-                Set<Long> drawn = new HashSet<>();
-                for (String part : applied) {
-                    String[] split = part.split("@");
-                    int turns = Integer.parseInt(split[1]) / 90;
-                    for (Element element : ELEMENTS.computeIfAbsent(split[0], GeneratedWindowPaneModelsTest::load)) {
-                        Box box = element.box().rotateY(turns);
-                        if (!geometry.containsAll(box)) {
-                            fail(what + ": " + split[0] + " draws outside the geometry: " + box);
-                        }
-                        for (Direction face : element.faces()) {
-                            for (long key : Cells.faceKeys(box, turn(face, turns))) {
-                                if (!drawn.add(key)) {
-                                    fail(what + ": face drawn twice " + Cells.describe(key));
-                                }
-                                byte mine = geometry.at(key);
-                                byte next = geometry.neighbour(key);
-                                if (!(next == AIR || (mine == SOLID && next == GLASS))) {
-                                    fail(what + ": hidden face drawn (" + mine + " against " + next + ") " + Cells.describe(key));
-                                }
+                    for (Direction face : element.faces()) {
+                        for (long key : Cells.faceKeys(box, turn(face, turns))) {
+                            if (!drawn.add(key)) {
+                                fail(what + ": face drawn twice " + Cells.describe(key));
+                            }
+                            byte mine = geometry.at(key);
+                            byte next = geometry.neighbour(key);
+                            if (!(next == AIR || (mine == SOLID && next == GLASS))) {
+                                fail(what + ": hidden face drawn (" + mine + " against " + next + ") " + Cells.describe(key));
                             }
                         }
                     }
                 }
-                for (long key : geometry.visibleFaces()) {
-                    if (!drawn.contains(key)) {
-                        fail(what + ": visible face not drawn " + Cells.describe(key));
-                    }
+            }
+            for (long key : geometry.visibleFaces()) {
+                if (!drawn.contains(key)) {
+                    fail(what + ": visible face not drawn " + Cells.describe(key));
                 }
             }
         }
@@ -157,26 +163,21 @@ class GeneratedWindowPaneModelsTest {
             assertEquals("minecraft:translucent", renderType(id), id);
             Resolved model = resolve(id);
             assertFalse(model.elements().isEmpty(), id + ": no elements");
-            boolean trimmed = id.contains("_trimmed");
             for (JsonObject element : elements(model)) {
                 JsonObject faces = element.getAsJsonObject("faces");
                 assertEquals(1, faces.size(), id + ": an element draws one surface");
                 for (Map.Entry<String, JsonElement> face : faces.entrySet()) {
                     String texture = face.getValue().getAsJsonObject().get("texture").getAsString();
-                    Set<String> allowed = trimmed ? Set.of("#frame", "#glass", "#trim_face", "#trim_edge") : Set.of("#frame", "#glass");
+                    Set<String> allowed = Set.of("#frame", "#glass");
                     assertTrue(allowed.contains(texture), id + ": unexpected texture " + texture);
                 }
             }
             assertEquals(ModelExpectations.OAK_PLANKS, model.texture("#frame"), id);
             assertEquals(ModelExpectations.OAK_PLANKS, model.texture("#particle"), id);
             assertEquals(ModelExpectations.GLASS, model.texture("#glass"), id);
-            if (trimmed) {
-                assertEquals("roundwood:block/window_trim_face", model.texture("#trim_face"), id);
-                assertEquals("roundwood:block/window_trim_edge", model.texture("#trim_edge"), id);
-            }
             checked++;
         }
-        assertEquals(220, checked, "window block models");
+        assertEquals(110, checked, "window block models");
     }
 
     /**

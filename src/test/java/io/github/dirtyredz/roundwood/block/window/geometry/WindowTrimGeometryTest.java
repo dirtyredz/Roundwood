@@ -16,10 +16,12 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * The window trim (0.7.0): the band follows each opening rim, sits on frame wood only, stays inside
- * the cell at the specified depths in every pose, never changes collision, and its whole-face
+ * The window trim: the band follows each opening rim and sits on frame wood only (0.7.0); since 0.8.0
+ * each face's band stands one pixel proud of its face in every pose (a flush pane's wall-side band one
+ * pixel past the cell), never changes collision, is targeted only inside the cell, and its whole-face
  * artwork coordinates run on across the four pieces of the arched window.
  */
 class WindowTrimGeometryTest {
@@ -42,7 +44,7 @@ class WindowTrimGeometryTest {
     }
 
     /** Written out independently: the 16/12 ring, the 32/28 ring around (16, 0) of the arches, the corners' jamb and sill. */
-    private static boolean expectedBand(WindowProfile profile, int u, int v) {
+    static boolean expectedBand(WindowProfile profile, int u, int v) {
         double cu = u + 0.5;
         double cv = v + 0.5;
         return switch (profile) {
@@ -76,37 +78,67 @@ class WindowTrimGeometryTest {
         assertArrayEquals(new double[] {16, 17}, WindowTrimGeometry.depths(WindowDepth.POSITIVE)[1], "positive flush, wall side");
     }
 
+    /**
+     * Every band sits one pixel proud of its own face of the slab, in every pose, on both sides: never
+     * inside the slab (no frame pixel is replaced) and never further than one pixel past the cell.
+     */
     @Test
-    void trimDepthsStayInTheCellAndCoverBothFaces() {
+    void eachBandStandsOnePixelProudOfItsFace() {
         for (WindowPose pose : WindowPaneGeometryTest.allPoses()) {
-            double[][] depths = WindowTrimGeometry.depths(pose.depth());
-            double[][] expected = switch (pose.depth()) {
-                case CENTER -> new double[][] {{6, 7}, {9, 10}};
-                case NEGATIVE -> new double[][] {{0, 1}, {2, 3}};
-                case POSITIVE -> new double[][] {{13, 14}, {15, 16}};
-            };
-            assertArrayEquals(expected[0], depths[0]);
-            assertArrayEquals(expected[1], depths[1]);
-            for (WindowProfile profile : WindowProfile.values()) {
-                for (Piece piece : WindowTrimGeometry.pieces(profile, pose)) {
-                    assertTrue(piece.box().within(Box.cell()), profile + " " + pose + ": trim leaves the cell " + piece.box());
-                    assertEquals(WindowTrimGeometry.TRIM, piece.texture());
+            for (Direction side : sides(pose)) {
+                double[] expected = side.getAxisDirection() == Direction.AxisDirection.POSITIVE
+                        ? new double[] {pose.depth().slabMax(), pose.depth().slabMax() + 1}
+                        : new double[] {pose.depth().slabMin() - 1, pose.depth().slabMin()};
+                for (WindowProfile profile : WindowProfile.values()) {
+                    List<Piece> pieces = WindowTrimGeometry.pieces(profile, pose, side);
+                    assertFalse(pieces.isEmpty(), profile + " " + pose + " " + side + ": empty band");
+                    for (Piece piece : pieces) {
+                        double[] n = range(piece.box(), pose.normal());
+                        if (n[0] != expected[0] || n[1] != expected[1]) {
+                            fail(profile + " " + pose + " " + side + ": band at " + n[0] + ".." + n[1]);
+                        }
+                        assertTrue(piece.box().within(new Box(-1, -1, -1, 17, 17, 17)), "beyond one pixel: " + piece.box());
+                        assertEquals(WindowTrimGeometry.TRIM, piece.texture());
+                    }
                 }
             }
         }
     }
 
+    /** Collision never includes a trim; the outline adds only the in-cell bands of the trimmed sides. */
     @Test
-    void theTrimNeverCollidesButIsTargeted() {
+    void theTrimNeverCollidesAndIsTargetedOnlyInTheCell() {
         for (WindowDesign design : WindowDesign.all()) {
             for (WindowPose pose : WindowPaneGeometryTest.allPoses()) {
                 List<Box> collision = WindowPaneGeometry.boxes(design, pose, Set.of());
-                List<Box> selection = WindowPaneGeometry.selection(design, pose, Set.of(), true);
                 assertEquals(List.of(pose.slab()), collision, design.id() + " " + pose);
-                assertTrue(selection.size() > collision.size(), design.id() + " " + pose + ": trim not targetable");
-                assertEquals(collision, WindowPaneGeometry.selection(design, pose, Set.of(), false));
+                assertEquals(collision, WindowPaneGeometry.selection(design, pose, Set.of(), Set.of()));
+                for (Direction side : sides(pose)) {
+                    List<Box> selection = WindowPaneGeometry.selection(design, pose, Set.of(), Set.of(side));
+                    boolean inCell = range(WindowTrimGeometry.pieces(design.profile(), pose, side).get(0).box(), pose.normal())[0] >= 0
+                            && range(WindowTrimGeometry.pieces(design.profile(), pose, side).get(0).box(), pose.normal())[1] <= 16;
+                    if (inCell != (selection.size() > collision.size())) {
+                        fail(design.id() + " " + pose + " " + side + ": in-cell " + inCell + " but selection " + selection.size());
+                    }
+                    for (Box box : selection) {
+                        assertTrue(box.within(Box.cell()), "selection leaves the cell: " + box);
+                    }
+                }
             }
         }
+    }
+
+    static List<Direction> sides(WindowPose pose) {
+        return List.of(Direction.fromAxisAndDirection(pose.normal(), Direction.AxisDirection.NEGATIVE),
+                Direction.fromAxisAndDirection(pose.normal(), Direction.AxisDirection.POSITIVE));
+    }
+
+    static double[] range(Box box, Direction.Axis axis) {
+        return switch (axis) {
+            case X -> new double[] {box.minX(), box.maxX()};
+            case Y -> new double[] {box.minY(), box.maxY()};
+            case Z -> new double[] {box.minZ(), box.maxZ()};
+        };
     }
 
     /**

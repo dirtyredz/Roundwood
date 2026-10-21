@@ -86,7 +86,7 @@ class GeneratedWindowModelsTest {
         assertNotNull(glass, GLASS + " is missing");
         int scale = glass.getWidth() / 16;
         for (String id : List.of("roundwood:block/round_window", "roundwood:block/round_window_arms_both",
-                "roundwood:block/round_window_arch_left_cross_trimmed_arms_north")) {
+                "roundwood:block/round_window_arch_left_cross_arms_north")) {
             assertEquals("minecraft:translucent", renderType(id), id + ": glazing needs the translucent render type");
             Resolved model = resolve(id);
             int glassFaces = 0;

@@ -67,10 +67,10 @@ class GeneratedBlockstatesTest {
 
     /**
      * Round windows (both designs and every alias, which draw the plain round window): every position,
-     * axis, connection set and trim state, checked through the multipart's own conditions.
+     * axis, connection set and trimmed or face_reversed flag (neither selects a model), checked through the multipart's own conditions.
      */
     @Test
-    void roundWindowBlockstatesCoverEveryPositionAxisConnectionAndTrim() {
+    void roundWindowBlockstatesCoverEveryPositionAxisAndConnection() {
         Map<String, String> windows = new java.util.LinkedHashMap<>();
         ModelExpectations.aliasWindows().forEach(alias -> windows.put(alias, "round_window"));
         windows.put("round_window", "round_window");
@@ -84,13 +84,13 @@ class GeneratedBlockstatesTest {
             assertFalse(state.toString().contains("waterlogged"), id + ": no waterlogged conditions");
             for (String position : List.of("center", "north", "east", "south", "west", "up", "down")) {
                 for (String axis : List.of("x", "z")) {
-                    for (String trimmed : List.of("false", "true")) {
+                    for (String flags : FLAG_STATES) {
                         for (int mask = 0; mask < 16; mask++) {
                             Map<String, String> values = connections(mask);
                             values.put("axis", axis);
                             values.put("position", position);
-                            values.put("trimmed", trimmed);
-                            assertEquals(expectedRound(window.getValue(), position, axis, trimmed.equals("true"), mask),
+                            values.putAll(flagValues(flags));
+                            assertEquals(expectedRound(window.getValue(), position, axis, mask),
                                     applied(parts, values), id + " " + values);
                         }
                     }
@@ -99,9 +99,9 @@ class GeneratedBlockstatesTest {
         }
     }
 
-    /** The eight oriented pieces: every orientation, depth, connection set and trim state draws exactly the expected model. */
+    /** The eight oriented pieces: every orientation, depth, connection set and trimmed or face_reversed flag (neither selects a model) draws exactly the expected model. */
     @Test
-    void orientedBlockstatesCoverEveryOrientationDepthConnectionAndTrim() {
+    void orientedBlockstatesCoverEveryOrientationDepthAndConnection() {
         for (String piece : List.of("round_window_arch_left", "round_window_arch_right", "round_window_bottom_left",
                 "round_window_bottom_right", "round_window_arch_left_cross", "round_window_arch_right_cross",
                 "round_window_bottom_left_cross", "round_window_bottom_right_cross")) {
@@ -111,13 +111,13 @@ class GeneratedBlockstatesTest {
             JsonArray parts = state.getAsJsonArray("multipart");
             for (String orientation : ORIENTATIONS) {
                 for (String depth : List.of("center", "negative", "positive")) {
-                    for (String trimmed : List.of("false", "true")) {
+                    for (String flags : FLAG_STATES) {
                         for (int mask = 0; mask < 16; mask++) {
                             Map<String, String> values = connections(mask);
                             values.put("orientation", orientation);
                             values.put("depth", depth);
-                            values.put("trimmed", trimmed);
-                            assertEquals(expectedArch(piece, orientation, depth, trimmed.equals("true"), mask),
+                            values.putAll(flagValues(flags));
+                            assertEquals(expectedArch(piece, orientation, depth, mask),
                                     applied(parts, values), piece + " " + values);
                         }
                     }
@@ -131,21 +131,20 @@ class GeneratedBlockstatesTest {
             "up_south", "up_west", "down_north", "down_east", "down_south", "down_west");
 
     /** What a round window state should draw, written independently of the generator. */
-    private static Set<String> expectedRound(String design, String position, String axis, boolean trimmed, int mask) {
+    private static Set<String> expectedRound(String design, String position, String axis, int mask) {
         Set<String> out = new TreeSet<>();
-        String trim = trimmed ? "_trimmed" : "";
         if (position.equals("center")) {
             int turns = axis.equals("x") ? 0 : 1;
             List<String> across = axis.equals("x") ? List.of("north", "south") : List.of("east", "west");
-            out.add("roundwood:block/" + design + trim + arms(across, turns, mask) + "@" + 90 * turns);
+            out.add("roundwood:block/" + design + arms(across, turns, mask) + "@" + 90 * turns);
             return out;
         }
         if (position.equals("up") || position.equals("down")) {
-            posed(out, design + (position.equals("up") ? "_down_ceiling" : "_up_floor") + trim, 0);
+            posed(out, design + (position.equals("up") ? "_down_ceiling" : "_up_floor"), 0);
             return out;
         }
         // Flush on a side: the north-flush pose turned so its flush side lands on that side.
-        posed(out, design + "_back" + trim, SIDES.indexOf(position));
+        posed(out, design + "_back", SIDES.indexOf(position));
         return out;
     }
 
@@ -165,16 +164,15 @@ class GeneratedBlockstatesTest {
     }
 
     /** What an arch state should draw: its canonical model family (upright facing south or top north) turned. */
-    private static Set<String> expectedArch(String piece, String orientation, String depth, boolean trimmed, int mask) {
+    private static Set<String> expectedArch(String piece, String orientation, String depth, int mask) {
         Set<String> out = new TreeSet<>();
-        String trim = trimmed ? "_trimmed" : "";
         if (!orientation.contains("_")) {
             int turns = List.of("south", "west", "north", "east").indexOf(orientation);
             Map<String, String> flush = Map.of("north", "z", "south", "z", "east", "x", "west", "x");
             if (depth.equals("center")) {
                 // across the plane: the two sides on the normal's axis
                 List<String> across = SIDES.stream().filter(side -> flush.get(side).equals(flush.get(orientation))).toList();
-                out.add("roundwood:block/" + piece + trim + arms(across, turns, mask) + "@" + 90 * turns);
+                out.add("roundwood:block/" + piece + arms(across, turns, mask) + "@" + 90 * turns);
                 return out;
             }
             // The slab lies against the negative or positive world side of the normal's axis.
@@ -182,7 +180,7 @@ class GeneratedBlockstatesTest {
                     : (depth.equals("negative") ? "west" : "east");
             String canonicalSide = SIDES.get(Math.floorMod(SIDES.indexOf(side) - turns, 4));
             String stem = piece + (canonicalSide.equals("north") ? "_back" : "_front");
-            posed(out, stem + trim, turns);
+            posed(out, stem, turns);
             return out;
         }
         String[] parts = orientation.split("_");
@@ -192,13 +190,22 @@ class GeneratedBlockstatesTest {
             case "center" -> "level";
             default -> "ceiling";
         };
-        posed(out, piece + "_" + parts[0] + "_" + level + trim, turns);
+        posed(out, piece + "_" + parts[0] + "_" + level, turns);
         return out;
     }
 
     /** A positioned pose draws its core only, whatever is connected (0.6.1: no glass bridges). */
     private static void posed(Set<String> out, String stem, int turns) {
         out.add("roundwood:block/" + stem + "@" + 90 * turns);
+    }
+
+    /** Every trimmed / face_reversed combination, as "trimmed,face_reversed". */
+    static final List<String> FLAG_STATES = List.of("false,false", "true,false", "false,true", "true,true");
+
+    /** The trimmed and face_reversed property values of one {@link #FLAG_STATES} entry. */
+    static Map<String, String> flagValues(String flags) {
+        String[] split = flags.split(",");
+        return Map.of("trimmed", split[0], "face_reversed", split[1]);
     }
 
     private static boolean connected(int mask, String side) {

@@ -9,8 +9,7 @@
         "depth": "center",
         "north": "false",
         "orientation": "north",
-        "south": "false",
-        "trimmed": "false"
+        "south": "false"
       }
     },
     {
@@ -22,8 +21,7 @@
         "depth": "center",
         "north": "true",
         "orientation": "north",
-        "south": "false",
-        "trimmed": "false"
+        "south": "false"
       }
     },
     {
@@ -35,8 +33,7 @@
         "depth": "center",
         "north": "false",
         "orientation": "north",
-        "south": "true",
-        "trimmed": "false"
+        "south": "true"
       }
     },
     {
@@ -48,60 +45,7 @@
         "depth": "center",
         "north": "true",
         "orientation": "north",
-        "south": "true",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed",
-        "y": 180
-      },
-      "when": {
-        "depth": "center",
-        "north": "false",
-        "orientation": "north",
-        "south": "false",
-        "trimmed": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_south",
-        "y": 180
-      },
-      "when": {
-        "depth": "center",
-        "north": "true",
-        "orientation": "north",
-        "south": "false",
-        "trimmed": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_north",
-        "y": 180
-      },
-      "when": {
-        "depth": "center",
-        "north": "false",
-        "orientation": "north",
-        "south": "true",
-        "trimmed": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_both",
-        "y": 180
-      },
-      "when": {
-        "depth": "center",
-        "north": "true",
-        "orientation": "north",
-        "south": "true",
-        "trimmed": "true"
+        "south": "true"
       }
     },
     {
@@ -111,19 +55,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "north",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_front_trimmed",
-        "y": 180
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "north",
-        "trimmed": "true"
+        "orientation": "north"
       }
     },
     {
@@ -133,19 +65,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "north",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_back_trimmed",
-        "y": 180
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "north",
-        "trimmed": "true"
+        "orientation": "north"
       }
     },
     {
@@ -157,7 +77,6 @@
         "depth": "center",
         "east": "false",
         "orientation": "east",
-        "trimmed": "false",
         "west": "false"
       }
     },
@@ -170,7 +89,6 @@
         "depth": "center",
         "east": "true",
         "orientation": "east",
-        "trimmed": "false",
         "west": "false"
       }
     },
@@ -183,7 +101,6 @@
         "depth": "center",
         "east": "false",
         "orientation": "east",
-        "trimmed": "false",
         "west": "true"
       }
     },
@@ -196,59 +113,6 @@
         "depth": "center",
         "east": "true",
         "orientation": "east",
-        "trimmed": "false",
-        "west": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed",
-        "y": 270
-      },
-      "when": {
-        "depth": "center",
-        "east": "false",
-        "orientation": "east",
-        "trimmed": "true",
-        "west": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_south",
-        "y": 270
-      },
-      "when": {
-        "depth": "center",
-        "east": "true",
-        "orientation": "east",
-        "trimmed": "true",
-        "west": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_north",
-        "y": 270
-      },
-      "when": {
-        "depth": "center",
-        "east": "false",
-        "orientation": "east",
-        "trimmed": "true",
-        "west": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_both",
-        "y": 270
-      },
-      "when": {
-        "depth": "center",
-        "east": "true",
-        "orientation": "east",
-        "trimmed": "true",
         "west": "true"
       }
     },
@@ -259,19 +123,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "east",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_back_trimmed",
-        "y": 270
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "east",
-        "trimmed": "true"
+        "orientation": "east"
       }
     },
     {
@@ -281,19 +133,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "east",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_front_trimmed",
-        "y": 270
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "east",
-        "trimmed": "true"
+        "orientation": "east"
       }
     },
     {
@@ -304,8 +144,7 @@
         "depth": "center",
         "north": "false",
         "orientation": "south",
-        "south": "false",
-        "trimmed": "false"
+        "south": "false"
       }
     },
     {
@@ -316,8 +155,7 @@
         "depth": "center",
         "north": "true",
         "orientation": "south",
-        "south": "false",
-        "trimmed": "false"
+        "south": "false"
       }
     },
     {
@@ -328,8 +166,7 @@
         "depth": "center",
         "north": "false",
         "orientation": "south",
-        "south": "true",
-        "trimmed": "false"
+        "south": "true"
       }
     },
     {
@@ -340,56 +177,7 @@
         "depth": "center",
         "north": "true",
         "orientation": "south",
-        "south": "true",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed"
-      },
-      "when": {
-        "depth": "center",
-        "north": "false",
-        "orientation": "south",
-        "south": "false",
-        "trimmed": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_north"
-      },
-      "when": {
-        "depth": "center",
-        "north": "true",
-        "orientation": "south",
-        "south": "false",
-        "trimmed": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_south"
-      },
-      "when": {
-        "depth": "center",
-        "north": "false",
-        "orientation": "south",
-        "south": "true",
-        "trimmed": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_both"
-      },
-      "when": {
-        "depth": "center",
-        "north": "true",
-        "orientation": "south",
-        "south": "true",
-        "trimmed": "true"
+        "south": "true"
       }
     },
     {
@@ -398,18 +186,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "south",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_back_trimmed"
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "south",
-        "trimmed": "true"
+        "orientation": "south"
       }
     },
     {
@@ -418,18 +195,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "south",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_front_trimmed"
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "south",
-        "trimmed": "true"
+        "orientation": "south"
       }
     },
     {
@@ -441,7 +207,6 @@
         "depth": "center",
         "east": "false",
         "orientation": "west",
-        "trimmed": "false",
         "west": "false"
       }
     },
@@ -454,7 +219,6 @@
         "depth": "center",
         "east": "true",
         "orientation": "west",
-        "trimmed": "false",
         "west": "false"
       }
     },
@@ -467,7 +231,6 @@
         "depth": "center",
         "east": "false",
         "orientation": "west",
-        "trimmed": "false",
         "west": "true"
       }
     },
@@ -480,59 +243,6 @@
         "depth": "center",
         "east": "true",
         "orientation": "west",
-        "trimmed": "false",
-        "west": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed",
-        "y": 90
-      },
-      "when": {
-        "depth": "center",
-        "east": "false",
-        "orientation": "west",
-        "trimmed": "true",
-        "west": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_north",
-        "y": 90
-      },
-      "when": {
-        "depth": "center",
-        "east": "true",
-        "orientation": "west",
-        "trimmed": "true",
-        "west": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_south",
-        "y": 90
-      },
-      "when": {
-        "depth": "center",
-        "east": "false",
-        "orientation": "west",
-        "trimmed": "true",
-        "west": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_trimmed_arms_both",
-        "y": 90
-      },
-      "when": {
-        "depth": "center",
-        "east": "true",
-        "orientation": "west",
-        "trimmed": "true",
         "west": "true"
       }
     },
@@ -543,19 +253,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "west",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_front_trimmed",
-        "y": 90
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "west",
-        "trimmed": "true"
+        "orientation": "west"
       }
     },
     {
@@ -565,19 +263,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "west",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_back_trimmed",
-        "y": 90
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "west",
-        "trimmed": "true"
+        "orientation": "west"
       }
     },
     {
@@ -586,18 +272,7 @@
       },
       "when": {
         "depth": "center",
-        "orientation": "up_north",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_level_trimmed"
-      },
-      "when": {
-        "depth": "center",
-        "orientation": "up_north",
-        "trimmed": "true"
+        "orientation": "up_north"
       }
     },
     {
@@ -606,18 +281,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "up_north",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_floor_trimmed"
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "up_north",
-        "trimmed": "true"
+        "orientation": "up_north"
       }
     },
     {
@@ -626,18 +290,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "up_north",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_ceiling_trimmed"
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "up_north",
-        "trimmed": "true"
+        "orientation": "up_north"
       }
     },
     {
@@ -647,19 +300,7 @@
       },
       "when": {
         "depth": "center",
-        "orientation": "up_east",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_level_trimmed",
-        "y": 90
-      },
-      "when": {
-        "depth": "center",
-        "orientation": "up_east",
-        "trimmed": "true"
+        "orientation": "up_east"
       }
     },
     {
@@ -669,19 +310,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "up_east",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_floor_trimmed",
-        "y": 90
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "up_east",
-        "trimmed": "true"
+        "orientation": "up_east"
       }
     },
     {
@@ -691,19 +320,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "up_east",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_ceiling_trimmed",
-        "y": 90
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "up_east",
-        "trimmed": "true"
+        "orientation": "up_east"
       }
     },
     {
@@ -713,19 +330,7 @@
       },
       "when": {
         "depth": "center",
-        "orientation": "up_south",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_level_trimmed",
-        "y": 180
-      },
-      "when": {
-        "depth": "center",
-        "orientation": "up_south",
-        "trimmed": "true"
+        "orientation": "up_south"
       }
     },
     {
@@ -735,19 +340,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "up_south",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_floor_trimmed",
-        "y": 180
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "up_south",
-        "trimmed": "true"
+        "orientation": "up_south"
       }
     },
     {
@@ -757,19 +350,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "up_south",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_ceiling_trimmed",
-        "y": 180
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "up_south",
-        "trimmed": "true"
+        "orientation": "up_south"
       }
     },
     {
@@ -779,19 +360,7 @@
       },
       "when": {
         "depth": "center",
-        "orientation": "up_west",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_level_trimmed",
-        "y": 270
-      },
-      "when": {
-        "depth": "center",
-        "orientation": "up_west",
-        "trimmed": "true"
+        "orientation": "up_west"
       }
     },
     {
@@ -801,19 +370,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "up_west",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_floor_trimmed",
-        "y": 270
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "up_west",
-        "trimmed": "true"
+        "orientation": "up_west"
       }
     },
     {
@@ -823,19 +380,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "up_west",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_up_ceiling_trimmed",
-        "y": 270
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "up_west",
-        "trimmed": "true"
+        "orientation": "up_west"
       }
     },
     {
@@ -844,18 +389,7 @@
       },
       "when": {
         "depth": "center",
-        "orientation": "down_north",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_level_trimmed"
-      },
-      "when": {
-        "depth": "center",
-        "orientation": "down_north",
-        "trimmed": "true"
+        "orientation": "down_north"
       }
     },
     {
@@ -864,18 +398,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "down_north",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_floor_trimmed"
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "down_north",
-        "trimmed": "true"
+        "orientation": "down_north"
       }
     },
     {
@@ -884,18 +407,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "down_north",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_ceiling_trimmed"
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "down_north",
-        "trimmed": "true"
+        "orientation": "down_north"
       }
     },
     {
@@ -905,19 +417,7 @@
       },
       "when": {
         "depth": "center",
-        "orientation": "down_east",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_level_trimmed",
-        "y": 90
-      },
-      "when": {
-        "depth": "center",
-        "orientation": "down_east",
-        "trimmed": "true"
+        "orientation": "down_east"
       }
     },
     {
@@ -927,19 +427,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "down_east",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_floor_trimmed",
-        "y": 90
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "down_east",
-        "trimmed": "true"
+        "orientation": "down_east"
       }
     },
     {
@@ -949,19 +437,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "down_east",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_ceiling_trimmed",
-        "y": 90
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "down_east",
-        "trimmed": "true"
+        "orientation": "down_east"
       }
     },
     {
@@ -971,19 +447,7 @@
       },
       "when": {
         "depth": "center",
-        "orientation": "down_south",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_level_trimmed",
-        "y": 180
-      },
-      "when": {
-        "depth": "center",
-        "orientation": "down_south",
-        "trimmed": "true"
+        "orientation": "down_south"
       }
     },
     {
@@ -993,19 +457,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "down_south",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_floor_trimmed",
-        "y": 180
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "down_south",
-        "trimmed": "true"
+        "orientation": "down_south"
       }
     },
     {
@@ -1015,19 +467,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "down_south",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_ceiling_trimmed",
-        "y": 180
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "down_south",
-        "trimmed": "true"
+        "orientation": "down_south"
       }
     },
     {
@@ -1037,19 +477,7 @@
       },
       "when": {
         "depth": "center",
-        "orientation": "down_west",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_level_trimmed",
-        "y": 270
-      },
-      "when": {
-        "depth": "center",
-        "orientation": "down_west",
-        "trimmed": "true"
+        "orientation": "down_west"
       }
     },
     {
@@ -1059,19 +487,7 @@
       },
       "when": {
         "depth": "negative",
-        "orientation": "down_west",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_floor_trimmed",
-        "y": 270
-      },
-      "when": {
-        "depth": "negative",
-        "orientation": "down_west",
-        "trimmed": "true"
+        "orientation": "down_west"
       }
     },
     {
@@ -1081,19 +497,7 @@
       },
       "when": {
         "depth": "positive",
-        "orientation": "down_west",
-        "trimmed": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arch_right_down_ceiling_trimmed",
-        "y": 270
-      },
-      "when": {
-        "depth": "positive",
-        "orientation": "down_west",
-        "trimmed": "true"
+        "orientation": "down_west"
       }
     }
   ]

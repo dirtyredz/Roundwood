@@ -25,9 +25,6 @@ final class ModelExpectations {
     static final String GLASS = "roundwood:block/window_glass_clear";
     /** The pre-0.7.0 glazing texture; still shipped but no window model uses it. */
     static final String GLASS_LEGACY = "roundwood:block/window_glass";
-    /** The window trim's own textures, bound by the {@code _trimmed} window models. */
-    static final String TRIM_FACE = "roundwood:block/window_trim_face";
-    static final String TRIM_EDGE = "roundwood:block/window_trim_edge";
     static final String OAK_PLANKS = "minecraft:block/oak_planks";
     static final String STRIPPED_OAK_LOG = "minecraft:block/stripped_oak_log";
     static final List<String> PARTS = List.of("lower_left", "upper_left", "lower_right", "upper_right");

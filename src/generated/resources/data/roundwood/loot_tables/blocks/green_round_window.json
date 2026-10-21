@@ -20,11 +20,8 @@
       "bonus_rolls": 0.0,
       "conditions": [
         {
-          "block": "roundwood:green_round_window",
-          "condition": "minecraft:block_state_property",
-          "properties": {
-            "trimmed": "true"
-          }
+          "condition": "roundwood:trim_face",
+          "face": "front"
         },
         {
           "condition": "minecraft:survives_explosion"
@@ -39,7 +36,39 @@
               "ops": [
                 {
                   "op": "replace",
-                  "source": "WindowTrim.RoundwoodAppearance",
+                  "source": "WindowTrim.Front.RoundwoodAppearance",
+                  "target": "RoundwoodAppearance"
+                }
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "roundwood:window_trim"
+        }
+      ],
+      "rolls": 1.0
+    },
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "roundwood:trim_face",
+          "face": "back"
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "WindowTrim.Back.RoundwoodAppearance",
                   "target": "RoundwoodAppearance"
                 }
               ],

@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -28,8 +27,8 @@ class WindowSurfaceGeometryTest {
     private static final WindowPose CENTRED = WindowPosition.CENTER.pose(Direction.Axis.X);
     private static final Set<String> TRANSLUCENT = Set.of(WindowPaneGeometry.GLASS);
 
-    private static List<Surface> surfaces(WindowDesign design, WindowPose pose, Set<Direction> connected, boolean trimmed) {
-        return WindowSurfaceGeometry.surfaces(WindowPaneGeometry.pieces(design, pose, connected, trimmed), TRANSLUCENT);
+    private static List<Surface> surfaces(WindowDesign design, WindowPose pose, Set<Direction> connected) {
+        return WindowSurfaceGeometry.surfaces(WindowPaneGeometry.pieces(design, pose, connected), TRANSLUCENT);
     }
 
     @Test
@@ -53,7 +52,7 @@ class WindowSurfaceGeometryTest {
         }
     }
 
-    /** Every design, every pose, every centred arm combination, trimmed or not: glass front and back exactly once over the glazing. */
+    /** Every design, every pose, every centred arm combination: glass front and back exactly once over the glazing. */
     @Test
     void glassCoversTheGlazingExactlyOnceOnEachSide() {
         for (WindowDesign design : WindowDesign.all()) {
@@ -66,43 +65,41 @@ class WindowSurfaceGeometryTest {
                             connected.add(sides.get(i));
                         }
                     }
-                    for (boolean trimmed : new boolean[] {false, true}) {
-                        String what = design.id() + " " + pose + " " + connected + " trimmed " + trimmed;
-                        int[] front = new int[32 * 32];
-                        int[] back = new int[32 * 32];
-                        for (Surface surface : surfaces(design, pose, connected, trimmed)) {
-                            if (!surface.texture().equals(WindowPaneGeometry.GLASS) || surface.face().getAxis() != pose.normal()) {
-                                continue;
-                            }
-                            if (!pose.slab().intersect(surface.backing()).isPresent()) {
-                                continue; // an arm's glass outside the slab faces the cell edge, not the viewer
-                            }
-                            int[] side = surface.face() == pose.front() ? front : back;
-                            double[] u = pose.uRange(surface.backing());
-                            double[] v = pose.vRange(surface.backing());
-                            for (int hu = (int) Math.round(u[0] * 2); hu < Math.round(u[1] * 2); hu++) {
-                                for (int hv = (int) Math.round(v[0] * 2); hv < Math.round(v[1] * 2); hv++) {
-                                    side[hu * 32 + hv]++;
-                                }
+                    String what = design.id() + " " + pose + " " + connected;
+                    int[] front = new int[32 * 32];
+                    int[] back = new int[32 * 32];
+                    for (Surface surface : surfaces(design, pose, connected)) {
+                        if (!surface.texture().equals(WindowPaneGeometry.GLASS) || surface.face().getAxis() != pose.normal()) {
+                            continue;
+                        }
+                        if (!pose.slab().intersect(surface.backing()).isPresent()) {
+                            continue; // an arm's glass outside the slab faces the cell edge, not the viewer
+                        }
+                        int[] side = surface.face() == pose.front() ? front : back;
+                        double[] u = pose.uRange(surface.backing());
+                        double[] v = pose.vRange(surface.backing());
+                        for (int hu = (int) Math.round(u[0] * 2); hu < Math.round(u[1] * 2); hu++) {
+                            for (int hv = (int) Math.round(v[0] * 2); hv < Math.round(v[1] * 2); hv++) {
+                                side[hu * 32 + hv]++;
                             }
                         }
+                    }
+                    for (int hu = 0; hu < 32; hu++) {
+                        for (int hv = 0; hv < 32; hv++) {
+                            if (front[hu * 32 + hv] > 1 || back[hu * 32 + hv] > 1) {
+                                fail(what + ": glass drawn twice at " + hu + "," + hv);
+                            }
+                            if (!design.glazed(hu, hv) && front[hu * 32 + hv] != 0) {
+                                fail(what + ": glass over wood at " + hu + "," + hv);
+                            }
+                        }
+                    }
+                    if (connected.isEmpty()) {
                         for (int hu = 0; hu < 32; hu++) {
                             for (int hv = 0; hv < 32; hv++) {
-                                if (front[hu * 32 + hv] > 1 || back[hu * 32 + hv] > 1) {
-                                    fail(what + ": glass drawn twice at " + hu + "," + hv);
-                                }
-                                if (!design.glazed(hu, hv) && front[hu * 32 + hv] != 0) {
-                                    fail(what + ": glass over wood at " + hu + "," + hv);
-                                }
-                            }
-                        }
-                        if (connected.isEmpty()) {
-                            for (int hu = 0; hu < 32; hu++) {
-                                for (int hv = 0; hv < 32; hv++) {
-                                    int expected = design.glazed(hu, hv) ? 1 : 0;
-                                    if (front[hu * 32 + hv] != expected || back[hu * 32 + hv] != expected) {
-                                        fail(what + ": front/back glass " + front[hu * 32 + hv] + "/" + back[hu * 32 + hv] + " at " + hu + "," + hv);
-                                    }
+                                int expected = design.glazed(hu, hv) ? 1 : 0;
+                                if (front[hu * 32 + hv] != expected || back[hu * 32 + hv] != expected) {
+                                    fail(what + ": front/back glass " + front[hu * 32 + hv] + "/" + back[hu * 32 + hv] + " at " + hu + "," + hv);
                                 }
                             }
                         }
@@ -116,7 +113,7 @@ class WindowSurfaceGeometryTest {
     @Test
     void openingAndBeamRevealsAreDrawn() {
         for (WindowDesign design : WindowDesign.all()) {
-            List<Surface> surfaces = surfaces(design, CENTRED, Set.of(), false);
+            List<Surface> surfaces = surfaces(design, CENTRED, Set.of());
             long reveals = surfaces.stream().filter(s -> s.texture().equals(WindowPaneGeometry.FRAME)
                     && s.face().getAxis() != Direction.Axis.Z).count();
             assertTrue(reveals > 0, design.id() + ": no reveal");
@@ -135,35 +132,11 @@ class WindowSurfaceGeometryTest {
     void surfacesAreWellFormed() {
         for (WindowDesign design : WindowDesign.all()) {
             for (WindowPose pose : WindowPaneGeometryTest.allPoses()) {
-                for (Surface surface : surfaces(design, pose, EnumSet.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST), true)) {
+                for (Surface surface : surfaces(design, pose, EnumSet.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST))) {
                     Box box = surface.backing();
                     assertTrue(box.within(Box.cell()), surface.toString());
                     assertEquals(0.5, box.volume() / extent(box, surface.face()), 1e-9, "backing is half a pixel thick: " + surface);
                 }
-            }
-        }
-    }
-
-    /** A flush trim replaces the wood skin under it: no wood surface and trim surface share a plane and spot. */
-    @Test
-    void trimAndWoodNeverOverlay() {
-        for (WindowDesign design : WindowDesign.all()) {
-            for (WindowPose pose : WindowPaneGeometryTest.allPoses()) {
-                List<Surface> surfaces = surfaces(design, pose, Set.of(), true);
-                Set<String> cells = new HashSet<>();
-                for (Surface surface : surfaces) {
-                    Box b = surface.backing();
-                    for (double x = b.minX() + 0.25; x < b.maxX(); x += 0.5) {
-                        for (double y = b.minY() + 0.25; y < b.maxY(); y += 0.5) {
-                            for (double z = b.minZ() + 0.25; z < b.maxZ(); z += 0.5) {
-                                if (!cells.add(x + "," + y + "," + z + "," + surface.face())) {
-                                    fail(design.id() + " " + pose + ": two surfaces on one spot " + surface);
-                                }
-                            }
-                        }
-                    }
-                }
-                assertFalse(surfaces.stream().noneMatch(s -> s.texture().equals("trim")), design.id() + " " + pose + ": no trim drawn");
             }
         }
     }
