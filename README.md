@@ -14,25 +14,33 @@ to any modpack.
 
 ## Content
 
-**Round door** (one item places a 2 wide x 2 high assembly). Two half-round leaves meet at a
-centre seam; each leaf swings on its outer edge, so an open door keeps 26/16 of clear width.
+**Round door** (one item places a 2 wide x 2 high assembly). One round leaf on one hinge, like a
+hobbit door. It swings 90 degrees away from you with a short animation; the open leaf lies along
+the hinge-side wall and leaves 29/16 of clear width.
 
 - Placement: the cell you target becomes the **lower-left** part (seen from where you stand); the
   door extends one block to your right and one up. All four cells must be empty or replaceable,
   dry (no water), free of mobs, inside the world, and both columns need a solid floor. If anything
   is in the way nothing is placed and the item is kept.
-- Use: clicking any part, a villager, or any mod calling `setOpen` moves the whole door. Redstone
-  on any of the four cells opens it; removing the last signal closes it. Between power changes you
-  can still open and close it by hand.
+- Hinge: chosen like a vanilla door, judged at the door's two outer edges. Next to another round
+  door of the same finish it hinges on the far side (a pair opens from the middle); otherwise the
+  side with more solid blocks beside it; otherwise the half of the targeted block you aimed at
+  (aim at its left half for a left hinge, right half for a right hinge).
+- Use: clicking any part (including the open leaf's part against the hinge wall, from either side),
+  a villager, or any mod calling `setOpen` moves the whole door. Redstone on any of the four cells
+  opens it; removing the last signal closes it. Between power changes you can still open and close
+  it by hand.
+- The open leaf's outer half sticks out one block in front of the hinge column. It is only drawn:
+  it does not collide, cannot be clicked, and can overlap whatever is there.
 - Breaking any part removes the whole door and drops **one** door (none in creative). Losing the
   floor under either column breaks it the same way. Pistons cannot move it.
 - It is a normal wooden door to the game: villagers and pathfinding use it, it is in
   `minecraft:doors` / `minecraft:wooden_doors`, it burns as fuel, an axe mines it fastest.
+- Upgrading from 0.1.0: break placed 0.1.0 doors first and place them again after the update.
 
-**Round window** (single block). A 16-pixel round frame with glass. It faces the player who places
-it and behaves like a glass pane: panes and other windows connect to it on all four sides (in-plane
-neighbours fill the corners with glass, perpendicular ones form a pane junction), it can be
-waterlogged and bucketed, and it drops itself without Silk Touch.
+**Round window** (single block). A full wooden block, wood in all four corners, with a round glazed
+opening through it. It faces the player who places it, builds like any solid block (full collision;
+panes and walls meet it), can be waterlogged and bucketed, and drops itself without Silk Touch.
 
 **Finishes** (15 per family, 30 items): oak, spruce, birch, jungle, acacia, dark oak, mangrove,
 cherry, bamboo, crimson, warped, plus green, yellow, red and blue painted (on oak). Natural doors
@@ -65,8 +73,9 @@ Dramatic Doors from a pack instance to the GameTest runtime for compatibility ru
 
 ## Release
 
-Not released yet. The flow follows DankRecipeTransfer: an immutable GitHub prerelease asset, then a
-direct-URL `mods/roundwood.pw.toml` (with SHA-256, `side = "both"`) in the pack repo, rehashed with
+Not released yet; 0.2.0 is a local candidate. The flow follows DankRecipeTransfer: an immutable
+GitHub prerelease asset, then a direct-URL `mods/roundwood.pw.toml` (with SHA-256,
+`side = "both"`) in the pack repo, rehashed with
 that repo's tools. Both steps need the owner's go-ahead.
 
 See [STRUCTURE.md](STRUCTURE.md) for the code map and [docs/](docs/) for architecture, decisions
