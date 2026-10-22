@@ -116,6 +116,7 @@ public final class WindowSillGameTests {
             for (WindowPattern pattern : WindowPattern.values()) {
                 for (WindowPose pose : POSES) {
                     WindowDesign design = new WindowDesign(profile, pattern);
+                    helper.setBlock(AT, Blocks.AIR); // a new window, not the last one restated (its entity would keep its attachments)
                     helper.setBlock(AT, window(design, pose));
                     entity(helper).setGlass(Optional.of(DyeColor.LIGHT_BLUE));
                     String what = design.id() + " " + pose;
