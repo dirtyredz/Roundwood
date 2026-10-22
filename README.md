@@ -1,7 +1,6 @@
 # Roundwood
 
-Forge 1.20.1 mod: a round 2x2 wooden door and an arched 1x2 one, a round window with arch, corner and edge pieces (each
-plain or with cross beams), two open 2x2 archways, a Universal Trim for all of them and an Arch Sill, hobbit-hole style. Each is one item you
+Forge 1.20.1 mod: a round 2x2 wooden door and an arched 1x2 one, a round window with arch, corner and edge profiles with optional Cross Beams attachments, two open 2x2 archways, a Universal Trim for all of them and an Arch Sill, hobbit-hole style. Each is one item you
 restyle in the world: any planks (vanilla or modded) set the wood, any of the 16 dyes paints it,
 and trims can also be faced with radial brick. Install on **both** the server and every client.
 Generic: not tied to any modpack.
@@ -16,16 +15,16 @@ Generic: not tied to any modpack.
 
 ## Content
 
-32 items: **Round Door**, **Arched Door** (0.11.0), thirteen window pieces, each in a plain and a cross-beam version
+20 items: **Round Door**, **Arched Door**, thirteen plain window profiles
 (**Round Window**, **Round Window Arch, Left** and **Right**, **Round Window Corner, Bottom Left**
 and **Bottom Right**, and since 0.10.0 **Round Window Arch, Bottom Left** and **Bottom Right**,
 **Round Window Corner, Top Left** and **Top Right**, and **Round Window Edge, Top**, **Left**,
-**Bottom** and **Right**; the crossed ones are named "... with Cross Beams"), the **Archway** and
-**Keyhole Archway** (0.12.0), the **Universal Trim** and the **Arch Sill**. Creative tab order: round
-door, arched door, then each plain window piece followed by its crossed variant (round, arch left,
+**Bottom** and **Right**), the **Archway** and
+**Keyhole Archway** (0.12.0), the **Universal Trim**, **Arch Sill** and **Cross Beams**. Creative tab order: round
+door, arched door, then each plain window profile (round, arch left,
 arch right, corner bottom left, corner bottom right, arch bottom left, arch bottom right, corner top
 left, corner top right, edge top, left, bottom, right), archway, keyhole archway, Universal Trim,
-Arch Sill. They are crafted (and found in the creative tab) in oak;
+Arch Sill, Cross Beams. They are crafted (and found in the creative tab) in oak;
 their look is changed once placed and travels with them when picked or broken.
 
 **Round door** (one item places a 2 wide x 2 high assembly). One round leaf on one hinge, like a
@@ -152,17 +151,21 @@ two-pixel border on the named side. Runs of them, between the corner pieces, mak
 width or height: a 3 x 2 window is bottom left corner, bottom edge, bottom right corner under top
 left corner, top edge, top right corner.
 
-**Plain or cross beams.** Each of the thirteen window pieces also exists as a separate item with cross
-beams (names end "with Cross Beams"). Every crossed piece has its own one-pixel wooden cross through
-the middle of its own opening, so four crossed pieces in a 2 x 2 show four crosses (a grid), not one
-shared cross. The beams use the pane's wood or paint, run the full thickness of the pane, and glass
-is cut away under them. Plain and crossed are chosen by the item, not by a click or toggle.
+**Cross Beams** (`cross_beams`, 0.13.0). One attachment fits any of the thirteen window profiles.
+Hold it and aim at a pane to preview the clipped cross; click to fit it. One item spans the whole
+pane, visible and removable from either side. Every pane in a larger window has its own cross.
+Beams have their own wood, paint or masonry look: aim at a beam with planks, dye or one of the four
+masonry blocks to restyle it; aim with shears to remove it and recover one styled item. Sneaking
+changes nothing. An occupied fit is free. Beams run the full slab depth, with glazing cut away
+beneath them. Sills cover beam ends and take clicks where they overlap. A broken window drops its
+plain pane and one styled Cross Beams item, plus its trims and sills. Pick-block returns only the
+plain pane with its frame look and glass tint.
 
 **Universal Trim** (`round_trim`, one item, one piece per face, since 0.9.0). One trim item for every
 window and door; its icon is a flat square frame in the trim's look. The older Window Trim and
 Door Trim items still work everywhere (see Upgrading).
 
-*On a window* the trim fits onto any of the 26 windows (plain or crossed) and follows its shape: a
+*On a window* the trim fits onto any of the 13 window profiles and follows its shape: a
 ring round the round window, the matching quarter of the big ring on an arch (upper or lower, so four
 arches carry one full ring), the outer jamb and sill or head on a corner, and only the framed side of
 an edge piece (beams are never trimmed). Click a window
@@ -193,7 +196,7 @@ before 0.8.0 (see Upgrading).
 
 ## Placing windows
 
-Holding a window item (any of the 26 window pieces) and aiming at a block face draws an overlay on
+Holding a window item (any of the 13 window profiles) and aiming at a block face draws an overlay on
 that face: a centre square and four edge trapezoids, with the zone you aim at picked out in white
 and the pane that would be placed outlined in light blue at its destination. The outline is hidden
 when placement would be refused. The main hand's window wins; the offhand window is used only when
@@ -230,8 +233,11 @@ the main hand is empty. Sneaking changes nothing.
 | Door leaf | Dye (sneaking or not) | Painted, the wood kept underneath | 1 dye |
 | Door corner | Block, not sneaking (planks included) | Camouflage, as above | 1 block, refunded later |
 | Door corner | Sneak + planks or dye | Refused with a hint to aim at the leaf | nothing |
-| Window frame or cross beam | Planks | That wood for the frame and beams; glass and trims kept | 1 plank |
-| Window frame or cross beam | Dye | Frame and beams painted | 1 dye |
+| Window frame | Planks | That wood for the frame; glass and attachments kept | 1 plank |
+| Window frame | Dye | Frame painted | 1 dye |
+| Window face | Cross Beams | Fits one whole-pane cross; occupied fits are free | 1 Cross Beams |
+| Fitted beam | Planks, dye or masonry | Restyles beams only; masonry refuses dye | 1 donor |
+| Fitted beam | Shears | Removes and returns one styled Cross Beams item; one wear | none |
 | Window glass (including the glass arms) | Dye | The whole window's glass tinted that dye (another dye replaces the tint) | 1 dye |
 | Window trim band (the ring under a trim) | Planks | That wood for that face's trim (paint removed) | 1 plank |
 | Window trim band | Bricks, stone bricks, deepslate bricks or mud bricks | Brickwork for that face's trim | 1 block |
@@ -242,7 +248,7 @@ the main hand is empty. Sneaking changes nothing.
 | Arch sill | Shears | That face's sill removed and returned as an Arch Sill; shears take one wear | none |
 | Upper arch face | Arch Sill | Fits a sill on the clicked face (nothing happens if it has one) | 1 sill |
 | Any other window | Arch Sill | Refused with a hint | nothing |
-| Window, anywhere but a trim band or sill | Bricks, stone bricks, deepslate bricks or mud bricks | Refused with a hint to aim at the trim | nothing |
+| Window, anywhere but a trim band, sill or fitted beam | Bricks, stone bricks, deepslate bricks or mud bricks | Refused with a hint to aim at the trim | nothing |
 | Door trim ring | Planks | That wood for that face's ring (also replaces masonry) | 1 plank |
 | Door trim ring | Bricks, stone bricks, deepslate bricks or mud bricks | Radial brickwork, paint cleared | 1 block |
 | Door trim ring | Dye | Painted (refused on brickwork, free) | 1 dye |
@@ -260,10 +266,8 @@ the main hand is empty. Sneaking changes nothing.
 
 - Windows, archways and door trims need no sneaking: a plain click does the same as a sneaking one.
   Only the door leaf and freestanding frames keep their sneak gestures.
-- Aim decides on a window. There are four targets: the trim band (the ring under a trim, on the face
-  you aim at), the arch sill, the frame (the wooden border, including the cross beams) and the
-  glass. A trim band or sill only counts on a face that has one; the cross beams are frame, never
-  glass or trim (under a sill they are the sill).
+- Aim decides on a window: installed perimeter trim, installed sill, fitted beam, frame, then glass.
+  Each attachment keeps its own look. A sill takes priority over the beam end underneath it.
 - Nothing is refunded when you restyle; using the same planks or dye again does nothing and costs
   nothing; re-planking a painted object with its own wood strips the paint (one plank). Creative
   costs nothing, and shears in creative return nothing and take no wear. A plain click (or a plain
@@ -317,11 +321,6 @@ different front and back casings), at r 26..58, f 35..41, between the round door
 | Round window arch, right | Rows `PPP` / ` G ` / ` P ` (P planks, G glass pane) |
 | Round window corner, bottom left | Rows `P ` / `PG` / `PP` (P planks, G glass pane) |
 | Round window corner, bottom right | Rows ` P ` / ` G ` / `PPP` (P planks, G glass pane) |
-| Round window with cross beams | Rows `SPS` / `PGP` / `SPS` (S stick) |
-| Arch with cross beams, left | Rows `PPS` / `PGS` / `P  ` |
-| Arch with cross beams, right | Rows `PPP` / `SGS` / ` P ` |
-| Corner with cross beams, bottom left | Rows `P  ` / `PGS` / `PPS` |
-| Corner with cross beams, bottom right | Rows ` P ` / `SGS` / `PPP` |
 | Arch, bottom left (0.10.0) | Rows `PP` / `PG` / `PP` |
 | Arch, bottom right | Rows `PPP` / ` G ` / `PPP` |
 | Corner, top left | Rows `PPP` / `PG ` / `P  ` |
@@ -330,16 +329,9 @@ different front and back casings), at r 26..58, f 35..41, between the round door
 | Edge, left | Rows `P ` / `PG` / `P ` |
 | Edge, bottom | Rows ` G ` / `PPP` |
 | Edge, right | Rows `GP` / ` P` / ` P` |
-| Arch with cross beams, bottom left | Rows `PP ` / `PGS` / `PPS` |
-| Arch with cross beams, bottom right | Rows `PPP` / `SGS` / `PPP` |
-| Corner with cross beams, top left | Rows `PPP` / `PGS` / `PS ` |
-| Corner with cross beams, top right | Rows `PPP` / `SGS` / `  P` |
-| Edge with cross beams, top | Rows `PPP` / `SGS` |
-| Edge with cross beams, left | Rows `PS` / `PG` / `PS` |
-| Edge with cross beams, bottom | Rows `SGS` / `PPP` |
-| Edge with cross beams, right | Rows `GP` / `SP` / `SP` |
 | Archway (0.12.0) | Rows `PPP` / `P P` / `P P` (P any planks) |
 | Keyhole Archway (0.12.0) | Rows `SPS` / `P P` / `P P` (S stick) |
+| Cross Beams (`cross_beams`) | Five sticks: rows ` S ` / `SSS` / ` S `; unlocked by obtaining a stick |
 | Universal Trim (`round_trim`) | 4 planks in the four corners of the grid |
 | Arch Sill (`arch_sill_trim`) | Rows `PPP` / `S S` |
 
@@ -350,10 +342,16 @@ the left and right edges differ by where the pane sits.
 Crafting always gives the oak object; restyle it in the world. With **EMI** each item is one index
 entry whose icon cycles through example looks (the tooltip says it is a preview; taking or
 bookmarking it gives the plain oak item); styled stacks in your inventory are told apart by their
-look. With **JEI** styled stacks are separate subtypes and the 32 plain items are listed.
+look. With **JEI** styled stacks are separate subtypes and the 20 default items are listed.
 Neither viewer is required.
 
 ## Upgrading
+
+**From 0.12.x and earlier:** crossed windows become plain profiles with one Cross Beams attachment
+in their former frame look. Their frame, glass, pose, water, trims and sills survive. Old `_cross`
+stacks keep their IDs, counts and saved contents in inventories and chests; placing one installs the
+plain pane and beams together. Unreadable beam data keeps the old block or stack intact. Hidden
+compatibility IDs remain registered, but their recipes and creative/viewer entries are retired.
 
 **From 0.10.0 or 0.11.0:** saves load unchanged; the archways are new content. Nothing converts.
 
@@ -413,6 +411,14 @@ windows, tinted window glass, Door Trim attached to doors, plain-click gestures)
 0.9.0 to 0.12.0 are built and tested headless (unit tests and server GameTests) and await one owner
 trial together. Use a copy of a world saved in 0.8.0, run `/roundwood showcase` on open ground, and
 check in game (the client-side retexturing and rendering have no automated test):
+
+*0.13.0, Cross Beams*
+- [ ] Fit preview equals the result on all 13 profiles and placement families, from either side.
+- [ ] Beam wood/paint/masonry stays independent of frame and tint; sills win overlapping targets.
+- [ ] Mixed fitted/plain neighbours have no seams or missing beam ends, including chunk edges,
+  save/reload, F3+T and a second client.
+- [ ] Hidden crossed inventory icons show the fitted result; viewers expose only plain profiles and
+  Cross Beams; old saved builds and chest stacks retain all contents.
 
 *0.9.0, Universal Trim*
 - [ ] The square-frame icon in oak, another wood, an unfamiliar modded wood, a paint and each of the

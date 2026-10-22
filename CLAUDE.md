@@ -9,12 +9,14 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   workspace. The owner checks visuals and client behaviour in game.
 - **Generated resources are source.** Change a provider, run `./gradlew runData`, commit the
   regenerated `src/generated/resources/` with the code. Never hand-edit generated JSON.
-- **Separate authorities, no catalogue.** Content is 31 canonical blocks and 32 advertised items in
-  three appearance families (door = the round and arched doors; window family = 26 windows; trim = the two archways,
-  the Universal Trim and the Arch Sill, an item only); looks are data. `round_trim` stays a registered compatibility block (frames from older
+- **Separate authorities, no catalogue.** Content is 18 canonical blocks and 20 advertised items in
+  three appearance families (door = the round and arched doors; window family = 13 plain profiles; trim = the two archways,
+  the Universal Trim, Arch Sill and Cross Beams attachment items); looks are data. `round_trim` stays a registered compatibility block (frames from older
   saves) while its item, the Universal Trim, attaches to window, door and archway faces; `window_trim` is
   a hidden compatibility item that behaves the same. The Arch Sill is the second attachment slot
-  (`TrimSlot.SILL`, upper arches only). Trim attachments go through
+  (`TrimSlot.SILL`, upper arches only). Cross Beams is the whole-pane third slot (`CROSS_BEAMS`):
+  one canonical Front address, independent TRIM look, all 13 profiles. The 13 retired `_cross` blocks
+  and items remain hidden alongside the 49 frozen aliases; world and stack placement migrate fail closed. Trim attachments go through
   `block/attachment` (`storage/FaceTrimStore`, `host/TrimFitting`, `host/TrimHost`, `TrimSlot`; anchor persistence in
   `entity/AppearanceAnchorBlockEntity`, held items in `interaction/HeldTrimTool`), never a host copy. Doors, archways and
   the frame share `block/assembly` (`Assembly` contract, integrity, removal, anchors, placement); never copy a lifecycle. Which

@@ -2,6 +2,28 @@
 
 Newest first.
 
+## 2026-10-22 - Cross Beams is a whole-pane attachment (0.13.0)
+
+Supersedes the separate crossed products and frame-owned beam appearance from 0.7.0. Advertise
+13 plain profiles and one Cross Beams item: five sticks in a plus, one item per pane, all profiles.
+Beams have an independent TRIM-family wood/paint/four-masonry look. Both physical sides address one
+Front record in `WindowCrossBeams` v1; Back is prohibited. `TrimSlot` declares the scope and the
+shared store and fitting service enforce it. Perimeter trims and sills retain their face addresses.
+The singleton encoding reuses existing transactions at the cost of a historical face-oriented name.
+
+Keep `WindowDesign(profile, pattern)` as geometry, not a product catalogue. Compose all frame,
+glass and beam volumes before surface extraction; fitted models use immutable neighbour snapshots
+and coverage culling, while the plain path stays unchanged. Beam art remains window planks/paint;
+masonry uses the existing granular edge art. Reload clears bounded model and coverage caches.
+
+Keep every evidenced retired ID (13 crossed blocks/items) beside the frozen 49 aliases. The frozen
+0.4 table contains no crossed aliases. Checked window-cell transfer uses full disk data, materializes
+historical defaults, validates before publication and restores state/data on failure. Hidden stacks
+place the plain pane and all contents atomically using the same proposal as their preview. Unknown
+beam data refuses conversion and remains in custody; a pending block yields one lossless hidden stack.
+Converted panes drop beams separately; pick-block gives the pane only. No new beam state property,
+no inventory rewrite, no new textures, no neighbour ownership or sneak gesture.
+
 ## 2026-10-22 - One assembly contract; the compatibility frame adopts it (0.12.0 refactor)
 
 Doors, archways and the compatibility frame implement one narrow `block/assembly/Assembly` contract

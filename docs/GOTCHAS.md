@@ -50,10 +50,21 @@
   as horizontal lines. Never add window geometry outside `WindowPaneGeometry` and
   `WindowSurfaceGeometry` (the models are emitted from those two), and rerun `runData` after any
   geometry change.
-- **Window clicks are routed by hit region** (trim band, frame, glass), through
-  `WindowHitRegions`/`WindowUseRules`. A trim band counts only on a face that has a trim; the cross
-  beams are frame, never glass or trim. Masonry works only on a trim band: elsewhere it is refused
-  with a hint and uses nothing.
+- **Window clicks use effective geometry.** Installed perimeter trim and sill win first, then
+  BEAM, frame and glass. Beam donors and shears affect only the singleton attachment. Never route
+  beams as FRAME or let a new slot fall through a sill/perimeter switch. The fit preview and server
+  both use `WindowBeamFitPlan`; plain clicks and sneak clicks are identical.
+- **Unknown beams retain custody.** `WindowCrossBeams` v1 accepts only Version and an optional
+  Front record. Back, malformed appearances, non-compounds and future fields/versions refuse edits;
+  disk saves retain the raw tag. Both physical sides normalize to Front, including loot addresses.
+- **Window migration needs disk data.** `getUpdateTag()` deliberately hides unknown stores.
+  Use `saveWithFullMetadata()` and `WindowCellConversion`, including for the older plain aliases.
+  Check writes and destination entities before publishing; rollback owns only its own snapshots.
+  Keep all 13 retired crossed IDs registered and never add invented IDs to frozen history.
+- **Fitted models cannot read live neighbours on chunk workers.** `WindowPaneState` publishes
+  immutable render snapshots on the level thread. Missing, unloaded and unknown neighbours retain
+  faces. Refresh self and adjacent panes after attachment/state/load changes, including chunk edges.
+
 - **Every window trim stands one pixel proud; the wall-side band of a flush, floor or ceiling pane
   is outside the cell.** It is render-only (`WindowTrimRenderer`): never collision, support or
   connection. Selection includes only the in-cell part, and a flush wall-side band is targeted
@@ -173,12 +184,13 @@
   TRIM-family `AppearanceDefaults` item to get it.
 - **One `FaceTrimStore` per slot, never two slots in one payload.** The arch sill (0.10.0,
   `WindowSillTrim` v1) has its own key and version, so an unknown sill payload never blocks the
-  perimeter trims (and the other way round). The `trimmed` summary counts sills too, so a sill-only
+  perimeter trims (and the other way round). Cross Beams has its own store too. The `trimmed` summary
+  counts every slot, so a sill-only or beam-only
   window is `trimmed=true`: it must still write its explicit `WindowTrim` v2 empty (the window format
   always does), or the summary would read as the 0.7.0 omitted-oak case. Never make the perimeter
   format omit empty.
 - **Only upper arches take a sill.** `WindowProfile.takesSill` gates the item (refused with a hint),
-  the host (`WindowTrimActions` builds none), the geometry and the loot pools (only the four upper-arch
+  the host (`WindowTrimActions` builds none), the geometry and the loot pools (only the two canonical upper-arch
   tables have sill pools). A lower arch's top diameter has no sill until the owner asks for one.
 - **Window profiles are appended, never inserted.** `WindowDesign.all()` follows enum order and is
   the creative order and the registration order; GameTests pick designs by index
@@ -243,7 +255,7 @@
   follow palette order, so only append to `tools/textures/palettes.mjs`.
 - **runData does not delete models nobody generates any more** without its local cache. When a
   model is renamed or removed, delete `src/generated/resources/assets/roundwood/models` and
-  `blockstates` before `runData`; `GeneratedResourcesTest` lists the exact model manifest.
+  `blockstates` before `runData`; `GeneratedResourceManifestTest` lists the exact model manifest.
 - **The leaf is drawn by a block-entity renderer.** The door's world model is empty, so the vanilla
   crack overlay does not appear while mining it, and a door whose four parts are not all present
   draws nothing (the integrity check removes it a tick later).
