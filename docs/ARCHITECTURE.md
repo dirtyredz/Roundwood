@@ -75,7 +75,7 @@ the anchor persistence and the attachment services.
   whose reconstructed layout equals the part's. That is anchor identity, which lets canonical and alias
   cells share an anchor, unlike exact membership. Loot falls back to the captured entity of the right
   type. `DoorBlockEntities`, `ArchwayBlockEntities` and `TrimAppearance` are typed facades.
-  `appearance/AssemblyAppearanceTarget` is the whole-assembly restyling target: loaded, complete,
+  `AssemblyAppearanceTarget` is the whole-assembly restyling target: loaded, complete,
   typed anchor, permission over every cell, announced at the clicked cell.
 - **Placement** (`placement/`). `AssemblyPlacementPlan` is the read-only skeleton: every cell in
   the world and dry first; then replaceable in the click's context with `mayInteract` and
@@ -548,7 +548,7 @@ plug in as further slots and hosts, not copies.
   is kept and saved back byte-for-byte, and `set` refuses until a build that understands it loads
   it. Update packets always carry the payload, explicit empty while an unknown one is held. One
   store per slot, so slots never see each other's payload. The anchor entities declare their stores
-  through `entity/AppearanceAnchorBlockEntity` (see Shared assembly services).
+  through `block/attachment/AppearanceAnchorBlockEntity` (see Shared assembly services).
 - **Transaction** (`host/TrimFitting`, on a `host/TrimHost`): fit (empty face takes the stack's look, one item
   unless creative; occupied is a free no-op), remove (shears: the slot's item in that look back or
   dropped, one wear), install (no player), restyle and a per-face `AppearanceActions.Target`. A host
