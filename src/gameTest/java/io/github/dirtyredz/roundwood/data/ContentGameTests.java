@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.data;
 
+import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.attachment.item.ArchSillTrimItem;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.Roundwood;
@@ -51,8 +52,8 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 
 /**
- * Registrations, tags, recipes, loot and the creative tab, as loaded by a dedicated server: 29
- * canonical blocks (round and (0.11.0) arched door, 26 windows, round trim), 30 advertised items (0.9.0: the Universal Trim is
+ * Registrations, tags, recipes, loot and the creative tab, as loaded by a dedicated server: 31
+ * canonical blocks (round and (0.11.0) arched door, 26 windows, (0.12.0) the two archways, round trim), 32 advertised items (0.9.0: the Universal Trim is
  * {@code round_trim}; 0.10.0: the Arch Sill, an item only), 49 hidden 0.4.0 aliases that keep their
  * looks, the hidden 0.8.0 window trim (an item only), and nothing else.
  */
@@ -66,8 +67,8 @@ public final class ContentGameTests {
     public static void canonicalEntriesAndFortyNineHiddenAliasesAreRegistered(GameTestHelper helper) {
         long blocks = ForgeRegistries.BLOCKS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         long items = ForgeRegistries.ITEMS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(blocks == 78, "expected 29 + 49 blocks, found " + blocks);
-        check(items == 80, "expected 29 + the arch sill + 49 + the window trim items, found " + items);
+        check(blocks == 80, "expected 31 + 49 blocks, found " + blocks);
+        check(items == 82, "expected 31 + the arch sill + 49 + the window trim items, found " + items);
         for (String id : CANONICAL_BLOCKS) {
             check(ForgeRegistries.BLOCKS.containsKey(id(id)) && ForgeRegistries.ITEMS.containsKey(id(id)), "missing " + id);
             check(ForgeRegistries.BLOCKS.getValue(id(id)).asItem() == ForgeRegistries.ITEMS.getValue(id(id)), id + ": item mapping");
@@ -126,6 +127,12 @@ public final class ContentGameTests {
             check(ModBlockEntities.roundTrim().isValid(trim.defaultBlockState()), trim + " cannot carry the trim entity");
             check(!ModBlockEntities.roundDoor().isValid(trim.defaultBlockState()), trim + " valid for the door entity");
         }
+        for (Block archway : ModBlocks.archways()) {
+            check(ModBlockEntities.archway().isValid(archway.defaultBlockState()), archway + " cannot carry the archway entity");
+            check(!ModBlockEntities.roundDoor().isValid(archway.defaultBlockState()) && !ModBlockEntities.roundTrim().isValid(
+                    archway.defaultBlockState()) && !ModBlockEntities.roundWindow().isValid(archway.defaultBlockState()),
+                    archway + " valid for another family");
+        }
         helper.succeed();
     }
 
@@ -160,6 +167,12 @@ public final class ContentGameTests {
             check(state.is(BlockTags.MINEABLE_WITH_AXE) && !state.is(BlockTags.MINEABLE_WITH_PICKAXE), block + " trims mine with an axe");
             check(!state.is(BlockTags.DOORS), block + " a trim must not be a door");
         }
+        for (Block archway : ModBlocks.archways()) {
+            BlockState state = archway.defaultBlockState();
+            check(state.is(ModTags.ARCHWAYS) && new ItemStack(archway).is(ModTags.ARCHWAY_ITEMS) && state.is(BlockTags.MINEABLE_WITH_AXE)
+                    && !state.is(BlockTags.DOORS) && !state.is(ModTags.ROUND_DOORS) && !new ItemStack(archway).is(ItemTags.DOORS),
+                    archway + " archway tags (never a door)");
+        }
         for (Block alias : LegacyContent.blocks()) {
             check(!alias.defaultBlockState().is(ModTags.ROUND_DOORS) && !alias.defaultBlockState().is(ModTags.ROUND_WINDOWS)
                     && !alias.defaultBlockState().is(ModTags.ROUND_TRIMS), alias + ": family tags name only the canonical blocks");
@@ -191,7 +204,7 @@ public final class ContentGameTests {
                 "a painting recipe is still loaded");
         long count = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
                 .filter(r -> r.getId().getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(count == 30, "expected 30 roundwood crafting recipes, loaded " + count);
+        check(count == 32, "expected 32 roundwood crafting recipes, loaded " + count);
         ItemStack k = new ItemStack(Items.STICK);
         check(find(level, grid(e, o, e, s, k, w, e, o, e)).map(r -> !r.getId().getNamespace().equals(Roundwood.MOD_ID)).orElse(true),
                 "the 0.8.0 window trim recipe is still loaded");
@@ -237,6 +250,9 @@ public final class ContentGameTests {
         expectShape(level, ModItems.window(design(WindowProfile.EDGE_RIGHT, WindowPattern.CROSS)), "GP", "SP", "SP");
         expectShape(level, ModItems.ARCH_SILL_TRIM.get(), "PPP", "S S");
         expectShape(level, ModItems.ARCHED_DOOR.get(), " P ", "PNP", "PPP");
+        // 0.12.0
+        expectShape(level, ModItems.archway(ArchwayDesign.ORDINARY), "PPP", "P P", "P P");
+        expectShape(level, ModItems.archway(ArchwayDesign.KEYHOLE), "SPS", "P P", "P P");
         helper.succeed();
     }
 
@@ -318,13 +334,13 @@ public final class ContentGameTests {
         List<String> expected = new java.util.ArrayList<>(CANONICAL_BLOCKS);
         expected.add("arch_sill_trim");
         check(shown.stream().map(stack -> ForgeRegistries.ITEMS.getKey(stack.getItem()).getPath()).toList().equals(expected),
-                "tab is not the two doors, the 26 windows (each plain then crossed), Universal Trim, Arch Sill: " + shown);
+                "tab is not the two doors, the 26 windows (each plain then crossed), the two archways, Universal Trim, Arch Sill: " + shown);
         check(shown.stream().noneMatch(ItemStack::hasTag), "tab entries carry an appearance: " + shown);
         check(AppearanceStacks.read(shown.get(0)).equals(Appearance.DEFAULT), "the tab's door is not oak");
         helper.succeed();
     }
 
-    /** The 29 canonical blocks in creative order, written out. */
+    /** The 31 canonical blocks in creative order, written out. */
     private static final List<String> CANONICAL_BLOCKS = List.of("round_door", "arched_door",
             "round_window", "round_window_cross", "round_window_arch_left", "round_window_arch_left_cross",
             "round_window_arch_right", "round_window_arch_right_cross", "round_window_bottom_left", "round_window_bottom_left_cross",
@@ -333,7 +349,7 @@ public final class ContentGameTests {
             "round_window_arch_bottom_right_cross", "round_window_top_left", "round_window_top_left_cross", "round_window_top_right",
             "round_window_top_right_cross", "round_window_edge_top", "round_window_edge_top_cross", "round_window_edge_left",
             "round_window_edge_left_cross", "round_window_edge_bottom", "round_window_edge_bottom_cross", "round_window_edge_right",
-            "round_window_edge_right_cross", "round_trim");
+            "round_window_edge_right_cross", "archway", "keyhole_archway", "round_trim");
 
     /** The canonical block of a family's 0.4.0 aliases (written out, not read from list positions). */
     private static Block canonicalBlock(io.github.dirtyredz.roundwood.appearance.AppearanceFamily family) {

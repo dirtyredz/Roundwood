@@ -80,11 +80,13 @@ class GeneratedTexturesTest {
             expected.add("window_trim_single_" + masonry);
             expected.add("window_sill_" + masonry);
             expected.add("door_casing_arched_" + masonry);
+            expected.add("archway_" + masonry);
+            expected.add("keyhole_archway_" + masonry);
         }
         for (String masonry : MASONRY) {
             expected.add("universal_trim_" + masonry);
         }
-        assertEquals(89 + 12 + 4, expected.size()); // 89 of 0.9.0, frame, single and sill (0.10.0), arched door casing (0.11.0)
+        assertEquals(89 + 12 + 4 + 8, expected.size()); // 89 of 0.9.0, frame, single and sill (0.10.0), arched door casing (0.11.0), archway and keyhole archway (0.12.0)
         TreeSet<String> actual = new TreeSet<>();
         try (Stream<Path> files = Files.list(DIR)) {
             files.map(p -> p.getFileName().toString()).filter(n -> n.endsWith(".png"))
@@ -112,6 +114,8 @@ class GeneratedTexturesTest {
             assertSize("window_trim_single_" + masonry, 32);
             assertSize("window_sill_" + masonry, 64);
             assertSize("door_casing_arched_" + masonry, 64);
+            assertSize("archway_" + masonry, 64);
+            assertSize("keyhole_archway_" + masonry, 64);
             assertSize("universal_trim_" + masonry, 32);
         }
         for (String dye : DYES) {

@@ -26,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Validates the checked-in generated tree without starting Minecraft. Since 0.11.0 there are 29
- * canonical blocks (round_door, arched_door, 26 windows, round_trim) whose look lives on block entities, the
+ * Validates the checked-in generated tree without starting Minecraft. Since 0.12.0 there are 31
+ * canonical blocks (round_door, arched_door, 26 windows, archway, keyhole_archway, round_trim) whose look lives on block entities, the
  * window_trim and arch_sill_trim items (items only: no blockstate, no loot table), and the 49 ids of 0.4.0 kept as
  * hidden aliases. The expected names are listed here independently of the mod's catalogue, so a
  * catalogue mistake shows up as a diff. Recipes are covered by {@link GeneratedRecipesTest}.
@@ -48,7 +48,9 @@ class GeneratedResourcesTest {
             "round_window_edge_bottom_cross", "round_window_edge_right", "round_window_edge_right_cross");
     /** The two designs that are plain round windows; the other 24 are oriented (arches, corners and edges). */
     private static final List<String> ROUND_DESIGNS = List.of("round_window", "round_window_cross");
-    private static final List<String> CANONICAL = Stream.of(List.of("round_door", "arched_door"), WINDOWS, List.of("round_trim"))
+    /** The two archways (0.12.0): block entities with a front and back trim, like doors and windows. */
+    private static final List<String> ARCHWAYS = List.of("archway", "keyhole_archway");
+    private static final List<String> CANONICAL = Stream.of(List.of("round_door", "arched_door"), WINDOWS, ARCHWAYS, List.of("round_trim"))
             .flatMap(List::stream).toList();
     /** window_trim is an item only. */
     private static final String WINDOW_TRIM = "window_trim";
@@ -87,7 +89,7 @@ class GeneratedResourcesTest {
         if (id.endsWith("_round_door") || id.equals("round_door")) {
             return "round_door";
         }
-        if (WINDOWS.contains(id)) {
+        if (WINDOWS.contains(id) || ARCHWAYS.contains(id)) {
             return id;
         }
         return id.endsWith("_round_window") ? "round_window" : "round_trim";
@@ -108,10 +110,10 @@ class GeneratedResourcesTest {
         assertEquals(15, ModelExpectations.aliasWindows().size());
         assertEquals(19, ModelExpectations.aliasTrims().size());
         assertEquals(49, ALIASES.size());
-        assertEquals(29, CANONICAL.size());
+        assertEquals(31, CANONICAL.size());
         assertEquals(26, WINDOWS.size());
-        assertEquals(78, BLOCKS.size());
-        assertEquals(78, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
+        assertEquals(80, BLOCKS.size());
+        assertEquals(80, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
     }
 
     @Test
@@ -158,10 +160,10 @@ class GeneratedResourcesTest {
         Set<String> block = new TreeSet<>(List.of("template_round_door_leaf_left", "template_round_door_leaf_right",
                 "round_door_leaf_left", "round_door_leaf_right", "round_door", "round_trim",
                 "template_arched_door_leaf_left", "template_arched_door_leaf_right", "arched_door_leaf_left",
-                "arched_door_leaf_right", "arched_door"));
+                "arched_door_leaf_right", "arched_door", "archway", "keyhole_archway"));
         Set<String> item = new TreeSet<>(List.of("template_round_door", "round_door", "template_arched_door", "arched_door",
                 "round_trim", WINDOW_TRIM,
-                ARCH_SILL_TRIM));
+                ARCH_SILL_TRIM, "archway", "keyhole_archway"));
         block.addAll(windowBlockModels());
         item.addAll(WINDOWS);
         for (String part : PARTS) {
@@ -172,8 +174,8 @@ class GeneratedResourcesTest {
         }
         item.addAll(ALIASES);
         assertEquals(302, windowBlockModels().size());
-        assertEquals(27 + 302, block.size()); // 22 before 0.11.0, the arched door adds 5
-        assertEquals(63 + 17 + 2, item.size()); // 63 of 0.9.0, 16 new windows, arch_sill_trim; 0.11.0 the arched door and its template
+        assertEquals(29 + 302, block.size()); // 22 before 0.11.0, the arched door adds 5; 0.12.0 the two archways
+        assertEquals(63 + 17 + 2 + 2, item.size()); // 63 of 0.9.0, 16 new windows, arch_sill_trim; 0.11.0 the arched door and its template; 0.12.0 the two archways
         // Exact sets: no per-finish models remain; the 49 old ids are only item-model aliases.
         assertEquals(block, names(assets("models/block")));
         assertEquals(item, names(assets("models/item")));
@@ -183,12 +185,12 @@ class GeneratedResourcesTest {
         crafted.add(ARCH_SILL_TRIM); // crafted, but an item only
         assertEquals(crafted, names(data("recipes")));
         assertEquals(crafted, names(data("advancements/recipes")));
-        assertEquals(78, allJson(assets("blockstates")).size());
-        assertEquals(27 + 302, allJson(assets("models/block")).size());
-        assertEquals(63 + 17 + 2, allJson(assets("models/item")).size());
-        assertEquals(30, allJson(data("recipes")).size());
-        assertEquals(78, allJson(data("loot_tables/blocks")).size());
-        assertEquals(30, allJson(data("advancements/recipes")).size());
+        assertEquals(80, allJson(assets("blockstates")).size());
+        assertEquals(29 + 302, allJson(assets("models/block")).size());
+        assertEquals(63 + 17 + 2 + 2, allJson(assets("models/item")).size());
+        assertEquals(32, allJson(data("recipes")).size());
+        assertEquals(80, allJson(data("loot_tables/blocks")).size());
+        assertEquals(32, allJson(data("advancements/recipes")).size());
     }
 
     /**
@@ -305,6 +307,10 @@ class GeneratedResourcesTest {
             assertEquals(26, windows.size());
             assertEquals(windows, tagValues(tags.resolve(kind + "/round_windows.json")), kind);
         }
+        for (String kind : List.of("blocks", "items")) {
+            assertEquals(Set.of("roundwood:archway", "roundwood:keyhole_archway"),
+                    tagValues(tags.resolve(kind + "/archways.json")), kind + " archways");
+        }
         assertEquals(Set.of("roundwood:round_trim"), tagValues(tags.resolve("blocks/round_trims.json")), "block trims");
         assertEquals(Set.of("roundwood:round_trim", "roundwood:window_trim"),
                 tagValues(tags.resolve("items/round_trims.json")), "item trims");
@@ -318,12 +324,13 @@ class GeneratedResourcesTest {
             JsonArray pools = loot.getAsJsonArray("pools");
             boolean window = WINDOWS.contains(block) || block.endsWith("_round_window");
             boolean door = block.equals("round_door") || block.equals("arched_door") || block.endsWith("_round_door");
+            boolean archway = ARCHWAYS.contains(block);
             boolean upperArch = UPPER_ARCHES.contains(block);
-            assertEquals(upperArch ? 5 : window || door ? 3 : 1, pools.size(), block);
+            assertEquals(upperArch ? 5 : window || door || archway ? 3 : 1, pools.size(), block);
             assertEquals(JsonParser.parseString(ownItemPool("roundwood:" + family(block))), pools.get(0), block);
-            if (window || door) {
+            if (window || door || archway) {
                 String item = "roundwood:round_trim";
-                String tag = window ? "WindowTrim" : "DoorTrim";
+                String tag = archway ? "ArchwayTrim" : window ? "WindowTrim" : "DoorTrim";
                 assertEquals(JsonParser.parseString(trimFacePool("front", item, tag + ".Front")), pools.get(1), block + ": front trim pool");
                 assertEquals(JsonParser.parseString(trimFacePool("back", item, tag + ".Back")), pools.get(2), block + ": back trim pool");
             }
@@ -376,6 +383,8 @@ class GeneratedResourcesTest {
         JsonObject lang = json(assets("lang/en_us.json"));
         assertEquals("Round Door", lang.get("block.roundwood.round_door").getAsString());
         assertEquals("Arched Door", lang.get("block.roundwood.arched_door").getAsString());
+        assertEquals("Archway", lang.get("block.roundwood.archway").getAsString());
+        assertEquals("Keyhole Archway", lang.get("block.roundwood.keyhole_archway").getAsString());
         List<String> windowNames = List.of("Round Window", "Round Window with Cross Beams", "Round Window Arch, Left",
                 "Round Window Arch with Cross Beams, Left", "Round Window Arch, Right",
                 "Round Window Arch with Cross Beams, Right", "Round Window Corner, Bottom Left",

@@ -5,6 +5,7 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.showcase.section.SectionChecks;
+import io.github.dirtyredz.roundwood.showcase.section.archway.ArchwaysChecks;
 import io.github.dirtyredz.roundwood.showcase.section.door.ArchedDoorsChecks;
 import io.github.dirtyredz.roundwood.showcase.section.door.DoorSectionsChecks;
 import io.github.dirtyredz.roundwood.showcase.section.window.WindowSectionsChecks;
@@ -123,6 +124,7 @@ public final class ShowcaseGameTests {
         WindowSectionsChecks.verifyWindowArches(level, frame);
         WindowSectionsChecks.verifyNewWindowSections(level, frame);
         ArchedDoorsChecks.verify(level, frame);
+        ArchwaysChecks.verify(level, frame);
         DoorSectionsChecks.verifyRedstone(level, frame);
         DoorSectionsChecks.verifyTrims(level, frame);
         SectionChecks.verifyArches(level, frame);
@@ -138,6 +140,7 @@ public final class ShowcaseGameTests {
             WindowSectionsChecks.verifyWindowArches(level, frame);
             WindowSectionsChecks.verifyNewWindowSections(level, frame);
             ArchedDoorsChecks.verify(level, frame);
+            ArchwaysChecks.verify(level, frame);
             ArchedDoorsChecks.verifyRedstone(level, frame);
             clearSilently(helper);
             helper.succeed();

@@ -22,7 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The 30 Roundwood recipes (round door, arched door (0.11.0), 26 windows, round trim, arch sill) and their advancements,
+ * The 32 Roundwood recipes (round door, arched door (0.11.0), 26 windows, round trim, arch sill, archway and
+ * keyhole archway (0.12.0)) and their advancements,
  * written out independently of the mod: exact patterns, ingredients, results and groups, plus the
  * guarantee that no two recipes can fill the same crafting grid, mirrored or shifted.
  */
@@ -54,7 +55,7 @@ class GeneratedRecipesTest {
     }
 
     @Test
-    void thereAreExactlyTheThirtyRecipes() throws IOException {
+    void thereAreExactlyTheThirtyTwoRecipes() throws IOException {
         assertEquals(new TreeSet<>(List.of("round_door", "arched_door", "round_window", "round_window_arch_left",
                 "round_window_arch_right", "round_window_bottom_left", "round_window_bottom_right",
                 "round_window_cross", "round_window_arch_left_cross", "round_window_arch_right_cross",
@@ -64,13 +65,13 @@ class GeneratedRecipesTest {
                 "round_window_edge_bottom", "round_window_edge_right", "round_window_arch_bottom_left_cross",
                 "round_window_arch_bottom_right_cross", "round_window_top_left_cross",
                 "round_window_top_right_cross", "round_window_edge_top_cross", "round_window_edge_left_cross",
-                "round_window_edge_bottom_cross", "round_window_edge_right_cross", "arch_sill_trim")),
+                "round_window_edge_bottom_cross", "round_window_edge_right_cross", "arch_sill_trim", "archway", "keyhole_archway")),
                 recipeNames());
-        assertEquals(30, recipeNames().size());
+        assertEquals(32, recipeNames().size());
     }
 
     @Test
-    void theThirtyRecipesAreExactlyAsDesigned() {
+    void theThirtyTwoRecipesAreExactlyAsDesigned() {
         assertRecipe("round_door", "roundwood:round_door", List.of("PPP", "PNP", "PPP"), Map.of("P", PLANKS, "N", NUGGET));
         assertRecipe("arched_door", "roundwood:arched_door", List.of(" P ", "PNP", "PPP"), Map.of("P", PLANKS, "N", NUGGET));
         assertRecipe("round_window", "roundwood:round_window", List.of(" P ", "PGP", " P "), Map.of("P", PLANKS, "G", PANE));
@@ -127,6 +128,9 @@ class GeneratedRecipesTest {
                 Map.of("P", PLANKS, "G", PANE, "S", STICK));
         assertRecipe("arch_sill_trim", "roundwood:arch_sill_trim", List.of("PPP", "S S"),
                 Map.of("P", PLANKS, "S", STICK));
+        assertRecipe("archway", "roundwood:archway", List.of("PPP", "P P", "P P"), Map.of("P", PLANKS));
+        assertRecipe("keyhole_archway", "roundwood:archway", List.of("SPS", "P P", "P P"),
+                Map.of("P", PLANKS, "S", STICK));
     }
 
     /**
@@ -148,7 +152,7 @@ class GeneratedRecipesTest {
             }
             grids.put(name, placements);
         }
-        assertEquals(30, grids.size());
+        assertEquals(32, grids.size());
         for (String a : grids.keySet()) {
             for (String b : grids.keySet()) {
                 if (a.compareTo(b) < 0) {
