@@ -7,7 +7,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
  * face at a time ({@code TrimSlot.SILL}). It covers the bottom {@link #ROWS} pixel rows <em>inside</em>
  * the profile's opening, so it never overlaps the curved perimeter band on the same face (the two may
  * be fitted together in different looks without coplanar faces), and it stands
- * {@link WindowTrimGeometry#PROUD} pixel proud at the perimeter band's depth. It is decorative: it
+ * {@code AttachmentFace.PROUD} pixel proud at the perimeter band's depth. It is decorative: it
  * lies over the glazing and the beam ends without changing the pane, its glass or its tint. Only
  * profiles that {@link WindowProfile#takesSill() take a sill} have one. Plain Java.
  */

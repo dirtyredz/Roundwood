@@ -56,10 +56,10 @@ class DoorTrimGeometryTest {
 
     @Test
     void depthPicksTheFaceAndTargetsStayInTheCells() {
-        assertEquals(AttachmentFace.FRONT, DoorTrimGeometry.face(15.9));
-        assertEquals(AttachmentFace.FRONT, DoorTrimGeometry.face(14.5));
-        assertEquals(AttachmentFace.BACK, DoorTrimGeometry.face(14.49));
-        assertEquals(AttachmentFace.BACK, DoorTrimGeometry.face(12.1));
+        assertEquals(AttachmentFace.FRONT, AttachmentFace.at(15.9, DoorTrimGeometry.MIDDLE));
+        assertEquals(AttachmentFace.FRONT, AttachmentFace.at(14.5, DoorTrimGeometry.MIDDLE));
+        assertEquals(AttachmentFace.BACK, AttachmentFace.at(14.49, DoorTrimGeometry.MIDDLE));
+        assertEquals(AttachmentFace.BACK, AttachmentFace.at(12.1, DoorTrimGeometry.MIDDLE));
         for (AttachmentFace face : AttachmentFace.values()) {
             for (Box box : DoorTrimGeometry.target(DoorDesign.ROUND, face)) {
                 assertTrue(box.minZ() >= 0 && box.maxZ() <= 16, face + ": target leaves the door's cells " + box);

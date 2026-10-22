@@ -25,9 +25,8 @@ import java.util.Map;
  * inside the door cells. Plain Java.
  */
 public final class DoorTrimGeometry {
-    /** Where a hit's depth decides the face: the middle of the closed leaf. */
+    /** Where a hit's depth decides the face ({@link AttachmentFace#at}): the middle of the closed leaf, 14.5. */
     public static final double MIDDLE = (DoorGeometry.BACK + DoorGeometry.FRONT) / 2;
-    public static final double PROUD = 1;
     /** The casing's width in pixels, on every design. */
     public static final int WIDTH = RingGeometry.WIDTH;
     /** The arched door's casing's inner edge: its leaf's arch, {@link #WIDTH} pixels in at the sides and the crown. */
@@ -41,9 +40,9 @@ public final class DoorTrimGeometry {
     static {
         for (DoorDesign design : DoorDesign.values()) {
             List<PixelCircle.Rect> rects = PixelCircle.rasterize(design.width(), DoorDesign.HEIGHT, (u, v) -> inCasing(design, u, v));
-            CASINGS.put(design, new Casing(extrude(rects, DoorGeometry.FRONT, DoorGeometry.FRONT + PROUD),
-                    extrude(rects, DoorGeometry.BACK - PROUD, DoorGeometry.BACK),
-                    extrude(rects, DoorGeometry.FRONT - PROUD, DoorGeometry.FRONT)));
+            CASINGS.put(design, new Casing(extrude(rects, DoorGeometry.FRONT, DoorGeometry.FRONT + AttachmentFace.PROUD),
+                    extrude(rects, DoorGeometry.BACK - AttachmentFace.PROUD, DoorGeometry.BACK),
+                    extrude(rects, DoorGeometry.FRONT - AttachmentFace.PROUD, DoorGeometry.FRONT)));
         }
     }
 
@@ -70,11 +69,6 @@ public final class DoorTrimGeometry {
         return face == AttachmentFace.FRONT ? casing.frontProxy() : casing.back();
     }
 
-    /** The face a point at depth {@code z} addresses. */
-    public static AttachmentFace face(double z) {
-        return z >= MIDDLE ? AttachmentFace.FRONT : AttachmentFace.BACK;
-    }
-
     /** True when an authored point lies on the casing's footprint (any depth). */
     public static boolean onRing(DoorDesign design, double x, double y) {
         return inPlane(design, x, y) && inCasing(design, (int) Math.floor(x), (int) Math.floor(y));
@@ -88,8 +82,8 @@ public final class DoorTrimGeometry {
     /** True when depth {@code z} lies in a casing's in-cell target for {@code face} (an open door is aimed at there). */
     public static boolean inTargetDepth(AttachmentFace face, double z) {
         return face == AttachmentFace.FRONT
-                ? z >= DoorGeometry.FRONT - PROUD && z <= DoorGeometry.FRONT
-                : z >= DoorGeometry.BACK - PROUD && z <= DoorGeometry.BACK;
+                ? z >= DoorGeometry.FRONT - AttachmentFace.PROUD && z <= DoorGeometry.FRONT
+                : z >= DoorGeometry.BACK - AttachmentFace.PROUD && z <= DoorGeometry.BACK;
     }
 
     private static boolean inPlane(DoorDesign design, double x, double y) {

@@ -47,8 +47,8 @@ public final class DoorTrimModels {
 
     private static BakedModel build(Key key) {
         boolean front = key.face() == AttachmentFace.FRONT;
-        double back = front ? DoorGeometry.FRONT : DoorGeometry.BACK - DoorTrimGeometry.PROUD;
-        double out = front ? DoorGeometry.FRONT + DoorTrimGeometry.PROUD : DoorGeometry.BACK;
+        double back = front ? DoorGeometry.FRONT : DoorGeometry.BACK - AttachmentFace.PROUD;
+        double out = front ? DoorGeometry.FRONT + AttachmentFace.PROUD : DoorGeometry.BACK;
         return PixelSlabModels.cell((u, v) -> DoorTrimGeometry.inCasing(key.design(), u, v), key.part().column.index(),
                 key.part().row(), back, out, key.facing(), key.look(),
                 new PixelSlabModels.Extent(key.design().width(), DoorDesign.HEIGHT, DoorGeometry.DIAMETER));
