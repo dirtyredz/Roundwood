@@ -9,10 +9,10 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   workspace. The owner checks visuals and client behaviour in game.
 - **Generated resources are source.** Change a provider, run `./gradlew runData`, commit the
   regenerated `src/generated/resources/` with the code. Never hand-edit generated JSON.
-- **Separate authorities, no catalogue.** Content is 29 canonical blocks and 30 advertised items in
-  three appearance families (door = the round and arched doors; window family = 26 windows; trim = the Universal Trim and the
-  Arch Sill, an item only); looks are data. `round_trim` stays a registered compatibility block (frames from older
-  saves) while its item, the Universal Trim, attaches to window and door faces; `window_trim` is
+- **Separate authorities, no catalogue.** Content is 31 canonical blocks and 32 advertised items in
+  three appearance families (door = the round and arched doors; window family = 26 windows; trim = the two archways,
+  the Universal Trim and the Arch Sill, an item only); looks are data. `round_trim` stays a registered compatibility block (frames from older
+  saves) while its item, the Universal Trim, attaches to window, door and archway faces; `window_trim` is
   a hidden compatibility item that behaves the same. The Arch Sill is the second attachment slot
   (`TrimSlot.SILL`, upper arches only). Trim attachments go through
   `block/attachment` (`FaceTrimStore`, `TrimFitting`, `TrimHost`, `TrimSlot`), never a host copy. Which

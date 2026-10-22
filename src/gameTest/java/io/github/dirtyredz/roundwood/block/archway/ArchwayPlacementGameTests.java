@@ -136,7 +136,9 @@ public final class ArchwayPlacementGameTests {
     @GameTest(template = TEMPLATE)
     public static void aCancelledPlacementRollsBackEveryCellAndTheItem(GameTestHelper helper) {
         floor(helper);
-        helper.setBlock(ANCHOR.above(), Blocks.GRASS); // replaceable, so it is written and must come back
+        // Replaceable, so it is written and must come back; a floor-standing snow layer survives the rollback's
+        // shape updates (floating grass would not: restoring the right column re-checks its support).
+        helper.setBlock(ANCHOR, Blocks.SNOW);
         int eventsBefore = PlacementCanceller.multiPlaceEvents();
         ServerPlayer player = player(helper, "cancelled", GameType.SURVIVAL, Direction.NORTH);
         ItemStack stack = new ItemStack(block(ArchwayDesign.KEYHOLE).asItem());
@@ -145,7 +147,7 @@ public final class ArchwayPlacementGameTests {
         check(PlacementCanceller.multiPlaceEvents() == eventsBefore + 1, "expected exactly one multi-place event");
         check(player.getMainHandItem().getCount() == 1, "item not restored: " + player.getMainHandItem());
         assertNoArchway(helper, assembly(helper, ANCHOR, Direction.NORTH, ArchwayDesign.KEYHOLE));
-        check(helper.getBlockState(ANCHOR.above()).is(Blocks.GRASS), "the replaced grass was not restored");
+        check(helper.getBlockState(ANCHOR).is(Blocks.SNOW), "the replaced snow was not restored");
         helper.succeed();
     }
 
@@ -192,12 +194,24 @@ public final class ArchwayPlacementGameTests {
                     check(placed.equals(plan.get().states().get(part)), name + ": " + part + " placed " + placed);
                     shapes += placed.getShape(helper.getLevel(), cell, CollisionContext.empty()).toAabbs().stream()
                             .mapToDouble(box -> box.getXsize() * box.getYsize() * box.getZsize()).sum();
-                    // Every box of the cell's shape lies inside the outline's boxes, offset to the cell.
+                    // Every box of the cell's shape lies inside the outline's footprint (with the equal volume below,
+                    // the outline is exactly the placed shapes).
                     BlockPos offset = cell.subtract(planned.anchor());
+                    Box footprint = ArchwayGeometry.footprint(facing);
                     for (var box : placed.getShape(helper.getLevel(), cell, CollisionContext.empty()).toAabbs()) {
-                        Vec3 centre = box.getCenter().add(offset.getX(), offset.getY(), offset.getZ()).scale(16);
-                        check(ArchwayGeometry.placed(design, facing).stream().anyMatch(b -> b.containsStrictly(centre.x, centre.y, centre.z)),
-                                name + ": " + part + " shape outside the previewed frame");
+                        Box pixels = new Box((box.minX + offset.getX()) * 16, (box.minY + offset.getY()) * 16, (box.minZ + offset.getZ()) * 16,
+                                (box.maxX + offset.getX()) * 16, (box.maxY + offset.getY()) * 16, (box.maxZ + offset.getZ()) * 16);
+                        check(pixels.within(footprint), name + ": " + part + " shape " + pixels + " outside the previewed cells");
+                        // Every pixel voxel of the shape (its centre never on a seam) is inside the previewed frame.
+                        for (double x = pixels.minX() + 0.5; x < pixels.maxX(); x++) {
+                            for (double y = pixels.minY() + 0.5; y < pixels.maxY(); y++) {
+                                for (double z = pixels.minZ() + 0.5; z < pixels.maxZ(); z += 4) {
+                                    double px = x, py = y, pz = z;
+                                    check(ArchwayGeometry.placed(design, facing).stream().anyMatch(b -> b.containsStrictly(px, py, pz)),
+                                            name + ": " + part + " pixel " + px + "," + py + "," + pz + " outside the previewed frame");
+                                }
+                            }
+                        }
                     }
                 }
                 double outline = ArchwayGeometry.placed(design, facing).stream().mapToDouble(Box::volume).sum() / 4096.0;

@@ -1,5 +1,16 @@
 # Gotchas - Roundwood
 
+- **An archway's loot holds two trim-family items.** The archway and its Universal Trims are both
+  TRIM family, so `AppearanceDrops.decorate(drops, family, look)` would stamp the archway's look on
+  the trims; the archway decorates by item. `ArchwayTrimGameTests` guards it.
+- **Restyling an archway with a casing: aim at the passage side.** On a face with a casing, planks,
+  masonry and dye restyle the casing (there is no other way to reach it); the archway itself takes
+  them on its other surfaces. A face without a casing restyles the archway.
+- **Archway models are baked on the client, cached by design, layer, cell, facing and look.** The
+  generated `archway` / `keyhole_archway` block models are empty (particle only); the item JSON is the
+  oak icon whose transforms the styled icons copy. A geometry change needs no `runData` for the world
+  look, but does for the oak item model.
+
 - **Interactive targets take the click before placement.** Aiming a window item at a door, chest or
   lever uses that block first; the overlay still shows the zone, so it is not a promise.
 - **Flush and floor/ceiling windows never connect** (0.6.1). Their slab does not reach the middle

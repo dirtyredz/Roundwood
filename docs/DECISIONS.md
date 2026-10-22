@@ -2,6 +2,36 @@
 
 Newest first.
 
+## 2026-10-22 - Archway proportions, depth and an open floor (0.12.0)
+
+Both archways are 32 x 32 pixels outside (straight outer jambs to y 16, a radius-16 crown at
+(16, 16)) and a full block deep with collidable jambs and crown and no threshold. The ordinary opening
+is x 2..30 under a radius-14 crown (two-pixel jambs and crown); the keyhole keeps that crown and steps
+each side in by four pixels over the eight pixels under the spring line, leaving a 20-pixel lower
+passage. These are the plan's starting proportions, unchanged; a player fits through the middle of
+either. Rejected: a threshold (a step at the floor), a thinner frame (the full block reads as masonry).
+
+## 2026-10-22 - Archways reuse the trim appearance family and the shared attachment services (0.12.0)
+
+Archways take wood, paint and the four masonry materials, which is exactly the TRIM family; no fourth
+family or material catalogue. Their face casings are Universal Trims stored in their own `ArchwayTrim`
+payload through `FaceTrimStore` and edited through `TrimFitting`, like doors and windows. A casing
+covers the whole frame face (the frame is itself a narrow band, so a two-pixel border would cover
+most of it anyway). On a face with a casing, donors restyle the casing; the archway is restyled from
+its other surfaces (the inside of the passage, the crown). Consequence: drops are decorated by item,
+not by family, so an archway's look never lands on its trims. Rejected: a plain-click restyle that
+always hits the archway (a casing could then never be restyled), sneaking to switch target (the owner
+rules out sneak-click mechanics).
+
+## 2026-10-22 - Archways keep their own lifecycle and bake their models from the mask (0.12.0)
+
+As the plan chose, the archway has its own layout, plan, integrity and removal over the shared
+mutation batch, teardown and harvest, rather than a generic multiblock framework; the duplication with
+the door and frame is recorded on dk-992020e6. Frame, casing and styled-item models are baked on the
+client from the same pixel mask as the shapes (`PixelSlabModels`, extracted from the arched door
+casing now that there are two callers), so only the oak item model and empty world models are
+generated. The placement preview draws voxel-shape outlines, so no shared overlay class was extracted.
+
 ## 2026-10-22 - One shared door adapter with an explicit design (0.11.0)
 
 The arched door is a second design of the existing door family, not a second family:

@@ -1,7 +1,7 @@
 # Roundwood
 
 Forge 1.20.1 mod: a round 2x2 wooden door and an arched 1x2 one, a round window with arch, corner and edge pieces (each
-plain or with cross beams), a Universal Trim for both and an Arch Sill, hobbit-hole style. Each is one item you
+plain or with cross beams), two open 2x2 archways, a Universal Trim for all of them and an Arch Sill, hobbit-hole style. Each is one item you
 restyle in the world: any planks (vanilla or modded) set the wood, any of the 16 dyes paints it,
 and trims can also be faced with radial brick. Install on **both** the server and every client.
 Generic: not tied to any modpack.
@@ -16,15 +16,16 @@ Generic: not tied to any modpack.
 
 ## Content
 
-30 items: **Round Door**, **Arched Door** (0.11.0), thirteen window pieces, each in a plain and a cross-beam version
+32 items: **Round Door**, **Arched Door** (0.11.0), thirteen window pieces, each in a plain and a cross-beam version
 (**Round Window**, **Round Window Arch, Left** and **Right**, **Round Window Corner, Bottom Left**
 and **Bottom Right**, and since 0.10.0 **Round Window Arch, Bottom Left** and **Bottom Right**,
 **Round Window Corner, Top Left** and **Top Right**, and **Round Window Edge, Top**, **Left**,
-**Bottom** and **Right**; the crossed ones are named "... with Cross Beams"), the **Universal Trim**
-and the **Arch Sill**. Creative tab order: round door, arched door, then each plain window piece followed by its
-crossed variant (round, arch left, arch right, corner bottom left, corner bottom right, arch bottom
-left, arch bottom right, corner top left, corner top right, edge top, left, bottom, right),
-Universal Trim, Arch Sill. They are crafted (and found in the creative tab) in oak;
+**Bottom** and **Right**; the crossed ones are named "... with Cross Beams"), the **Archway** and
+**Keyhole Archway** (0.12.0), the **Universal Trim** and the **Arch Sill**. Creative tab order: round
+door, arched door, then each plain window piece followed by its crossed variant (round, arch left,
+arch right, corner bottom left, corner bottom right, arch bottom left, arch bottom right, corner top
+left, corner top right, edge top, left, bottom, right), archway, keyhole archway, Universal Trim,
+Arch Sill. They are crafted (and found in the creative tab) in oak;
 their look is changed once placed and travels with them when picked or broken.
 
 **Round door** (one item places a 2 wide x 2 high assembly). One round leaf on one hinge, like a
@@ -83,6 +84,35 @@ short animation; the knobs and straps do not collide.
   its trims and the stored camouflage block. To the game it is a normal wooden door
   (`minecraft:doors`, `minecraft:wooden_doors`, fuel, axe, villagers). The same placement preview as
   the round door's is drawn while you hold it. The item icon is the closed left-hinge leaf.
+
+**Archway and Keyhole Archway** (0.12.0, one item places a 2 wide x 2 high static opening). A
+full-block-deep frame with an open passage: no leaf, glass, swing, camouflage or redstone. Both are
+32 x 32 pixels outside, straight outer jambs up to half height under a round (radius 16) crown.
+- *Archway*: two-pixel jambs and crown; the passage is 28 pixels wide (1.75 blocks) under a radius-14
+  crown.
+- *Keyhole Archway*: the same crown, but below the spring line each jamb steps in four pixels over
+  eight (one pixel every two rows), leaving a 20-pixel (1.25 blocks) lower passage.
+- Placement: an ordinary click; the cell you target (or the replaceable cell you click) becomes the
+  **lower-left** cell seen from where you stand, and the archway extends one block to your right and
+  one up, facing you (four facings, always upright, no hinge). All four cells must be empty or
+  replaceable, dry, inside the world and border, loaded and buildable by you, with a solid floor
+  under both lower cells, and no mob where the frame would stand (someone in the passage is fine).
+  Holding the item previews the frame outline (the real opening) and the four cells; nothing is
+  drawn where placement would be refused. A refused or cancelled placement keeps the item and
+  restores every cell.
+- You walk through the passage; the jambs and crown collide like a wall. Light and neighbours show
+  through.
+- Looks: any planks (stripped-log look, like the trims), any dye, or bricks, stone bricks, deepslate
+  bricks or mud bricks, with brickwork that follows the contour (radial voussoirs with a keystone,
+  straight jamb courses, corbelled shoulders on the keyhole). A plain click with planks, masonry or
+  dye restyles it (sneaking does the same).
+- Universal Trim: click either face (a plain click) to fit a casing over that whole face, one pixel
+  proud, in its own look; restyle it by aiming planks, masonry or dye at that face; shears take it off.
+  On a face with a casing, donors restyle the casing; to restyle the archway itself, aim at the inside
+  of the passage or the crown. The Arch Sill is refused with a hint.
+- Breaking any cell removes the archway and drops **one** archway in its look plus one Universal Trim
+  per trimmed face, each in its own look. Losing the floor breaks it the same way. Pistons cannot move
+  it. It is in `roundwood:archways`, mines with an axe, and is never a door.
 
 **Round window** (single block). A thin square wooden pane with round tinted glass in the middle.
 It can stand upright and centred, or flush against any side of its cell (four walls, floor,
@@ -218,13 +248,18 @@ the main hand is empty. Sneaking changes nothing.
 | Door trim ring | Dye | Painted (refused on brickwork, free) | 1 dye |
 | Door trim ring | Shears | That face's ring removed and returned as an item; shears take one wear | none |
 | Door | Universal Trim (or an older trim item) | Attaches a ring to the clicked face (nothing happens if it has one) | 1 trim |
+| Archway (passage side, crown, or a face without a casing) | Planks, masonry or dye | That look for the whole archway (dye refused on brickwork, free) | 1 item |
+| Archway face with a casing | Planks, masonry or dye | Restyles that face's casing | 1 item |
+| Archway face | Shears | That face's casing removed and returned as a Universal Trim; shears take one wear | none |
+| Archway | Universal Trim (or an older trim item) | Fits a casing on the nearer face (nothing happens if it has one) | 1 trim |
+| Archway | Arch Sill | Refused with a hint | nothing |
 | Freestanding frame (older saves) | **Sneak** + planks | That wood (also replaces masonry) | 1 plank |
 | Freestanding frame | **Sneak** + bricks, stone bricks, deepslate bricks or mud bricks | Radial brickwork, paint cleared | 1 block |
 | Wooden freestanding frame | Dye | Painted | 1 dye |
 | Brick freestanding frame | Dye | Refused (masonry is not painted) | nothing |
 
-- Windows and door trims need no sneaking: a plain click does the same as a sneaking one. Only the
-  door leaf and freestanding frames keep their sneak gestures.
+- Windows, archways and door trims need no sneaking: a plain click does the same as a sneaking one.
+  Only the door leaf and freestanding frames keep their sneak gestures.
 - Aim decides on a window. There are four targets: the trim band (the ring under a trim, on the face
   you aim at), the arch sill, the frame (the wooden border, including the cross beams) and the
   glass. A trim band or sill only counts on a face that has one; the cross beams are frame, never
@@ -267,7 +302,9 @@ paint on a door with a painted door trim, on a tinted-glass window and on a pain
 wood and masonry door trim on a blue, a camouflaged oak and an open red door; and the legacy
 freestanding frames (older saves). Since 0.11.0 an arched door section (oak closed and open on both
 hinges, a lever-driven door, other woods and a paint, trims and camouflage) stands at r 40..49,
-f 0..7.
+f 0..7. Since 0.12.0 an archway section: a row of archways and a row of keyhole archways behind it
+(oak, spruce, dark oak, cherry, blue paint, the four masonry materials, a stone-brick front casing, and
+different front and back casings), at r 26..58, f 35..41, between the round doors and the corners.
 
 ## Recipes
 
@@ -301,6 +338,8 @@ f 0..7.
 | Edge with cross beams, left | Rows `PS` / `PG` / `PS` |
 | Edge with cross beams, bottom | Rows `SGS` / `PPP` |
 | Edge with cross beams, right | Rows `GP` / `SP` / `SP` |
+| Archway (0.12.0) | Rows `PPP` / `P P` / `P P` (P any planks) |
+| Keyhole Archway (0.12.0) | Rows `SPS` / `P P` / `P P` (S stick) |
 | Universal Trim (`round_trim`) | 4 planks in the four corners of the grid |
 | Arch Sill (`arch_sill_trim`) | Rows `PPP` / `S S` |
 
@@ -311,10 +350,12 @@ the left and right edges differ by where the pane sits.
 Crafting always gives the oak object; restyle it in the world. With **EMI** each item is one index
 entry whose icon cycles through example looks (the tooltip says it is a preview; taking or
 bookmarking it gives the plain oak item); styled stacks in your inventory are told apart by their
-look. With **JEI** styled stacks are separate subtypes and the 30 plain items are listed.
+look. With **JEI** styled stacks are separate subtypes and the 32 plain items are listed.
 Neither viewer is required.
 
 ## Upgrading
+
+**From 0.10.0 or 0.11.0:** saves load unchanged; the archways are new content. Nothing converts.
 
 **From 0.9.0:** saves load unchanged. Windows gain an optional sill payload
 (`WindowSillTrim`) only when a sill is fitted; nothing converts.
@@ -367,22 +408,53 @@ Not released yet. 0.5.0 is the baseline; 0.6.0 (targeted window placement and th
 0.6.1 (no glass bridges on positioned windows, the door highlight follows the swing) and 0.7.0
 (seamless clearer window glass, corner pieces, cross beams, window trims, thinner mortar) were
 trialled by the owner, and so was 0.8.0 (a trim per window face, trim standing proud of flush
-windows, tinted window glass, Door Trim attached to doors, plain-click gestures). 0.9.0 (one
-Universal Trim for windows and doors, square-frame icon) is built and tested headless. Owner checks
-in game: the square icon in wood, paint, each masonry and an unfamiliar wood; old Window Trim and
-Door Trim stacks from a chest fit both windows and doors; separate face looks survive save and
-reload; shears give back a Universal Trim; 0.7.0 fitted frames still convert only as documented.
-0.10.0 (lower arches, top corners, edges, the Arch Sill) is built and tested headless. Owner checks in
-game: plain and crossed full circles (front and back seams), top corners and runs of each edge piece;
-centred, flush, floor, ceiling and waterlogged placement and the preview; sills fitted, restyled and
-removed independently of trims on both faces; glass tint under a sill; drops; masonry art on lower
-arches (radial), top corners (head), edges and sills; the Arch Sill icon; F3+T.
-0.11.0 (the 1 x 2 arched door and the door placement preview) is built and tested headless. Owner
-checks in game: place both door designs on both hinges; the preview before placing (open when
-powered, hidden when refused); refusals keep the item; the open arched leaf's 13/16 clearance with
-nothing outside its cells; straps and knobs; swing and highlight; static trims on the arched outline;
-upper-corner camouflage; redstone from either half; villager passage; save and reload; item icons.
-Not covered by a unit test: the client-side trim retexturing. The flow follows DankRecipeTransfer: an immutable
+windows, tinted window glass, Door Trim attached to doors, plain-click gestures).
+
+0.9.0 to 0.12.0 are built and tested headless (unit tests and server GameTests) and await one owner
+trial together. Use a copy of a world saved in 0.8.0, run `/roundwood showcase` on open ground, and
+check in game (the client-side retexturing and rendering have no automated test):
+
+*0.9.0, Universal Trim*
+- [ ] The square-frame icon in oak, another wood, an unfamiliar modded wood, a paint and each of the
+  four masonry materials.
+- [ ] Old Window Trim and Door Trim stacks from a chest fit both windows and doors, plain click and
+  sneaking; shears give back a Universal Trim in the same look.
+- [ ] Two faces with different looks survive save and reload; 0.7.0 fitted frames convert only as
+  documented in Upgrading.
+
+*0.10.0, window shapes and the Arch Sill*
+- [ ] Plain and crossed full circles from four arches: front and back seams, the ring trim's quarters
+  meeting.
+- [ ] Top corners over bottom corners, runs of each edge piece (a 3 x 2 window), each edge alone.
+- [ ] Centred, flush, floor, ceiling and waterlogged placement, and the preview matching the result.
+- [ ] Sills fitted, restyled and removed independently of trims on both faces; glass tint under a
+  sill; a window with two trims and two sills drops five items.
+- [ ] Masonry art: radial on lower arches, head on top corners, straight runs on edges, one course on
+  sills; the Arch Sill icon; F3+T reload keeps every look.
+
+*0.11.0, the arched door and the door preview*
+- [ ] Place both door designs on both hinges; the preview before placing (open when powered, nothing
+  shown where refused); refusals keep the item.
+- [ ] The open arched leaf's 13/16 clearance with nothing outside its cells; straps and knobs; the
+  swing and its highlight.
+- [ ] Static trims on the arched outline; upper-corner camouflage; redstone from either half;
+  villagers walking through; save and reload; both item icons.
+
+*0.12.0, the archways*
+- [ ] Hold each archway: the preview shows the frame's real opening (ordinary, keyhole) and the four
+  cells, matches what is placed, and shows nothing where placement is refused (blocked cell, water,
+  missing floor, a mob in a jamb). Sneaking changes nothing.
+- [ ] Depth (full block), the open floor (no threshold), the crown, and the keyhole's shoulders and
+  20-pixel lower passage; walk through both; the jambs and crown stop you.
+- [ ] Every look: oak, other woods, an unfamiliar wood, a paint, each masonry material (contour
+  brickwork: keystone on top, joints on the spring lines, straight jamb courses, corbelled shoulders);
+  the styled item icon in the inventory and in hand.
+- [ ] Universal Trim on the front and the back separately, in different looks, one pixel proud;
+  restyling a casing vs the archway (aim at the passage side); shears; the Arch Sill refused.
+- [ ] Break each cell: one archway in its look plus each trim in its own; remove the floor under a
+  lower cell; save and reload; F3+T; rendering from a distance and with the archway across a chunk
+  edge (it is drawn whenever any part is in view).
+- [ ] Known gap shared with doors and frames: the mining crack does not show on archways. The flow follows DankRecipeTransfer: an immutable
 GitHub prerelease asset, then a direct-URL `mods/roundwood.pw.toml` (with SHA-256, `side = "both"`)
 in the pack repo. Both steps need the owner's go-ahead.
 

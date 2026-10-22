@@ -149,6 +149,47 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   (FRONT z 16..17, BACK z 12..13, no threshold), built from geometry by `client/door/DoorTrimModels`;
   the round ring keeps the frame quarter models. Masonry uses `door_casing_arched_<material>`.
 
+## Archways (0.12.0)
+
+- **A fourth block family, static.** `block/archway/ArchwayBlock` (one class, `design()` ORDINARY or
+  KEYHOLE, ids `archway`, `keyhole_archway`) has `facing` and `part` (lower/upper, left/right) like the
+  compatibility frame; the lower-left cell carries `ArchwayBlockEntity` (type `archway`) with the look
+  (appearance family TRIM: wood, paint, the four masonry) and the `ArchwayTrim` payload. No swing,
+  glass, camouflage or redstone. It imports `block/attachment` and `block/assembly` only.
+- **Profiles.** `geometry/ArchwayDesign` is a 32 x 32 pixel mask: outer `ArchedProfile(0, 32, 16)`
+  minus the opening, `ArchedProfile(2, 30, 16)` for the ordinary archway and, for the keyhole,
+  `KeyholeGeometry` (the same crown above y 16; below it the edges move in linearly by 4 px over 8 px,
+  then x 6..26 to the floor; pixel centres decide). `ArchwayGeometry` rasterises it once, extruded the
+  full block (z 0..16). Collision, target and outline are the same per-cell piece (`ArchwayShapes`),
+  so players and rays pass through the passage; the item model, the world models and the preview are
+  built from the same mask.
+- **Placement.** `ArchwayPlacementPlan.of(block, context)` (or `at(...)` for the showcase) is the one
+  read-only decision: anchor = clicked or replaceable cell, facing = the placer's horizontal
+  direction, right column = facing's clockwise side, four cells checked for bounds, border, loaded,
+  permission, replaceable, dry, entity obstruction against the frame's own collision, and a sturdy
+  floor under both lower cells. `ArchwayPlacement` writes exactly the plan inside an
+  `AssemblyMutationBatch` (one Forge multi-place event, rolled back on cancel) and charges once;
+  `client/archway/ArchwayPlacementPreview` draws the same plan (frame outline from
+  `ArchwayGeometry.placed`, the four-cell footprint).
+- **Lifecycle.** Integrity is deferred one tick and retried while a cell is unloaded
+  (`ArchwayIntegrity`); removing a cell clears the loaded partners silently (`ArchwayRemoval` over
+  `AssemblyTeardown`); survival harvests defer removal (`AssemblyHarvest`) so loot reads the anchor;
+  lower cells break when their floor goes. Loot: one archway in its look (`AppearanceDrops.decorate`
+  by item, so the trims keep theirs) plus one `round_trim` per trimmed face via `AttachmentLootPools`
+  keyed `ArchwayTrim`, evaluated with the anchor entity from whichever cell broke.
+- **Face casings.** `ArchwayTrimNbt` (`ArchwayTrim` v1, no legacy, empty omitted) through
+  `FaceTrimStore`; fitting, removal and restyling through `TrimFitting` with an anchor `TrimHost`
+  (`ArchwayTrimActions`). A casing covers the whole frame face (`ArchwayTrimGeometry.inCasing` = the
+  frame mask), FRONT z 16..17, BACK -1..0, render-only. Targeting (`ArchwayTrimTarget`): a hit on the
+  front or back plane addresses that face; any other surface is the archway; a held Universal Trim
+  fits the nearer face by depth. The router (`ArchwayInteraction`) is the window convention: plain
+  click, sneaking identical through `claimsUse`, main hand first.
+- **Rendering.** `ArchwayRenderer` (anchor BER, solid layer, per-cell world light) draws each cell's
+  frame and installed casing pieces from `ArchwayModels`, which bakes them with the shared
+  `client/render/PixelSlabModels` (the arched door casing uses it too). Masonry faces are
+  `archway_<m>` / `keyhole_archway_<m>` (64 x 64 over the 32 x 32 face). Styled items are baked from the
+  mask with the oak item model's transforms. The world model is empty, so no mining crack shows.
+
 ## Camouflage
 
 One material covers all four static corners: the 32 x 32 square minus the disc, at the closed
