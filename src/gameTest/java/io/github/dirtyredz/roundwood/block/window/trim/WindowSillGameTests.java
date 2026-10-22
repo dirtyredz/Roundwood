@@ -260,4 +260,95 @@ public final class WindowSillGameTests {
         helper.setBlock(AT, Blocks.AIR);
         helper.succeed();
     }
+
+    /** Shears take the last sill and then the last trim through real clicks: only the last attachment clears {@code trimmed}. */
+    @GameTest(template = TEMPLATE)
+    public static void removingTheLastAttachmentClearsTheTrimmedSummary(GameTestHelper helper) {
+        ServerPlayer player = player(helper, "sill_last", GameType.SURVIVAL, Direction.NORTH);
+        helper.setBlock(AT, Blocks.AIR);
+        helper.setBlock(AT, window(WindowDesign.plain(WindowProfile.ARCH_LEFT), SOUTH));
+        BlockPos abs = helper.absolutePos(AT);
+        check(!WindowPaneBlock.trimmed(helper.getBlockState(AT)), "a fresh window is trimmed");
+        check(WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.SILL, face(helper, Direction.SOUTH), BRICKS), "sill");
+        check(WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.PERIMETER, face(helper, Direction.SOUTH), SPRUCE), "trim");
+        check(WindowPaneBlock.trimmed(helper.getBlockState(AT)), "attachments did not set the summary");
+
+        AppearanceFixtures.use(helper, player, new ItemStack(Items.SHEARS), ItemStack.EMPTY, hit(helper, player, SILL, Direction.SOUTH), false);
+        check(!entity(helper).trims(TrimSlot.SILL).any() && entity(helper).trims().any(), "shears did not take only the sill");
+        check(WindowPaneBlock.trimmed(helper.getBlockState(AT)), "the summary cleared while a trim remained");
+
+        AppearanceFixtures.use(helper, player, new ItemStack(Items.SHEARS), ItemStack.EMPTY, hit(helper, player, LEFT_BAND, Direction.SOUTH), false);
+        check(!entity(helper).trims().any() && !entity(helper).trims(TrimSlot.SILL).any(), "shears did not take the last trim");
+        check(!WindowPaneBlock.trimmed(helper.getBlockState(AT)), "the summary stayed set after the last attachment went");
+        helper.setBlock(AT, Blocks.AIR);
+        helper.succeed();
+    }
+
+    /** A sill-only window is trimmed, saves an explicit empty perimeter payload, and syncs the sill alongside it. */
+    @GameTest(template = TEMPLATE)
+    public static void aSillOnlyWindowIsTrimmedAndSavesAnExplicitEmptyPerimeter(GameTestHelper helper) {
+        ServerPlayer player = player(helper, "sill_only", GameType.SURVIVAL, Direction.NORTH);
+        helper.setBlock(AT, Blocks.AIR);
+        helper.setBlock(AT, window(WindowDesign.plain(WindowProfile.ARCH_RIGHT), SOUTH));
+        ItemStack sill = sills(SPRUCE, 1);
+        AppearanceFixtures.use(helper, player, sill, ItemStack.EMPTY, hit(helper, player, SILL, Direction.SOUTH), false);
+        RoundWindowBlockEntity window = entity(helper);
+        check(sill.getCount() == 0 && window.trims(TrimSlot.SILL).count() == 1 && !window.trims().any(), "sill fit " + window.trims(TrimSlot.SILL));
+        check(WindowPaneBlock.trimmed(helper.getBlockState(AT)), "a sill-only window is not trimmed");
+        CompoundTag saved = window.saveWithoutMetadata();
+        check(saved.getCompound("WindowTrim").getInt("Version") == 2 && saved.getCompound("WindowTrim").getAllKeys().size() == 1,
+                "perimeter payload " + saved.getCompound("WindowTrim"));
+        check(saved.getCompound("WindowSillTrim").contains("Front"), "sill payload " + saved);
+        CompoundTag update = window.getUpdateTag();
+        check(update.getCompound("WindowTrim").getInt("Version") == 2 && update.getCompound("WindowSillTrim").contains("Front"),
+                "update tag " + update);
+        helper.setBlock(AT, Blocks.AIR);
+        helper.succeed();
+    }
+
+    /** While the perimeter payload is of an unknown version, sill edits succeed but never reconcile {@code trimmed}. */
+    @GameTest(template = TEMPLATE)
+    public static void sillEditsBesideAnUnknownPerimeterDoNotReconcileTheSummary(GameTestHelper helper) {
+        unknownPayloadLeavesTheSummaryAlone(helper, "WindowTrim", 99, TrimSlot.SILL);
+        helper.succeed();
+    }
+
+    /** While the sill payload is of an unknown version, perimeter edits succeed but never reconcile {@code trimmed}. */
+    @GameTest(template = TEMPLATE)
+    public static void perimeterEditsBesideAnUnknownSillDoNotReconcileTheSummary(GameTestHelper helper) {
+        unknownPayloadLeavesTheSummaryAlone(helper, "WindowSillTrim", 99, TrimSlot.PERIMETER);
+        helper.succeed();
+    }
+
+    /**
+     * Holds {@code key} at an unknown {@code version}, then edits {@code edited} (the other slot) through the production
+     * actions: untrimmed state, install: stays untrimmed; trimmed state, remove: stays trimmed.
+     */
+    private static void unknownPayloadLeavesTheSummaryAlone(GameTestHelper helper, String key, int version, TrimSlot edited) {
+        helper.setBlock(AT, Blocks.AIR);
+        helper.setBlock(AT, window(WindowDesign.plain(WindowProfile.ARCH_LEFT), SOUTH));
+        BlockPos abs = helper.absolutePos(AT);
+        RoundWindowBlockEntity window = entity(helper);
+        CompoundTag future = window.saveWithFullMetadata();
+        CompoundTag payload = new CompoundTag();
+        payload.putInt("Version", version);
+        payload.putString("Mystery", "kept");
+        future.put(key, payload);
+        window.load(future);
+        check(!window.attachmentsEditable(), key + ": the unknown payload is not held");
+        check(!WindowPaneBlock.trimmed(helper.getBlockState(AT)), key + ": loading changed the summary");
+
+        AttachmentFace front = face(helper, Direction.SOUTH);
+        check(WindowTrimActions.install(helper.getLevel(), abs, edited, front, SPRUCE), key + ": " + edited + " install refused");
+        check(window.trims(edited).count() == 1, key + ": " + edited + " not fitted");
+        check(!WindowPaneBlock.trimmed(helper.getBlockState(AT)), key + ": the summary was reconciled to set while a payload is unknown");
+
+        helper.getLevel().setBlock(abs, helper.getBlockState(AT).setValue(WindowPaneBlock.TRIMMED, true), 3);
+        check(entity(helper) == window, key + ": the entity was replaced by a state change");
+        check(WindowTrimActions.store(helper.getLevel(), abs, window, edited, FaceTrims.NONE), key + ": " + edited + " removal refused");
+        check(!window.trims(edited).any(), key + ": " + edited + " not removed");
+        check(WindowPaneBlock.trimmed(helper.getBlockState(AT)), key + ": the summary was reconciled to clear while a payload is unknown");
+        check(window.saveWithFullMetadata().getCompound(key).equals(payload), key + ": the unknown payload was not kept");
+        helper.setBlock(AT, Blocks.AIR);
+    }
 }
