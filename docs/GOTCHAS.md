@@ -128,13 +128,26 @@
 - **Fitting lives in the host router, never the item** (0.9.0). `UniversalTrimItem.useOn` returns
   FAIL; doors and windows fit in their router and claim the sneak gesture there. A fit added to the
   item's own use would run a second time after a router that passes.
-- **Trim item icons resolve in Java.** Every TRIM-family item wraps `item/round_trim` (the square
-  frame) and `UniversalTrimModels` retextures it per stack; changing only the JSON does not change a
-  styled stack's icon, and a new trim id must be a TRIM-family item to get it.
-- **One `FaceTrimStore` per slot, never two slots in one payload.** A future sill (`WindowSillTrim`)
-  gets its own key and version, so an unknown sill payload never blocks the perimeter trims. A
-  sill-only window must still write its explicit `WindowTrim` v2 empty (the window format always
-  does), or a `trimmed=true` summary would read as the 0.7.0 omitted-oak case.
+- **Trim item icons resolve in Java.** Every TRIM-family item wraps its slot's icon (`item/round_trim`,
+  the square frame; `item/arch_sill_trim`, the bar) and `TrimItemModels` retextures it per stack;
+  changing only the JSON does not change a styled stack's icon, and a new attachment id must be a
+  TRIM-family `AppearanceDefaults` item to get it.
+- **One `FaceTrimStore` per slot, never two slots in one payload.** The arch sill (0.10.0,
+  `WindowSillTrim` v1) has its own key and version, so an unknown sill payload never blocks the
+  perimeter trims (and the other way round). The `trimmed` summary counts sills too, so a sill-only
+  window is `trimmed=true`: it must still write its explicit `WindowTrim` v2 empty (the window format
+  always does), or the summary would read as the 0.7.0 omitted-oak case. Never make the perimeter
+  format omit empty.
+- **Only upper arches take a sill.** `WindowProfile.takesSill` gates the item (refused with a hint),
+  the host (`WindowTrimActions` builds none), the geometry and the loot pools (only the four upper-arch
+  tables have sill pools). A lower arch's top diameter has no sill until the owner asks for one.
+- **Window profiles are appended, never inserted.** `WindowDesign.all()` follows enum order and is
+  the creative order and the registration order; GameTests pick designs by index
+  (`WindowDesign.all().get(7)`). New profiles go at the end.
+- **Lower arches draw the door ring's radial art.** Their masonry is `trim_radial_thin_<m>`, whose
+  upper half equals the arched window face pixel for pixel (`WindowShapeArtworkTest`). Change either
+  generator and a full masonry circle breaks at its diameter. The sill's art is one 4-texel course at
+  texel rows 28..32 of the 2 x 2 image; moving the sill or its height needs new art.
 - **GameTest window and door hits must come from real rays** (`fixture/WindowRays`,
   `fixture/DoorRays`), clipped against the real shapes. Constructed hit results skip the targeting
   that these gestures now depend on.

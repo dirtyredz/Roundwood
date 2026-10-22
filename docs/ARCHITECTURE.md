@@ -159,10 +159,12 @@ change; the 0.2.0 passage is unchanged.
 
 ## Window
 
-Ten blocks share one pane base, `WindowPaneBlock` (a vanilla `IronBarsBlock`): `RoundWindowBlock`
-and the single-cell `OrientedWindowBlock` pieces (arch left and right, corner bottom left and
-right), each also in a `_cross` version. One block entity type, `roundwood:round_window`, holds the
-look of all ten (and of 15 alias windows). Every state has the four horizontal connections,
+26 blocks share one pane base, `WindowPaneBlock` (a vanilla `IronBarsBlock`; the Minecraft adapters
+live in `block/window/pane/` since 0.10.0): `RoundWindowBlock` and the single-cell
+`OrientedWindowBlock` pieces (upper arch left and right, corner bottom left and right; since 0.10.0
+lower arch left and right, corner top left and right, edge top, left, bottom and right), each also
+in a `_cross` version. One block entity type, `roundwood:round_window`, holds the look of all 26
+(and of 15 alias windows). Every state has the four horizontal connections,
 `waterlogged`, `trimmed` and `face_reversed`.
 
 **State.** Round window: `axis` (the 0.5.0 value) plus `position` = center/north/east/south/west/
@@ -171,10 +173,13 @@ top up; `up_<dir>` / `down_<dir>` = front facing up or down with that horizontal
 (center/negative/positive along the positive world axis of the pane's normal). Both reduce to a
 `WindowPose` (front, top, depth; right = top x front) in `block/window/geometry/`. What a block
 draws is a `WindowDesign` (`geometry/face/`): a `WindowProfile` (ROUND, ARCH_LEFT, ARCH_RIGHT,
-BOTTOM_LEFT, BOTTOM_RIGHT, each with its assembly offset) says which pixels are glazed, and a
+BOTTOM_LEFT, BOTTOM_RIGHT, ARCH_BOTTOM_LEFT, ARCH_BOTTOM_RIGHT, TOP_LEFT, TOP_RIGHT, EDGE_TOP,
+EDGE_LEFT, EDGE_BOTTOM, EDGE_RIGHT; the 2 x 2 pieces with their assembly offset) says which pixels
+are glazed, and a
 `WindowPattern` (PLAIN or CROSS) says whether beams cross the opening. The pattern is fixed per
 registration, not a blockstate. `trimmed` (boolean, every window and alias; missing in an old save
-reads false) is a derived summary: either face has a trim (see Window trims). `face_reversed`
+reads false) is a derived summary: any attachment, perimeter trim or (0.10.0) arch sill, on either
+face (see Window trims). `face_reversed`
 (boolean, every window and alias, default false) is the face identity bit (see Face identity).
 
 **Pane geometry.** The slab is 2 px thick at 7..9 (centre), 0..2 (negative) or 14..16 (positive); the
@@ -189,6 +194,16 @@ circle. The corners (`WindowCornerGeometry`) glaze u 2..16, v 2..16 (bottom left
 corners make a 32 x 32 window whose lower opening is x 2..30, y 2..16 under the radius-14
 semicircle, with one continuous frame and no divider. Corners are independent pieces (no partner
 lookup or teardown) with the arches' placement, overlay, restyling and water.
+
+**Reflected and edge pieces (0.10.0).** Explicit profiles, not a flip property: the lower arches are
+the upper arches reflected top to bottom (`WindowArchGeometry.inLowerOpening`: pixel v of a lower
+piece is pixel 15 - v of the upper one), so four arches glaze exactly `PixelCircle.inDisc(32, 28)`;
+the top corners reflect the bottom corners (`WindowCornerGeometry.inTopOpening`: outer jamb and a
+two-pixel head). Lower arches sit in row 0 and top corners in row 1 of the 32 x 32 assembly. The
+single-edge pieces (`WindowEdgeGeometry`) are framed on one side only and glazed elsewhere; their
+artwork spans their own 16 pixels (`WindowProfile.assemblySize`), not a 32-pixel assembly. All are
+`OrientedWindowBlock`s placed by the arches' existing zone rules, with no new gesture or partner
+lookup. Every crossed piece clips its own cross to its own opening.
 
 **Cross beams.** A crossed piece adds a one-pixel cross through its own middle (u and v 7.5..8.5),
 clipped to its own opening (`WindowMuntinGeometry`). Each crossed piece has its own cross, so four
@@ -306,20 +321,27 @@ restyling go through the shared `TrimFitting` with a `WindowTrimActions` host wh
   report "trim missing on the other window blocks" (it showed only when the pane was on an edge); it
   was not a targeting failure. `WindowTrimGeometryTest.flushTrimProjectsBeyondTheCellOnTheWallSide`
   guards it.
-- **Selection.** Outline and rays include only the in-cell part of the bands of trimmed faces
-  (`WindowShapes.selection(..., trimSides)`, read from the entity); a flush wall-side band is
-  targeted through the slab face under it. Collision never includes trims.
+- **Selection.** Outline and rays include only the in-cell part of the bands of trimmed faces and
+  of fitted sills (`WindowShapes.selection(..., trimSides, sillSides)`, read from the entity); a
+  flush wall-side band is targeted through the slab face under it. Collision never includes trims.
+  Since 0.10.0 `WindowShapes.selectionBoxes` composes pane and attachment volumes, and
+  `WindowPaneGeometry` no longer imports `geometry/trim` (dk-90159902).
 - **Hit classification and routing.** `interaction/WindowHitRegions` is pure and classifies a point
-  as TRIM, FRAME, GLASS, CONNECTOR_GLASS or NONE: the beams (7.5..8.5 half pixels) are FRAME, never
-  glass or trim; the trim band wins only on the clicked face and only if it has a trim; the exact
+  as TRIM, SILL (0.10.0), FRAME, GLASS, CONNECTOR_GLASS or NONE: the beams (7.5..8.5 half pixels) are
+  FRAME, never glass or trim; the trim band wins only on the clicked face and only if it has a trim,
+  then the sill likewise (the two never overlap; under a sill the beam ends are sill); the exact
   outer edge 16 belongs to the last cell; outside is NONE. `interaction/WindowHitTarget` turns a
   Minecraft hit into a face slot plus a region: the side comes from the hit position along the
   normal against the slab middle after nudging into the surface; an exact tie goes to the viewer's
-  side, else FRONT; outside the slab an installed band on that side is TRIM, a centred pane's arms
-  are CONNECTOR_GLASS, anything else NONE. `interaction/WindowUseRules` is the pure routing table;
+  side, else FRONT; outside the slab an installed band or sill on that side is TRIM or SILL, a
+  centred pane's arms are CONNECTOR_GLASS, anything else NONE. A region's `slot()` names the
+  attachment slot every restyle and removal acts on. `interaction/WindowUseRules` is the pure routing table;
   `WindowInteraction` is the adapter (extracted from `WindowPaneBlock.use`). Main hand first, the
   offhand only with an empty main hand. No action needs sneaking and sneaking does the same:
   - Any Universal Trim id (`TrimAttachmentItem`, perimeter slot) on any face target: fits the clicked face.
+  - The Arch Sill (sill slot) on any face target of an upper arch: fits that face's sill; on any
+    other window: refused with the hint "An arch sill fits only an upper window arch", nothing used.
+  - Planks, dye, masonry and shears on a SILL region act on that face's sill exactly as on a band.
   - Planks: on a trim band restyle that face's trim (removing its paint); on frame, beam or glass
     restyle the frame and beams, the glass kept.
   - Dye: on a trim band paint that face's trim (masonry refuses, free); on frame or beam paint the
@@ -338,7 +360,9 @@ restyling go through the shared `TrimFitting` with a `WindowTrimActions` host wh
 - **Loot.** Each window loot table (canonical and 15 aliases) is the window item pool plus one pool
   per face (`roundwood:trim_face` with `"face": "front"|"back"`, plus survives_explosion, and
   `copy_nbt` from `WindowTrim.Front.RoundwoodAppearance` or `WindowTrim.Back.RoundwoodAppearance` to
-  `RoundwoodAppearance`), built by `data/server/AttachmentLootPools`. The condition
+  `RoundwoodAppearance`), built by `data/server/AttachmentLootPools`. The four upper-arch tables
+  (0.10.0) add two sill pools (`"slot": "sill"`, `WindowSillTrim.<Face>.RoundwoodAppearance`,
+  dropping `arch_sill_trim`), so two trims and two sills drop five items. The condition
   (`block/attachment/loot/TrimFaceCondition`, registered by `registry/ModLootConditions`) reads the
   loot context's block entity only (a `TrimAttachmentSource`), never the block state. Breaking
   yields the pane and one trim per trimmed face; the pane drops with its frame look and glass;
@@ -355,18 +379,34 @@ restyling go through the shared `TrimFitting` with a `WindowTrimActions` host wh
 - **Rendering split.** The chunk model is pane-only. `WindowAppearanceData` carries the frame look
   and glass colour; `client/window/WindowAppearanceModel` retextures oak planks to the frame look
   and the clear glass to the tinted glass, and its cache key adds the glass sprite. The item model
-  cache key is (source, wood, glass) (`WindowItemModels`). Trims are drawn by
-  `client/window/WindowTrimRenderer`, a block-entity renderer on the window entity: solid layer,
-  cached models from `WindowTrimWorldModels`, general quads with no cull side, world light, render
+  cache key is (source, wood, glass) (`WindowItemModels`). Trims and sills are drawn by
+  `client/window/trim/WindowTrimRenderer`, a block-entity renderer on the window entity: solid layer,
+  cached models from `WindowTrimWorldModels` (keyed by slot, profile, pose, side and look), general quads with no cull side, world light, render
   bounds the cell inflated by one pixel, `shouldRenderOffScreen`. That is how a wall-side band
   can stand outside the cell. Looks: vanilla woods with their stripped log tiled, other woods with
   the plank sprite tiled, paint with the door boards, masonry with a thin-mortar face
   (`window_trim_round_<m>`, 32 x 32, 12 bricks, over the round window; `window_trim_arch_<m>`,
-  64 x 64, over the whole 2 x 2 arched window), the edge in the granular `trim_edge_<m>`. Paint and
+  64 x 64, over the whole 2 x 2 arched window), the edge in the granular `trim_edge_<m>`. Since
+  0.10.0 the face is chosen by an explicit `geometry/trim/WindowTrimLayout` per slot and profile
+  (`client/material/MasonryStyles.windowFace`): lower arches the full radial `trim_radial_thin_<m>`
+  (its upper half is pixel for pixel the arched face, `WindowShapeArtworkTest`), top corners
+  `window_trim_frame_<m>` (the arched face's straight lower half reflected above it), edges
+  `window_trim_single_<m>` (32 x 32, a straight run per side) and sills `window_sill_<m>` (64 x 64,
+  4-texel courses with head joints only, one course under the upper arches). Paint and
   masonry spread over the whole round or 2 x 2 face through `WindowTrimUv`. Edge UVs fold into the
   sprite through `geometry/FaceUv.tiled`, which handles -1 and 17; every projected UV must go
   through it. The marker textures `window_trim_face` and `_edge` are still generated but no model
   uses them. The trim item model `item/window_trim` is resolved per stack.
+- **Arch sill (0.10.0).** A second `FaceTrimStore` on the window entity, `WindowSillTrim` v1
+  (`trim/WindowSillNbt`, missing = none, empty not written, no legacy reader), beside the perimeter
+  store; `TrimAttachmentSource.trims(SILL)` exposes it to loot and rendering. Geometry
+  (`geometry/trim/WindowSillGeometry`): the bottom two pixel rows inside an upper arch's opening, so
+  it never overlaps the perimeter band and both may be fitted in different looks; one pixel proud at
+  the band's depth; decorative (no collision, no change to glass or tint). `WindowTrimActions` is
+  slot-aware (fit, remove, install, target, store); a host is built only when the profile takes the
+  slot (`WindowTrimGeometry.supports`). The window keeps writing its explicit `WindowTrim` v2 empty,
+  so a sill-only window's `trimmed=true` never reads as the 0.7.0 omitted-oak trim; an unknown sill
+  version blocks sill edits only.
 - **Viewers.** JEI subtypes and the EMI comparison key are the appearance key plus the glass colour
   (`WindowGlassStacks.key`); the index still lists thirteen default entries.
 
@@ -383,7 +423,7 @@ One attachment item and one transaction for every host; the sill (0.10.0) and th
 plug in as further slots and hosts, not copies.
 
 - **Slot** (`block/attachment/TrimSlot`): `PERIMETER` (the Universal Trim, item `round_trim`) and
-  `SILL` (planned, item `arch_sill_trim`, no host stores it yet). A slot names the canonical item
+  `SILL` (0.10.0, the Arch Sill, item `arch_sill_trim`, stored by the upper arch windows). A slot names the canonical item
   a removed or dropped attachment becomes, and is the loot condition's `slot`.
 - **Storage** (`FaceTrimStore`): one host's FRONT/BACK pair in one slot plus custody of an unknown
   payload. The host supplies a `Format` (key, version, whether an empty pair is written: windows
@@ -406,10 +446,13 @@ plug in as further slots and hosts, not copies.
 - **Loot.** `roundwood:trim_face` takes an optional `slot` (omitted = perimeter, which is how it is
   written, so 0.8.0 tables are unchanged). `AttachmentLootPools` builds a slot's two face pools;
   windows and doors drop `round_trim`.
-- **Icon** (`client/item/UniversalTrimModels`): every TRIM-family item (all ids) wraps the generated
-  square frame (`item/round_trim`, 16 px, 2 px band, 2 px deep, whole-face UVs over 16) and
-  retextures it through the shared resolver `client/material/TrimLooks` (masonry: the square face
-  `universal_trim_<m>`, straight courses). `TrimLooks` also serves the frame/door rings and the
+- **Icon** (`client/item/TrimItemModels`, was `UniversalTrimModels`): every TRIM-family item (all ids)
+  wraps its slot's generated icon (`data/client/trim/AttachmentItemModelProvider`: the square frame
+  `item/round_trim`, 16 px, 2 px band, 2 px deep; the sill bar `item/arch_sill_trim`, 16 x 4 px;
+  whole-face UVs over 16) and retextures it through the shared resolver `client/material/TrimLooks` (masonry: the square face
+  `universal_trim_<m>`, straight courses; the sill's `window_sill_<m>`). `ArchSillTrimItem` is a
+  plain item (no block) implementing `TrimAttachmentItem` and `AppearanceDefaults`; the client wraps
+  any `AppearanceDefaults` item, not only block items. `TrimLooks` also serves the frame/door rings and the
   window trims, which differ only in the masonry face.
 
 ## Door trim

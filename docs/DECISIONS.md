@@ -2,6 +2,41 @@
 
 Newest first.
 
+## 2026-10-22 - Explicit reflected and single-edge window profiles (0.10.0)
+
+Lower arches, top corners and four single-edge pieces are new `WindowProfile`s (sixteen blocks with
+the crossed variants), not a flip blockstate on the existing pieces. Each is a fixed item, like the
+left/right arches (0.6.0) and the crossed pieces (0.7.0); poses keep meaning placement only, the
+saved names of every existing block are unchanged, and the oriented placement, overlay and preview
+needed no new code. The circle is a circular glazed opening in four square panes, matching the
+arches' construction, so breaking one quarter leaves the others. Profiles are appended to the enum.
+Rejected: a `flipped` property (it would double every oriented blockstate, mix two shapes under one
+item and confuse the one-item-one-shape rule). Edge pieces take whole-face artwork over their own 16
+pixels: an assembly extent only makes sense for the 2 x 2 window's pieces.
+
+## 2026-10-22 - The arch sill is a separate attachment slot (0.10.0)
+
+The sill is its own item (`arch_sill_trim`) and slot (`TrimSlot.SILL`), with its own payload
+(`WindowSillTrim` v1, a second `FaceTrimStore`), loot pools, restyle and removal, so a face can carry
+a trim and a sill in different looks and an unknown sill version never blocks the trim. It lies in
+the bottom two rows inside the opening, never under the perimeter band (no coplanar overlap), one
+pixel proud, decorative over glass and beam ends. Only upper arches take one (the requested sill is
+under an arch's diameter); a lower arch's top diameter is left as an explicit product choice. The
+item is not a block item. Recipe: three planks on two sticks (three planks alone would be a slab).
+`WindowTrimActions` became slot-aware rather than gaining a `WindowSillActions` copy, and sill
+targeting is a region of the existing hit classifier, not a separate target class. Rejected: one
+payload holding both slots (an unknown version of one would lock the other), a sill drawn into the
+pane model (it would change pane geometry and tint).
+
+## 2026-10-22 - Distinct recipes for the new window pieces (0.10.0)
+
+Reflecting the old recipes would collide: an upturned upper arch is the bottom corner's shape and
+an upturned bottom corner is the upper arch's. Each new piece has its own raw-material shape (lower
+arches and top corners use five or six planks, edges three), left and right edges differ by the
+pane's position because shaped recipes also match mirrored, and every shape is checked against
+every other mirrored and shifted (`GeneratedRecipesTest`) and against the loaded server
+(`ContentGameTests`). Recipe emission is split by family under `data/server/recipe/`.
+
 ## 2026-10-22 - One Universal Trim; old ids kept, not remapped (0.9.0)
 
 The window trim and the door trim become one attachment, the **Universal Trim**, under the existing
