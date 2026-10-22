@@ -215,7 +215,8 @@ public final class AssemblyLifecycleGameTests {
                 check(object.place(level, LOOK), what + ": placement refused");
                 level.restoringBlockSnapshots = true;
                 try {
-                    level.setBlock(object.pos(i), AIR, Block.UPDATE_CLIENTS);
+                    // No neighbour shape updates: a door's own vertical-partner rule is a separate mechanism.
+                    level.setBlock(object.pos(i), AIR, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
                 } finally {
                     level.restoringBlockSnapshots = false;
                 }
