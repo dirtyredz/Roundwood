@@ -90,8 +90,6 @@
   "tooltip.roundwood.glass": "Glass: %s",
   "tooltip.roundwood.masonry": "Masonry: %s",
   "tooltip.roundwood.paint": "Paint: %s",
-  "tooltip.roundwood.preview": "Preview of a possible look",
-  "tooltip.roundwood.preview_note": "Crafting gives oak; restyle it in the world",
   "tooltip.roundwood.restyle": "Restyle placed: planks or dye (doors: sneak + planks)",
   "tooltip.roundwood.unavailable": "Material %s is not installed (shown as oak)",
   "tooltip.roundwood.universal_trim": "Trims the clicked face of a window, door or archway; restyle with planks, masonry or dye, remove with shears",

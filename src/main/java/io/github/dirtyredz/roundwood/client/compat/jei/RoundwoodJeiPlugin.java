@@ -20,8 +20,8 @@ import java.util.List;
 /**
  * Optional JEI adapter (loaded only when JEI is present): a styled stack is its own subtype, keyed by
  * its normalised appearance plus, for windows, its glass colour (0.8.0) (the default oak stack has
- * none, so the default entries stay single), and the 0.4.0 alias items are hidden. Cycling previews
- * are an EMI feature; JEI shows the plain defaults.
+ * none, so the default entries stay single), and the 0.4.0 alias items are hidden. Both viewers
+ * show each item once, as its plain default.
  */
 @JeiPlugin
 public final class RoundwoodJeiPlugin implements IModPlugin {

@@ -50,8 +50,6 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("tooltip.roundwood.universal_trim",
                 "Trims the clicked face of a window, door or archway; restyle with planks, masonry or dye, remove with shears");
         add("tooltip.roundwood.glass", "Glass: %s");
-        add("tooltip.roundwood.preview", "Preview of a possible look");
-        add("tooltip.roundwood.preview_note", "Crafting gives oak; restyle it in the world");
         add("message.roundwood.aim_at_leaf", "Aim at the door leaf to restyle or paint it");
         add("message.roundwood.masonry_unpaintable", "Masonry trims cannot be painted");
         add("message.roundwood.masonry_trim_only", "Masonry restyles a trim; aim at the trim");

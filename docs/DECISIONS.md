@@ -2,6 +2,14 @@
 
 Newest first.
 
+## 2026-10-22 - Viewers list one default look per item; EMI no longer cycles (0.12.0)
+
+Owner report: archways cycled through woods, paints and masonry in the recipe viewer while the owner
+expected one fixed oak look everywhere. The creative tab and the JEI plugin were already uniform; the
+cycling was `CyclingAppearanceStack` in the EMI plugin, applied to every canonical item (so it is not
+archway-specific in code). It and its serializer are removed: every item is one plain oak entry.
+Supersedes "EMI previews keep a stable identity" below. `AppearanceSamples` stays for the showcase.
+
 ## 2026-10-22 - One assembly contract; the compatibility frame adopts it (0.12.0 refactor)
 
 Doors, archways and the compatibility frame implement one narrow `block/assembly/Assembly` contract

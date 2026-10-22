@@ -84,7 +84,7 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 - `src/main/java/io/github/dirtyredz/roundwood/client/item/` — NBT-aware item model overrides, `FamilyItemModels` (the table of which wrapper each item kind gets), the attachment icons (Universal Trim, Arch Sill) per look
 - `src/main/java/io/github/dirtyredz/roundwood/client/material/` — donor sprites and colours, built-in wood and paint artwork bindings, masonry faces (thin mortar), the shared trim look resolver, quad retexturing, bounded model caches
 - `src/main/java/io/github/dirtyredz/roundwood/client/camouflage/` — static corner renderer, cached corner models
-- `src/main/java/io/github/dirtyredz/roundwood/client/compat/emi/` — optional EMI adapter: cycling preview entries, serializer
+- `src/main/java/io/github/dirtyredz/roundwood/client/compat/emi/` — optional EMI adapter: alias removal and the appearance comparison key
 - `src/main/java/io/github/dirtyredz/roundwood/client/compat/jei/` — optional JEI adapter: subtypes, hidden aliases
 - `src/main/java/io/github/dirtyredz/roundwood/data/` — datagen provider registration
 - `src/main/java/io/github/dirtyredz/roundwood/data/client/` — blockstate/model providers per family, alias compatibility models, item-model providers, display transforms, language

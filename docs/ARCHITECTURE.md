@@ -697,10 +697,9 @@ the window trim is a trim-family item. The look is data.
   entity hands it; window trims are drawn by `WindowTrimRenderer` (see Window trims). `AppearanceItemOverrides` resolves item stacks the same way. `DonorSprites` (shared with
   camouflage) and `DonorColors` cache 512 donors; model caches hold 2048 entries keyed by look and
   geometry variant (the window item cache by source item model, wood and glass); all of them clear together on every model bake.
-- **Viewers**: `client/compat/emi` replaces each canonical index entry with a stack whose identity,
-  NBT and comparison are the default's and whose icon (unbatched) cycles through `AppearanceSamples`;
-  it serialises as the plain stack. Styled stacks compare by appearance key. `client/compat/jei` gives
-  subtypes by key and hides the aliases. Both are discovered by annotation, so nothing loads without
+- **Viewers**: each canonical item is listed once, as the default (oak) stack the creative tab gives
+  it (no cycling previews since 0.12.0). `client/compat/emi` hides the aliases and compares styled
+  stacks by appearance key; `client/compat/jei` gives subtypes by key and hides the aliases. Both are discovered by annotation, so nothing loads without
   the viewer.
 
 ## Migration (from 0.4.0 and 0.7.0)

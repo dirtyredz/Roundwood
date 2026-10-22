@@ -347,10 +347,9 @@ The new shapes are not the old ones turned over: a lower arch drawn like an uptu
 would be a bottom corner's recipe, so each piece has its own. Shaped recipes also match mirrored, so
 the left and right edges differ by where the pane sits.
 
-Crafting always gives the oak object; restyle it in the world. With **EMI** each item is one index
-entry whose icon cycles through example looks (the tooltip says it is a preview; taking or
-bookmarking it gives the plain oak item); styled stacks in your inventory are told apart by their
-look. With **JEI** styled stacks are separate subtypes and the 32 plain items are listed.
+Crafting always gives the oak object; restyle it in the world. With **EMI** and **JEI** each of the
+32 items is listed once, as its plain oak look; styled stacks in your inventory are told apart by
+their look (EMI comparison key, JEI subtype).
 Neither viewer is required.
 
 ## Upgrading
