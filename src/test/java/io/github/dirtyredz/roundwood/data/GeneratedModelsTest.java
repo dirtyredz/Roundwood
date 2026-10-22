@@ -58,9 +58,6 @@ class GeneratedModelsTest {
         if (id.startsWith("roundwood:block/template_round_door_leaf_")) {
             return new Object[] {"#panel", 0.0, 0.0};
         }
-        if (id.equals("roundwood:item/template_round_trim_whole")) {
-            return new Object[] {"#face", 0.0, 0.0};
-        }
         String quarter = "roundwood:block/template_round_trim_whole_";
         if (id.startsWith(quarter)) {
             String part = id.substring(quarter.length());

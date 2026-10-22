@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.data.server;
 
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimNbt;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimNbt;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
@@ -22,8 +23,8 @@ import java.util.stream.Stream;
  * in its historical look.
  *
  * <p>Windows and doors (canonical and alias) add one pool per face trim (0.8.0,
- * {@link AttachmentLootPools}): a styled window trim, or a styled door trim, for each face that
- * carries one, under the host's explosion rule. A door evaluates its loot with its anchor's entity
+ * {@link AttachmentLootPools}): a styled Universal Trim ({@code round_trim}, 0.9.0, for windows too)
+ * for each face that carries one, under the host's explosion rule. A door evaluates its loot with its anchor's entity
  * supplied, from whichever quarter broke. So a window with two trims drops three items, and nothing
  * ever refunds a trim outside loot except shears.
  */
@@ -42,18 +43,19 @@ public class RoundwoodBlockLoot extends BlockLootSubProvider {
         LegacyContent.trims().forEach(block -> dropOther(block, ModItems.ROUND_TRIM.get()));
     }
 
-    /** The window's item, plus a window trim per trimmed face. */
+    /** The window's item, plus a Universal Trim per trimmed face. */
     private LootTable.Builder window(Item pane) {
-        return withFaces(createSingleItemTable(pane), ModItems.WINDOW_TRIM.get(), WindowTrimNbt.TAG);
+        return withFaces(createSingleItemTable(pane), WindowTrimNbt.TAG);
     }
 
-    /** The door's item, plus a door trim per trimmed face. */
+    /** The door's item, plus a Universal Trim per trimmed face. */
     private LootTable.Builder door(Item door) {
-        return withFaces(createSingleItemTable(door), ModItems.ROUND_TRIM.get(), DoorTrimNbt.TAG);
+        return withFaces(createSingleItemTable(door), DoorTrimNbt.TAG);
     }
 
-    private LootTable.Builder withFaces(LootTable.Builder table, Item trim, String payload) {
-        AttachmentLootPools.faces(trim, payload, pool -> applyExplosionCondition(trim, pool)).forEach(table::withPool);
+    private LootTable.Builder withFaces(LootTable.Builder table, String payload) {
+        Item trim = ModItems.ROUND_TRIM.get();
+        AttachmentLootPools.faces(TrimSlot.PERIMETER, trim, payload, pool -> applyExplosionCondition(trim, pool)).forEach(table::withPool);
         return table;
     }
 

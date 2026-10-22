@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -135,6 +136,33 @@ public final class DoorTrimMigrationGameTests {
         helper.runAfterDelay(2, () -> {
             check(frame.complete(helper.getLevel(), ModBlocks.roundTrim()), "an occupied destination lost its frame");
             check(anchor(helper, door).trims().equals(FaceTrims.NONE.with(AttachmentFace.FRONT, BRICKS)), "door trims " + anchor(helper, door).trims());
+            helper.succeed();
+        });
+    }
+
+    /**
+     * A door holding a trim payload of an unknown future version is not editable, so its fitted frame
+     * stays (no drop, no conversion) and the unknown payload is saved back unchanged (0.9.0 shared store).
+     */
+    @GameTest(template = TEMPLATE)
+    public static void anUnknownDoorPayloadKeepsTheFrameAndThePayload(GameTestHelper helper) {
+        DoorLayout.Assembly door = door(helper, "unknown_payload");
+        RoundDoorBlockEntity anchor = anchor(helper, door);
+        CompoundTag tag = anchor.saveWithoutMetadata();
+        CompoundTag future = new CompoundTag();
+        future.putInt("Version", 7);
+        future.putString("Shape", "gothic");
+        tag.put("DoorTrim", future);
+        anchor.load(tag);
+        check(!anchor.trimsEditable(), "an unknown payload was understood");
+        TrimLayout.Assembly frame = fitted(door);
+        check(TrimPlacement.placeAt(helper.getLevel(), ModBlocks.roundTrim(), frame, SPRUCE), "frame");
+        int before = items(helper);
+        migrate(helper);
+        helper.runAfterDelay(2, () -> {
+            check(frame.complete(helper.getLevel(), ModBlocks.roundTrim()), "the frame was removed onto an uneditable door");
+            check(items(helper) == before, "migration dropped items");
+            check(anchor(helper, door).saveWithoutMetadata().getCompound("DoorTrim").equals(future), "the unknown payload changed");
             helper.succeed();
         });
     }

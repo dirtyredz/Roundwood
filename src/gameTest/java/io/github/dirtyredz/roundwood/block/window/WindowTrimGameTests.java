@@ -15,6 +15,7 @@ import io.github.dirtyredz.roundwood.fixture.AppearanceFixtures;
 import io.github.dirtyredz.roundwood.fixture.WindowRays;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModItems;
+import net.minecraft.world.item.Item;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseWindow;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -53,7 +54,9 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
  * floor and ceiling poses take an independent trim on each face from the side clicked (no sneak),
  * an occupied face is a free no-op, shears remove only the aimed face, donors restyle only the aimed
  * face, the frame is restyled elsewhere with plain planks, masonry off the band is refused, the
- * offhand rule holds, looks save and reload, and loot gives one trim per face in its own look.
+ * offhand rule holds, looks save and reload, and loot gives one trim per face in its own look. Since
+ * 0.9.0 the trim is the Universal Trim: every one of its ids fits, plain or sneaking, and shears and
+ * loot give back the canonical {@code round_trim}.
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -100,7 +103,7 @@ public final class WindowTrimGameTests {
     }
 
     private static ItemStack trims(Appearance look, int count) {
-        ItemStack stack = styled(ModItems.WINDOW_TRIM.get(), look);
+        ItemStack stack = styled(ModItems.ROUND_TRIM.get(), look);
         stack.setCount(count);
         return stack;
     }
@@ -108,7 +111,7 @@ public final class WindowTrimGameTests {
     private static int returned(ServerPlayer player, Appearance look) {
         int count = 0;
         for (ItemStack stack : player.getInventory().items) {
-            if (stack.is(ModItems.WINDOW_TRIM.get()) && AppearanceStacks.read(stack).equals(look)) {
+            if (stack.is(ModItems.ROUND_TRIM.get()) && AppearanceStacks.read(stack).equals(look)) {
                 count += stack.getCount();
             }
         }
@@ -154,6 +157,38 @@ public final class WindowTrimGameTests {
                 AABB collision = helper.getBlockState(AT).getCollisionShape(helper.getLevel(), helper.absolutePos(AT)).bounds();
                 AABB slab = new AABB(0, 0, 0, 1, 1, 1);
                 check(slab.contains(collision.getCenter()), what + ": collision moved " + collision);
+            }
+        }
+        helper.setBlock(AT, Blocks.AIR);
+        helper.succeed();
+    }
+
+    /**
+     * Every Universal Trim id (canonical, the 0.8.0 window trim, 0.4.0 aliases in their historical
+     * looks) fits the clicked face for one item, plainly or sneaking, places nothing; shears give back
+     * one canonical {@code round_trim} in the same look.
+     */
+    @GameTest(template = TEMPLATE, timeoutTicks = 200)
+    public static void everyTrimIdFitsAWindowPlainOrSneaking(GameTestHelper helper) {
+        ServerPlayer player = player(helper, "trim_ids", GameType.SURVIVAL, Direction.NORTH);
+        WindowDesign arch = WindowDesign.plain(WindowProfile.ARCH_RIGHT);
+        for (Item id : AppearanceFixtures.universalTrimIds()) {
+            for (boolean sneaking : new boolean[] {false, true}) {
+                String what = id + (sneaking ? " sneaking" : "");
+                helper.setBlock(AT, window(arch, SOUTH));
+                AttachmentFace south = face(helper, Direction.SOUTH);
+                ItemStack stack = new ItemStack(id, 2);
+                Appearance look = AppearanceStacks.read(stack);
+                check(AppearanceFixtures.use(helper, player, stack, ItemStack.EMPTY, bandHit(helper, player, arch.profile(), Direction.SOUTH),
+                        sneaking).consumesAction(), what + ": not handled");
+                check(entity(helper, AT).trims().equals(FaceTrims.NONE.with(south, look)) && stack.getCount() == 1,
+                        what + ": fitted " + entity(helper, AT).trims() + ", holding " + stack);
+                check(helper.getBlockState(AT.south()).isAir(), what + ": something was placed");
+                player.getInventory().clearContent();
+                ItemStack shears = new ItemStack(Items.SHEARS);
+                AppearanceFixtures.use(helper, player, shears, ItemStack.EMPTY, bandHit(helper, player, arch.profile(), Direction.SOUTH), sneaking);
+                check(!entity(helper, AT).trims().any() && returned(player, look) == 1 && shears.getDamageValue() == 1,
+                        what + ": shears did not give back one Universal Trim in " + look.key());
             }
         }
         helper.setBlock(AT, Blocks.AIR);
@@ -226,21 +261,21 @@ public final class WindowTrimGameTests {
         clearDrops(helper);
         player.gameMode.destroyBlock(helper.absolutePos(AT));
         check(dropped(helper, ModItems.window(design), frame) == 1, "window drop");
-        check(dropped(helper, ModItems.WINDOW_TRIM.get(), front) == 1 && dropped(helper, ModItems.WINDOW_TRIM.get(), back) == 1, "trim drops");
-        check(dropped(helper, ModItems.WINDOW_TRIM.get()) == 2 && dropped(helper, ModItems.window(design)) == 1, "extra drops");
+        check(dropped(helper, ModItems.ROUND_TRIM.get(), front) == 1 && dropped(helper, ModItems.ROUND_TRIM.get(), back) == 1, "trim drops");
+        check(dropped(helper, ModItems.ROUND_TRIM.get()) == 2 && dropped(helper, ModItems.window(design)) == 1, "extra drops");
         clearDrops(helper);
         // One oak face: one plain oak trim.
         helper.setBlock(AT, window(design, SOUTH));
         WindowTrimActions.install(helper.getLevel(), helper.absolutePos(AT), AttachmentFace.BACK, Appearance.DEFAULT);
         player.gameMode.destroyBlock(helper.absolutePos(AT));
-        check(dropped(helper, ModItems.WINDOW_TRIM.get(), Appearance.DEFAULT) == 1 && dropped(helper, ModItems.WINDOW_TRIM.get()) == 1,
+        check(dropped(helper, ModItems.ROUND_TRIM.get(), Appearance.DEFAULT) == 1 && dropped(helper, ModItems.ROUND_TRIM.get()) == 1,
                 "one oak face drops one oak trim");
         clearDrops(helper);
         ServerPlayer creative = player(helper, "trim_drop_creative", GameType.CREATIVE, Direction.NORTH);
         helper.setBlock(AT, window(design, SOUTH));
         WindowTrimActions.install(helper.getLevel(), helper.absolutePos(AT), AttachmentFace.FRONT, front);
         creative.gameMode.destroyBlock(helper.absolutePos(AT));
-        check(dropped(helper, ModItems.WINDOW_TRIM.get()) == 0 && dropped(helper, ModItems.window(design)) == 0, "creative break dropped items");
+        check(dropped(helper, ModItems.ROUND_TRIM.get()) == 0 && dropped(helper, ModItems.window(design)) == 0, "creative break dropped items");
         helper.succeed();
     }
 

@@ -3,24 +3,22 @@ package io.github.dirtyredz.roundwood.block.window.trim;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
+import io.github.dirtyredz.roundwood.block.attachment.FaceTrimStore;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrimsNbt;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Optional;
 
 /**
  * The saved form of a window's face trims, nested so the frame's own top-level
  * {@code RoundwoodAppearance} keeps its meaning. 0.8.0 writes version 2,
- * {@code WindowTrim: {Version: 2, Front: {...}, Back: {...}}} ({@link FaceTrimsNbt}), and owns the
- * adapter from 0.7.0:
+ * {@code WindowTrim: {Version: 2, Front: {...}, Back: {...}}} ({@link FaceTrimsNbt}), always, empty
+ * included, through a {@link FaceTrimStore}, and owns the adapter from 0.7.0 ({@link #legacy}):
  * <ul>
  *     <li>no payload: both faces in oak when the old state was {@code trimmed}, else none;</li>
- *     <li>version 1 ({@code {Version: 1, RoundwoodAppearance: {...}}}, one look shared by both faces):
- *     both faces in that look when the old state was {@code trimmed} (0.7.0 ignored the data
- *     otherwise), else none;</li>
+ *     <li>version 1 ({@code {Version: 1, RoundwoodAppearance: {...}}}, one look shared by both faces)
+ *     or no version: both faces in that look when the old state was {@code trimmed} (0.7.0 ignored
+ *     the data otherwise), else none;</li>
  *     <li>version 2: authoritative, explicit empty data included (a stale {@code trimmed} never
  *     resurrects a removed trim);</li>
  *     <li>any other version: not understood. It reads as no trims, and the raw payload is kept so
@@ -31,38 +29,36 @@ public final class WindowTrimNbt {
     public static final String TAG = "WindowTrim";
     public static final int VERSION = 2;
     static final int SHARED_LOOK_VERSION = 1;
-
-    /** What was read: the faces, and a payload of an unknown version to keep (null when understood). */
-    public record Read(FaceTrims trims, @Nullable CompoundTag unknown) {
-    }
+    public static final FaceTrimStore.Format FORMAT = new FaceTrimStore.Format(TAG, VERSION, true);
 
     private WindowTrimNbt() {
     }
 
     public static void write(CompoundTag parent, FaceTrims trims) {
-        parent.put(TAG, FaceTrimsNbt.encode(trims, VERSION));
+        FaceTrimStore.write(FORMAT, parent, trims);
     }
 
     /**
      * @param legacyTrimmed the window's {@code trimmed} blockstate value as loaded (only consulted for
      *                      0.7.0 data and for a missing payload)
      */
-    public static Read read(@Nullable CompoundTag parent, boolean legacyTrimmed) {
-        if (parent == null || !parent.contains(TAG, Tag.TAG_COMPOUND)) {
-            return new Read(legacyTrimmed ? FaceTrims.both(Appearance.DEFAULT) : FaceTrims.NONE, null);
-        }
-        CompoundTag payload = parent.getCompound(TAG);
-        Optional<Integer> version = FaceTrimsNbt.version(payload);
-        if (version.isEmpty() || version.get() == SHARED_LOOK_VERSION) {
-            if (!legacyTrimmed) {
-                return new Read(FaceTrims.NONE, null);
+    public static FaceTrimStore.Read read(@Nullable CompoundTag parent, boolean legacyTrimmed) {
+        return FaceTrimStore.read(FORMAT, parent, legacy(legacyTrimmed));
+    }
+
+    /** The 0.7.0 adapter for a window whose loaded {@code trimmed} summary is {@code legacyTrimmed}. */
+    public static FaceTrimStore.Legacy legacy(boolean legacyTrimmed) {
+        return (payload, version) -> {
+            if (payload == null) {
+                return legacyTrimmed ? FaceTrims.both(Appearance.DEFAULT) : FaceTrims.NONE;
             }
-            Appearance look = AppearanceNbt.read(payload).filter(AppearanceFamily.TRIM::accepts).orElse(Appearance.DEFAULT);
-            return new Read(FaceTrims.both(look), null);
-        }
-        if (version.get() == VERSION) {
-            return new Read(FaceTrimsNbt.decodeFaces(payload), null);
-        }
-        return new Read(FaceTrims.NONE, payload.copy());
+            if (version.isPresent() && version.get() != SHARED_LOOK_VERSION) {
+                return null;
+            }
+            if (!legacyTrimmed) {
+                return FaceTrims.NONE;
+            }
+            return FaceTrims.both(AppearanceNbt.read(payload).filter(AppearanceFamily.TRIM::accepts).orElse(Appearance.DEFAULT));
+        };
     }
 }

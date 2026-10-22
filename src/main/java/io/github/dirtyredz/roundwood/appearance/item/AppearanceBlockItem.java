@@ -19,9 +19,10 @@ import java.util.Map;
 
 /**
  * The block item shared by the three families: it carries the family and default appearance, and a
- * tooltip naming the stored look. The canonical items place their canonical block; the hidden 0.4.0
- * aliases ({@code alias} true) place the same canonical block in their historical look, keep their
- * old names, and never claim the canonical block's item mapping.
+ * tooltip naming the stored look. The canonical items place their canonical block; the hidden
+ * compatibility items ({@link #isAlias}: the 0.4.0 aliases and, since 0.9.0, the 0.8.0 window trim)
+ * place or attach like their canonical item, in their historical look, keep their old names, and
+ * never claim the canonical block's item mapping.
  */
 public class AppearanceBlockItem extends BlockItem implements AppearanceDefaults {
     private final AppearanceFamily family;
@@ -30,7 +31,7 @@ public class AppearanceBlockItem extends BlockItem implements AppearanceDefaults
     private final String aliasId;
 
     /**
-     * @param aliasId the 0.4.0 registry path of a hidden alias, null for the canonical item
+     * @param aliasId the registry path of a hidden compatibility item, null for the canonical item
      */
     public AppearanceBlockItem(Block block, Properties properties, AppearanceFamily family, Appearance fallback,
                                @Nullable String aliasId) {
@@ -54,7 +55,7 @@ public class AppearanceBlockItem extends BlockItem implements AppearanceDefaults
         return aliasId != null;
     }
 
-    /** Aliases keep their 0.4.0 names ("Spruce Round Door"). */
+    /** Compatibility items keep their old names ("Spruce Round Door", "Window Trim"). */
     @Override
     public String getDescriptionId() {
         return aliasId != null ? "block." + Roundwood.MOD_ID + "." + aliasId : super.getDescriptionId();

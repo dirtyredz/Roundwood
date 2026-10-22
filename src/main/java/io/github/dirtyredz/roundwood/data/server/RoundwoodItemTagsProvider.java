@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.data.server;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import io.github.dirtyredz.roundwood.registry.ModTags;
 import net.minecraft.core.HolderLookup;
@@ -28,7 +29,7 @@ public class RoundwoodItemTagsProvider extends ItemTagsProvider {
     protected void addTags(HolderLookup.Provider provider) {
         tag(ModTags.ROUND_DOOR_ITEMS).add(ModItems.ROUND_DOOR.get());
         tag(ModTags.ROUND_WINDOW_ITEMS).add(ModItems.windows().toArray(Item[]::new));
-        tag(ModTags.ROUND_TRIM_ITEMS).add(ModItems.ROUND_TRIM.get(), ModItems.WINDOW_TRIM.get());
+        tag(ModTags.ROUND_TRIM_ITEMS).add(ModItems.ROUND_TRIM.get(), LegacyContent.windowTrim());
         tag(ItemTags.DOORS).add(ModItems.ROUND_DOOR.get());
         tag(ItemTags.WOODEN_DOORS).add(ModItems.ROUND_DOOR.get());
     }

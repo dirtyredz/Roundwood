@@ -6,7 +6,7 @@ import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageGeometry;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimGeometry;
-import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimItem;
+import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.core.BlockPos;
@@ -130,8 +130,8 @@ public final class DoorSelectionShapes {
 
     /** A player looking with the door trim in hand (main, or offhand with the main hand empty): both rings are targets. */
     private static boolean holdsDoorTrim(CollisionContext context) {
-        return player(context).map(player -> player.getMainHandItem().getItem() instanceof DoorTrimItem
-                || player.getMainHandItem().isEmpty() && player.getOffhandItem().getItem() instanceof DoorTrimItem).orElse(false);
+        return player(context).map(player -> TrimAttachmentItem.slotOf(player.getMainHandItem()).isPresent()
+                || player.getMainHandItem().isEmpty() && TrimAttachmentItem.slotOf(player.getOffhandItem()).isPresent()).orElse(false);
     }
 
     private static Optional<Player> player(CollisionContext context) {

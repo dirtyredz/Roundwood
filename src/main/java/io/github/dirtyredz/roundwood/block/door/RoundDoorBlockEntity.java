@@ -4,6 +4,7 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
+import io.github.dirtyredz.roundwood.block.attachment.FaceTrimStore;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.attachment.TrimAttachmentSource;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
@@ -44,10 +45,8 @@ public class RoundDoorBlockEntity extends BlockEntity implements TrimAttachmentS
     /** Null: the block's default (oak, or a hidden alias's historical finish). */
     @Nullable
     private Appearance appearance;
-    private FaceTrims trims = FaceTrims.NONE;
-    /** A trim payload of a version this build does not understand, saved back unchanged. */
-    @Nullable
-    private CompoundTag unknownTrims;
+    /** The face trims, and any payload of a version this build does not understand (saved back unchanged). */
+    private final FaceTrimStore trims = new FaceTrimStore(DoorTrimNbt.FORMAT);
 
     public RoundDoorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -76,20 +75,19 @@ public class RoundDoorBlockEntity extends BlockEntity implements TrimAttachmentS
     /** The door's face trims (0.8.0; none while an unknown payload is held). */
     @Override
     public FaceTrims trims() {
-        return trims;
+        return trims.trims();
     }
 
     /** False while the stored trims are of an unknown future version: they must not be edited. */
     public boolean trimsEditable() {
-        return unknownTrims == null;
+        return trims.editable();
     }
 
     /** Server: replaces the face trims, saves and tells the clients; refused while an unknown payload is held. */
     public boolean setTrims(FaceTrims next) {
-        if (!trimsEditable()) {
+        if (!trims.set(next)) {
             return false;
         }
-        trims = next;
         setChanged();
         if (level != null && !level.isClientSide) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
@@ -129,11 +127,7 @@ public class RoundDoorBlockEntity extends BlockEntity implements TrimAttachmentS
         if (appearance != null) {
             AppearanceNbt.write(tag, appearance);
         }
-        if (unknownTrims != null) {
-            tag.put(DoorTrimNbt.TAG, unknownTrims.copy());
-        } else if (trims.any()) {
-            DoorTrimNbt.write(tag, trims);
-        }
+        trims.save(tag);
     }
 
     /** Replaces camouflage, appearance and trims with whatever the tag holds (nothing when absent or not acceptable). */
@@ -142,9 +136,7 @@ public class RoundDoorBlockEntity extends BlockEntity implements TrimAttachmentS
         super.load(tag);
         camouflage = CamouflageData.read(tag).orElse(null);
         appearance = AppearanceNbt.read(tag).filter(AppearanceFamily.DOOR::accepts).orElse(null);
-        DoorTrimNbt.Read read = DoorTrimNbt.read(tag);
-        trims = read.trims();
-        unknownTrims = read.unknown();
+        trims.load(tag, FaceTrimStore.Legacy.NONE);
     }
 
     /**
@@ -158,7 +150,7 @@ public class RoundDoorBlockEntity extends BlockEntity implements TrimAttachmentS
         if (appearance != null) {
             AppearanceNbt.write(tag, appearance);
         }
-        DoorTrimNbt.write(tag, unknownTrims == null ? trims : FaceTrims.NONE); // always: a removal must reach clients
+        trims.writeUpdate(tag); // always: a removal must reach clients
         return tag;
     }
 

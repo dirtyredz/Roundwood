@@ -10,8 +10,9 @@ import net.minecraft.resources.ResourceLocation;
  * (keyed by {@link MasonryMaterials.Material#artwork}). Since 0.7.0 every masonry face uses the
  * thin-mortar artwork: the door ring's 64 x 64 radial face, the round window trim's 32 x 32 radial
  * face and the arched window trim's 64 x 64 face (radial above the spring line, straight courses
- * below). The 0.5.0 thick-mortar faces stay generated, unchanged, but nothing draws them. Every
- * masonry trim shares the granular edge.
+ * below), and since 0.9.0 the Universal Trim icon's 32 x 32 square-frame face (straight courses). The
+ * 0.5.0 thick-mortar faces stay generated, unchanged, but nothing draws them. Every masonry trim
+ * shares the granular edge.
  */
 public final class MasonryStyles {
     private MasonryStyles() {
@@ -25,6 +26,11 @@ public final class MasonryStyles {
     /** A window trim's face, spread over the round window or the whole 2 x 2 arched window. */
     public static ResourceLocation windowFace(MasonryMaterials.Material material, WindowProfile profile) {
         return texture((profile == WindowProfile.ROUND ? "window_trim_round_" : "window_trim_arch_") + material.artwork());
+    }
+
+    /** The Universal Trim icon's square-frame face (0.9.0). */
+    public static ResourceLocation squareFace(MasonryMaterials.Material material) {
+        return texture("universal_trim_" + material.artwork());
     }
 
     public static ResourceLocation edge(MasonryMaterials.Material material) {

@@ -4,12 +4,11 @@ import io.github.dirtyredz.roundwood.data.client.DoorItemModelProvider;
 import io.github.dirtyredz.roundwood.data.client.DoorModelProvider;
 import io.github.dirtyredz.roundwood.data.client.LegacyModelProvider;
 import io.github.dirtyredz.roundwood.data.client.RoundwoodLanguageProvider;
-import io.github.dirtyredz.roundwood.data.client.TrimItemModelProvider;
-import io.github.dirtyredz.roundwood.data.client.TrimModelProvider;
+import io.github.dirtyredz.roundwood.data.client.trim.TrimModelProvider;
+import io.github.dirtyredz.roundwood.data.client.trim.UniversalTrimItemModelProvider;
 import io.github.dirtyredz.roundwood.data.client.window.OrientedWindowModelProvider;
 import io.github.dirtyredz.roundwood.data.client.window.WindowItemModelProvider;
 import io.github.dirtyredz.roundwood.data.client.window.WindowModelProvider;
-import io.github.dirtyredz.roundwood.data.client.window.WindowTrimItemModelProvider;
 import io.github.dirtyredz.roundwood.data.server.RoundwoodBlockTagsProvider;
 import io.github.dirtyredz.roundwood.data.server.RoundwoodItemTagsProvider;
 import io.github.dirtyredz.roundwood.data.server.RoundwoodLootProvider;
@@ -39,8 +38,7 @@ public final class RoundwoodDataProviders {
         generator.addProvider(event.includeClient(), new TrimModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new DoorItemModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new WindowItemModelProvider(output, existingFiles));
-        generator.addProvider(event.includeClient(), new WindowTrimItemModelProvider(output, existingFiles));
-        generator.addProvider(event.includeClient(), new TrimItemModelProvider(output, existingFiles));
+        generator.addProvider(event.includeClient(), new UniversalTrimItemModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new LegacyModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new RoundwoodLanguageProvider(output));
 

@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The thirteen Roundwood recipes (door, ten windows, window trim, round trim) and their advancements,
+ * The twelve Roundwood recipes (door, ten windows, round trim) and their advancements,
  * written out independently of the mod: exact patterns, ingredients, results and groups, plus the
  * guarantee that no two recipes can fill the same crafting grid, mirrored or shifted.
  */
@@ -54,17 +54,17 @@ class GeneratedRecipesTest {
     }
 
     @Test
-    void thereAreExactlyTheThirteenRecipes() throws IOException {
+    void thereAreExactlyTheTwelveRecipes() throws IOException {
         assertEquals(new TreeSet<>(List.of("round_door", "round_window", "round_window_arch_left",
                 "round_window_arch_right", "round_window_bottom_left", "round_window_bottom_right",
                 "round_window_cross", "round_window_arch_left_cross", "round_window_arch_right_cross",
-                "round_window_bottom_left_cross", "round_window_bottom_right_cross", "window_trim", "round_trim")),
+                "round_window_bottom_left_cross", "round_window_bottom_right_cross", "round_trim")),
                 recipeNames());
-        assertEquals(13, recipeNames().size());
+        assertEquals(12, recipeNames().size());
     }
 
     @Test
-    void theThirteenRecipesAreExactlyAsDesigned() {
+    void theTwelveRecipesAreExactlyAsDesigned() {
         assertRecipe("round_door", "roundwood:round_door", List.of("PPP", "PNP", "PPP"), Map.of("P", PLANKS, "N", NUGGET));
         assertRecipe("round_window", "roundwood:round_window", List.of(" P ", "PGP", " P "), Map.of("P", PLANKS, "G", PANE));
         assertRecipe("round_window_arch_left", "roundwood:round_window_arch", List.of("PP", "PG", "P "),
@@ -85,7 +85,6 @@ class GeneratedRecipesTest {
                 Map.of("P", PLANKS, "G", PANE, "S", STICK));
         assertRecipe("round_window_bottom_right_cross", "roundwood:round_window_bottom_cross", List.of(" P ", "SGS", "PPP"),
                 Map.of("P", PLANKS, "G", PANE, "S", STICK));
-        assertRecipe("window_trim", "roundwood:window_trim", List.of(" P ", "PSP", " P "), Map.of("P", PLANKS, "S", STICK));
         assertRecipe("round_trim", "roundwood:round_trim", List.of("P P", "   ", "P P"), Map.of("P", PLANKS));
     }
 
@@ -108,7 +107,7 @@ class GeneratedRecipesTest {
             }
             grids.put(name, placements);
         }
-        assertEquals(13, grids.size());
+        assertEquals(12, grids.size());
         for (String a : grids.keySet()) {
             for (String b : grids.keySet()) {
                 if (a.compareTo(b) < 0) {

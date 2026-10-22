@@ -9,6 +9,7 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimGeometry;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.client.material.TrimLooks;
 import io.github.dirtyredz.roundwood.client.trim.TrimAppearanceModels;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -52,7 +53,7 @@ public final class DoorTrimRenderer {
             if (look.isEmpty()) {
                 continue;
             }
-            TrimAppearanceModels.Look painted = TrimAppearanceModels.look(look.get());
+            TrimLooks.Look painted = TrimAppearanceModels.look(look.get());
             // A quarter model's ring lies on the facing side of its cell (authored z 0..1). FRONT: the cell in
             // front of the door (z 16..17). BACK: the door's own cell, moved towards the front to z 12..13.
             double shift = face == AttachmentFace.FRONT ? 0 : (DoorGeometry.BACK - DoorTrimGeometry.PROUD) / 16.0;

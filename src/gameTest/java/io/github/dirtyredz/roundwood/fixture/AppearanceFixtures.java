@@ -1,11 +1,15 @@
 package io.github.dirtyredz.roundwood.fixture;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
+import io.github.dirtyredz.roundwood.block.attachment.item.UniversalTrimItem;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.migration.LegacyContent;
+import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestAssertException;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -13,9 +17,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+
+import java.util.List;
 
 /**
  * Appearance helpers for the GameTests: named looks, real (optionally sneaking) use through the
@@ -40,6 +47,17 @@ public final class AppearanceFixtures {
 
     public static Appearance oakPainted(DyeColor dye) {
         return Appearance.DEFAULT.painted(dye);
+    }
+
+    /**
+     * Every kind of Universal Trim id a host must accept (0.9.0): the canonical {@code round_trim}, the
+     * hidden 0.8.0 {@code window_trim}, and two hidden 0.4.0 trim aliases (the first, and the first in
+     * a masonry finish), each fitted in its own historical look.
+     */
+    public static List<Item> universalTrimIds() {
+        List<Item> aliases = LegacyContent.aliasItems().stream().filter(item -> item instanceof UniversalTrimItem).toList();
+        Item masonry = aliases.stream().filter(item -> !AppearanceDefaults.of(item).isWood()).findFirst().orElseThrow();
+        return List.of(ModItems.ROUND_TRIM.get(), LegacyContent.windowTrim(), aliases.get(0), masonry);
     }
 
     private static ResourceLocation id(String path) {

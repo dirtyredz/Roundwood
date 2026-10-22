@@ -4,6 +4,8 @@ import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceGestures;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
+import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.appearance.DoorAppearance;
@@ -13,7 +15,6 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorStateController;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageInteraction;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorHitRegion;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimActions;
-import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimItem;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimTarget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -32,14 +33,15 @@ import java.util.Optional;
 /**
  * Who handles a right-click on a door, in order:
  * <ol>
- *     <li><b>Door trim</b> (0.8.0, before anything else): holding the door trim item, the click is
- *     the item's (it attaches or is refused; the door never toggles). On a trim ring
+ *     <li><b>Trim attachment</b> (0.8.0, before anything else; 0.9.0: fitted here, not by the item):
+ *     holding a Universal Trim (any of its ids), the click fits the face {@link DoorTrimTarget#fit}
+ *     picks or is refused; the door never toggles, camouflages or places anything. On a trim ring
  *     ({@link DoorTrimTarget#ring}), no sneak needed: shears remove that face's trim (a free no-op on an
  *     untrimmed ring), and planks, masonry or dye restyle an installed ring.</li>
  *     <li><b>Restyling</b> ({@code AppearanceGestures}: sneak + planks, or dye): on the leaf it
  *     re-planks or paints the whole door; on a corner it is refused with a hint to aim at the leaf
  *     (never placing the plank, never toggling).</li>
- *     <li>Main hand empty while the offhand holds a restyling item or the door trim: the main hand
+ *     <li>Main hand empty while the offhand holds a restyling item or a trim attachment: the main hand
  *     passes, so the offhand acts as above (and the door does not toggle first).</li>
  *     <li><b>Camouflage</b> on the corners ({@link CamouflageInteraction}).</li>
  *     <li>Otherwise the ordinary toggle, once.</li>
@@ -53,7 +55,10 @@ public final class DoorInteraction {
     public static InteractionResult use(RoundDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
                                         InteractionHand hand, BlockHitResult hit) {
         if (heldTrim(player, hand)) {
-            return InteractionResult.PASS; // the door trim item's own use attaches it
+            Optional<AttachmentFace> face = fitFace(state, pos, player, hand, hit);
+            return face.isPresent()
+                    ? DoorTrimActions.fit(level, pos, state, player, player.getItemInHand(hand), face.get())
+                    : InteractionResult.FAIL;
         }
         Optional<InteractionResult> ring = ring(block, state, level, pos, player, hand, hit);
         if (ring.isPresent()) {
@@ -69,18 +74,18 @@ public final class DoorInteraction {
         }
         if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty()
                 && (AppearanceGestures.of(AppearanceFamily.DOOR, player, InteractionHand.OFF_HAND).isPresent()
-                || player.getOffhandItem().getItem() instanceof DoorTrimItem)) {
+                || TrimAttachmentItem.slotOf(player.getOffhandItem()).isPresent())) {
             return InteractionResult.PASS; // the offhand's turn
         }
         InteractionResult camouflage = CamouflageInteraction.use(block, state, region, level, pos, player, hand);
         return camouflage != null ? camouflage : DoorStateController.use(block, state, level, pos, player);
     }
 
-    /** The sneak-use bridge: a trim-ring action, or the door's ordinary restyling gesture. */
+    /** The sneak-use bridge: a trim fit, a trim-ring action, or the door's ordinary restyling gesture. */
     public static boolean claims(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand,
                                  BlockHitResult hit) {
         if (heldTrim(player, hand)) {
-            return false;
+            return fitFace(state, pos, player, hand, hit).isPresent();
         }
         return ringAction(state, level, pos, player, hand, hit) != RingAction.NONE
                 || AppearanceGestures.of(AppearanceFamily.DOOR, player, hand).isPresent();
@@ -99,12 +104,12 @@ public final class DoorInteraction {
         AttachmentFace face = DoorTrimTarget.ring(state, pos, hit).orElseThrow();
         ItemStack stack = player.getItemInHand(hand);
         if (action == RingAction.REMOVE) {
-            return Optional.of(DoorTrimActions.remove(level, pos, state, player, hand, stack, face, DoorTrimItem.item()));
+            return Optional.of(DoorTrimActions.remove(level, pos, state, player, hand, stack, face));
         }
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
         return AppearanceGestures.donor(AppearanceFamily.TRIM, player, hand).map(gesture -> AppearanceActions.apply(level, player,
                 gesture, () -> anchor(level, pos, state, block)
-                        .map(anchor -> DoorTrimTarget.of(anchor, assembly, level, face, pos))));
+                        .map(anchor -> DoorTrimActions.target(anchor, assembly, level, face, pos))));
     }
 
     private static RingAction ringAction(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand,
@@ -128,11 +133,21 @@ public final class DoorInteraction {
                 ? RingAction.RESTYLE : RingAction.NONE;
     }
 
+    /** A trim attachment in the acting hand (the offhand acts only while the main hand is empty). */
     private static boolean heldTrim(Player player, InteractionHand hand) {
         if (hand == InteractionHand.OFF_HAND && !player.getMainHandItem().isEmpty()) {
             return false;
         }
-        return player.getItemInHand(hand).getItem() instanceof DoorTrimItem;
+        return TrimAttachmentItem.slotOf(player.getItemInHand(hand)).isPresent();
+    }
+
+    /** The face a held trim fits for this hit; doors take only perimeter trims. */
+    private static Optional<AttachmentFace> fitFace(BlockState state, BlockPos pos, Player player, InteractionHand hand,
+                                                    BlockHitResult hit) {
+        if (TrimAttachmentItem.slotOf(player.getItemInHand(hand)).filter(slot -> slot == TrimSlot.PERIMETER).isEmpty()) {
+            return Optional.empty();
+        }
+        return DoorTrimTarget.fit(state, pos, hit);
     }
 
     private static Optional<RoundDoorBlockEntity> anchor(Level level, BlockPos pos, BlockState state, RoundDoorBlock block) {

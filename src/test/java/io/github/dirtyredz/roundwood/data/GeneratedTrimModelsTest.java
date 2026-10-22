@@ -185,23 +185,29 @@ class GeneratedTrimModelsTest {
         }
     }
 
+    /** Since 0.9.0 the item is the Universal Trim: a flat, face-on square frame with its own elements. */
     @Test
-    void itemIconsAreTheWholeRingCentred() {
-        assertIcon("roundwood:item/round_trim", "roundwood:item/template_round_trim", ModelExpectations.STRIPPED_OAK_LOG);
-        assertIcon("roundwood:item/round_trim_whole", "roundwood:item/template_round_trim_whole",
-                ModelExpectations.DOOR_PANEL_OAK);
-    }
-
-    private static void assertIcon(String id, String parent, String oak) {
-        assertEquals(parent, ResolvedModels.read(id).get("parent").getAsString(), id);
+    void theItemIconIsAFlatSquareFrame() {
+        String id = "roundwood:item/round_trim";
+        assertFalse(ResolvedModels.read(id).has("parent"), id + ": no template parent");
         Resolved item = resolve(id);
+        String oak = ModelExpectations.STRIPPED_OAK_LOG;
         assertEquals(oak, item.texture("#face"), id);
         assertEquals(oak, item.texture("#edge"), id);
-        for (int u = 0; u < 32; u++) {
-            for (int v = 0; v < 32; v++) {
-                assertEquals(ring(u, v), ResolvedModels.frontCovered(item, u, v, oak), id + " icon at " + u + "," + v);
+        assertEquals(oak, item.texture("#particle"), id);
+        for (int u = 0; u < 16; u++) {
+            for (int v = 0; v < 16; v++) {
+                boolean band = u < 2 || u >= 14 || v < 2 || v >= 14;
+                assertEquals(band, ResolvedModels.frontCovered(item, u, v, oak), id + " icon at " + u + "," + v);
             }
         }
-        ModelExpectations.assertDisplay(item, id, new double[] {16, 16, 0.5});
+        ModelExpectations.assertDisplay(item, id, new double[] {8, 8, 8});
+    }
+
+    @Test
+    void theWindowTrimItemModelIsTheUniversalTrim() {
+        JsonObject model = ResolvedModels.read("roundwood:item/window_trim");
+        assertEquals(Set.of("parent"), model.keySet());
+        assertEquals("roundwood:item/round_trim", model.get("parent").getAsString());
     }
 }

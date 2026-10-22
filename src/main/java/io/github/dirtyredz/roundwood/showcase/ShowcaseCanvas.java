@@ -125,7 +125,7 @@ public final class ShowcaseCanvas {
 
     /**
      * Fits a door trim in {@code appearance} on {@code face} of the door whose anchor is at ({@code r},
-     * 0, {@code f}), the way the door trim item does (0.8.0).
+     * 0, {@code f}), the way a Universal Trim fits it (0.8.0).
      */
     public boolean doorTrim(Appearance appearance, int r, int f, AttachmentFace face) {
         boolean fitted = DoorTrimActions.install(level, pos(r, 0, f), face, appearance);

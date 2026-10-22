@@ -5,6 +5,7 @@ import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
+import io.github.dirtyredz.roundwood.block.attachment.FaceTrimStore;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.attachment.TrimAttachmentSource;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassNbt;
@@ -47,10 +48,8 @@ public class RoundWindowBlockEntity extends BlockEntity implements AppearanceAct
     /** Null: the block's default. */
     @Nullable
     private Appearance appearance;
-    private FaceTrims trims = FaceTrims.NONE;
-    /** A trim payload of a version this build does not understand, saved back unchanged. */
-    @Nullable
-    private CompoundTag unknownTrims;
+    /** The face trims, and any payload of a version this build does not understand (saved back unchanged). */
+    private final FaceTrimStore trims = new FaceTrimStore(WindowTrimNbt.FORMAT);
     @Nullable
     private DyeColor glass;
 
@@ -71,12 +70,12 @@ public class RoundWindowBlockEntity extends BlockEntity implements AppearanceAct
     /** The fitted face trims (none while an unknown payload is held). */
     @Override
     public FaceTrims trims() {
-        return trims;
+        return trims.trims();
     }
 
     /** False while the stored trims are of an unknown future version: they must not be edited. */
     public boolean trimsEditable() {
-        return unknownTrims == null;
+        return trims.editable();
     }
 
     /**
@@ -84,10 +83,9 @@ public class RoundWindowBlockEntity extends BlockEntity implements AppearanceAct
      * summary in step ({@code trim/WindowTrimActions}). Refused while an unknown payload is held.
      */
     public boolean setTrims(FaceTrims next) {
-        if (!trimsEditable()) {
+        if (!trims.set(next)) {
             return false;
         }
-        trims = next;
         changed();
         return true;
     }
@@ -132,16 +130,15 @@ public class RoundWindowBlockEntity extends BlockEntity implements AppearanceAct
     @Override
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
-        writeLooks(tag);
+        writeFrameAndGlass(tag);
+        trims.save(tag);
     }
 
     @Override
     public void load(CompoundTag tag) {
         super.load(tag);
         appearance = AppearanceNbt.read(tag).filter(AppearanceFamily.WINDOW::accepts).orElse(null);
-        WindowTrimNbt.Read read = WindowTrimNbt.read(tag, WindowPaneBlock.trimmed(getBlockState()));
-        trims = read.trims();
-        unknownTrims = read.unknown();
+        trims.load(tag, WindowTrimNbt.legacy(WindowPaneBlock.trimmed(getBlockState())));
         glass = WindowGlassNbt.read(tag).orElse(null);
     }
 
@@ -150,7 +147,7 @@ public class RoundWindowBlockEntity extends BlockEntity implements AppearanceAct
     public void onLoad() {
         super.onLoad();
         if (level != null && !level.isClientSide && trimsEditable()
-                && WindowPaneBlock.trimmed(getBlockState()) != trims.any()) {
+                && WindowPaneBlock.trimmed(getBlockState()) != trims().any()) {
             level.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
         }
     }
@@ -159,21 +156,14 @@ public class RoundWindowBlockEntity extends BlockEntity implements AppearanceAct
     @Override
     public CompoundTag getUpdateTag() {
         CompoundTag tag = new CompoundTag();
-        writeLooks(tag);
-        if (unknownTrims != null) {
-            WindowTrimNbt.write(tag, FaceTrims.NONE); // clients would not understand it either
-        }
+        writeFrameAndGlass(tag);
+        trims.writeUpdate(tag); // explicit empty while an unknown payload is held: clients could not read it either
         return tag;
     }
 
-    private void writeLooks(CompoundTag tag) {
+    private void writeFrameAndGlass(CompoundTag tag) {
         if (appearance != null) {
             AppearanceNbt.write(tag, appearance);
-        }
-        if (unknownTrims != null) {
-            tag.put(WindowTrimNbt.TAG, unknownTrims.copy());
-        } else {
-            WindowTrimNbt.write(tag, trims);
         }
         WindowGlassNbt.write(tag, glass());
     }

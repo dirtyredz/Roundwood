@@ -44,7 +44,7 @@ export function radialMortar(x, y, size, bricks) {
   return jointCoverage(Math.min(across, 1 - across) * width * radius);
 }
 
-function brickColour(palette, index, across, radius, outerArris, innerArris, x, y, seed) {
+export function brickColour(palette, index, across, radius, outerArris, innerArris, x, y, seed) {
   const { brick, dark, light } = palette;
   let colour = shade(brick, 0.9 + hash(index, 0, seed) * 0.2);
   if (across < 0.22) colour = mix(colour, light, 0.35);
@@ -57,7 +57,7 @@ function brickColour(palette, index, across, radius, outerArris, innerArris, x, 
   return shade(colour, 0.97 + hash(y, x, seed + 3) * 0.06);
 }
 
-function withMortar(colour, palette, coverage, x, y, seed) {
+export function withMortar(colour, palette, coverage, x, y, seed) {
   if (coverage <= 0) return colour;
   return mix(colour, shade(palette.mortar, 0.94 + hash(x, y, seed + 7) * 0.1), coverage);
 }

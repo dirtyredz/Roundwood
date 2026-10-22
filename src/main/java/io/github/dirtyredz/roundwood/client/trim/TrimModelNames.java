@@ -8,12 +8,12 @@ import net.minecraft.resources.ResourceLocation;
  * Names of the frame's source models, shared by the model generator and the client (like
  * {@code client/door/DoorLeafModels}): per quarter an oak model in each mapping family, tiled
  * ({@code block/round_trim_<part>}) and whole-ring ({@code block/round_trim_whole_<part>}), authored
- * facing north, plus the whole-ring item ({@code item/round_trim_whole}). No blockstate references
- * them; the client registers them for baking and retextures and turns them per appearance.
+ * facing north. No blockstate references them; the client registers them for baking and retextures
+ * and turns them per appearance. (The 0.8.0 whole-ring item model is gone: the {@code round_trim}
+ * item is the Universal Trim's square icon since 0.9.0.)
  */
 public final class TrimModelNames {
     public static final String TRIM_ID = "round_trim";
-    public static final String WHOLE_ITEM = "round_trim_whole";
 
     private TrimModelNames() {
     }
@@ -25,9 +25,5 @@ public final class TrimModelNames {
 
     public static ResourceLocation quarterLocation(TrimPart part, boolean whole) {
         return ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, quarter(part, whole));
-    }
-
-    public static ResourceLocation wholeItemLocation() {
-        return ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, "item/" + WHOLE_ITEM);
     }
 }

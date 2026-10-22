@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.block.window.trim;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
+import io.github.dirtyredz.roundwood.block.attachment.FaceTrimStore;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.testsupport.MinecraftBootstrap;
 import net.minecraft.nbt.CompoundTag;
@@ -52,7 +53,7 @@ class WindowTrimNbtTest {
                 WindowTrimNbt.write(tag, trims);
                 assertEquals(2, tag.getCompound(WindowTrimNbt.TAG).getInt("Version"));
                 for (boolean trimmed : new boolean[] {false, true}) {
-                    WindowTrimNbt.Read read = WindowTrimNbt.read(tag, trimmed);
+                    FaceTrimStore.Read read = WindowTrimNbt.read(tag, trimmed);
                     assertEquals(trims, read.trims(), trims + " trimmed " + trimmed);
                     assertNull(read.unknown());
                 }
@@ -104,7 +105,7 @@ class WindowTrimNbtTest {
         future.putString("Shape", "gothic");
         future.put("Front", new CompoundTag());
         tag.put(WindowTrimNbt.TAG, future);
-        WindowTrimNbt.Read read = WindowTrimNbt.read(tag, true);
+        FaceTrimStore.Read read = WindowTrimNbt.read(tag, true);
         assertEquals(FaceTrims.NONE, read.trims());
         assertNotNull(read.unknown());
         assertEquals(future, read.unknown());

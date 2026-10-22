@@ -19,8 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Window trims: one trim per face (0.8.0), on every profile, in wood, paint and all four masonry
- * materials, independent of the frame's own look. Row one, centred: both faces, front only, back
+ * Window trims (the Universal Trim since 0.9.0, the same item as the door's): one trim per face
+ * (0.8.0), on every profile, in wood, paint and all four masonry materials, independent of the frame's own look. Row one, centred: both faces, front only, back
  * only, the two faces differently styled, crossed pieces, and a practice target separating trim,
  * frame, beam and tinted glass. Row two, raised one block so each side can be seen: a round window
  * flush against each of the six sides of its cell with trims on both faces, so the wall-side trim
@@ -76,14 +76,14 @@ public final class WindowTrimsSection implements ShowcaseSection {
 
     @Override
     public void build(ShowcaseCanvas canvas) {
-        canvas.sign(60, ROW1_F - 1, "Window trim", "both faces");
+        canvas.sign(60, ROW1_F - 1, "Universal Trim", "both faces");
         canvas.sign(62, ROW1_F - 1, "Front only", "| back only");
         canvas.sign(64, ROW1_F - 1, "Arched window", "brick front,", "spruce back");
         canvas.sign(67, ROW1_F - 1, "Crossed window", "stone brick trim");
         canvas.sign(70, ROW1_F - 1, "Spruce window", "deepslate front");
         canvas.sign(72, ROW1_F - 1, "Practice:", "trim, frame,", "beam, glass");
         canvas.sign(60, ROW2_F - 1, "Flush windows:", "N E S W up down", "trim projects", "past the cell");
-        canvas.sign(72, ROW2_F - 1, "Window Trim:", "click a face", "planks/bricks/dye", "shears remove");
+        canvas.sign(72, ROW2_F - 1, "Universal Trim:", "window or door", "planks/bricks/dye", "shears remove");
         windows(canvas.frame()).forEach(canvas::window);
     }
 }

@@ -1,7 +1,8 @@
 package io.github.dirtyredz.roundwood.migration;
 
+import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.block.attachment.item.UniversalTrimItem;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorItem;
-import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimItem;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowItem;
 import io.github.dirtyredz.roundwood.migration.block.LegacyDoorBlock;
 import io.github.dirtyredz.roundwood.migration.block.LegacyTrimBlock;
@@ -18,10 +19,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Registers the 49 hidden 0.4.0 aliases ({@link LegacyAppearances}): a deprecated block per old id
- * (so saved chunks keep their states and block entities until converted) and an item per old id
- * (so stacks in chests and inventories keep their look; they place the canonical block). Aliases are
- * in no creative tab, have no recipes and are hidden from recipe viewers.
+ * Registers the hidden compatibility content: the 49 0.4.0 aliases ({@link LegacyAppearances}), a
+ * deprecated block per old id (so saved chunks keep their states and block entities until converted)
+ * and an item per old id (so stacks in chests and inventories keep their look; they place the
+ * canonical block, and the trim aliases attach as the Universal Trim); and since 0.9.0 the 0.8.0
+ * {@code window_trim} item, which keeps its id, name and NBT and behaves as the Universal Trim. None
+ * is in a creative tab or a recipe, and recipe viewers hide them all ({@link #items}).
  */
 @SuppressWarnings("deprecation")
 public final class LegacyContent {
@@ -29,6 +32,9 @@ public final class LegacyContent {
     private static final List<RegistryObject<LegacyWindowBlock>> WINDOWS = new ArrayList<>();
     private static final List<RegistryObject<LegacyTrimBlock>> TRIMS = new ArrayList<>();
     private static final List<RegistryObject<Item>> ITEMS = new ArrayList<>();
+    /** The 0.8.0 window trim's registry path (an item only). */
+    public static final String WINDOW_TRIM_ID = "window_trim";
+    private static RegistryObject<Item> windowTrim;
 
     private LegacyContent() {
     }
@@ -51,9 +57,16 @@ public final class LegacyContent {
         for (LegacyAppearances.Entry entry : LegacyAppearances.TRIMS) {
             TRIMS.add(blocks.register(entry.id(), () -> new LegacyTrimBlock(
                     ModBlocks.trimProperties(), entry, ModBlocks::roundTrim, ModBlockEntities::roundTrim)));
-            ITEMS.add(items.register(entry.id(), () -> new DoorTrimItem(ModBlocks.roundTrim(), new Item.Properties(),
+            ITEMS.add(items.register(entry.id(), () -> new UniversalTrimItem(ModBlocks.roundTrim(), new Item.Properties(),
                     entry.appearance(), entry.id())));
         }
+        windowTrim = items.register(WINDOW_TRIM_ID, () -> new UniversalTrimItem(ModBlocks.roundTrim(), new Item.Properties(),
+                Appearance.DEFAULT, WINDOW_TRIM_ID));
+    }
+
+    /** The hidden 0.8.0 window trim (behaves as the Universal Trim). */
+    public static Item windowTrim() {
+        return windowTrim.get();
     }
 
     public static List<LegacyDoorBlock> doors() {
@@ -73,8 +86,13 @@ public final class LegacyContent {
         return Stream.of(doors(), windows(), trims()).flatMap(List::stream).map(Block.class::cast).toList();
     }
 
-    /** Every alias item, in the same order as {@link #blocks()}'s families. */
-    public static List<Item> items() {
+    /** The 49 0.4.0 alias items, in the same order as {@link #blocks()}'s families. */
+    public static List<Item> aliasItems() {
         return ITEMS.stream().map(RegistryObject::get).toList();
+    }
+
+    /** Every hidden compatibility item: the 49 aliases, then the window trim. */
+    public static List<Item> items() {
+        return Stream.concat(aliasItems().stream(), Stream.of(windowTrim())).toList();
     }
 }

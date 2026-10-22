@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * The generated block textures: manifest, sizes, preserved files, the 0.7.0 additions, board, brick and
- * neutral-grey structure, and the clear glazing. Thin-mortar masonry is in {@link GeneratedMasonryTexturesTest}.
+ * neutral-grey structure, the clear glazing, and the 0.9.0 square-frame masonry faces. Thin-mortar masonry is in
+ * {@link GeneratedMasonryTexturesTest}.
  */
 class GeneratedTexturesTest {
     private static final Path DIR = Path.of("src/main/resources/assets/roundwood/textures/block");
@@ -75,7 +77,10 @@ class GeneratedTexturesTest {
             expected.add("window_trim_round_" + masonry);
             expected.add("window_trim_arch_" + masonry);
         }
-        assertEquals(85, expected.size());
+        for (String masonry : MASONRY) {
+            expected.add("universal_trim_" + masonry);
+        }
+        assertEquals(89, expected.size());
         TreeSet<String> actual = new TreeSet<>();
         try (Stream<Path> files = Files.list(DIR)) {
             files.map(p -> p.getFileName().toString()).filter(n -> n.endsWith(".png"))
@@ -99,6 +104,7 @@ class GeneratedTexturesTest {
             assertSize("trim_radial_thin_" + masonry, 64);
             assertSize("window_trim_round_" + masonry, 32);
             assertSize("window_trim_arch_" + masonry, 64);
+            assertSize("universal_trim_" + masonry, 32);
         }
         for (String dye : DYES) {
             assertSize("window_glass_" + dye, 16);
@@ -296,6 +302,70 @@ class GeneratedTexturesTest {
                 assertTrue(Math.abs(lum - brick) < Math.abs(lum - mortar),
                         name + ": texel " + texel[0] + "," + texel[1] + " reads as mortar, expected brick");
             }
+        }
+    }
+
+    /**
+     * One straight run of the square frame's masonry face (4 texels wide). Positions are along the run;
+     * a joint or brick is the list of texels it covers; {@code cross} are the two sample lines inside
+     * the run; {@code reach} is how far (in texels) a brick may sit from a joint to count as its neighbour.
+     */
+    private record Run(boolean alongX, int[] cross, int[][] joints, int[][] bricks, double reach) {
+        double lum(BufferedImage image, int[] positions) {
+            double sum = 0;
+            for (int position : positions) {
+                for (int line : cross) {
+                    sum += alongX ? luminance(image, position, line) : luminance(image, line, position);
+                }
+            }
+            return sum / (positions.length * cross.length);
+        }
+
+        static double mean(int[] positions) {
+            return Arrays.stream(positions).average().orElseThrow();
+        }
+    }
+
+    /** The 0.9.0 square frame: a 4-texel band, top run with joints at 4,12,20,28, bottom at 8,16,24, sides at 4,16,28. */
+    private static final List<Run> SQUARE_RUNS = List.of(
+            new Run(true, new int[] {1, 2}, new int[][] {{3, 4}, {11, 12}, {19, 20}, {27, 28}},
+                    new int[][] {{7, 8}, {15, 16}, {23, 24}}, 4.5),
+            new Run(true, new int[] {29, 30}, new int[][] {{7, 8}, {15, 16}, {23, 24}},
+                    new int[][] {{3, 4}, {11, 12}, {19, 20}, {27, 28}}, 4.5),
+            new Run(false, new int[] {1, 2}, new int[][] {{4}, {15, 16}, {27}}, new int[][] {{9, 10}, {21, 22}}, 6.5),
+            new Run(false, new int[] {29, 30}, new int[][] {{4}, {15, 16}, {27}}, new int[][] {{9, 10}, {21, 22}}, 6.5));
+
+    @Test
+    void squareFrameFacesHaveStraightCourseJoints() throws IOException {
+        for (String masonry : MASONRY) {
+            String name = "universal_trim_" + masonry;
+            BufferedImage image = read(name);
+            int direction = 0;
+            int checked = 0;
+            for (Run run : SQUARE_RUNS) {
+                for (int[] joint : run.joints()) {
+                    double jointLum = run.lum(image, joint);
+                    double brickSum = 0;
+                    int bricks = 0;
+                    for (int[] brick : run.bricks()) {
+                        if (Math.abs(Run.mean(brick) - Run.mean(joint)) <= run.reach()) {
+                            brickSum += run.lum(image, brick);
+                            bricks++;
+                        }
+                    }
+                    assertTrue(bricks > 0, name + ": joint " + Arrays.toString(joint) + " has no neighbouring brick");
+                    double diff = jointLum - brickSum / bricks;
+                    String where = name + ": joint " + Arrays.toString(joint) + " of the " + (run.alongX() ? "horizontal" : "vertical")
+                            + " run at " + run.cross()[0];
+                    assertTrue(Math.abs(diff) > 5, where + " indistinct from its bricks (" + diff + ")");
+                    if (direction == 0) {
+                        direction = diff > 0 ? 1 : -1;
+                    }
+                    assertTrue(diff * direction > 0, where + " differs in the opposite direction (" + diff + ")");
+                    checked++;
+                }
+            }
+            assertEquals(4 + 3 + 3 + 3, checked, name + ": joints checked");
         }
     }
 

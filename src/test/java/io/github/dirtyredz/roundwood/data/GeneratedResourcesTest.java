@@ -115,7 +115,12 @@ class GeneratedResourcesTest {
     @Test
     void windowTrimIsAnItemWithoutABlock() {
         assertTrue(Files.isRegularFile(assets("models/item/" + WINDOW_TRIM + ".json")), "item model");
-        assertTrue(json(assets("lang/en_us.json")).has("item.roundwood." + WINDOW_TRIM), "item name");
+        assertTrue(json(assets("lang/en_us.json")).has("block.roundwood." + WINDOW_TRIM), "name");
+        assertFalse(json(assets("lang/en_us.json")).has("item.roundwood." + WINDOW_TRIM), "no old item key");
+        JsonObject model = json(assets("models/item/" + WINDOW_TRIM + ".json"));
+        assertEquals(Set.of("parent"), model.keySet(), "item model has only a parent");
+        assertEquals("roundwood:item/round_trim", model.get("parent").getAsString());
+        assertFalse(Files.exists(data("recipes/" + WINDOW_TRIM + ".json")), "no recipe");
         assertFalse(Files.exists(assets("blockstates/" + WINDOW_TRIM + ".json")), "no blockstate");
         assertFalse(Files.exists(data("loot_tables/blocks/" + WINDOW_TRIM + ".json")), "no loot table");
         assertFalse(Files.exists(assets("models/block/" + WINDOW_TRIM + ".json")), "no block model");
@@ -125,8 +130,7 @@ class GeneratedResourcesTest {
     void generatedSetsAreExactlyTheExpectedManifests() throws IOException {
         Set<String> block = new TreeSet<>(List.of("template_round_door_leaf_left", "template_round_door_leaf_right",
                 "round_door_leaf_left", "round_door_leaf_right", "round_door", "round_trim"));
-        Set<String> item = new TreeSet<>(List.of("template_round_door", "round_door", "template_round_trim",
-                "template_round_trim_whole", "round_trim", "round_trim_whole", WINDOW_TRIM));
+        Set<String> item = new TreeSet<>(List.of("template_round_door", "round_door", "round_trim", WINDOW_TRIM));
         block.addAll(windowBlockModels());
         item.addAll(WINDOWS);
         for (String part : PARTS) {
@@ -138,22 +142,21 @@ class GeneratedResourcesTest {
         item.addAll(ALIASES);
         assertEquals(110, windowBlockModels().size());
         assertEquals(22 + 110, block.size());
-        assertEquals(66, item.size());
+        assertEquals(63, item.size());
         // Exact sets: no per-finish models remain; the 49 old ids are only item-model aliases.
         assertEquals(block, names(assets("models/block")));
         assertEquals(item, names(assets("models/item")));
         assertEquals(new TreeSet<>(BLOCKS), names(assets("blockstates")));
         assertEquals(new TreeSet<>(BLOCKS), names(data("loot_tables/blocks")));
         Set<String> crafted = new TreeSet<>(CANONICAL);
-        crafted.add(WINDOW_TRIM);
         assertEquals(crafted, names(data("recipes")));
         assertEquals(crafted, names(data("advancements/recipes")));
         assertEquals(61, allJson(assets("blockstates")).size());
         assertEquals(22 + 110, allJson(assets("models/block")).size());
-        assertEquals(66, allJson(assets("models/item")).size());
-        assertEquals(13, allJson(data("recipes")).size());
+        assertEquals(63, allJson(assets("models/item")).size());
+        assertEquals(12, allJson(data("recipes")).size());
         assertEquals(61, allJson(data("loot_tables/blocks")).size());
-        assertEquals(13, allJson(data("advancements/recipes")).size());
+        assertEquals(12, allJson(data("advancements/recipes")).size());
     }
 
     /**
@@ -285,7 +288,7 @@ class GeneratedResourcesTest {
             assertEquals(window || door ? 3 : 1, pools.size(), block);
             assertEquals(JsonParser.parseString(ownItemPool("roundwood:" + family(block))), pools.get(0), block);
             if (window || door) {
-                String item = window ? "roundwood:window_trim" : "roundwood:round_trim";
+                String item = "roundwood:round_trim";
                 String tag = window ? "WindowTrim" : "DoorTrim";
                 assertEquals(JsonParser.parseString(trimFacePool("front", item, tag + ".Front")), pools.get(1), block + ": front trim pool");
                 assertEquals(JsonParser.parseString(trimFacePool("back", item, tag + ".Back")), pools.get(2), block + ": back trim pool");
@@ -309,7 +312,7 @@ class GeneratedResourcesTest {
 
     /**
      * Pools 2 and 3 of every window and door table (0.8.0): one per face, each dropping that face's trim
-     * item (window_trim for windows, round_trim for doors) with the face's look copied from the block entity.
+     * item (round_trim for both) with the face's look copied from the block entity.
      */
     private static String trimFacePool(String face, String item, String source) {
         return "{\"bonus_rolls\":0.0,\"conditions\":[{\"condition\":\"roundwood:trim_face\",\"face\":\"" + face + "\"},"
@@ -332,9 +335,10 @@ class GeneratedResourcesTest {
         for (int i = 0; i < WINDOWS.size(); i++) {
             assertEquals(windowNames.get(i), lang.get("block.roundwood." + WINDOWS.get(i)).getAsString(), WINDOWS.get(i));
         }
-        assertEquals("Window Trim", lang.get("item.roundwood.window_trim").getAsString());
-        assertTrue(lang.has("tooltip.roundwood.window_trim"));
-        assertEquals("Door Trim", lang.get("block.roundwood.round_trim").getAsString());
+        assertEquals("Window Trim", lang.get("block.roundwood.window_trim").getAsString());
+        assertTrue(lang.has("tooltip.roundwood.universal_trim"));
+        assertFalse(lang.has("tooltip.roundwood.window_trim") || lang.has("tooltip.roundwood.door_trim"), "retired trim tooltips");
+        assertEquals("Universal Trim", lang.get("block.roundwood.round_trim").getAsString());
         for (String alias : ALIASES) {
             assertEquals(englishName(alias), lang.get("block.roundwood." + alias).getAsString(), alias);
         }

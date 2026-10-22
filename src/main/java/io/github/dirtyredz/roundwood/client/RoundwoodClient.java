@@ -5,18 +5,16 @@ import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceBlockItem;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
-import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimItem;
 import io.github.dirtyredz.roundwood.client.camouflage.CamouflageModels;
 import io.github.dirtyredz.roundwood.client.door.DoorAppearanceModels;
 import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
 import io.github.dirtyredz.roundwood.client.door.RoundDoorRenderer;
 import io.github.dirtyredz.roundwood.client.item.AppearanceItemOverrides;
+import io.github.dirtyredz.roundwood.client.item.UniversalTrimModels;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.trim.RoundTrimRenderer;
-import io.github.dirtyredz.roundwood.client.trim.TrimAppearanceModels;
 import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
 import io.github.dirtyredz.roundwood.client.window.WindowAppearanceModel;
-import io.github.dirtyredz.roundwood.client.window.WindowTrimModels;
 import io.github.dirtyredz.roundwood.client.window.WindowTrimRenderer;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
@@ -45,8 +43,9 @@ import java.util.stream.Stream;
 /**
  * Client-only wiring on the mod bus: the door, frame and window-trim renderers, the source models they draw (no
  * blockstate references them, so they are registered for baking here), the appearance-aware window
- * blockstate and item models (the window trim item's too), the door items' panel tint, and dropping every appearance, donor and
- * camouflage cache whenever models are re-baked. Never loaded on a server.
+ * blockstate and item models (every trim id draws the Universal Trim's square icon), the door items'
+ * panel tint, and dropping every appearance, donor and camouflage cache whenever models are re-baked.
+ * Never loaded on a server.
  */
 @Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class RoundwoodClient {
@@ -69,7 +68,6 @@ public final class RoundwoodClient {
             event.register(TrimModelNames.quarterLocation(part, false));
             event.register(TrimModelNames.quarterLocation(part, true));
         }
-        event.register(TrimModelNames.wholeItemLocation());
     }
 
     /** Windows read their appearance through model data; every family item resolves its stack's appearance. */
@@ -93,17 +91,13 @@ public final class RoundwoodClient {
             if (model == null) {
                 continue;
             }
-            if (item instanceof WindowTrimItem) {
-                models.put(location, AppearanceItemOverrides.wrap(model, WindowTrimModels::item));
-                continue;
-            }
             if (!(item instanceof AppearanceBlockItem family)) {
                 continue;
             }
             models.put(location, switch (family.appearanceFamily()) {
                 case DOOR -> AppearanceItemOverrides.wrap(model, DoorAppearanceModels::item);
                 case WINDOW -> AppearanceItemOverrides.wrapStack(model, WindowAppearanceModel::item);
-                case TRIM -> AppearanceItemOverrides.wrap(model, TrimAppearanceModels::item);
+                case TRIM -> AppearanceItemOverrides.wrap(model, UniversalTrimModels::item);
             });
         }
     }

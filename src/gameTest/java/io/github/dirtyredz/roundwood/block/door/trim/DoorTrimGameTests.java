@@ -5,6 +5,7 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
+import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorSelectionShapes;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
@@ -16,8 +17,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -54,7 +57,9 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
  * open door without moving it; an occupied face is a free no-op; it never places a frame, toggles or
  * camouflages; planks, masonry and dye restyle an installed ring and shears remove only that face;
  * breaking any quarter drops the door once plus one trim per face in its look; the rings are static,
- * inside the render bounds, and change no collision.
+ * inside the render bounds, and change no collision. Since 0.9.0 the door's router does the fitting:
+ * every Universal Trim id fits, plain or sneaking, the main hand first and the offhand only with an
+ * empty main hand; a protected door refuses for free; looks save and reload per face.
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -118,6 +123,79 @@ public final class DoorTrimGameTests {
                 }
             }
         }
+        helper.succeed();
+    }
+
+    /**
+     * Every Universal Trim id (canonical, the 0.8.0 window trim, 0.4.0 aliases in their historical
+     * looks) fits the clicked face of a closed door for one item, plainly or sneaking, without
+     * toggling or camouflaging; shears give back one canonical {@code round_trim} in the same look.
+     */
+    @GameTest(template = TEMPLATE, timeoutTicks = 300)
+    public static void everyTrimIdFitsADoorPlainOrSneaking(GameTestHelper helper) {
+        for (Item id : AppearanceFixtures.universalTrimIds()) {
+            for (boolean sneaking : new boolean[] {false, true}) {
+                String what = id + (sneaking ? " sneaking" : "");
+                DoorLayout.Assembly door = place(helper, Direction.NORTH, DoorHingeSide.LEFT, "ids_" + (sneaking ? "sneak" : "plain"));
+                ServerPlayer player = player(helper, "ids", GameType.SURVIVAL, Direction.NORTH);
+                ItemStack stack = new ItemStack(id, 2);
+                Appearance look = AppearanceStacks.read(stack);
+                DoorFixtures.hold(player, stack, ItemStack.EMPTY);
+                check(use(helper, player, stack, ItemStack.EMPTY, DoorRays.through(helper, player, door, 1.0, 1.0, true), sneaking)
+                        .consumesAction(), what + ": not handled");
+                check(trims(helper, door).equals(FaceTrims.NONE.with(AttachmentFace.FRONT, look)) && stack.getCount() == 1,
+                        what + ": fitted " + trims(helper, door) + ", holding " + stack);
+                check(!open(helper, door) && anchorEntity(helper, door).camouflage().isEmpty(), what + ": toggled or camouflaged");
+                player.getInventory().clearContent();
+                ItemStack shears = new ItemStack(Items.SHEARS);
+                use(helper, player, shears, ItemStack.EMPTY, DoorRays.through(helper, player, door, RING_A, RING_H, true), sneaking);
+                check(!trims(helper, door).any() && returned(player, look) == 1 && shears.getDamageValue() == 1,
+                        what + ": shears did not give back one Universal Trim in " + look.key());
+                for (BlockPos cell : door.positions()) {
+                    helper.getLevel().destroyBlock(cell, false);
+                }
+            }
+        }
+        helper.succeed();
+    }
+
+    /** The main hand wins; an offhand trim fits only while the main hand is empty; a protected door refuses for free. */
+    @GameTest(template = TEMPLATE)
+    public static void theOffhandFitsOnlyWithAnEmptyMainHandAndProtectionRefuses(GameTestHelper helper) {
+        DoorLayout.Assembly door = place(helper, Direction.NORTH, DoorHingeSide.LEFT, "door_offhand");
+        ServerPlayer visitor = player(helper, "door_visitor", GameType.ADVENTURE, Direction.NORTH);
+        ItemStack refused = doorTrims(SPRUCE, 2);
+        use(helper, visitor, refused, ItemStack.EMPTY, DoorRays.through(helper, visitor, door, 1.0, 1.0, true), false);
+        check(!trims(helper, door).any() && refused.getCount() == 2 && !open(helper, door), "a player who may not build fitted or toggled");
+        ServerPlayer player = player(helper, "door_offhand", GameType.SURVIVAL, Direction.NORTH);
+        ItemStack offTrim = doorTrims(BRICKS, 2);
+        use(helper, player, ItemStack.EMPTY, offTrim, DoorRays.through(helper, player, door, 1.0, 1.0, true), false);
+        check(trims(helper, door).equals(FaceTrims.NONE.with(AttachmentFace.FRONT, BRICKS)) && offTrim.getCount() == 1 && !open(helper, door),
+                "offhand trim with an empty main hand: " + trims(helper, door));
+        use(helper, player, new ItemStack(Items.STICK), offTrim, DoorRays.through(helper, player, door, 1.0, 1.0, false), false);
+        check(!trims(helper, door).has(AttachmentFace.BACK) && offTrim.getCount() == 1, "an offhand trim fitted with a full main hand");
+        helper.succeed();
+    }
+
+    /** Each face's look saves and reloads; the update tag always carries the payload so a removal reaches clients. */
+    @GameTest(template = TEMPLATE)
+    public static void doorFaceTrimsSaveReloadAndSync(GameTestHelper helper) {
+        DoorLayout.Assembly door = place(helper, Direction.NORTH, DoorHingeSide.LEFT, "door_save");
+        Appearance back = AppearanceFixtures.oakPainted(DyeColor.BLUE);
+        check(DoorTrimActions.install(helper.getLevel(), door.anchor(), AttachmentFace.FRONT, BRICKS)
+                && DoorTrimActions.install(helper.getLevel(), door.anchor(), AttachmentFace.BACK, back), "install");
+        RoundDoorBlockEntity anchor = anchorEntity(helper, door);
+        CompoundTag saved = anchor.saveWithFullMetadata();
+        check(saved.getCompound("DoorTrim").getInt("Version") == 1, "saved " + saved);
+        RoundDoorBlockEntity copy = new RoundDoorBlockEntity(anchor.getType(), door.anchor(), helper.getLevel().getBlockState(door.anchor()));
+        copy.load(saved);
+        check(copy.trims().equals(new FaceTrims(Optional.of(BRICKS), Optional.of(back))), "reloaded " + copy.trims());
+        check(anchor.setTrims(FaceTrims.NONE), "clear");
+        check(!anchor.saveWithFullMetadata().contains("DoorTrim"), "an untrimmed door wrote a payload");
+        CompoundTag update = anchor.getUpdateTag();
+        check(update.contains("DoorTrim"), "a removal must be sent: " + update);
+        copy.load(update);
+        check(!copy.trims().any(), "client kept a removed trim");
         helper.succeed();
     }
 

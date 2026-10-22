@@ -25,7 +25,7 @@ class WindowUseRulesTest {
         Map<Region, Action> shears = row(Action.REMOVE_TRIM, Action.PASS, Action.PASS, Action.PASS, Action.PASS);
         Map<Region, Action> other = row(Action.PASS, Action.PASS, Action.PASS, Action.PASS, Action.PASS);
         Map<Item, Map<Region, Action>> table = new EnumMap<>(Item.class);
-        table.put(Item.WINDOW_TRIM, trim);
+        table.put(Item.UNIVERSAL_TRIM, trim);
         table.put(Item.PLANKS, planks);
         table.put(Item.DYE, dye);
         table.put(Item.MASONRY, masonry);

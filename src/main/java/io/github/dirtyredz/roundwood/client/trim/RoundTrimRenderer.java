@@ -6,6 +6,7 @@ import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.client.material.TrimLooks;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
@@ -46,7 +47,7 @@ public class RoundTrimRenderer implements BlockEntityRenderer<RoundTrimBlockEnti
         if (!assembly.complete(level, block)) {
             return;
         }
-        TrimAppearanceModels.Look look = TrimAppearanceModels.look(entity.appearance());
+        TrimLooks.Look look = TrimAppearanceModels.look(entity.appearance());
         VertexConsumer consumer = buffers.getBuffer(RenderType.solid());
         BlockPos anchor = assembly.anchor();
         for (TrimPart part : TrimPart.values()) {

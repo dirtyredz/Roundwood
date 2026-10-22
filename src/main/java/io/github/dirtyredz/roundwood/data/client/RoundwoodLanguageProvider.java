@@ -4,8 +4,8 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
 import io.github.dirtyredz.roundwood.migration.LegacyAppearances;
+import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
-import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.LanguageProvider;
 
@@ -31,8 +31,8 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         for (WindowDesign design : WindowDesign.all()) {
             add(ModBlocks.window(design), windowName(design));
         }
-        add(ModItems.WINDOW_TRIM.get(), "Window Trim");
-        add(ModBlocks.roundTrim(), "Door Trim");
+        add(ModBlocks.roundTrim(), "Universal Trim");
+        add(LegacyContent.windowTrim(), "Window Trim");
         for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
             add("block." + Roundwood.MOD_ID + "." + entry.id(), title(entry.id()));
         }
@@ -41,8 +41,8 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("tooltip.roundwood.paint", "Paint: %s");
         add("tooltip.roundwood.unavailable", "Material %s is not installed (shown as oak)");
         add("tooltip.roundwood.restyle", "Restyle placed: planks or dye (doors: sneak + planks)");
-        add("tooltip.roundwood.window_trim", "Trims the clicked face of a window; restyle with planks, masonry or dye, remove with shears");
-        add("tooltip.roundwood.door_trim", "Trims the clicked face of a round door; restyle with planks, masonry or dye, remove with shears");
+        add("tooltip.roundwood.universal_trim",
+                "Trims the clicked face of a window or round door; restyle with planks, masonry or dye, remove with shears");
         add("tooltip.roundwood.glass", "Glass: %s");
         add("tooltip.roundwood.preview", "Preview of a possible look");
         add("tooltip.roundwood.preview_note", "Crafting gives oak; restyle it in the world");

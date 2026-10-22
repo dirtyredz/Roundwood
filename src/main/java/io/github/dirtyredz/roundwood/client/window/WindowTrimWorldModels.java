@@ -9,6 +9,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimUv;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
 import io.github.dirtyredz.roundwood.client.material.ModelRetexturing;
+import io.github.dirtyredz.roundwood.client.material.TrimLooks;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.FaceUv;
 import io.github.dirtyredz.roundwood.geometry.Surface;
@@ -44,7 +45,7 @@ public final class WindowTrimWorldModels {
     private static final ResourceLocation NAME = ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, "window_trim");
     private static final FaceBakery BAKERY = new FaceBakery();
 
-    private record Key(WindowProfile profile, WindowPose pose, Direction side, WindowTrimModels.Look look) {
+    private record Key(WindowProfile profile, WindowPose pose, Direction side, TrimLooks.Look look) {
     }
 
     private static final AppearanceModelCache<Key, BakedModel> MODELS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
@@ -53,7 +54,7 @@ public final class WindowTrimWorldModels {
     }
 
     /** The band on {@code side} (along the normal) of a window posed {@code pose}, in {@code look}. */
-    public static BakedModel model(WindowProfile profile, WindowPose pose, Direction side, WindowTrimModels.Look look) {
+    public static BakedModel model(WindowProfile profile, WindowPose pose, Direction side, TrimLooks.Look look) {
         return MODELS.get(new Key(profile, pose, side, look), WindowTrimWorldModels::build);
     }
 

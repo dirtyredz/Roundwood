@@ -35,8 +35,9 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
-import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimItem;
-import net.minecraft.world.item.BlockItem;
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
+import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
+import io.github.dirtyredz.roundwood.block.attachment.item.UniversalTrimItem;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -49,8 +50,9 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 
 /**
  * Registrations, tags, recipes, loot and the creative tab, as loaded by a dedicated server: twelve
- * canonical blocks (door, ten windows, round trim), thirteen advertised items (those plus the window
- * trim, which is not a block), 49 hidden 0.4.0 aliases that keep their looks, and nothing else.
+ * canonical blocks (door, ten windows, round trim), twelve advertised items (0.9.0: the Universal
+ * Trim is {@code round_trim}), 49 hidden 0.4.0 aliases that keep their looks, the hidden 0.8.0 window
+ * trim (an item only), and nothing else.
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -63,16 +65,22 @@ public final class ContentGameTests {
         long blocks = ForgeRegistries.BLOCKS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         long items = ForgeRegistries.ITEMS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         check(blocks == 61, "expected 12 + 49 blocks, found " + blocks);
-        check(items == 62, "expected 13 + 49 items, found " + items);
+        check(items == 62, "expected 12 + 49 + the window trim items, found " + items);
         for (String id : CANONICAL_BLOCKS) {
             check(ForgeRegistries.BLOCKS.containsKey(id(id)) && ForgeRegistries.ITEMS.containsKey(id(id)), "missing " + id);
             check(ForgeRegistries.BLOCKS.getValue(id(id)).asItem() == ForgeRegistries.ITEMS.getValue(id(id)), id + ": item mapping");
         }
         check(ForgeRegistries.ITEMS.containsKey(id("window_trim")) && !ForgeRegistries.BLOCKS.containsKey(id("window_trim")),
                 "the window trim is an item without a block");
-        Item windowTrim = ModItems.WINDOW_TRIM.get();
-        check(windowTrim instanceof WindowTrimItem trim && trim.appearanceFamily() == AppearanceFamily.TRIM
-                && !(windowTrim instanceof BlockItem), "the window trim is a trim-family attachment item");
+        Item windowTrim = LegacyContent.windowTrim();
+        check(windowTrim instanceof UniversalTrimItem trim && trim.appearanceFamily() == AppearanceFamily.TRIM && trim.isAlias()
+                && TrimAttachmentItem.slotOf(new ItemStack(windowTrim)).equals(Optional.of(TrimSlot.PERIMETER)),
+                "the window trim is a hidden Universal Trim");
+        check(windowTrim == ForgeRegistries.ITEMS.getValue(id("window_trim")) && LegacyContent.items().contains(windowTrim)
+                && !ModItems.all().contains(windowTrim), "the window trim is hidden compatibility content");
+        check(windowTrim.getDescriptionId().equals("block.roundwood.window_trim"), "the window trim keeps its own name");
+        check(ModItems.ROUND_TRIM.get() instanceof UniversalTrimItem && !((UniversalTrimItem) ModItems.ROUND_TRIM.get()).isAlias(),
+                "round_trim is the canonical Universal Trim");
         check(ModBlocks.roundDoor().asItem() == ModItems.ROUND_DOOR.get(), "an alias took the door's item mapping");
         check(ModBlocks.roundWindow().asItem() == ModItems.ROUND_WINDOW.get(), "an alias took the window's item mapping");
         check(ModBlocks.roundTrim().asItem() == ModItems.ROUND_TRIM.get(), "an alias took the trim's item mapping");
@@ -83,6 +91,7 @@ public final class ContentGameTests {
             Item item = ForgeRegistries.ITEMS.getValue(id(entry.id()));
             check(block != null && AppearanceDefaults.of(block).equals(entry.appearance()), entry.id() + ": alias block look");
             check(item instanceof AppearanceBlockItem alias && alias.isAlias(), entry.id() + ": not a hidden alias item");
+            check(entry.family() != AppearanceFamily.TRIM || item instanceof UniversalTrimItem, entry.id() + ": a trim alias is no Universal Trim");
             check(AppearanceStacks.read(new ItemStack(item)).equals(entry.appearance()), entry.id() + ": alias stack look");
             check(((AppearanceBlockItem) item).getBlock() == canonicalBlock(entry.family()),
                     entry.id() + ": alias item does not place the canonical block");
@@ -129,8 +138,8 @@ public final class ContentGameTests {
         }
         check(ModBlocks.roundTrim().defaultBlockState().is(ModTags.ROUND_TRIMS)
                 && new ItemStack(ModItems.ROUND_TRIM.get()).is(ModTags.ROUND_TRIM_ITEMS), "trim family tags");
-        check(new ItemStack(ModItems.WINDOW_TRIM.get()).is(ModTags.ROUND_TRIM_ITEMS)
-                && !new ItemStack(ModItems.WINDOW_TRIM.get()).is(ModTags.ROUND_WINDOW_ITEMS), "window trim item tags");
+        check(new ItemStack(LegacyContent.windowTrim()).is(ModTags.ROUND_TRIM_ITEMS)
+                && !new ItemStack(LegacyContent.windowTrim()).is(ModTags.ROUND_WINDOW_ITEMS), "window trim item tags");
         for (Block block : with(ModBlocks.roundWindow(), LegacyContent.windows())) {
             check(block.defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE) && !block.defaultBlockState().is(BlockTags.DOORS), block + " window tags");
         }
@@ -170,7 +179,10 @@ public final class ContentGameTests {
                 "a painting recipe is still loaded");
         long count = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
                 .filter(r -> r.getId().getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(count == 13, "expected 13 roundwood crafting recipes, loaded " + count);
+        check(count == 12, "expected 12 roundwood crafting recipes, loaded " + count);
+        ItemStack k = new ItemStack(Items.STICK);
+        check(find(level, grid(e, o, e, s, k, w, e, o, e)).map(r -> !r.getId().getNamespace().equals(Roundwood.MOD_ID)).orElse(true),
+                "the 0.8.0 window trim recipe is still loaded");
         helper.succeed();
     }
 
@@ -188,7 +200,6 @@ public final class ContentGameTests {
         expectShape(level, ModItems.window(design(WindowProfile.ARCH_RIGHT, WindowPattern.CROSS)), "PPP", "SGS", " P ");
         expectShape(level, ModItems.window(design(WindowProfile.BOTTOM_LEFT, WindowPattern.CROSS)), "P  ", "PGS", "PPS");
         expectShape(level, ModItems.window(design(WindowProfile.BOTTOM_RIGHT, WindowPattern.CROSS)), " P ", "SGS", "PPP");
-        expectShape(level, ModItems.WINDOW_TRIM.get(), " P ", "PSP", " P ");
         helper.succeed();
     }
 
@@ -232,7 +243,7 @@ public final class ContentGameTests {
             check(drops.size() == 1 && drops.get(0).is(block.asItem()) && drops.get(0).getCount() == 1 && !drops.get(0).hasTag(),
                     block + " loot is " + drops);
         }
-        // A window (canonical or alias) with oak trims on both faces also drops one plain oak window trim per face (0.8.0 face pools).
+        // A window (canonical or alias) with oak trims on both faces also drops one plain oak Universal Trim per face (0.8.0 face pools).
         List<Block> windows = new java.util.ArrayList<>(ModBlocks.windows());
         windows.addAll(LegacyContent.windows());
         for (Block window : windows) {
@@ -241,7 +252,7 @@ public final class ContentGameTests {
                     io.github.dirtyredz.roundwood.registry.ModBlockEntities.roundWindow(), pos, state);
             entity.setTrims(io.github.dirtyredz.roundwood.block.attachment.FaceTrims.both(io.github.dirtyredz.roundwood.appearance.Appearance.DEFAULT));
             List<ItemStack> drops = Block.getDrops(state, helper.getLevel(), pos, entity);
-            check(drops.size() == 3 && drops.stream().filter(d -> d.is(ModItems.WINDOW_TRIM.get()) && !d.hasTag()).count() == 2,
+            check(drops.size() == 3 && drops.stream().filter(d -> d.is(ModItems.ROUND_TRIM.get()) && !d.hasTag()).count() == 2,
                     window + " trimmed loot is " + drops);
         }
         for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
@@ -255,15 +266,14 @@ public final class ContentGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void creativeTabHoldsExactlyTheThirteenDefaults(GameTestHelper helper) {
+    public static void creativeTabHoldsExactlyTheTwelveDefaults(GameTestHelper helper) {
         CreativeModeTab tab = ModCreativeTab.ROUNDWOOD.get();
         tab.buildContents(new CreativeModeTab.ItemDisplayParameters(helper.getLevel().enabledFeatures(), false,
                 helper.getLevel().registryAccess()));
         List<ItemStack> shown = List.copyOf(tab.getDisplayItems());
-        List<String> expected = new java.util.ArrayList<>(CANONICAL_BLOCKS);
-        expected.add(expected.size() - 1, "window_trim");
+        List<String> expected = List.copyOf(CANONICAL_BLOCKS);
         check(shown.stream().map(stack -> ForgeRegistries.ITEMS.getKey(stack.getItem()).getPath()).toList().equals(expected),
-                "tab is not door, the ten windows (each plain then crossed), window trim, round trim: " + shown);
+                "tab is not door, the ten windows (each plain then crossed), Universal Trim: " + shown);
         check(shown.stream().noneMatch(ItemStack::hasTag), "tab entries carry an appearance: " + shown);
         check(AppearanceStacks.read(shown.get(0)).equals(Appearance.DEFAULT), "the tab's door is not oak");
         helper.succeed();

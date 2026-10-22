@@ -17,18 +17,18 @@ import net.minecraft.world.item.Items;
 import java.util.function.Consumer;
 
 /**
- * Thirteen recipes over any planks (mixed types allowed), each straight from raw materials, so no
+ * Eleven recipes over any planks (mixed types allowed), each straight from raw materials, so no
  * recipe ever consumes a styled window and loses its look:
  * <ul>
- *     <li>door: eight planks around a gold nugget; round trim: four planks in the corners (the 0.4.0
- *     shapes);</li>
+ *     <li>door: eight planks around a gold nugget; Universal Trim: four planks in the corners (the
+ *     0.4.0 shapes);</li>
  *     <li>round window: four planks around a glass pane; with cross beams, sticks in the corners;</li>
  *     <li>left and right arch: four planks and a glass pane in two shapes that are not mirror images
  *     (0.6.0); with cross beams, two sticks take planks' places;</li>
  *     <li>bottom left and right corner (0.7.0): an L of planks under a glass pane, the right one a
- *     T; with cross beams, two sticks beside the pane;</li>
- *     <li>window trim: four planks around a stick.</li>
+ *     T; with cross beams, two sticks beside the pane.</li>
  * </ul>
+ * The 0.8.0 window trim recipe is gone (0.9.0): the Universal Trim fits windows too.
  * No two shapes match each other's grid, mirrored or moved (the unit and GameTests check). The result
  * is always the default oak object; its look is chosen in the world (planks, dye and, for trims,
  * masonry), so there are no per-wood, painting or masonry recipes.
@@ -57,13 +57,6 @@ public class RoundwoodRecipeProvider extends RecipeProvider {
         window(writer, WindowProfile.ARCH_RIGHT, WindowPattern.CROSS, "round_window_arch_cross", "PPP", "SGS", " P ");
         window(writer, WindowProfile.BOTTOM_LEFT, WindowPattern.CROSS, "round_window_bottom_cross", "P  ", "PGS", "PPS");
         window(writer, WindowProfile.BOTTOM_RIGHT, WindowPattern.CROSS, "round_window_bottom_cross", " P ", "SGS", "PPP");
-        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModItems.WINDOW_TRIM.get())
-                .pattern(" P ").pattern("PSP").pattern(" P ")
-                .define('P', ItemTags.PLANKS)
-                .define('S', Items.STICK)
-                .group(Roundwood.MOD_ID + ":window_trim")
-                .unlockedBy("has_planks", has(ItemTags.PLANKS))
-                .save(writer);
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModItems.ROUND_TRIM.get())
                 .pattern("P P").pattern("   ").pattern("P P")
                 .define('P', ItemTags.PLANKS)
