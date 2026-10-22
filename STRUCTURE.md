@@ -174,3 +174,5 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-4cf186bd `LegacyAlias` contract
 - dk-1d129342 test duplication
 - dk-d402bd77 shared appearance-family wiring (P3, only if a fourth family appears)
+- dk-90159902 WindowPaneGeometry imports trim geometry (pane depends on the optional trim subsystem)
+- dk-87f3ad8f TrimFaceCondition <-> ModLootConditions registry cycle
