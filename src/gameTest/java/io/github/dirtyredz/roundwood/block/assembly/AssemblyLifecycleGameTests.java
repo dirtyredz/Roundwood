@@ -230,6 +230,12 @@ public final class AssemblyLifecycleGameTests {
             }
         }
 
+        // The placements above scheduled their own checks in these cells; let those fire first, so the
+        // scheduled-tick probes below see only what the lone writes schedule.
+        helper.runAfterDelay(2, () -> restoredLonePartsAreNotChecked(helper, level, families));
+    }
+
+    private static void restoredLonePartsAreNotChecked(GameTestHelper helper, ServerLevel level, List<Family> families) {
         List<Instance> restored = new ArrayList<>();
         List<Instance> control = new ArrayList<>();
         for (int row = 0; row < families.size(); row++) {
