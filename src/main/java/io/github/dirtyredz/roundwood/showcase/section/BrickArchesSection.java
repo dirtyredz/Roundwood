@@ -33,7 +33,7 @@ public final class BrickArchesSection implements ShowcaseSection {
         List<Appearance> masonry = canvas.masonry();
         for (int i = 0; i < masonry.size(); i++) {
             canvas.trim(masonry.get(i), r(i), F);
-            canvas.sign(r(i) - 1, F, ShowcaseSamples.label(masonry.get(i)), "legacy frame", "(older saves)");
+            canvas.sign(r(i), F, ShowcaseSamples.label(masonry.get(i)), "legacy frame", "(older saves)");
         }
     }
 }

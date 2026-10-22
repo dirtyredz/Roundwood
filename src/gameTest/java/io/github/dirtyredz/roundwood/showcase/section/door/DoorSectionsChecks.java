@@ -7,6 +7,7 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
+import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseFrame;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSamples;
 import net.minecraft.core.BlockPos;
@@ -50,7 +51,7 @@ public final class DoorSectionsChecks {
                 check(assembly.complete(level, block), what + ": door missing or incomplete");
                 check(level.getBlockState(assembly.anchor()).getValue(DoorBlock.OPEN) == DoorsSection.open(variant), what + ": wrong open state");
                 check(wood.equals(doorLook(level, assembly.anchor())), what + ": anchor shows " + doorLook(level, assembly.anchor()));
-                check(signSays(level, frame.pos(r, 0, f - 1), ShowcaseSamples.label(wood)), what + ": label sign missing");
+                check(signSays(level, frame.pos(ShowcaseCanvas.labelR(r), 0, f - 1), ShowcaseSamples.label(wood)), what + ": label sign missing");
             }
         }
     }
@@ -104,7 +105,7 @@ public final class DoorSectionsChecks {
                 check(expected.equals(shown), what + ": door trims " + shown);
                 check(!(level.getBlockState(frame.pos(r, 0, f - 1)).getBlock() instanceof RoundTrimBlock),
                         what + ": a frame block stands in front of the door");
-                check(signSays(level, frame.pos(r, 0, f - 2), ShowcaseSamples.label(material)), what + ": label sign missing");
+                check(signSays(level, frame.pos(ShowcaseCanvas.labelR(r), 0, f - 2), ShowcaseSamples.label(material)), what + ": label sign missing");
             }
         }
     }

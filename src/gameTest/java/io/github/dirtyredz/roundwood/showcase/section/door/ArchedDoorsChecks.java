@@ -4,6 +4,7 @@ import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
+import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseFrame;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -42,7 +43,7 @@ public final class ArchedDoorsChecks {
             BlockPos besides = frame.pos(door.r() + 1, 0, door.f());
             check(!level.getBlockState(besides).is(ModBlocks.archedDoor()) && !level.getBlockState(besides.above()).is(ModBlocks.archedDoor()),
                     what + ": a door part stands beside the one-column door");
-            check(level.getBlockEntity(frame.pos(door.r(), 0, door.f() - 1)) instanceof SignBlockEntity, what + ": sign missing");
+            check(level.getBlockEntity(frame.pos(ShowcaseCanvas.labelR(door.r()), 0, door.f() - 1)) instanceof SignBlockEntity, what + ": sign missing");
         }
     }
 

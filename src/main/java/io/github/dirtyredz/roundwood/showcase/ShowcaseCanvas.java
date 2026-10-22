@@ -35,7 +35,9 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * What a section builds with: frame-relative placement helpers over one level that go through the
@@ -43,10 +45,14 @@ import java.util.List;
  * shared sample appearances, and a list of anything that failed.
  */
 public final class ShowcaseCanvas {
+    /** Columns (to the builder's right) from a piece's lower-left cell to its label: one to the left. */
+    public static final int LABEL_OFFSET = -1;
+
     private final ServerLevel level;
     private final ShowcaseFrame frame;
     private final List<String> problems = new ArrayList<>();
     private final List<Appearance> trimSamples;
+    private final Set<BlockPos> labelCells = new HashSet<>();
 
     ShowcaseCanvas(ServerLevel level, ShowcaseFrame frame) {
         this.level = level;
@@ -217,10 +223,27 @@ public final class ShowcaseCanvas {
         }
     }
 
-    /** A standing sign on the floor at ({@code r}, 0, {@code f}) readable from the builder's side. */
-    public void sign(int r, int f, String... lines) {
+    /**
+     * The column a label stands in for a piece whose lower-left cell is in column {@code pieceR}: one
+     * column to the builder's left, so the sign sits beside the piece rather than in front of it.
+     */
+    public static int labelR(int pieceR) {
+        return pieceR + LABEL_OFFSET;
+    }
+
+    /**
+     * Labels the piece whose lower-left cell is in column {@code pieceR}: a standing sign on the floor
+     * at {@link #labelR} in row {@code f} (the walkway row in front of the piece), turned to face the
+     * builder so it reads from where they stand to look at the piece without covering it. A cell that
+     * is not free, or a sign a later section overwrites, is a build problem ({@link #verifyLabels}).
+     */
+    public void sign(int pieceR, int f, String... lines) {
         int rotation = Math.floorMod(Math.round(frame.forward().getOpposite().toYRot() / 22.5F), 16);
-        BlockPos pos = frame.pos(r, 0, f);
+        BlockPos pos = frame.pos(labelR(pieceR), 0, f);
+        if (!level.getBlockState(pos).isAir()) {
+            problem("sign would replace " + level.getBlockState(pos) + " at " + pos.toShortString());
+        }
+        labelCells.add(pos);
         level.setBlock(pos, Blocks.OAK_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, rotation),
                 Block.UPDATE_ALL);
         if (level.getBlockEntity(pos) instanceof SignBlockEntity sign) {
@@ -232,6 +255,15 @@ public final class ShowcaseCanvas {
             sign.setWaxed(true);
         } else {
             problem("sign not placed at " + pos.toShortString());
+        }
+    }
+
+    /** Reports every label a later section overwrote; called once after the last section has built. */
+    void verifyLabels() {
+        for (BlockPos pos : labelCells) {
+            if (!(level.getBlockEntity(pos) instanceof SignBlockEntity)) {
+                problem("label overwritten at " + pos.toShortString() + " by " + level.getBlockState(pos));
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
+import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseFrame;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -36,7 +37,7 @@ public final class ArchwaysChecks {
             ArchwayBlockEntity entity = (ArchwayBlockEntity) level.getBlockEntity(assembly.anchor());
             check(entity.appearance().equals(archway.look()), what + ": look " + entity.appearance().key());
             check(entity.trims().equals(archway.trims()), what + ": trims " + entity.trims());
-            BlockPos sign = frame.pos(archway.r(), 0, archway.f() - 1);
+            BlockPos sign = frame.pos(ShowcaseCanvas.labelR(archway.r()), 0, archway.f() - 1);
             check(level.getBlockEntity(sign) instanceof SignBlockEntity, what + ": sign missing");
             owned.addAll(assembly.positions());
             owned.add(sign);

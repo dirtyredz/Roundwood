@@ -39,6 +39,7 @@ public final class ShowcaseBuilder {
         for (ShowcaseSection section : ShowcaseSections.ALL) {
             section.build(canvas);
         }
+        canvas.verifyLabels();
         String message = "Built the showcase (" + ShowcaseSections.ALL.size() + " sections) over "
                 + size(bounds) + " blocks ahead of you.";
         return new Result(true, message, bounds, List.copyOf(canvas.problems()));

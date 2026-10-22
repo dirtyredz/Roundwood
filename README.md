@@ -310,6 +310,8 @@ f 0..7. Since 0.12.0 an archway section: a row of archways and a row of keyhole 
 (oak, spruce, dark oak, cherry, blue paint, the four masonry materials, a stone-brick front casing, and
 different front and back casings), at r 26..58, f 35..41, between the round doors and the corners.
 
+Every label sign stands beside the piece it names, never in front of it: on the walkway side, one column to the left of the piece's lower-left cell, turned to face you, so it reads from where you stand to look at the piece and does not cover it. The build reports a placement problem if a sign would replace, or be replaced by, another sample's block.
+
 ## Recipes
 
 | Result | Recipe |

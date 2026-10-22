@@ -9,6 +9,7 @@ import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
+import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseFrame;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSamples;
 import net.minecraft.core.BlockPos;
@@ -42,7 +43,7 @@ public final class SectionChecks {
             TrimLayout.Assembly trim = new TrimLayout.Assembly(frame.pos(BrickArchesSection.r(i), 0, BrickArchesSection.F), frame.forward());
             check(trim.complete(level, ModBlocks.roundTrim()), masonry.get(i).key() + ": freestanding arch missing");
             check(masonry.get(i).equals(trimLook(level, trim.anchor())), masonry.get(i).key() + ": arch look");
-            check(level.getBlockEntity(frame.pos(BrickArchesSection.r(i) - 1, 0, BrickArchesSection.F)) instanceof SignBlockEntity,
+            check(level.getBlockEntity(frame.pos(ShowcaseCanvas.labelR(BrickArchesSection.r(i)), 0, BrickArchesSection.F)) instanceof SignBlockEntity,
                     masonry.get(i).key() + ": arch label missing");
         }
     }
@@ -63,7 +64,7 @@ public final class SectionChecks {
                     && tinted.appearance().equals(Appearance.DEFAULT), paint.key() + ": tinted glass");
             BlockPos window = frame.pos(r + PaintsSection.WINDOW_OFFSET, 0, f);
             check(level.getBlockState(window).is(ModBlocks.roundWindow()) && paint.equals(windowLook(level, window)), paint.key() + ": window");
-            check(signSays(level, frame.pos(r, 0, f - 1), ShowcaseSamples.label(paint)), paint.key() + ": label sign missing");
+            check(signSays(level, frame.pos(ShowcaseCanvas.labelR(r), 0, f - 1), ShowcaseSamples.label(paint)), paint.key() + ": label sign missing");
         }
     }
 }
