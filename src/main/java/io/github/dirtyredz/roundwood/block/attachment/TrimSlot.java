@@ -9,7 +9,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.Locale;
 
 /**
- * Which kind of attachment a face trim is (0.9.0). A host keeps one {@link FaceTrimStore} per slot it
+ * Which kind of attachment a face trim is (0.9.0). A host keeps one {@code storage/FaceTrimStore} per slot it
  * supports, each with its own FRONT/BACK pair, payload and loot pools, so two slots on one face are
  * fitted, restyled, removed and dropped independently. The slot also names the canonical item a
  * removed or dropped attachment comes back as.

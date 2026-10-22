@@ -1,8 +1,9 @@
-package io.github.dirtyredz.roundwood.block.attachment;
+package io.github.dirtyredz.roundwood.block.attachment.host;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.sounds.SoundSource;

@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.block.window.trim;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
-import io.github.dirtyredz.roundwood.block.attachment.FaceTrimStore;
+import io.github.dirtyredz.roundwood.block.attachment.storage.FaceTrimStore;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.testsupport.MinecraftBootstrap;
 import net.minecraft.nbt.CompoundTag;

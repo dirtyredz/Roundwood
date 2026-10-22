@@ -1,5 +1,7 @@
-package io.github.dirtyredz.roundwood.block.attachment;
+package io.github.dirtyredz.roundwood.block.attachment.storage;
 
+import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;

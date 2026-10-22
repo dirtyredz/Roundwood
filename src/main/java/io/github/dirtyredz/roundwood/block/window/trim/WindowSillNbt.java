@@ -1,8 +1,8 @@
 package io.github.dirtyredz.roundwood.block.window.trim;
 
-import io.github.dirtyredz.roundwood.block.attachment.FaceTrimStore;
+import io.github.dirtyredz.roundwood.block.attachment.storage.FaceTrimStore;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
-import io.github.dirtyredz.roundwood.block.attachment.FaceTrimsNbt;
+import io.github.dirtyredz.roundwood.block.attachment.storage.FaceTrimsNbt;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
 
