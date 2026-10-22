@@ -8,6 +8,7 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceBlockItem;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassStacks;
 import io.github.dirtyredz.roundwood.migration.LegacyAppearances;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
@@ -341,6 +342,31 @@ public final class ContentGameTests {
                 "tab is not the two doors, 13 plain windows, two archways, Universal Trim, Arch Sill and Cross Beams: " + shown);
         check(shown.stream().noneMatch(ItemStack::hasTag), "tab entries carry an appearance: " + shown);
         check(AppearanceStacks.read(shown.get(0)).equals(Appearance.DEFAULT), "the tab's door is not oak");
+        helper.succeed();
+    }
+
+    /** Viewer lists are built from the tab: each item once, as its oak default (the JEI "no subtype" key). */
+    @GameTest(template = TEMPLATE)
+    public static void everyItemIncludingBothArchwaysIsListedOnceAsItsOakDefault(GameTestHelper helper) {
+        CreativeModeTab tab = ModCreativeTab.ROUNDWOOD.get();
+        tab.buildContents(new CreativeModeTab.ItemDisplayParameters(helper.getLevel().enabledFeatures(), false,
+                helper.getLevel().registryAccess()));
+        List<ItemStack> shown = List.copyOf(tab.getDisplayItems());
+        for (Item item : ModItems.all()) {
+            List<ItemStack> listed = shown.stream().filter(stack -> stack.getItem() == item).toList();
+            check(listed.size() == 1, item + " is listed " + listed.size() + " times in the tab");
+            ItemStack stack = listed.get(0);
+            check(!stack.hasTag() && AppearanceStacks.read(stack).equals(AppearanceDefaults.of(item))
+                    && WindowGlassStacks.key(stack).equals(AppearanceDefaults.of(item).key()), item + " is not its plain default: " + stack);
+        }
+        check(ModItems.all().size() == 20 && shown.size() == 20, "tab lists " + shown.size() + " items, not the 20 of 0.13.0");
+        check(shown.stream().anyMatch(stack -> stack.getItem() == ModItems.CROSS_BEAMS.get()), "Cross Beams is not listed");
+        for (Item retired : io.github.dirtyredz.roundwood.migration.LegacyContent.items()) {
+            check(shown.stream().noneMatch(stack -> stack.getItem() == retired), "hidden compatibility item " + retired + " is listed");
+        }
+        for (Item archway : ModItems.archways()) {
+            check(AppearanceStacks.read(new ItemStack(archway)).equals(Appearance.DEFAULT), archway + " default is not oak");
+        }
         helper.succeed();
     }
 
