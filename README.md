@@ -1,7 +1,7 @@
 # Roundwood
 
 Forge 1.20.1 mod: a round 2x2 wooden door, a round window with arch and corner pieces (each plain
-or with cross beams), a window trim and a Door Trim, hobbit-hole style. Each is one item you
+or with cross beams) and a Universal Trim for both, hobbit-hole style. Each is one item you
 restyle in the world: any planks (vanilla or modded) set the wood, any of the 16 dyes paints it,
 and trims can also be faced with radial brick. Install on **both** the server and every client.
 Generic: not tied to any modpack.
@@ -16,12 +16,12 @@ Generic: not tied to any modpack.
 
 ## Content
 
-Thirteen items: **Round Door**, five window pieces, each in a plain and a cross-beam version
+Twelve items: **Round Door**, five window pieces, each in a plain and a cross-beam version
 (**Round Window**, **Round Window Arch, Left**, **Round Window Arch, Right**, **Round Window
 Corner, Bottom Left**, **Round Window Corner, Bottom Right**; the crossed ones are named "... with
-Cross Beams"), **Window Trim** and **Door Trim**. Creative tab order: door, then each plain window
+Cross Beams"), and the **Universal Trim**. Creative tab order: door, then each plain window
 piece followed by its crossed variant (round, arch left, arch right, corner bottom left, corner
-bottom right), window trim, door trim. They are crafted (and found in the creative tab) in oak;
+bottom right), Universal Trim. They are crafted (and found in the creative tab) in oak;
 their look is changed once placed and travels with them when picked or broken.
 
 **Round door** (one item places a 2 wide x 2 high assembly). One round leaf on one hinge, like a
@@ -81,9 +81,13 @@ the middle of its own opening, so four crossed pieces in a 2 x 2 show four cross
 shared cross. The beams use the pane's wood or paint, run the full thickness of the pane, and glass
 is cut away under them. Plain and crossed are chosen by the item, not by a click or toggle.
 
-**Window trim** (one item, one piece per face). A ring of trim that fits onto any of the ten windows
-(plain or crossed) and follows its shape: a ring round the round window, the matching quarter of the
-big ring on an arch, the outer jamb and sill on a corner (beams are never trimmed). Click a window
+**Universal Trim** (`round_trim`, one item, one piece per face, since 0.9.0). One trim item for every
+window and round door; its icon is a flat square frame in the trim's look. The older Window Trim and
+Door Trim items still work everywhere (see Upgrading).
+
+*On a window* the trim fits onto any of the ten windows (plain or crossed) and follows its shape: a
+ring round the round window, the matching quarter of the big ring on an arch, the outer jamb and
+sill on a corner (beams are never trimmed). Click a window
 face with it (a plain click, no sneaking): it trims the face you clicked, so a window takes up to two
 trims, each with its own look. A face that already has a trim just ignores the click and keeps the
 item. Every trim stands one pixel proud of its face. On a window set flush against a wall, floor or
@@ -91,12 +95,11 @@ ceiling, the wall-side trim therefore extends one pixel outside the window's blo
 (no collision, support or connection) and decorative. A trimmed window drops its pane and one trim
 per trimmed face as separate items; picking the block gives the pane (with its glass tint) only.
 
-**Door Trim** (one item, one piece per face). A flat ring, open in the middle, purely decorative; the
-`round_trim` item. Click a round door with it (a plain click) and it attaches to the face you
-clicked, as a static casing: it never swings, collides or changes redstone. The front ring stands at
+*On a round door* it is a flat ring, open in the middle, purely decorative. Click a round door with
+it (a plain click) and it attaches to the face you clicked, as a static casing: it never swings, collides or changes redstone. The front ring stands at
 the leaf's front face, one pixel into the cells in front of the door; the back ring sits just behind
 the leaf. A closed door takes a click anywhere inside the ring's outer edge; an open door is fitted
-by aiming at the ring itself (it is outlined while you hold the Door Trim). A face that already has a
+by aiming at the ring itself (it is outlined while you hold the trim). A face that already has a
 trim ignores the click and keeps the item. The ring stays put while the door swings, and a door
 drops its trims, one per face, when broken. The old 2 x 2 frame block is still there for saves made
 before 0.8.0 (see Upgrading).
@@ -126,7 +129,7 @@ the main hand is empty. Sneaking changes nothing.
   piece on your left); an edge zone places them flush with the front towards you; on a floor or
   ceiling the top is the side you see as up, so a left piece looks left to whoever placed it.
 - **To move a placed window, break it and place it again**; its look survives in the item (a fitted
-  window trim comes back as its own item, and a glass tint survives in the item). Windows saved by 0.5.0 or 0.6.x load unchanged and
+  trim comes back as a Universal Trim, and a glass tint survives in the item). Windows saved by 0.5.0 or 0.6.x load unchanged and
   untrimmed, with their position, connections, water and look as they were.
 - Junctions: only a centred window grows glass, an arm across its plane towards a pane, bars, a
   wall or a centred window crossing it. Flush, floor and ceiling windows never connect, so two of
@@ -146,14 +149,14 @@ the main hand is empty. Sneaking changes nothing.
 | Window trim band (the ring under a trim) | Planks | That wood for that face's trim (paint removed) | 1 plank |
 | Window trim band | Bricks, stone bricks, deepslate bricks or mud bricks | Brickwork for that face's trim | 1 block |
 | Window trim band | Dye | Painted trim (refused on brickwork, free) | 1 dye |
-| Window trim band | Shears | That face's trim removed and returned as an item; shears take one wear | none |
-| Window face | Window trim item | Fits a trim on the clicked face (nothing happens if it has one) | 1 trim |
+| Window trim band | Shears | That face's trim removed and returned as a Universal Trim; shears take one wear | none |
+| Window face | Universal Trim (or an older trim item) | Fits a trim on the clicked face (nothing happens if it has one) | 1 trim |
 | Window, anywhere but a trim band | Bricks, stone bricks, deepslate bricks or mud bricks | Refused with a hint to aim at the trim | nothing |
 | Door trim ring | Planks | That wood for that face's ring (also replaces masonry) | 1 plank |
 | Door trim ring | Bricks, stone bricks, deepslate bricks or mud bricks | Radial brickwork, paint cleared | 1 block |
 | Door trim ring | Dye | Painted (refused on brickwork, free) | 1 dye |
 | Door trim ring | Shears | That face's ring removed and returned as an item; shears take one wear | none |
-| Door | Door Trim item | Attaches a ring to the clicked face (nothing happens if it has one) | 1 trim |
+| Door | Universal Trim (or an older trim item) | Attaches a ring to the clicked face (nothing happens if it has one) | 1 trim |
 | Freestanding frame (older saves) | **Sneak** + planks | That wood (also replaces masonry) | 1 plank |
 | Freestanding frame | **Sneak** + bricks, stone bricks, deepslate bricks or mud bricks | Radial brickwork, paint cleared | 1 block |
 | Wooden freestanding frame | Dye | Painted | 1 dye |
@@ -215,25 +218,31 @@ freestanding frames (older saves).
 | Arch with cross beams, right | Rows `PPP` / `SGS` / ` P ` |
 | Corner with cross beams, bottom left | Rows `P  ` / `PGS` / `PPS` |
 | Corner with cross beams, bottom right | Rows ` P ` / `SGS` / `PPP` |
-| Window trim | Rows ` P ` / `PSP` / ` P ` (P planks, S stick) |
-| Door Trim (`round_trim`) | 4 planks in the four corners of the grid |
+| Universal Trim (`round_trim`) | 4 planks in the four corners of the grid |
 
 Crafting always gives the oak object; restyle it in the world. With **EMI** each item is one index
 entry whose icon cycles through example looks (the tooltip says it is a preview; taking or
 bookmarking it gives the plain oak item); styled stacks in your inventory are told apart by their
-look. With **JEI** styled stacks are separate subtypes and the thirteen plain items are listed.
+look. With **JEI** styled stacks are separate subtypes and the twelve plain items are listed.
 Neither viewer is required.
 
 ## Upgrading
 
+**From 0.8.0:** the Window Trim and Door Trim become one **Universal Trim** (`round_trim`, the old
+Door Trim id, now with a square-frame icon). Old stacks are not rewritten: Window Trim and Door
+Trim stacks in chests and inventories keep their id, count and look, and both fit windows and doors
+straight away; a trim you take off with shears, or that drops when its window or door breaks, comes
+back as a Universal Trim in the same look. The Window Trim recipe is gone (the four-corner planks
+recipe makes the Universal Trim). Placed windows and doors keep every trim exactly as saved.
+
 **From 0.7.0:** window trims become two trims, one on each face, in the look they had (a 0.7.0 trim
 fitted both faces); this is a one-time uplift in material, since each face now drops its own trim.
 Fitted door frames (a round trim standing in the four cells in front of a door) become that door's
-front Door Trim, once the chunk loads, when the frame and door match exactly and the door's front has
+front trim, once the chunk loads, when the frame and door match exactly and the door's front has
 no trim yet; a door whose front already has a trim keeps its frame. A freestanding frame exactly in
 front of a door is indistinguishable from a fitted one and converts too. Other freestanding frames
 remain as legacy content: they still render, restyle with the sneak gestures, break normally and
-drop a Door Trim in their look. Nothing else changes.
+drop a Universal Trim in their look. Nothing else changes.
 
 **From 0.6.x:** saves load unchanged. Placed windows keep their position, connections, water and
 look and come back untrimmed (a missing `trimmed` means no trim); they are redrawn with the
@@ -266,13 +275,13 @@ The release jar is `build/libs/roundwood-1.20.1-<version>.jar`.
 Not released yet. 0.5.0 is the baseline; 0.6.0 (targeted window placement and the arch pieces),
 0.6.1 (no glass bridges on positioned windows, the door highlight follows the swing) and 0.7.0
 (seamless clearer window glass, corner pieces, cross beams, window trims, thinner mortar) were
-trialled by the owner. 0.8.0 (a trim per window face, trim standing proud of flush windows, tinted
-window glass, Door Trim attached to doors, plain-click gestures) is built and tested headless.
-Owner checks in game: the wall-side trim of flush, floor and ceiling windows, trims on both faces and
-their separate looks, glass tinting, Door Trim fitting on closed and open doors, shears and
-restyling without sneaking, a copied 0.7.0 world (window trims on both faces, fitted frames turned
-into door trims), thinner mortar, water and F3+T. Not covered by a unit test: the client-side
-trim retexturing. The flow follows DankRecipeTransfer: an immutable
+trialled by the owner, and so was 0.8.0 (a trim per window face, trim standing proud of flush
+windows, tinted window glass, Door Trim attached to doors, plain-click gestures). 0.9.0 (one
+Universal Trim for windows and doors, square-frame icon) is built and tested headless. Owner checks
+in game: the square icon in wood, paint, each masonry and an unfamiliar wood; old Window Trim and
+Door Trim stacks from a chest fit both windows and doors; separate face looks survive save and
+reload; shears give back a Universal Trim; 0.7.0 fitted frames still convert only as documented.
+Not covered by a unit test: the client-side trim retexturing. The flow follows DankRecipeTransfer: an immutable
 GitHub prerelease asset, then a direct-URL `mods/roundwood.pw.toml` (with SHA-256, `side = "both"`)
 in the pack repo. Both steps need the owner's go-ahead.
 

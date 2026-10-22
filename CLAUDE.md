@@ -9,10 +9,12 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   workspace. The owner checks visuals and client behaviour in game.
 - **Generated resources are source.** Change a provider, run `./gradlew runData`, commit the
   regenerated `src/generated/resources/` with the code. Never hand-edit generated JSON.
-- **Separate authorities, no catalogue.** Content is twelve canonical blocks and thirteen items in
-  three appearance families (door; window family = ten windows; trim, with the window trim a
-  trim-family item); looks are data. `round_trim` stays a registered compatibility block (frames
-  from older saves) while normal use of its item, "Door Trim", attaches to a door. Which
+- **Separate authorities, no catalogue.** Content is twelve canonical blocks and twelve advertised
+  items in three appearance families (door; window family = ten windows; trim = the Universal
+  Trim); looks are data. `round_trim` stays a registered compatibility block (frames from older
+  saves) while its item, the Universal Trim, attaches to window and door faces; `window_trim` is
+  a hidden compatibility item that behaves the same. Trim attachments go through
+  `block/attachment` (`FaceTrimStore`, `TrimFitting`, `TrimHost`, `TrimSlot`), never a host copy. Which
   items restyle: `appearance/material` (tagged planks, the fixed four masonry). What a look draws:
   `client/material` (`BuiltinWoodStyles`, `PaintStyles`) plus the generated art. Examples:
   `AppearanceSamples`. History: `migration/LegacyAppearances` is frozen, never edit it. New artwork

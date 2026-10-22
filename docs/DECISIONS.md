@@ -2,6 +2,38 @@
 
 Newest first.
 
+## 2026-10-22 - One Universal Trim; old ids kept, not remapped (0.9.0)
+
+The window trim and the door trim become one attachment, the **Universal Trim**, under the existing
+`round_trim` id (its recipe, its 0.4.0 aliases and the compatibility frame's item mapping all keep
+working), with a flat square-frame icon so it no longer looks like a door-only ring. `window_trim`
+stays registered as a hidden compatibility item that behaves exactly like it (no recipe, tab or
+viewer entry, its old name). Old stacks are not rewritten: every id fits windows and doors, and a
+removed or dropped attachment comes back as `round_trim` in the same look, so ids converge through
+use. Rejected: a missing-mapping remap or inventory scan (`window_trim` to `round_trim` is
+many-to-one with different stack NBT rules and would touch arbitrary containers), a new id (would
+orphan every recipe book, tag and 0.4.0 alias), and keeping two items (two recipes and two icons for
+one behaviour). Tradeoff: old and new stacks do not stack together until used.
+
+The square icon's masonry gets its own straight-course face (`universal_trim_<m>`) rather than the
+radial ring faces, which would show radial joints on a square.
+
+## 2026-10-22 - Shared trim storage and transaction in block/attachment (0.9.0)
+
+The duplicated door/window code (dk-08d20a47, dk-f9d8d245) moved into `block/attachment`:
+`FaceTrimStore` (the pair, the unknown-payload custody and the fail-closed save/update rules,
+parameterised by a host `Format` and a load-time `Legacy` reader), `TrimFitting` (fit, remove,
+install, restyle, restyle target, announce) on a narrow `TrimHost`, and `TrimSlot` naming the
+attachment kind (`PERIMETER` now, `SILL` next) and its canonical item. Host adapters keep only
+their lookup, permission and store hook (the window's `trimmed` summary). Fitting moved from the
+door trim item into the door router, as the window's already was, so both hosts claim the sneak
+gesture the same way and an item's own use can never fit twice. One store per slot, each with its
+own payload key and version, so a later sill or archway casing adds a store rather than a branch
+inside a codec. Rejected: a generic multi-slot payload (one unknown slot would block the others)
+and a per-host transaction with a shared helper (the drift the review found). The trim look
+resolver was shared at the same time (`client/material/TrimLooks`) so the icon did not add a third
+copy (part of dk-73e57897; the pane and leaf resolvers are untouched).
+
 ## 2026-10-21 - Window gestures are routed by hit region, with no sneaking (0.8.0)
 
 A shared classifier (`WindowHitRegions`, fed by `WindowHitTarget`) names what is under the cursor:

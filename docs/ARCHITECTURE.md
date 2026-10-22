@@ -271,11 +271,13 @@ degrees keeps its pose but the bit toggles, so each trim stays on the face it wa
 rotations keep the bit; a mirror toggles it (the pose mirror reverses the geometric front to keep
 handedness). Never set it by hand.
 
-**Window trims.** An item, not a block (`block/window/trim/WindowTrimItem`, family TRIM, so it takes
-wood, paint or the four masonry materials). Recipe ` P /PSP/ P `. One item trims one face, the
+**Window trims.** Since 0.9.0 the Universal Trim (see Face-trim attachments; family TRIM, so it
+takes wood, paint or the four masonry materials). One item trims one face, the
 clicked one, so a window takes up to two trims, each with its own look. A plain click fits it (no
 sneaking); a face that already has a trim is a free no-op and nothing is used. The item has no use
-of its own: the window router fits it (see Hit classification and routing).
+of its own: the window router fits it (see Hit classification and routing). Fitting, removal and
+restyling go through the shared `TrimFitting` with a `WindowTrimActions` host whose writes keep the
+`trimmed` summary in step.
 
 - **State and payload.** The shared value is `block/attachment/FaceTrims` (two optional looks;
   whether a face has a trim never depends on its look) with one codec, `FaceTrimsNbt`:
@@ -317,15 +319,15 @@ of its own: the window router fits it (see Hit classification and routing).
   are CONNECTOR_GLASS, anything else NONE. `interaction/WindowUseRules` is the pure routing table;
   `WindowInteraction` is the adapter (extracted from `WindowPaneBlock.use`). Main hand first, the
   offhand only with an empty main hand. No action needs sneaking and sneaking does the same:
-  - Window trim item on any face target: fits the clicked face.
+  - Any Universal Trim id (`TrimAttachmentItem`, perimeter slot) on any face target: fits the clicked face.
   - Planks: on a trim band restyle that face's trim (removing its paint); on frame, beam or glass
     restyle the frame and beams, the glass kept.
   - Dye: on a trim band paint that face's trim (masonry refuses, free); on frame or beam paint the
     frame; on glass or connector glass tint the whole window's glass.
   - Masonry: on a trim band restyle that face; elsewhere refused with the action-bar hint "Masonry
     restyles a trim; aim at the trim", nothing used and no block placed.
-  - Shears: on a trim band remove that face only (survival: the styled trim back or dropped and one
-    wear; creative: nothing back, no wear); elsewhere no change.
+  - Shears: on a trim band remove that face only (survival: a styled `round_trim` back or dropped
+    and one wear; creative: nothing back, no wear); elsewhere no change.
   - Bucket or anything unrelated: the ordinary item use.
   Payment is one item per actual change in survival, none in creative, repeats free.
 - **Sneak bridge.** `appearance/interaction/AppearanceUseTarget` asks the target block instead of
@@ -375,12 +377,46 @@ and load centred; windows saved by 0.6.x have no `trimmed` and load untrimmed, b
 axis, connections, water and look unchanged; aliases (`LegacyWindowBlock`) inherit the properties,
 and `LegacyAppearances` and the 0.4.0 fixture are unchanged.
 
+## Face-trim attachments (0.9.0)
+
+One attachment item and one transaction for every host; the sill (0.10.0) and the archways (0.12.0)
+plug in as further slots and hosts, not copies.
+
+- **Slot** (`block/attachment/TrimSlot`): `PERIMETER` (the Universal Trim, item `round_trim`) and
+  `SILL` (planned, item `arch_sill_trim`, no host stores it yet). A slot names the canonical item
+  a removed or dropped attachment becomes, and is the loot condition's `slot`.
+- **Storage** (`FaceTrimStore`): one host's FRONT/BACK pair in one slot plus custody of an unknown
+  payload. The host supplies a `Format` (key, version, whether an empty pair is written: windows
+  yes, doors no) and, at load, a `Legacy` reader (the window's 0.7.0 adapter; doors have none).
+  The current version decodes through `FaceTrimsNbt`; anything not understood reads as no trims,
+  is kept and saved back byte-for-byte, and `set` refuses until a build that understands it loads
+  it. Update packets always carry the payload, explicit empty while an unknown one is held. One
+  store per slot, so slots never see each other's payload. Both block entities delegate to it.
+- **Transaction** (`TrimFitting`, on a `TrimHost`): fit (empty face takes the stack's look, one item
+  unless creative; occupied is a free no-op), remove (shears: the slot's item in that look back or
+  dropped, one wear), install (no player), restyle and a per-face `AppearanceActions.Target`. A host
+  adapter (`DoorTrimActions`, `WindowTrimActions`) does only its own lookup and checks (complete,
+  loaded, permission over every cell) and its store hook.
+- **Items** (`block/attachment/item`): `TrimAttachmentItem` names a slot; hosts recognise trims
+  through `TrimAttachmentItem.slotOf`, never a class or id. `UniversalTrimItem` is registered as the
+  advertised `round_trim` (it keeps its block association with the compatibility frame, never places
+  one, and claims the frame's item mapping) and, hidden, as every older id: the 19 0.4.0 trim aliases
+  (historical looks) and the 0.8.0 `window_trim` (`migration/LegacyContent`). Its own use does
+  nothing: the host router fits, so a click is never fitted twice.
+- **Loot.** `roundwood:trim_face` takes an optional `slot` (omitted = perimeter, which is how it is
+  written, so 0.8.0 tables are unchanged). `AttachmentLootPools` builds a slot's two face pools;
+  windows and doors drop `round_trim`.
+- **Icon** (`client/item/UniversalTrimModels`): every TRIM-family item (all ids) wraps the generated
+  square frame (`item/round_trim`, 16 px, 2 px band, 2 px deep, whole-face UVs over 16) and
+  retextures it through the shared resolver `client/material/TrimLooks` (masonry: the square face
+  `universal_trim_<m>`, straight courses). `TrimLooks` also serves the frame/door rings and the
+  window trims, which differ only in the masonry face.
+
 ## Door trim
 
-The `roundwood:round_trim` item (recipe and id unchanged) is displayed "Door Trim"
-(`block/door/trim/DoorTrimItem`; it replaces `block/trim/RoundTrimItem`, which is deleted). It keeps
-its block association with the compatibility frame block but never places one (`place()` refuses).
-It attaches to a door face as a static casing, using the shared `block/attachment` value.
+The Universal Trim attaches to a door face as a static casing, using the shared `block/attachment`
+services (see Face-trim attachments). Until 0.9.0 the `round_trim` item was the "Door Trim"
+(`block/door/trim/DoorTrimItem`, now deleted).
 
 - **Use.** On a closed door it trims the clicked face: any hit inside the ring's outer edge counts,
   and the face is chosen by depth against the leaf's middle z 14.5. On an open door only an aimed
@@ -400,9 +436,10 @@ It attaches to a door face as a static casing, using the shared `block/attachmen
   where they are (the front ring at 16..17) and never an absent ring; while swinging the static
   outline is the corners plus the rings (`visibleStatic`). `DoorHitResolver` is unchanged: there are
   no hits in neighbouring cells.
-- **Routing** (`DoorInteraction`, ahead of restyle, camouflage and toggle). Holding a Door Trim hands
-  the click to the item's use (block use passes and never toggles; an empty main hand with a Door
-  Trim in the offhand passes to the offhand). On a ring (`DoorTrimTarget.ring`): shears remove that
+- **Routing** (`DoorInteraction`, ahead of restyle, camouflage and toggle). Holding a trim
+  attachment (any id) the router fits the face `DoorTrimTarget.fit` picks, or refuses; it never
+  toggles, camouflages or places (an empty main hand with a trim in the offhand passes to the
+  offhand). `claims` answers yes for a fit target, so sneaking fits the same way. On a ring (`DoorTrimTarget.ring`): shears remove that
   face (a free no-op if untrimmed); planks, masonry and dye restyle an installed ring by the trim
   family rules (masonry is not paintable). Otherwise the existing leaf restyle (sneak + planks,
   dye), camouflage and toggle apply. `DoorInteraction.claims` feeds the sneak bridge.
@@ -443,7 +480,7 @@ of its cells (z 0..1, authored facing north), cut into cell-local quarters.
   64 x 64 radial brick face (24 wedge bricks, a brick at the crown) spread across the ring. Since
   0.7.0 that face is `trim_radial_thin_<m>` (joint half width 0.425 texels, anti-aliased) via
   `client/material/MasonryStyles`; the old `trim_radial_<m>` stay generated and pinned, unused.
-  Freestanding frames break normally, drop the Door Trim item in their look and keep their
+  Freestanding frames break normally, drop the Universal Trim in their look and keep their
   integrity policy; they restyle through the sneak gestures.
 
 ## Appearance (0.5.0)
@@ -548,12 +585,13 @@ another texture variable (a frame's sides) or explicit UVs: door panels and whol
 templates, two oak leaves (`round_door_leaf_<hinge>`), one empty world model and a single `""`
 variant. Window: pane-only visible-surface models per design, pose and arm combination (trims are
 not in them; see Window), in one-model-per-state blockstates; 110 window block models (132 block
-models in all), ten window item models plus the window trim item model. Textures:
+models in all), ten window item models. Textures:
 `window_glass_clear`, `window_glass_<dye>` (sixteen), `trim_radial_thin_<m>`,
-`window_trim_round_<m>`, `window_trim_arch_<m>`; `window_trim_face` and `_edge` are still generated
-but unused.
-Trim: quarter templates in two families (tiled, whole-image), oak source quarters per family, one
-empty world model and a single `""` variant. `LegacyModelProvider` gives the 49 aliases blockstates
+`window_trim_round_<m>`, `window_trim_arch_<m>`, `universal_trim_<m>` (0.9.0); `window_trim_face`
+and `_edge` are still generated but unused. The Universal Trim item model is the square frame
+(`data/client/trim/UniversalTrimItemModelProvider`), and `item/window_trim` parents it.
+Frame (`data/client/trim/TrimModelProvider`): quarter templates in two families (tiled,
+whole-image), oak source quarters per family, one empty world model and a single `""` variant. `LegacyModelProvider` gives the 49 aliases blockstates
 over the canonical models and item models parenting the canonical items. Items carry front GUI light
-and computed centred transforms. Plus thirteen recipes and their advancements, loot (aliases drop the
+and computed centred transforms. Plus twelve recipes and their advancements, loot (aliases drop the
 canonical item; windows and doors add one trim pool per face), tags and English names.

@@ -103,10 +103,10 @@
   refund (structure tools are creative tools).
 - **The open leaf passes through the hinge-side corners' edge.** At its hinge the open leaf crosses
   a sliver of the static corner region; when camouflaged the two overlap visually there.
-- **The Door Trim fits by a plain click on either face, and an open door only by aiming at the
-  ring.** Holding it, the door never toggles, camouflages or places anything; a face that already
-  has a trim is a free no-op. On a closed door any hit inside the ring's outer edge fits the face
-  chosen by depth against the leaf's middle (z 14.5). The held Door Trim adds both rings to the
+- **A trim fits a door by a plain click on either face, and an open door only by aiming at the
+  ring.** Holding any trim id, the door never toggles, camouflages or places anything; a face that
+  already has a trim is a free no-op. On a closed door any hit inside the ring's outer edge fits the
+  face chosen by depth against the leaf's middle (z 14.5). A held trim adds both rings to the
   target shape so an open door can be aimed at. The old 2 x 2 frame block is only a compatibility
   block now; nothing places it.
 - **Trims and door hardware are decorative.** Nothing collides with the rings or the knobs and
@@ -118,7 +118,23 @@
   same look); a frame converts only when exactly matched to a complete door (same facing, anchor
   offset by the opposite facing, all eight cells loaded). A freestanding frame placed exactly where
   a fitted one would be converts too, since the two cannot be told apart. Other frames stay as
-  legacy content and drop a Door Trim in their look.
+  legacy content and drop a Universal Trim in their look. A door holding an unknown `DoorTrim`
+  version is not editable, so its fitted frame stays.
+- **Old trim stacks stay distinct until used** (0.9.0). `window_trim`, `round_trim` and the 19
+  0.4.0 trim aliases are separate item ids, so old stacks do not merge with new Universal Trims in
+  an inventory. They are never rewritten (no inventory scan, no id remap); every id fits windows and
+  doors, and anything fitted comes back as `round_trim` (shears, loot). Recognise a trim through
+  `TrimAttachmentItem.slotOf`, never by class or id, or an old id stops working.
+- **Fitting lives in the host router, never the item** (0.9.0). `UniversalTrimItem.useOn` returns
+  FAIL; doors and windows fit in their router and claim the sneak gesture there. A fit added to the
+  item's own use would run a second time after a router that passes.
+- **Trim item icons resolve in Java.** Every TRIM-family item wraps `item/round_trim` (the square
+  frame) and `UniversalTrimModels` retextures it per stack; changing only the JSON does not change a
+  styled stack's icon, and a new trim id must be a TRIM-family item to get it.
+- **One `FaceTrimStore` per slot, never two slots in one payload.** A future sill (`WindowSillTrim`)
+  gets its own key and version, so an unknown sill payload never blocks the perimeter trims. A
+  sill-only window must still write its explicit `WindowTrim` v2 empty (the window format always
+  does), or a `trimmed=true` summary would read as the 0.7.0 omitted-oak case.
 - **GameTest window and door hits must come from real rays** (`fixture/WindowRays`,
   `fixture/DoorRays`), clipped against the real shapes. Constructed hit results skip the targeting
   that these gestures now depend on.
