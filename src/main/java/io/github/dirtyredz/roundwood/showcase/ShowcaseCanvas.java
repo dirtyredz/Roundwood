@@ -12,6 +12,7 @@ import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
 import io.github.dirtyredz.roundwood.block.window.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimActions;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
@@ -123,8 +124,21 @@ public final class ShowcaseCanvas {
     }
 
     /**
-     * Places a frame in {@code appearance} through {@link TrimPlacement#placeAt}, its lower-left
-     * quarter at ({@code r}, 0, {@code f}), facing away from the builder like the doors.
+     * Fits a door trim in {@code appearance} on {@code face} of the door whose anchor is at ({@code r},
+     * 0, {@code f}), the way the door trim item does (0.8.0).
+     */
+    public boolean doorTrim(Appearance appearance, int r, int f, AttachmentFace face) {
+        boolean fitted = DoorTrimActions.install(level, pos(r, 0, f), face, appearance);
+        if (!fitted) {
+            problem(face + " door trim not fitted at " + pos(r, 0, f).toShortString());
+        }
+        return fitted;
+    }
+
+    /**
+     * Places a legacy freestanding frame (0.8.0: compatibility content that only older saves hold) in
+     * {@code appearance} through {@link TrimPlacement#placeAt}, its lower-left quarter at ({@code r},
+     * 0, {@code f}), facing away from the builder like the doors.
      */
     public boolean trim(Appearance appearance, int r, int f) {
         TrimLayout.Assembly assembly = new TrimLayout.Assembly(frame.pos(r, 0, f), frame.forward());

@@ -9,36 +9,57 @@
   windows grow arms, across their plane; there are no up/down links.
 - **0.5.0 windows load centred.** `position` defaults to center when absent, so saved windows keep
   their axis, connections, water and look. Aliases inherit the property.
-- **Restyling changes the wood only.** Glass and arms never change with planks or dye.
-- **Every window blockstate applies one complete model** (visible surfaces, with a model per
-  centred arm combination and each also `_trimmed`). After any pose or geometry change rerun
+- **Planks and dye on a window change the frame; dye on glass tints.** Planks and frame paint leave
+  the glass alone; dye aimed at the glass or a connector arm tints the whole window's glass. Aim
+  decides (trim band, frame or beam, glass), and no gesture needs sneaking.
+- **Every window blockstate applies one complete model** (pane-only visible surfaces, with a model
+  per centred arm combination; there are no `_trimmed` models, trims are drawn by a block-entity
+  renderer). After any pose or geometry change rerun
   `runData`; `GeneratedWindowPaneModelsTest` compares every state's model with the block geometry
   and fails on a stale file.
 - **Internal translucent faces cause seams.** Glass faces drawn inside or against other glass show
   as horizontal lines. Never add window geometry outside `WindowPaneGeometry` and
   `WindowSurfaceGeometry` (the models are emitted from those two), and rerun `runData` after any
   geometry change.
-- **Trim clicks target the band, the pane outside it.** The band is the pixels under the trim; a
-  click there (no sneaking) removes or restyles the trim, a click elsewhere on the pane restyles the
-  pane. Masonry is trim-only: on a pane it does nothing.
-- **Flush trims are inlaid at the wall plane; centred trims project one pixel.** A flush window's
-  trim replaces its outer pixels rather than occupying the neighbouring cell. Selection includes the
-  trim, collision does not.
+- **Window clicks are routed by hit region** (trim band, frame, glass), through
+  `WindowHitRegions`/`WindowUseRules`. A trim band counts only on a face that has a trim; the cross
+  beams are frame, never glass or trim. Masonry works only on a trim band: elsewhere it is refused
+  with a hint and uses nothing.
+- **Every window trim stands one pixel proud; the wall-side band of a flush, floor or ceiling pane
+  is outside the cell.** It is render-only (`WindowTrimRenderer`): never collision, support or
+  connection. Selection includes only the in-cell part, and a flush wall-side band is targeted
+  through the slab face under it. Normal depth testing can hide it inside a solid neighbour, but it
+  is never culled by one. (0.7.0 inlaid it, which read as no trim.)
 - **A missing `trimmed` means untrimmed.** 0.6.x saves and old chunks load with no trim; never
-  default it to true.
-- **Pane and trim drop separately; pick-block gives the pane only.** Count both items in drop tests,
-  and use the trim's loot pool when changing window loot.
+  default it to true. The 0.7.0 payload is the exception: `trimmed=true` with no `WindowTrim`
+  payload is the omitted-oak case and reads as an oak trim on both faces.
+- **`face_reversed` parity.** A 180 degree turn of a centred round window keeps its pose but
+  toggles the bit, so each trim stays on its face; mirrors toggle it too. It is derived by
+  `WindowPaneBlock.keepFaces` and selects no model: never set it by hand.
+- **Projected UVs must go through `FaceUv.tiled`.** Trim edges reach -1 and 17, outside the sprite;
+  folding them in by hand samples neighbouring atlas sprites.
+- **Loading never writes `trimmed`.** An out-of-step summary is corrected by a scheduled block tick
+  (`RoundWindowBlockEntity.onLoad` to `WindowPaneBlock.tick` to `WindowTrimActions.reconcile`). An
+  unknown `WindowTrim`/`DoorTrim` version reads as no trims, is kept and saved back, and trim edits
+  are refused.
+- **Pane and trims drop separately; pick-block gives the pane only.** One trim item drops per
+  trimmed face. Count all items in drop tests, and use the per-face loot pools
+  (`AttachmentLootPools`, condition `roundwood:trim_face`) when changing window or door loot. The
+  pane keeps its frame look and glass in both drops and pick-block.
 - **Window tests that sweep geometry are slow if assertion messages are built eagerly.** Check
   inside an `if` and call `fail(...)` there instead of passing a built string to `assertEquals`.
 - **A junction face partly against wood is still drawn** (harmless, opposite-facing); a wholly
   buried one is not.
 - **The strip where an arch's glazed edge reaches the cell edge keeps the 0.5 px glass recess.**
   Nothing fills it.
-- **Sneak-use reaches Roundwood blocks only for restyling.** Forge never calls block use for a
-  sneaking player holding anything; since 0.5.0 `AppearanceUseEvents` lets exactly sneak + planks,
-  sneak + dye and (trims) sneak + masonry through to the block and denies the item use, so a plank
-  is never placed against a door. Every other sneak-use is vanilla: sneak + a block item places it,
-  sneak + a trim item fits the trim, and clearing camouflage still needs both hands empty.
+- **Sneak-use reaches Roundwood blocks only for what the block's router claims.** Forge never calls
+  block use for a sneaking player holding anything; `AppearanceUseEvents` asks the block
+  (`AppearanceUseTarget.claimsUse`, answered by `WindowInteraction.claims` and
+  `DoorInteraction.claims`) and, for a claimed gesture, lets block use through and denies the item
+  use, so a plank is never placed against a door. Windows and door trims treat sneaking like not
+  sneaking; the door leaf and freestanding frames still need sneak + planks or masonry. Every other
+  sneak-use is vanilla: sneak + a block item places it, and clearing camouflage still needs both
+  hands empty.
 - **Restyling a door needs the leaf.** Sneak + planks or dye on a corner is refused with an
   action-bar hint (it would otherwise be ambiguous with camouflage); plain planks on a corner are
   camouflage.
@@ -82,14 +103,25 @@
   refund (structure tools are creative tools).
 - **The open leaf passes through the hinge-side corners' edge.** At its hinge the open leaf crosses
   a sliver of the static corner region; when camouflaged the two overlap visually there.
-- **Round trims fit only the front of a closed door, by sneak-use.** A plain click opens the door
-  (or, on a corner with the trim in hand, is refused as camouflage); the back face, the sides and an
-  open door refuse the fit without using the item. A fitted frame occupies the four cells in front
-  of the door, so they must be empty or replaceable, and both lower cells need a solid floor.
-- **Trims and door hardware are decorative.** Nothing collides with the ring or the knobs and
+- **The Door Trim fits by a plain click on either face, and an open door only by aiming at the
+  ring.** Holding it, the door never toggles, camouflages or places anything; a face that already
+  has a trim is a free no-op. On a closed door any hit inside the ring's outer edge fits the face
+  chosen by depth against the leaf's middle (z 14.5). The held Door Trim adds both rings to the
+  target shape so an open door can be aimed at. The old 2 x 2 frame block is only a compatibility
+  block now; nothing places it.
+- **Trims and door hardware are decorative.** Nothing collides with the rings or the knobs and
   straps; mobs and players walk through the ring's area and the knob pokes two pixels into the
-  cell in front of the door. At the hinge, the swinging leaf briefly passes a fraction of a pixel
-  into a fitted frame's cells.
+  cell in front of the door. The front ring is drawn one pixel into the cells in front of the door
+  and the back ring overlaps the hinge-side brass straps where they cross it (cosmetic). Door
+  trims are static and never swing with the leaf.
+- **Fitted-frame migration is conservative.** An occupied FRONT keeps the old frame (even in the
+  same look); a frame converts only when exactly matched to a complete door (same facing, anchor
+  offset by the opposite facing, all eight cells loaded). A freestanding frame placed exactly where
+  a fitted one would be converts too, since the two cannot be told apart. Other frames stay as
+  legacy content and drop a Door Trim in their look.
+- **GameTest window and door hits must come from real rays** (`fixture/WindowRays`,
+  `fixture/DoorRays`), clipped against the real shapes. Constructed hit results skip the targeting
+  that these gestures now depend on.
 - **Door leaves no longer follow plank resource packs.** Since 0.4.0 the leaf uses Roundwood's own
   generated board art (one 32 x 32 image across the leaf); a resource pack must retexture
   `roundwood:block/door_panel_<wood|dye|neutral>`. Windows and wooden trims use the plank / stripped-log textures.

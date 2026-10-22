@@ -5,7 +5,9 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowTargetZones;
+import io.github.dirtyredz.roundwood.fixture.DoorFixtures;
 import io.github.dirtyredz.roundwood.fixture.WindowFixtures;
+import io.github.dirtyredz.roundwood.fixture.WindowRays;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,6 +29,7 @@ import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.BIRCH;
+import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.SPRUCE;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.WARPED;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.pick;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.use;
@@ -38,8 +41,9 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.useItemOn;
 
 /**
- * Restyling a window with the sneak and dye gestures, including what must NOT change: its pane
- * state, its water, its neighbours' connections and ordinary item use on it.
+ * Restyling a window's frame with planks and dye (0.8.0: no sneak needed, sneaking does the same),
+ * aimed at the frame wood by a real ray, including what must NOT change: its pane state, its water,
+ * its neighbours' connections and ordinary item use on it. Glass tinting is in WindowGlassGameTests.
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -60,8 +64,10 @@ public final class WindowAppearanceGameTests {
         return place(helper, name, new ItemStack(ModItems.ROUND_WINDOW.get()), rel);
     }
 
-    private static BlockHitResult front(BlockPos abs) {
-        return new BlockHitResult(Vec3.atCenterOf(abs).relative(Direction.SOUTH, 0.45), Direction.SOUTH, abs, false);
+    /** A real ray from the south onto the frame wood (face pixel 1.5, 1.5) of the window at {@code abs}. */
+    private static BlockHitResult front(GameTestHelper helper, BlockPos abs) {
+        ServerPlayer viewer = player(helper, "frame_ray", GameType.SURVIVAL, Direction.NORTH);
+        return WindowRays.face(helper, viewer, DoorFixtures.rel(helper, abs), 1.5, 1.5, Direction.SOUTH);
     }
 
     private static BlockState state(GameTestHelper helper, BlockPos abs) {
@@ -80,18 +86,18 @@ public final class WindowAppearanceGameTests {
         ServerPlayer player = player(helper, "style", GameType.SURVIVAL, Direction.NORTH);
 
         ItemStack birch = new ItemStack(Items.BIRCH_PLANKS, 2);
-        check(use(helper, player, birch, ItemStack.EMPTY, front(abs), true).consumesAction(), "sneak + birch not handled");
+        check(use(helper, player, birch, ItemStack.EMPTY, front(helper, abs), true).consumesAction(), "sneak + birch not handled");
         expect(helper, abs, BIRCH, "birch");
         check(birch.getCount() == 1, "expected one plank consumed, left " + birch.getCount());
         check(state(helper, abs) == before, "the pane state changed: " + before + " -> " + state(helper, abs));
 
         ItemStack dye = new ItemStack(Items.RED_DYE, 2);
-        check(use(helper, player, dye, ItemStack.EMPTY, front(abs), false).consumesAction(), "dye not handled");
+        check(use(helper, player, dye, ItemStack.EMPTY, front(helper, abs), false).consumesAction(), "dye not handled");
         expect(helper, abs, BIRCH.painted(DyeColor.RED), "painted");
         check(dye.getCount() == 1, "expected one dye consumed, left " + dye.getCount());
 
         ItemStack again = new ItemStack(Items.BIRCH_PLANKS, 2);
-        check(use(helper, player, again, ItemStack.EMPTY, front(abs), true).consumesAction(), "sneak + birch over paint not handled");
+        check(use(helper, player, again, ItemStack.EMPTY, front(helper, abs), true).consumesAction(), "sneak + birch over paint not handled");
         expect(helper, abs, BIRCH, "unpainted");
         check(again.getCount() == 1, "unpainting should consume one plank, left " + again.getCount());
         check(state(helper, abs) == before, "the pane state changed after unpainting");
@@ -111,29 +117,37 @@ public final class WindowAppearanceGameTests {
         BlockState before = state(helper, abs);
         check(before.getValue(RoundWindowBlock.POSITION) == WindowPosition.NORTH && !before.getValue(RoundWindowBlock.EAST), "setup " + before);
         ServerPlayer player = player(helper, "flush_style", GameType.SURVIVAL, Direction.NORTH);
-        check(use(helper, player, new ItemStack(Items.BIRCH_PLANKS), ItemStack.EMPTY, front(abs), true).consumesAction(), "sneak + birch");
-        check(use(helper, player, new ItemStack(Items.RED_DYE), ItemStack.EMPTY, front(abs), true).consumesAction(), "sneaking dye");
+        check(use(helper, player, new ItemStack(Items.BIRCH_PLANKS), ItemStack.EMPTY, front(helper, abs), true).consumesAction(), "sneak + birch");
+        check(use(helper, player, new ItemStack(Items.RED_DYE), ItemStack.EMPTY, front(helper, abs), true).consumesAction(), "sneaking dye");
         expect(helper, abs, BIRCH.painted(DyeColor.RED), "flush restyle");
         check(state(helper, abs) == before, "restyling changed the flush window's state: " + before + " -> " + state(helper, abs));
-        use(helper, player, new ItemStack(Items.WATER_BUCKET), ItemStack.EMPTY, front(abs), false);
+        use(helper, player, new ItemStack(Items.WATER_BUCKET), ItemStack.EMPTY, front(helper, abs), false);
         check(state(helper, abs).getValue(RoundWindowBlock.POSITION) == WindowPosition.NORTH, "a bucket moved the window");
         helper.setBlock(rel, Blocks.AIR);
         helper.succeed();
     }
 
+    /** Masonry is trims only: refused on the frame, sneaking or not, nothing used or placed. Plain planks restyle (0.8.0). */
     @GameTest(template = TEMPLATE)
-    public static void masonryAndPlainPlankUseDoNotRestyleAWindow(GameTestHelper helper) {
+    public static void masonryIsRefusedAndPlainPlanksRestyleAWindow(GameTestHelper helper) {
         floor(helper);
         BlockPos abs = place(helper, "refuse", new BlockPos(4, 1, 3));
         BlockState before = state(helper, abs);
         ServerPlayer player = player(helper, "refuse", GameType.SURVIVAL, Direction.NORTH);
-        // Masonry is trims only; a non-sneaking plank is just a block placed beside the window as vanilla would.
-        use(helper, player, new ItemStack(Items.BRICKS, 2), ItemStack.EMPTY, front(abs), true);
-        expect(helper, abs, Appearance.DEFAULT, "sneak + bricks");
-        use(helper, player, new ItemStack(Items.OAK_PLANKS, 2), ItemStack.EMPTY, front(abs), false);
-        expect(helper, abs, Appearance.DEFAULT, "plain oak planks");
-        use(helper, player, new ItemStack(Items.SPRUCE_PLANKS, 2), ItemStack.EMPTY, front(abs), false);
-        expect(helper, abs, Appearance.DEFAULT, "plain spruce planks");
+        for (boolean sneaking : new boolean[] {true, false}) {
+            ItemStack bricks = new ItemStack(Items.BRICKS, 2);
+            use(helper, player, bricks, ItemStack.EMPTY, front(helper, abs), sneaking);
+            expect(helper, abs, Appearance.DEFAULT, "bricks, sneaking " + sneaking);
+            check(bricks.getCount() == 2 && !helper.getLevel().getBlockState(abs.south()).is(Blocks.BRICKS), "bricks used or placed");
+        }
+        ItemStack oak = new ItemStack(Items.OAK_PLANKS, 2);
+        use(helper, player, oak, ItemStack.EMPTY, front(helper, abs), false);
+        expect(helper, abs, Appearance.DEFAULT, "plain oak planks (unchanged, free)");
+        check(oak.getCount() == 2, "oak on an oak frame was paid for");
+        ItemStack spruce = new ItemStack(Items.SPRUCE_PLANKS, 2);
+        use(helper, player, spruce, ItemStack.EMPTY, front(helper, abs), false);
+        expect(helper, abs, SPRUCE, "plain spruce planks");
+        check(spruce.getCount() == 1 && !helper.getLevel().getBlockState(abs.south()).is(Blocks.SPRUCE_PLANKS), "spruce cost or placement");
         check(state(helper, abs) == before, "the window state changed");
         helper.succeed();
     }
@@ -144,7 +158,7 @@ public final class WindowAppearanceGameTests {
         BlockPos rel = new BlockPos(4, 1, 2);
         BlockPos abs = place(helper, "water", rel);
         ServerPlayer player = player(helper, "water", GameType.SURVIVAL, Direction.NORTH);
-        use(helper, player, new ItemStack(Items.BIRCH_PLANKS, 2), ItemStack.EMPTY, front(abs), true);
+        use(helper, player, new ItemStack(Items.BIRCH_PLANKS, 2), ItemStack.EMPTY, front(helper, abs), true);
         expect(helper, abs, BIRCH, "birch before water");
         check(!state(helper, abs).getValue(BlockStateProperties.WATERLOGGED), "the window started waterlogged");
 
@@ -168,7 +182,7 @@ public final class WindowAppearanceGameTests {
         BlockState leftBefore = state(helper, left);
         BlockState rightBefore = state(helper, right);
         ServerPlayer player = player(helper, "pair", GameType.SURVIVAL, Direction.NORTH);
-        use(helper, player, new ItemStack(Items.BIRCH_PLANKS, 2), ItemStack.EMPTY, front(left), true);
+        use(helper, player, new ItemStack(Items.BIRCH_PLANKS, 2), ItemStack.EMPTY, front(helper, left), true);
         expect(helper, left, BIRCH, "left");
         expect(helper, right, Appearance.DEFAULT, "right");
         check(state(helper, left) == leftBefore && state(helper, right) == rightBefore, "the connections changed");
@@ -180,8 +194,8 @@ public final class WindowAppearanceGameTests {
         floor(helper);
         BlockPos abs = place(helper, "pick", new BlockPos(4, 1, 5));
         ServerPlayer player = player(helper, "pick", GameType.CREATIVE, Direction.NORTH);
-        use(helper, player, new ItemStack(Items.BIRCH_PLANKS), ItemStack.EMPTY, front(abs), true);
-        use(helper, player, new ItemStack(Items.LIME_DYE), ItemStack.EMPTY, front(abs), false);
+        use(helper, player, new ItemStack(Items.BIRCH_PLANKS), ItemStack.EMPTY, front(helper, abs), true);
+        use(helper, player, new ItemStack(Items.LIME_DYE), ItemStack.EMPTY, front(helper, abs), false);
         Appearance look = BIRCH.painted(DyeColor.LIME);
         expect(helper, abs, look, "setup");
         ItemStack picked = pick(helper, abs);

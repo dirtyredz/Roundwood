@@ -191,7 +191,9 @@ public final class WindowArchGameTests {
         WindowFixtures.place(player, new ItemStack(left()), WindowFixtures.zone(helper, at.below(), Direction.UP, WindowTargetZones.Zone.U_MAX));
         helper.setBlock(at.north(), Blocks.GLASS_PANE);
         BlockState before = helper.getBlockState(at);
-        BlockHitResult face = WindowFixtures.hit(helper, at, Direction.SOUTH, 0.5, 0.5);
+        // A real ray onto the arch's frame wood (face pixel 0.5, 15.5), from its front side.
+        BlockHitResult face = io.github.dirtyredz.roundwood.fixture.WindowRays.face(helper, player, at, 0.5, 15.5,
+                WindowFixtures.pose(before).front());
         check(AppearanceFixtures.use(helper, player, new ItemStack(Items.SPRUCE_PLANKS), ItemStack.EMPTY, face, true).consumesAction(),
                 "sneak + planks did not restyle the arch");
         check(SPRUCE.equals(windowLook(helper, helper.absolutePos(at))), "arch look " + windowLook(helper, helper.absolutePos(at)));

@@ -65,9 +65,12 @@ public class WindowTrimRenderer implements BlockEntityRenderer<RoundWindowBlockE
         }
     }
 
-    /** Like the door: a band may reach past the window's section; draw it whenever its bounds are in view. */
+    /**
+     * Like the door: a band may reach past the window's section, so a trimmed window is drawn whenever
+     * its bounds are in view. Untrimmed windows stay with their section (they draw nothing here).
+     */
     @Override
     public boolean shouldRenderOffScreen(RoundWindowBlockEntity entity) {
-        return true;
+        return entity.trims().any();
     }
 }

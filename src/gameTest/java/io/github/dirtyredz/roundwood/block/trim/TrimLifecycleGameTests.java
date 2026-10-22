@@ -41,7 +41,7 @@ import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.placeFreestandi
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.trimAssembly;
 
 /**
- * The frame's life: structure transforms (rotate / mirror), neighbouring frames staying independent,
+ * The legacy frame's life (frames are placed by the fixture writer, not the item): structure transforms (rotate / mirror), neighbouring frames staying independent,
  * the integrity tick for incomplete frames, and placement across a chunk boundary. The frame has no
  * block entity, so there is no save/load round trip to mirror from the door suite.
  */

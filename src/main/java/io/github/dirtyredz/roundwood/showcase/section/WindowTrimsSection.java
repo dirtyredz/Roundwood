@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.showcase.section;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
@@ -18,9 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Window trims (0.7.0): the trim fitted to every profile, on both faces, in wood, paint and all four
- * masonry materials, independent of the pane's own look; centred, flush and on the floor; plus how to
- * fit, restyle and remove one. Occupies {@code r 60..73, f 62..73}.
+ * Window trims: one trim per face (0.8.0), on every profile, in wood, paint and all four masonry
+ * materials, independent of the frame's own look. Row one, centred: both faces, front only, back
+ * only, the two faces differently styled, crossed pieces, and a practice target separating trim,
+ * frame, beam and tinted glass. Row two, raised one block so each side can be seen: a round window
+ * flush against each of the six sides of its cell with trims on both faces, so the wall-side trim
+ * projects one pixel beyond the cell. Plus how to fit, restyle and remove one. Occupies
+ * {@code r 60..73, f 62..73}.
  */
 public final class WindowTrimsSection implements ShowcaseSection {
     public static final int ROW1_F = 63;
@@ -44,39 +49,41 @@ public final class WindowTrimsSection implements ShowcaseSection {
         Direction.Axis across = frame.right().getAxis();
         Appearance oak = Appearance.DEFAULT;
         WindowDesign round = WindowDesign.plain(WindowProfile.ROUND);
+        WindowDesign roundCross = new WindowDesign(WindowProfile.ROUND, WindowPattern.CROSS);
         WindowPose centred = WindowArchesSection.centred(forward);
         WindowPose roundCentred = WindowPosition.CENTER.pose(across);
         List<ShowcaseWindow> out = new ArrayList<>();
         out.add(ShowcaseWindow.of(round, roundCentred, 60, 0, ROW1_F, oak).trimmed(oak));
-        out.add(ShowcaseWindow.of(round, roundCentred, 62, 0, ROW1_F, oak).trimmed(block("bricks")));
+        out.add(ShowcaseWindow.of(round, roundCentred, 62, 0, ROW1_F, oak).trimmed(AttachmentFace.FRONT, block("bricks")));
+        out.add(ShowcaseWindow.of(round, roundCentred, 63, 0, ROW1_F, oak).trimmed(AttachmentFace.BACK, block("stone_bricks")));
         ShowcaseWindow.arched(WindowPattern.PLAIN, centred, frame, 64, 0, ROW1_F, oak)
-                .forEach(w -> out.add(w.trimmed(block("bricks"))));
+                .forEach(w -> out.add(w.trimmed(AttachmentFace.FRONT, block("bricks")).trimmed(AttachmentFace.BACK, wood("spruce"))));
         ShowcaseWindow.arched(WindowPattern.CROSS, centred, frame, 67, 0, ROW1_F, oak)
                 .forEach(w -> out.add(w.trimmed(block("stone_bricks"))));
         ShowcaseWindow.arched(WindowPattern.PLAIN, centred, frame, 70, 0, ROW1_F, wood("spruce"))
-                .forEach(w -> out.add(w.trimmed(block("deepslate_bricks"))));
-        out.add(ShowcaseWindow.of(round, roundCentred, 60, 0, ROW2_F, oak).trimmed(block("mud_bricks")));
-        out.add(ShowcaseWindow.of(round, roundCentred, 62, 0, ROW2_F, wood("spruce")).trimmed(oak.painted(DyeColor.RED)));
-        out.add(ShowcaseWindow.of(round, WindowPosition.flush(forward).pose(across), 64, 0, ROW2_F, oak).trimmed(block("bricks")));
-        out.add(ShowcaseWindow.of(round, WindowPosition.DOWN.pose(across), 66, 0, ROW2_F, oak).trimmed(wood("spruce")));
-        ShowcaseWindow.arched(WindowPattern.CROSS, WindowArchesSection.floor(forward), frame, 68, 0, ROW2_F, oak)
-                .forEach(w -> out.add(w.trimmed(block("mud_bricks"))));
+                .forEach(w -> out.add(w.trimmed(AttachmentFace.FRONT, block("deepslate_bricks"))));
+        out.add(ShowcaseWindow.of(roundCross, roundCentred, 72, 0, ROW1_F, wood("spruce"))
+                .trimmed(AttachmentFace.FRONT, block("mud_bricks")).glass(DyeColor.LIGHT_BLUE));
+        int r = 60;
+        for (WindowPosition position : List.of(WindowPosition.NORTH, WindowPosition.EAST, WindowPosition.SOUTH,
+                WindowPosition.WEST, WindowPosition.UP, WindowPosition.DOWN)) {
+            out.add(ShowcaseWindow.of(round, position.pose(across), r, 1, ROW2_F, oak)
+                    .trimmed(AttachmentFace.FRONT, block("bricks")).trimmed(AttachmentFace.BACK, oak.painted(DyeColor.RED)));
+            r += 2;
+        }
         return List.copyOf(out);
     }
 
     @Override
     public void build(ShowcaseCanvas canvas) {
-        canvas.sign(60, ROW1_F - 1, "Window trim", "oak");
-        canvas.sign(62, ROW1_F - 1, "Window trim", "bricks");
-        canvas.sign(64, ROW1_F - 1, "Arched window", "brick trim");
+        canvas.sign(60, ROW1_F - 1, "Window trim", "both faces");
+        canvas.sign(62, ROW1_F - 1, "Front only", "| back only");
+        canvas.sign(64, ROW1_F - 1, "Arched window", "brick front,", "spruce back");
         canvas.sign(67, ROW1_F - 1, "Crossed window", "stone brick trim");
-        canvas.sign(70, ROW1_F - 1, "Spruce window", "deepslate trim");
-        canvas.sign(60, ROW2_F - 1, "Window trim", "mud bricks");
-        canvas.sign(62, ROW2_F - 1, "Spruce window", "red trim");
-        canvas.sign(64, ROW2_F - 1, "Trimmed window", "flush far");
-        canvas.sign(66, ROW2_F - 1, "Trimmed window", "on the floor");
-        canvas.sign(68, ROW2_F - 1, "Floor window", "mud brick trim");
-        canvas.sign(72, ROW2_F - 1, "Window Trim:", "use on a window", "planks/bricks/dye", "shears remove");
+        canvas.sign(70, ROW1_F - 1, "Spruce window", "deepslate front");
+        canvas.sign(72, ROW1_F - 1, "Practice:", "trim, frame,", "beam, glass");
+        canvas.sign(60, ROW2_F - 1, "Flush windows:", "N E S W up down", "trim projects", "past the cell");
+        canvas.sign(72, ROW2_F - 1, "Window Trim:", "click a face", "planks/bricks/dye", "shears remove");
         windows(canvas.frame()).forEach(canvas::window);
     }
 }

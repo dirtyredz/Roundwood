@@ -232,13 +232,16 @@ public final class ContentGameTests {
             check(drops.size() == 1 && drops.get(0).is(block.asItem()) && drops.get(0).getCount() == 1 && !drops.get(0).hasTag(),
                     block + " loot is " + drops);
         }
-        // A trimmed window (canonical or alias) also drops one oak window trim through its second pool.
+        // A window (canonical or alias) with oak trims on both faces also drops one plain oak window trim per face (0.8.0 face pools).
         List<Block> windows = new java.util.ArrayList<>(ModBlocks.windows());
         windows.addAll(LegacyContent.windows());
         for (Block window : windows) {
-            List<ItemStack> drops = Block.getDrops(window.defaultBlockState().setValue(WindowPaneBlock.TRIMMED, true),
-                    helper.getLevel(), pos, null);
-            check(drops.size() == 2 && drops.stream().filter(d -> d.is(ModItems.WINDOW_TRIM.get()) && !d.hasTag()).count() == 1,
+            net.minecraft.world.level.block.state.BlockState state = window.defaultBlockState().setValue(WindowPaneBlock.TRIMMED, true);
+            io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity entity = new io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity(
+                    io.github.dirtyredz.roundwood.registry.ModBlockEntities.roundWindow(), pos, state);
+            entity.setTrims(io.github.dirtyredz.roundwood.block.attachment.FaceTrims.both(io.github.dirtyredz.roundwood.appearance.Appearance.DEFAULT));
+            List<ItemStack> drops = Block.getDrops(state, helper.getLevel(), pos, entity);
+            check(drops.size() == 3 && drops.stream().filter(d -> d.is(ModItems.WINDOW_TRIM.get()) && !d.hasTag()).count() == 2,
                     window + " trimmed loot is " + drops);
         }
         for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {

@@ -6,6 +6,7 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,9 +25,9 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.point;
 
 /**
- * Frame helpers for the GameTests: the blocks, real item use for freestanding and fitted placement
- * (through {@code ServerPlayerGameMode.useItemOn}, so sneaking, block use and Forge's placement
- * capture all apply), precise hits and assertions.
+ * Frame helpers for the GameTests. Frames are compatibility content from older saves: the trim item no
+ * longer places them, so the fixtures write them with {@link TrimPlacement#placeAt}; the item path
+ * ({@link #useAt}) stays for tests that prove it places nothing. Also precise hits and assertions.
  */
 public final class TrimFixtures {
     private TrimFixtures() {
@@ -72,20 +73,25 @@ public final class TrimFixtures {
         }
     }
 
-    /** Freestanding placement: clicks the top of the floor block under {@code anchor} (relative), not sneaking. */
+    /**
+     * Writes a freestanding frame at {@code anchor} (relative), facing the player's horizontal direction, in
+     * the stack's look. The item no longer places frames, so this goes through {@link TrimPlacement#placeAt}
+     * and neither uses nor shrinks {@code stack}. CONSUME when placed, FAIL when refused.
+     */
     public static InteractionResult placeFreestanding(GameTestHelper helper, ServerPlayer player, ItemStack stack, BlockPos anchor) {
-        BlockPos floor = helper.absolutePos(anchor.below());
-        return useAt(helper, player, stack, floor, Direction.UP, Vec3.atCenterOf(floor).add(0, 0.5, 0), false);
+        TrimLayout.Assembly assembly = trimAssembly(helper, anchor, player.getDirection());
+        return TrimPlacement.placeAt(helper.getLevel(), oakTrim(), assembly, AppearanceStacks.read(stack))
+                ? InteractionResult.CONSUME : InteractionResult.FAIL;
     }
 
     /**
-     * Fitted placement: sneak-uses the stack on the door's front face at ({@code a}, {@code h}) in the
-     * door's frame (blocks across from its left edge, blocks up), credited to the containing part.
+     * Writes the frame that fits {@code door} (the 0.7.0 fitted position) in the stack's look. {@code a} and
+     * {@code h} are ignored, kept so callers keep compiling. CONSUME when placed, FAIL when refused.
      */
     public static InteractionResult fitToDoor(GameTestHelper helper, ServerPlayer player, ItemStack stack,
                                               DoorLayout.Assembly door, double a, double h) {
-        BlockHitResult hit = DoorFixtures.frontHit(door, a, h);
-        return useAt(helper, player, stack, hit.getBlockPos(), hit.getDirection(), hit.getLocation(), true);
+        return TrimPlacement.placeAt(helper.getLevel(), oakTrim(), fittedTo(door), AppearanceStacks.read(stack))
+                ? InteractionResult.CONSUME : InteractionResult.FAIL;
     }
 
     /** A hit on the frame's front face at ({@code a}, {@code h}), as a player standing in front sends it. */

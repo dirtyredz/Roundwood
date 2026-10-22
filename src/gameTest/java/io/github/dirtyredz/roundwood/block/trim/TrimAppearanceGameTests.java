@@ -45,7 +45,7 @@ import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.placeFreestandi
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.trimAssembly;
 
 /**
- * Restyling a frame with the sneak and dye gestures: wood, paint, masonry, what is consumed in each
+ * Restyling a legacy frame (placed by the fixture writer, not the item) with the sneak and dye gestures: wood, paint, masonry, what is consumed in each
  * game mode, who may do it, which hand, and that the whole frame (one anchor) follows.
  */
 @GameTestHolder(Roundwood.MOD_ID)

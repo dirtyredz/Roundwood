@@ -49,7 +49,7 @@ import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.placeFreestandi
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.trimAssembly;
 
 /**
- * The frame is decorative and never obstructs: no collision, nothing stands on it, it is pathable, it
+ * The legacy frame (placed by the fixture writer, not the item) is decorative and never obstructs: no collision, nothing stands on it, it is pathable, it
  * leaves a fitted door's own collision untouched, and mobs walk straight through the aperture.
  */
 @GameTestHolder(Roundwood.MOD_ID)

@@ -131,7 +131,7 @@ public final class WindowSaveCompatibilityGameTests {
         entity.put("RoundwoodAppearance", look);
         helper.getLevel().getBlockEntity(pos).load(entity);
         check(SPRUCE.equals(windowLook(helper, pos)), "saved look not read");
-        check(((RoundWindowBlockEntity) helper.getLevel().getBlockEntity(pos)).trim().isEmpty(), "an untrimmed 0.6 window shows a trim");
+        check(!((RoundWindowBlockEntity) helper.getLevel().getBlockEntity(pos)).trims().any(), "an untrimmed 0.6 window shows a trim");
         helper.succeed();
     }
 

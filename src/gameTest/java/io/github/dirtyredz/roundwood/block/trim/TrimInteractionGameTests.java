@@ -11,7 +11,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -38,17 +37,15 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.point;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.use;
-import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.assertNoTrim;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.assertTrim;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.fitToDoor;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.fittedTo;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.oakTrim;
-import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.useAt;
 
 /**
- * A frame in use with its door: sneak-fitting only on a closed door's front, an ordinary click
- * still opening the door, rays (and clicks) passing through the open centre and the corners to the
- * door, only the ring quarter itself being a target, and camouflage still reachable.
+ * A legacy frame in use with its door (frames are compatibility content, written by the fixture
+ * writer): rays (and clicks) passing through the open centre and the corners to the door, only the
+ * ring quarter itself being a target, and camouflage still reachable.
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -79,45 +76,6 @@ public final class TrimInteractionGameTests {
 
     private static boolean onDoor(GameTestHelper helper, BlockHitResult hit) {
         return hit.getType() == HitResult.Type.BLOCK && helper.getLevel().getBlockState(hit.getBlockPos()).getBlock() instanceof RoundDoorBlock;
-    }
-
-    @GameTest(template = TEMPLATE)
-    public static void wrongFaceAndOpenDoorsAreRefusedWithoutConsuming(GameTestHelper helper) {
-        floor(helper);
-        DoorLayout.Assembly door = door(helper, Direction.NORTH, "refuse");
-        ServerPlayer player = player(helper, "refuse_fitter", GameType.SURVIVAL, Direction.SOUTH);
-        // The back face (the far side from the placing player).
-        BlockPos part = door.anchor();
-        ItemStack stack = new ItemStack(oakTrim().asItem(), 2);
-        InteractionResult back = useAt(helper, player, stack, part, Direction.NORTH, point(door, 0.5, 0.5, 1), true);
-        check(!back.consumesAction() && stack.getCount() == 2, "fitted from the back face: " + back);
-        check(helper.getLevel().getBlockState(door.anchor().north()).isAir(), "something was placed behind the door");
-        // The top face.
-        InteractionResult top = useAt(helper, player, stack, door.pos(DoorLayout.Part.UPPER_LEFT), Direction.UP,
-                point(door, 0.5, 2, 0.5), true);
-        check(!top.consumesAction() && stack.getCount() == 2, "fitted from the top: " + top);
-        // An open door's front.
-        oakDoor().setOpen(null, helper.getLevel(), helper.getLevel().getBlockState(part), part, true);
-        InteractionResult open = fitToDoor(helper, player, stack, door, 0.5, 0.5);
-        check(!open.consumesAction() && stack.getCount() == 2, "fitted to an open door: " + open);
-        assertNoTrim(helper, fittedTo(door));
-        check(helper.getLevel().getBlockState(part).getValue(DoorBlock.OPEN), "the refused fitting changed the door");
-        helper.succeed();
-    }
-
-    @GameTest(template = TEMPLATE)
-    public static void anOrdinaryClickWithAFrameStillOpensTheDoor(GameTestHelper helper) {
-        floor(helper);
-        DoorLayout.Assembly door = door(helper, Direction.NORTH, "ordinary");
-        ServerPlayer player = player(helper, "ordinary_user", GameType.SURVIVAL, Direction.NORTH);
-        ItemStack stack = new ItemStack(oakTrim().asItem());
-        BlockHitResult hit = io.github.dirtyredz.roundwood.fixture.DoorFixtures.frontHit(door, 0.7, 0.8);
-        InteractionResult result = useAt(helper, player, stack, hit.getBlockPos(), hit.getDirection(), hit.getLocation(), false);
-        check(result.consumesAction(), "the click did nothing: " + result);
-        check(helper.getLevel().getBlockState(door.anchor()).getValue(DoorBlock.OPEN), "the door did not open");
-        check(stack.getCount() == 1, "the frame was consumed by an ordinary click");
-        assertNoTrim(helper, fittedTo(door));
-        helper.succeed();
     }
 
     @GameTest(template = TEMPLATE)

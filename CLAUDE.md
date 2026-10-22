@@ -11,7 +11,8 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   regenerated `src/generated/resources/` with the code. Never hand-edit generated JSON.
 - **Separate authorities, no catalogue.** Content is twelve canonical blocks and thirteen items in
   three appearance families (door; window family = ten windows; trim, with the window trim a
-  trim-family item); looks are data. Which
+  trim-family item); looks are data. `round_trim` stays a registered compatibility block (frames
+  from older saves) while normal use of its item, "Door Trim", attaches to a door. Which
   items restyle: `appearance/material` (tagged planks, the fixed four masonry). What a look draws:
   `client/material` (`BuiltinWoodStyles`, `PaintStyles`) plus the generated art. Examples:
   `AppearanceSamples`. History: `migration/LegacyAppearances` is frozen, never edit it. New artwork

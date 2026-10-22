@@ -7,9 +7,10 @@ import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
 import java.util.List;
 
 /**
- * The four masonry trims standing free, nothing behind them, so the radial brickwork, the open
- * centre and both faces can be inspected (walk round the back). Each has a sign to its left.
- * Occupies {@code r 3..35, f 78}.
+ * The retained legacy exhibit (0.8.0): the four masonry frames standing free, as worlds from 0.7.0
+ * and earlier may still hold them (the door trim item no longer places them; frames fitted to a door
+ * became door trims on upgrade). Nothing behind them, so the radial brickwork, the open centre and
+ * both faces can be inspected. Each has a sign to its left. Occupies {@code r 3..35, f 78}.
  */
 public final class BrickArchesSection implements ShowcaseSection {
     public static final int F = 78;
@@ -31,7 +32,7 @@ public final class BrickArchesSection implements ShowcaseSection {
         List<Appearance> masonry = canvas.masonry();
         for (int i = 0; i < masonry.size(); i++) {
             canvas.trim(masonry.get(i), r(i), F);
-            canvas.sign(r(i) - 1, F, ShowcaseCanvas.label(masonry.get(i)), "round trim", "freestanding");
+            canvas.sign(r(i) - 1, F, ShowcaseCanvas.label(masonry.get(i)), "legacy frame", "(older saves)");
         }
     }
 }

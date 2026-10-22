@@ -39,13 +39,14 @@ final class ShowcaseWindowChecks {
             check(state.is(ModBlocks.window(window.design())), where + ": expected " + window.design().id() + ", found " + state);
             WindowPaneBlock block = (WindowPaneBlock) state.getBlock();
             check(block.pose(state).equals(window.pose()), where + ": pose " + block.pose(state) + " instead of " + window.pose());
-            check(WindowPaneBlock.trimmed(state) == window.trim().isPresent(), where + ": trimmed " + WindowPaneBlock.trimmed(state));
+            check(WindowPaneBlock.trimmed(state) == window.trims().any(), where + ": trimmed " + WindowPaneBlock.trimmed(state));
             if (!(level.getBlockEntity(pos) instanceof RoundWindowBlockEntity entity)) {
                 check(false, where + ": no window entity");
                 return;
             }
             check(entity.appearance().equals(window.pane()), where + ": pane shows " + entity.appearance().key());
-            check(entity.trim().equals(window.trim()), where + ": trim shows " + entity.trim());
+            check(entity.trims().equals(window.trims()), where + ": trims show " + entity.trims());
+            check(entity.glass().equals(window.glass()), where + ": glass shows " + entity.glass());
         }
     }
 }

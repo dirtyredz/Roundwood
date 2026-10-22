@@ -1,25 +1,21 @@
 package io.github.dirtyredz.roundwood.block.trim;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
-import io.github.dirtyredz.roundwood.fixture.PlacementCanceller;
+import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
-
-import java.util.List;
 
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.STRIP;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
@@ -32,24 +28,20 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.assertNoTrim;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.assertTrim;
-import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.brickStack;
-import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.fitToDoor;
-import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.fittedTo;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.oakTrim;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.placeFreestanding;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.trimAssembly;
+import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.useAt;
 
 /**
- * Placing whole frames through real server item use: freestanding and fitted to a door in every
- * facing and from every clicked quarter, the support, cell, fluid, limit and permission checks,
- * exact consumption, and Forge's multi-place cancellation rolling everything back.
+ * Frame placement rules. Frames are legacy content from older saves, written here by the fixture
+ * writer ({@code TrimPlacement.placeAt}): the support, cell, fluid, limit and unloaded-chunk checks and
+ * chunk-boundary placement; and that the Door Trim item never places a frame itself.
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class TrimPlacementGameTests {
     private static final BlockPos ANCHOR = new BlockPos(3, 1, 3);
-    private static final List<Direction> FACINGS = List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST);
-    private static final double[][] QUARTERS = {{0.5, 0.5}, {1.5, 0.5}, {0.5, 1.5}, {1.5, 1.5}};
 
     private TrimPlacementGameTests() {
     }
@@ -59,61 +51,17 @@ public final class TrimPlacementGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void freestandingFramesFaceAwayFromThePlayerInEveryFacing(GameTestHelper helper) {
-        floor(helper);
-        for (Direction facing : FACINGS) {
-            ServerPlayer player = player(helper, "free_" + facing, GameType.SURVIVAL, facing);
-            ItemStack stack = two(oakTrim());
-            check(placeFreestanding(helper, player, stack, ANCHOR).consumesAction(), facing + ": placement refused");
-            TrimLayout.Assembly assembly = trimAssembly(helper, ANCHOR, facing);
-            assertTrim(helper, assembly, oakTrim());
-            check(stack.getCount() == 1, facing + ": expected exactly one item consumed, have " + stack.getCount());
-            helper.setBlock(ANCHOR, Blocks.AIR);
-            assertNoTrim(helper, assembly);
-        }
-        helper.succeed();
-    }
-
-    @GameTest(template = TEMPLATE)
-    public static void sneakUseOnAClosedDoorFitsTheFrameFromAnyQuarter(GameTestHelper helper) {
-        floor(helper);
-        for (Direction facing : FACINGS) {
-            ServerPlayer placer = player(helper, "fit_door_" + facing, GameType.SURVIVAL, facing);
-            check(placeDoor(helper, placer, oakDoor().asItem(), ANCHOR, DoorHingeSide.LEFT).consumesAction(), facing + ": door");
-            DoorLayout.Assembly door = assembly(helper, ANCHOR, facing, DoorHingeSide.LEFT);
-            for (double[] q : QUARTERS) {
-                String name = facing + " quarter " + q[0] + "," + q[1];
-                ServerPlayer player = player(helper, "fitter", GameType.SURVIVAL, facing);
-                ItemStack stack = brickStack().copyWithCount(2);
-                InteractionResult result = fitToDoor(helper, player, stack, door, q[0], q[1]);
-                check(result.consumesAction(), name + ": fitting refused: " + result);
-                TrimLayout.Assembly fitted = fittedTo(door);
-                assertTrim(helper, fitted, oakTrim());
-                check(stack.getCount() == 1, name + ": expected one item consumed, have " + stack.getCount());
-                assertAssembly(helper, door, oakDoor(), false);
-                helper.getLevel().setBlockAndUpdate(fitted.anchor(), Blocks.AIR.defaultBlockState());
-                assertNoTrim(helper, fitted);
-            }
-            helper.setBlock(ANCHOR, Blocks.AIR);
-        }
-        helper.succeed();
-    }
-
-    @GameTest(template = TEMPLATE)
     public static void missingSupportUnderEitherLowerQuarterRefuses(GameTestHelper helper) {
         floor(helper);
         TrimLayout.Assembly assembly = trimAssembly(helper, ANCHOR, Direction.NORTH);
-        // Under the left quarter (nothing to click there, so through the command path).
+        // Under the left quarter.
         helper.setBlock(ANCHOR.below(), Blocks.AIR);
         check(!TrimPlacement.placeAt(helper.getLevel(), oakTrim(), assembly), "placed with no floor under the left quarter");
         assertNoTrim(helper, assembly);
         helper.setBlock(ANCHOR.below(), Blocks.STONE);
-        // Under the right quarter, through real item use.
+        // Under the right quarter.
         helper.setBlock(ANCHOR.below().east(), Blocks.AIR);
-        ServerPlayer player = player(helper, "support", GameType.SURVIVAL, Direction.NORTH);
-        ItemStack stack = two(oakTrim());
-        check(!placeFreestanding(helper, player, stack, ANCHOR).consumesAction() && stack.getCount() == 2,
-                "placed with no floor under the right quarter");
+        check(!TrimPlacement.placeAt(helper.getLevel(), oakTrim(), assembly), "placed with no floor under the right quarter");
         assertNoTrim(helper, assembly);
         helper.succeed();
     }
@@ -125,10 +73,9 @@ public final class TrimPlacementGameTests {
         Object[][] blockers = {{Blocks.STONE, "stone"}, {Blocks.WATER, "water"}};
         for (Object[] blocker : blockers) {
             helper.setBlock(upperRight, (net.minecraft.world.level.block.Block) blocker[0]);
-            ServerPlayer player = player(helper, "occupied_" + blocker[1], GameType.SURVIVAL, Direction.NORTH);
-            ItemStack stack = two(oakTrim());
-            check(!placeFreestanding(helper, player, stack, ANCHOR).consumesAction() && stack.getCount() == 2,
-                    blocker[1] + ": placed into a blocked cell");
+            if (TrimPlacement.placeAt(helper.getLevel(), oakTrim(), trimAssembly(helper, ANCHOR, Direction.NORTH))) {
+                check(false, blocker[1] + ": placed into a blocked cell");
+            }
             assertNoTrim(helper, trimAssembly(helper, ANCHOR, Direction.NORTH));
             helper.setBlock(upperRight, Blocks.AIR);
         }
@@ -141,26 +88,9 @@ public final class TrimPlacementGameTests {
         helper.succeed();
     }
 
-    /** The ring never collides, so a mob standing in the aperture does not stop placement. */
     @GameTest(template = TEMPLATE)
-    public static void entitiesInTheApertureDoNotBlock(GameTestHelper helper) {
+    public static void limitsAndUnloadedCellsRefuse(GameTestHelper helper) {
         floor(helper);
-        helper.spawn(EntityType.PIG, ANCHOR.east());
-        ServerPlayer player = player(helper, "entity", GameType.SURVIVAL, Direction.NORTH);
-        check(placeFreestanding(helper, player, two(oakTrim()), ANCHOR).consumesAction(), "a mob in the aperture blocked the frame");
-        assertTrim(helper, trimAssembly(helper, ANCHOR, Direction.NORTH), oakTrim());
-        helper.getLevel().getEntities(EntityType.PIG, e -> true).forEach(e -> e.discard());
-        helper.succeed();
-    }
-
-    @GameTest(template = TEMPLATE)
-    public static void limitsPermissionsAndUnloadedCellsRefuse(GameTestHelper helper) {
-        floor(helper);
-        // Adventure players cannot place.
-        ServerPlayer adventurer = player(helper, "adventure", GameType.ADVENTURE, Direction.NORTH);
-        ItemStack stack = two(oakTrim());
-        check(!placeFreestanding(helper, adventurer, stack, ANCHOR).consumesAction() && stack.getCount() == 2, "adventure placed");
-        assertNoTrim(helper, trimAssembly(helper, ANCHOR, Direction.NORTH));
         // The top of the world: the upper quarters would be outside the build height.
         BlockPos base = helper.absolutePos(ANCHOR);
         int top = helper.getLevel().getMaxBuildHeight() - 1;
@@ -172,19 +102,26 @@ public final class TrimPlacementGameTests {
         helper.succeed();
     }
 
+    /** The Door Trim item only trims doors: used on a floor it places no frame, sneaking or not, and is not consumed. */
     @GameTest(template = TEMPLATE)
-    public static void cancelledPlacementRollsBackAllCellsAndTheItem(GameTestHelper helper) {
+    public static void theDoorTrimItemNeverPlacesAFrame(GameTestHelper helper) {
         floor(helper);
-        helper.setBlock(ANCHOR.east().below(), Blocks.DIRT);
-        helper.setBlock(ANCHOR.east(), Blocks.GRASS); // a replaceable cell must come back too
-        int eventsBefore = PlacementCanceller.multiPlaceEvents();
-        ServerPlayer player = player(helper, "cancelled", GameType.SURVIVAL, Direction.NORTH);
-        ItemStack stack = new ItemStack(oakTrim().asItem());
-        placeFreestanding(helper, player, stack, ANCHOR);
-        check(PlacementCanceller.multiPlaceEvents() == eventsBefore + 1, "expected exactly one multi-place event");
-        check(player.getMainHandItem().getCount() == 1, "item not restored: " + player.getMainHandItem());
-        assertNoTrim(helper, trimAssembly(helper, ANCHOR, Direction.NORTH));
-        check(helper.getBlockState(ANCHOR.east()).is(Blocks.GRASS), "replaced grass not restored");
+        BlockPos floorAbs = helper.absolutePos(ANCHOR.below());
+        for (boolean sneaking : new boolean[]{false, true}) {
+            ServerPlayer player = player(helper, "item_" + sneaking, GameType.SURVIVAL, Direction.NORTH);
+            ItemStack stack = new ItemStack(ModItems.ROUND_TRIM.get(), 2);
+            useAt(helper, player, stack, floorAbs, Direction.UP, Vec3.atCenterOf(floorAbs).add(0, 0.5, 0), sneaking);
+            check(stack.getCount() == 2, "the item was consumed (sneaking=" + sneaking + "): " + stack.getCount());
+            for (int x = 0; x < 9; x++) {
+                for (int y = 0; y < 6; y++) {
+                    for (int z = 0; z < 9; z++) {
+                        if (helper.getBlockState(new BlockPos(x, y, z)).getBlock() instanceof RoundTrimBlock) {
+                            check(false, "a frame quarter appeared at " + x + "," + y + "," + z + " (sneaking=" + sneaking + ")");
+                        }
+                    }
+                }
+            }
+        }
         helper.succeed();
     }
 

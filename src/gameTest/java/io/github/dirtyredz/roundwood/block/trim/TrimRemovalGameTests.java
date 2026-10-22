@@ -48,7 +48,7 @@ import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.oakTrim;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.placeFreestanding;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.trimAssembly;
 
-/** Breaking any quarter removes the frame and yields at most the loot of one frame; nothing else is disturbed. */
+/** Breaking any quarter of a legacy frame (placed by the fixture writer) removes the frame and yields at most the loot of one frame; nothing else is disturbed. */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class TrimRemovalGameTests {
@@ -61,7 +61,7 @@ public final class TrimRemovalGameTests {
     /** A spruce door: other suites drop oak doors, and the drop count reaches into neighbouring test areas. */
     private static final Appearance SPRUCE = Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", "spruce_planks"));
 
-    /** Places a freestanding brick frame with a real item use and clears the drops. */
+    /** Places a freestanding brick frame with the fixture writer and clears the drops. */
     private static TrimLayout.Assembly placeBrick(GameTestHelper helper, String name) {
         floor(helper);
         ServerPlayer player = player(helper, name, GameType.SURVIVAL, Direction.NORTH);
@@ -72,7 +72,7 @@ public final class TrimRemovalGameTests {
         return assembly;
     }
 
-    /** Places a freestanding frame with a real item use and clears the drops. */
+    /** Places a freestanding frame with the fixture writer and clears the drops. */
     private static TrimLayout.Assembly place(GameTestHelper helper, RoundTrimBlock block, String name) {
         ServerPlayer player = player(helper, name + "_placer", GameType.SURVIVAL, Direction.NORTH);
         check(placeFreestanding(helper, player, new ItemStack(block), ANCHOR).consumesAction(), name + ": placement failed");

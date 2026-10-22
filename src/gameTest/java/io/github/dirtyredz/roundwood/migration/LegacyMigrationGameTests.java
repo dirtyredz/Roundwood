@@ -52,7 +52,6 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.useItemOn;
-import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.placeFreestanding;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.trimAssembly;
 import static io.github.dirtyredz.roundwood.migration.LegacyMigrationFixtures.isCanonicalDoor;
 import static io.github.dirtyredz.roundwood.migration.LegacyMigrationFixtures.isCanonicalTrim;
@@ -127,9 +126,14 @@ public final class LegacyMigrationGameTests {
 
             TrimLayout.Assembly green = new TrimLayout.Assembly(helper.absolutePos(new BlockPos(1, 2, 2)), Direction.NORTH);
             TrimLayout.Assembly mud = new TrimLayout.Assembly(helper.absolutePos(new BlockPos(10, 2, 1)), Direction.NORTH);
-            check(green.complete(helper.getLevel(), ModBlocks.roundTrim()), "fitted green trim not converted");
+            // 0.8.0: the fitted green frame became the spruce door's FRONT trim (aliases first, then the fitted-frame migration).
+            for (BlockPos cell : green.positions()) {
+                check(helper.getLevel().getBlockState(cell).isAir(), "fitted green frame left behind at " + cell);
+            }
+            check(spruceEntity.trims().get(io.github.dirtyredz.roundwood.block.attachment.AttachmentFace.FRONT)
+                    .equals(java.util.Optional.of(oak(DyeColor.GREEN))) && spruceEntity.trims().count() == 1,
+                    "green frame not on the door: " + spruceEntity.trims());
             check(mud.complete(helper.getLevel(), ModBlocks.roundTrim()), "mud-brick trim not converted");
-            check(((RoundTrimBlockEntity) helper.getLevel().getBlockEntity(green.anchor())).appearance().equals(oak(DyeColor.GREEN)), "green trim look");
             check(((RoundTrimBlockEntity) helper.getLevel().getBlockEntity(mud.anchor())).appearance()
                     .equals(Appearance.masonry(ResourceLocation.fromNamespaceAndPath("minecraft", "mud_bricks"))), "mud-brick trim look");
 
@@ -301,12 +305,14 @@ public final class LegacyMigrationGameTests {
         ItemStack picked = pick(helper, door.pos(DoorLayout.Part.UPPER_RIGHT));
         check(picked.is(ModItems.ROUND_DOOR.get()) && AppearanceStacks.read(picked).equals(planks("cherry")), "pick: " + picked);
 
-        BlockPos trimAnchor = new BlockPos(3, 1, 6);
-        check(placeFreestanding(helper, player, new ItemStack(item("stone_brick_round_trim")), trimAnchor).consumesAction(), "old trim item");
-        TrimLayout.Assembly trim = trimAssembly(helper, trimAnchor, Direction.NORTH);
-        check(trim.complete(helper.getLevel(), ModBlocks.roundTrim())
-                && ((RoundTrimBlockEntity) helper.getLevel().getBlockEntity(trim.anchor())).appearance()
-                .equals(Appearance.masonry(ResourceLocation.fromNamespaceAndPath("minecraft", "stone_bricks"))), "old trim item placement");
+        // 0.8.0: an old trim item is a door trim in its old look: it attaches to the door's clicked face.
+        ItemStack oldTrim = new ItemStack(item("stone_brick_round_trim"));
+        io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.use(helper, player, oldTrim, ItemStack.EMPTY,
+                io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.leaf(door, false), false);
+        check(((RoundDoorBlockEntity) helper.getLevel().getBlockEntity(door.anchor())).trims()
+                .get(io.github.dirtyredz.roundwood.block.attachment.AttachmentFace.FRONT)
+                .equals(java.util.Optional.of(Appearance.masonry(ResourceLocation.fromNamespaceAndPath("minecraft", "stone_bricks")))),
+                "old trim item did not trim the door in its look");
 
         useItemOn(helper, player, new ItemStack(item("green_round_window")), new BlockPos(7, 0, 1), Direction.UP);
         BlockPos window = helper.absolutePos(new BlockPos(7, 1, 1));

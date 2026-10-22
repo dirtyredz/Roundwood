@@ -2,6 +2,93 @@
 
 Newest first.
 
+## 2026-10-21 - Window gestures are routed by hit region, with no sneaking (0.8.0)
+
+A shared classifier (`WindowHitRegions`, fed by `WindowHitTarget`) names what is under the cursor:
+trim band, frame (the border and the cross beams), glass, connector glass or nothing. A pure table
+(`WindowUseRules`) maps item plus region to one action: planks and dye restyle the frame or, on a
+trim band, that face's trim; dye on glass tints; masonry works only on a trim band (elsewhere it is
+refused with a hint, using nothing); shears remove one face's trim; the trim item fits the clicked
+face. Sneaking does the same as not sneaking, and the sneak-use bridge asks the block's router
+(`claimsUse`) instead of guessing a family at the hit, so the bridge and the routing cannot disagree.
+Rejected: keeping sneak for the pane (the owner dislikes sneak-click mechanics, and 0.7.0 needed it
+for planks but not for the band), and an item-specific use on the trim item (the router already knows
+the target). The classifier lives in `block/window/interaction/`, not `geometry/face` as planned:
+`geometry/trim` already imports `geometry/face`, and the classifier needs the trim band, so `face`
+would have made a package cycle.
+
+## 2026-10-21 - One trim item per face; 0.7.0 trims become two (0.8.0)
+
+A trim item fits one face, so a fully trimmed window costs two trims and drops two. The 0.7.0 trims
+(one look on both faces) migrate to both faces in that look, which is a one-time uplift of material:
+the player gets back two trims where they once paid for one. Accepted, because splitting a 0.7.0
+trim to one face would silently delete a visible trim, and a refund-by-conversion path would add a
+second mutation route. Rejected: charging nothing for the second face (a free trim from nothing)
+and keeping the shared-face trim as a mode.
+
+## 2026-10-21 - Conservative fitted-frame migration (0.8.0)
+
+A 0.7.0 fitted frame converts to the door's FRONT trim only when everything matches exactly: a
+complete canonical frame and door, the same facing, the frame anchor exactly one block in front of
+the door anchor, all eight cells loaded and the door's FRONT free. The conversion is one guarded
+batch (the quarters go silently, FRONT is installed only if all four went, otherwise the frame is
+restored). An occupied destination keeps the frame as legacy content, even when the look is the
+same, and any other arrangement is left alone. A geometrically identical freestanding frame
+directly in front of a door cannot be told from a fitted one and converts too (accepted). Rejected:
+converting any nearby frame (could move a decoration the player placed on purpose), merging into an
+occupied FRONT (silently loses one of two looks), and dropping the frame (loses the player's
+material). Scheduling moved to `ChunkMigrations` and `ChunkMigrationQueue` so a frame and a door
+that load in either order both retry.
+
+## 2026-10-21 - Door trim is a static attachment; frames stay for compatibility (0.8.0; supersedes placing new frames in front of doors)
+
+The `round_trim` item is now the Door Trim: used on a door it attaches a ring to the clicked face
+(FRONT at the leaf's front face, one pixel into the cells in front; BACK just behind the leaf),
+stored on the door anchor (`DoorTrim`) like the window trims, using the shared `block/attachment`
+value. It is static: it never swings and has no collision, pathfinding, support or redstone effect.
+The frame block stays registered so frames in older saves keep rendering, restyling and dropping,
+but nothing places a new one. Rejected: keeping the independent 2 x 2 frame as the way to trim a door
+(it needs four free cells, two floors and a sneak click, and cannot trim the back), deleting the frame
+block (old saves would lose content) and a swinging trim (it would need collision and pathing
+changes for a decoration). Cost: the ring's FRONT face is rendered a pixel outside the door's cells
+by the door renderer, and the BACK ring overlaps the hinge-side brass straps (cosmetic).
+
+## 2026-10-21 - Glass tint is its own payload, not frame paint (0.8.0)
+
+Dyeing window glass sets a colour stored beside the look (`WindowGlass: {Version, Color}` on the
+entity and on the item stack), and the chunk model swaps the clear glass quads for one of sixteen
+generated `window_glass_<dye>` textures (the clear glass's mask, drawn darker). One colour covers the
+whole window including connector arms; another dye replaces it, and only a new window is clear
+again. Drops and pick-block keep frame look and glass. Rejected: tinting the whole model (the wood
+would change), a blockstate colour (16 times the models and states) and tinting by drawing (the
+glints need their own alpha). The cost is a viewer key that now includes the glass colour.
+
+## 2026-10-21 - Flush trim projects one pixel beyond the cell, drawn by a block-entity renderer (0.8.0, owner report; supersedes the 0.7.0 flush inlay)
+
+Owner trial of 0.7.0: trim "missing on the other window blocks", on closer look only when the pane
+was on an edge (flush, floor, ceiling). The cause was the 0.7.0 inlay: a flush pane's wall-side band
+replaced the pane's own outer pixels (0..1 or 15..16), so it stood at the surface instead of proud
+and read as no trim. Every band now stands one pixel proud of its slab face (flush 0..2 gets -1..0
+and 2..3; 14..16 gets 13..14 and 16..17), so the wall-side band lies one pixel outside the window's
+block. The owner accepted that. It is render-only: `WindowTrimRenderer` draws it from cached models,
+and collision, support, connection and neighbour blocks never see it. The chunk model is pane-only
+now (window block models 220 to 110). Rejected: keeping the inlay (the reported bug), reserving the
+neighbour cell (a trim would need a block there, and a cell holds one block) and thickening the
+slab (changes collision and every pose). Tradeoff: normal depth testing can hide a wall-side band
+inside a solid neighbour, but nothing culls it.
+
+## 2026-10-21 - A trim per window face, with face identity (0.8.0; supersedes the 0.7.0 shared-face trim)
+
+A window now has FRONT and BACK trims with their own looks, stored together (`WindowTrim`
+version 2, `FaceTrims`). Which side FRONT is on is a blockstate bit, `face_reversed`, with the pure
+mapping in `WindowFaceIdentity`; rotations and mirrors recompute it so a trim stays on the face it
+was on (a centred round window turned 180 degrees keeps its pose and toggles the bit). `trimmed`
+stays as a derived summary, corrected by a scheduled tick, never by a write on load. Unknown
+payload versions fail closed. Rejected: inferring the face from the pose alone (a 180 degree turn
+of a centred window would swap the trims), a second pair of window block states (more models) and
+keeping one shared look (the owner wants independent faces). The codec and loot condition are shared
+with doors in `block/attachment/`.
+
 ## 2026-10-21 - Window models are exposed surfaces, not stacked boxes (0.7.0, owner report)
 
 Owner trial of 0.6.1: horizontal lines in the window glass (round window at heights 3, 4, 6, 10, 12,
@@ -13,7 +100,8 @@ rectangles with default position UVs so the texture runs on continuously. Each b
 applies exactly one complete model (a centred upright pose has one per combination of its two
 across-plane connections, every model also `_trimmed`), which replaces the multipart arms. Rejected:
 hiding only wholly buried faces (the sheets inside the glass still overlap) and a striped-texture
-theory (the texture is not striped; the faces were the cause). Cost: 220 window block models, and
+theory (the texture is not striped; the faces were the cause). Cost: 220 window block models (110
+since 0.8.0 moved the trims out of the models), and
 the 0.5.0 baseline class `WindowGeometry`, the old round-window and arm models are gone.
 
 ## 2026-10-21 - Clearer glass is a new texture with the accents kept (0.7.0)
@@ -35,7 +123,7 @@ dislikes sneak-click mechanics). Cost: five more registrations, items, recipes a
 benefit is that the choice is explicit in the inventory, recipes and previews. The pattern is fixed
 per registration, not a blockstate.
 
-## 2026-10-21 - The window trim is an attachment item with a flag and a payload (0.7.0)
+## 2026-10-21 - The window trim is an attachment item with a flag and a payload (0.7.0; face sharing, flush inlay and sneak routing superseded in 0.8.0)
 
 Window trims take masonry like the door trim. `roundwood:window_trim` is an item that fits onto any of
 the ten windows: blockstate `trimmed=true` plus the trim's look in the window block entity under a
@@ -48,7 +136,7 @@ pixel on each face. One look serves both faces; independent front and back looks
 window trims are out of scope. Clicks are routed by what is under the hit: the band takes shears
 and restyling without sneaking, the rest of the pane keeps the sneak gestures.
 
-## 2026-10-21 - The trim drops as its own item (0.7.0)
+## 2026-10-21 - The trim drops as its own item (0.7.0; one pool per face since 0.8.0)
 
 Every window loot table has a second pool, conditioned on `trimmed=true`, dropping one window trim
 with its look copied from `WindowTrim.RoundwoodAppearance`, under the same explosion rule as the
@@ -202,7 +290,7 @@ has evaluated loot, then remove it normally; a missed callback is cleaned up at 
 Loot tables stay plain; the block only decorates its family item. Rejected: unconditional drops from
 `onRemove` (breaks explosion decay, `doTileDrops`, loot modifiers).
 
-## 2026-10-21 - Round trims: independent 2x2 frames, fitted or freestanding (0.4.0, supersedes the door's built-in trim ring)
+## 2026-10-21 - Round trims: independent 2x2 frames, fitted or freestanding (0.4.0, supersedes the door's built-in trim ring; new frames superseded by the Door Trim in 0.8.0)
 
 The door's 2-pixel ring is gone; frames are their own block family so trim and door colours mix.
 A frame is a 2 x 2 assembly of static quarters (`facing` + `part`, no block entity), one item

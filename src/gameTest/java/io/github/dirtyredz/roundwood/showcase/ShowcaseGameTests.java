@@ -5,14 +5,16 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
+import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
-import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.window.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
@@ -53,6 +55,7 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
@@ -396,9 +399,11 @@ public final class ShowcaseGameTests {
                 boolean camouflaged = level.getBlockEntity(assembly.anchor()) instanceof RoundDoorBlockEntity entity
                         && entity.camouflage().map(c -> c.material().is(Blocks.STONE_BRICKS)).orElse(false);
                 check(camouflaged == TrimCombinationsSection.camouflaged(j), what + ": camouflage");
-                TrimLayout.Assembly trim = new TrimLayout.Assembly(frame.pos(r, 0, f - 1), frame.forward());
-                check(trim.complete(level, ModBlocks.roundTrim()), what + ": frame missing or incomplete");
-                check(material.equals(trimLook(level, trim.anchor())), what + ": frame shows " + trimLook(level, trim.anchor()));
+                FaceTrims expected = new FaceTrims(Optional.of(material), TrimCombinationsSection.back(materials, i, j));
+                FaceTrims shown = level.getBlockEntity(assembly.anchor()) instanceof RoundDoorBlockEntity entity ? entity.trims() : FaceTrims.NONE;
+                check(expected.equals(shown), what + ": door trims " + shown);
+                check(!(level.getBlockState(frame.pos(r, 0, f - 1)).getBlock() instanceof io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock),
+                        what + ": a frame block stands in front of the door");
                 check(signSays(level, frame.pos(r, 0, f - 2), ShowcaseCanvas.label(material)), what + ": label sign missing");
             }
         }
@@ -425,8 +430,11 @@ public final class ShowcaseGameTests {
             int f = PaintsSection.f(i);
             DoorLayout.Assembly door = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), DoorHingeSide.LEFT);
             check(door.complete(level, ModBlocks.roundDoor()) && paint.equals(doorLook(level, door.anchor())), paint.key() + ": door");
-            TrimLayout.Assembly trim = new TrimLayout.Assembly(frame.pos(r + PaintsSection.TRIM_OFFSET, 0, f), frame.forward());
-            check(trim.complete(level, ModBlocks.roundTrim()) && paint.equals(trimLook(level, trim.anchor())), paint.key() + ": trim");
+            check(level.getBlockEntity(door.anchor()) instanceof RoundDoorBlockEntity entity
+                    && entity.trims().equals(FaceTrims.NONE.with(AttachmentFace.FRONT, paint)), paint.key() + ": door trim");
+            BlockPos glass = frame.pos(r + PaintsSection.GLASS_OFFSET, 0, f);
+            check(level.getBlockEntity(glass) instanceof RoundWindowBlockEntity tinted && tinted.glass().equals(paint.paint())
+                    && tinted.appearance().equals(Appearance.DEFAULT), paint.key() + ": tinted glass");
             BlockPos window = frame.pos(r + PaintsSection.WINDOW_OFFSET, 0, f);
             check(level.getBlockState(window).is(ModBlocks.roundWindow()) && paint.equals(windowLook(level, window)), paint.key() + ": window");
             check(signSays(level, frame.pos(r, 0, f - 1), ShowcaseCanvas.label(paint)), paint.key() + ": label sign missing");
