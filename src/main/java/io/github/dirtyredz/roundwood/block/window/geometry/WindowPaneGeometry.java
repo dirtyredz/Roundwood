@@ -2,7 +2,6 @@ package io.github.dirtyredz.roundwood.block.window.geometry;
 
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowMuntinGeometry;
-import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimGeometry;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.Piece;
 import io.github.dirtyredz.roundwood.geometry.PixelCircle;
@@ -108,7 +107,8 @@ public final class WindowPaneGeometry {
 
     /**
      * Everything the chunk model draws for a state: panel then junction. Trims are attachments drawn
-     * apart since 0.8.0 ({@link WindowTrimGeometry}); they never replace pane pixels.
+     * apart since 0.8.0 ({@code geometry/trim}); they never replace pane pixels, and the pane imports
+     * nothing of them (0.10.0: {@link WindowShapes} composes the targeted selection).
      */
     public static List<Piece> pieces(WindowDesign design, WindowPose pose, Collection<Direction> connected) {
         List<Piece> pieces = new ArrayList<>(panel(design, pose));
@@ -121,18 +121,6 @@ public final class WindowPaneGeometry {
         List<Box> boxes = new ArrayList<>();
         boxes.add(pose.slab());
         junction(design, pose, connected).forEach(piece -> boxes.add(piece.box()));
-        return List.copyOf(boxes);
-    }
-
-    /**
-     * Outline and target boxes: the collision boxes plus the in-cell part of the trim bands on
-     * {@code trimSides} (the world sides, along the normal, that carry a trim). A band beyond the cell
-     * is targeted through the slab face under it.
-     */
-    public static List<Box> selection(WindowDesign design, WindowPose pose, Collection<Direction> connected,
-                                      Collection<Direction> trimSides) {
-        List<Box> boxes = new ArrayList<>(boxes(design, pose, connected));
-        boxes.addAll(WindowTrimGeometry.targetBoxes(design.profile(), pose, trimSides));
         return List.copyOf(boxes);
     }
 

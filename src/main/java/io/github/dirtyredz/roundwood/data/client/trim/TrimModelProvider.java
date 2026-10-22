@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * The compatibility frame's blockstate and models (the Universal Trim's icon is
- * {@link UniversalTrimItemModelProvider}'s). The frame is drawn by its anchor's block-entity renderer,
+ * {@link AttachmentItemModelProvider}'s). The frame is drawn by its anchor's block-entity renderer,
  * so every trim state uses one empty world model (break particle only). Each cell-local quarter
  * template holds its piece of the ring once, authored facing north, in two mapping families:
  * <b>tiled</b> (wood: the texture repeats per block like any block) and <b>whole</b> (paint and

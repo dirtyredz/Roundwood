@@ -9,6 +9,7 @@ import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassActions;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
 import net.minecraft.core.BlockPos;
@@ -52,10 +53,12 @@ public final class WindowInteraction {
         ItemStack stack = player.getItemInHand(hand);
         return switch (plan.get().action()) {
             case PASS -> InteractionResult.PASS;
-            case FIT_TRIM -> WindowTrimActions.fit(level, pos, player, stack, target.face());
+            case FIT_TRIM -> WindowTrimActions.fit(level, pos, player, stack, TrimSlot.PERIMETER, target.face());
+            case FIT_SILL -> WindowTrimActions.fit(level, pos, player, stack, TrimSlot.SILL, target.face());
             case RESTYLE_TRIM -> AppearanceGestures.donor(AppearanceFamily.TRIM, player, hand)
                     .map(gesture -> AppearanceActions.apply(level, player, gesture,
-                            () -> window(level, pos).map(window -> WindowTrimActions.target(level, pos, window, target.face()))))
+                            () -> window(level, pos).map(window -> WindowTrimActions.target(level, pos, window,
+                                    target.region().slot(), target.face()))))
                     .orElse(InteractionResult.PASS);
             case RESTYLE_FRAME -> AppearanceGestures.donor(AppearanceFamily.WINDOW, player, hand)
                     .map(gesture -> AppearanceActions.apply(level, player, gesture,
@@ -63,8 +66,9 @@ public final class WindowInteraction {
                     .orElse(InteractionResult.PASS);
             case TINT_GLASS -> stack.getItem() instanceof DyeItem dye
                     ? WindowGlassActions.tint(level, pos, player, stack, dye.getDyeColor()) : InteractionResult.PASS;
-            case REMOVE_TRIM -> WindowTrimActions.remove(level, pos, player, hand, stack, target.face());
+            case REMOVE_TRIM -> WindowTrimActions.remove(level, pos, player, hand, stack, target.region().slot(), target.face());
             case REFUSE_MASONRY -> AppearanceActions.refuse(level, player, "message.roundwood.masonry_trim_only");
+            case REFUSE_SILL -> AppearanceActions.refuse(level, player, "message.roundwood.sill_upper_arch_only");
         };
     }
 
@@ -89,18 +93,22 @@ public final class WindowInteraction {
         if (item == WindowUseRules.Item.OTHER) {
             return Optional.empty();
         }
-        FaceTrims trims = level.getBlockEntity(pos) instanceof RoundWindowBlockEntity window ? window.trims() : FaceTrims.NONE;
-        return WindowHitTarget.of(state, pos, hit.getLocation(), hit.getDirection(), player.getEyePosition(), trims)
-                .map(target -> new Plan(WindowUseRules.decide(item, target.region()), target));
+        RoundWindowBlockEntity window = level.getBlockEntity(pos) instanceof RoundWindowBlockEntity found ? found : null;
+        FaceTrims trims = window != null ? window.trims() : FaceTrims.NONE;
+        FaceTrims sills = window != null ? window.trims(TrimSlot.SILL) : FaceTrims.NONE;
+        boolean takesSill = state.getBlock() instanceof WindowPaneBlock block && block.profile().takesSill();
+        return WindowHitTarget.of(state, pos, hit.getLocation(), hit.getDirection(), player.getEyePosition(), trims, sills)
+                .map(target -> new Plan(WindowUseRules.decide(item, target.region(), takesSill), target));
     }
 
-    /** What {@code stack} is to a window. */
+    /** What {@code stack} is to a window: each attachment item by its slot, then the restyling and tool items. */
     public static WindowUseRules.Item item(ItemStack stack) {
         if (stack.isEmpty()) {
             return WindowUseRules.Item.OTHER;
         }
-        if (TrimAttachmentItem.slotOf(stack).filter(slot -> slot == TrimSlot.PERIMETER).isPresent()) {
-            return WindowUseRules.Item.UNIVERSAL_TRIM;
+        Optional<TrimSlot> slot = TrimAttachmentItem.slotOf(stack);
+        if (slot.isPresent()) {
+            return slot.get() == TrimSlot.SILL ? WindowUseRules.Item.ARCH_SILL : WindowUseRules.Item.UNIVERSAL_TRIM;
         }
         if (stack.getItem() instanceof ShearsItem || stack.is(Tags.Items.SHEARS)) {
             return WindowUseRules.Item.SHEARS;

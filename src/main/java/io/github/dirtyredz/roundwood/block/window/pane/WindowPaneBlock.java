@@ -14,6 +14,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.interaction.WindowInteraction;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPlacement;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowFaceIdentity;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassStacks;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
@@ -232,20 +233,24 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
         return WindowConnections.filter(super.updateShape(state, direction, neighbor, level, pos, neighborPos), direction, neighbor);
     }
 
-    /** Outline and rays: the pane, its junction and the in-cell part of each fitted face trim. */
+    /** Outline and rays: the pane, its junction and the in-cell part of each fitted trim and sill. */
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return WindowShapes.selection(design, pose(state), connections(state), trimSides(state, level, pos));
+        return WindowShapes.selection(design, pose(state), connections(state),
+                attachedSides(state, level, pos, TrimSlot.PERIMETER), attachedSides(state, level, pos, TrimSlot.SILL));
     }
 
-    /** The world sides (along the normal) whose face carries a trim, read from the entity when it is there. */
-    public Set<Direction> trimSides(BlockState state, BlockGetter level, BlockPos pos) {
+    /**
+     * The world sides (along the normal) whose face carries an attachment in {@code slot}, read from
+     * the entity when it is there (nothing while the {@code trimmed} summary says none).
+     */
+    public Set<Direction> attachedSides(BlockState state, BlockGetter level, BlockPos pos, TrimSlot slot) {
         if (!trimmed(state) || !(level.getBlockEntity(pos) instanceof RoundWindowBlockEntity window)) {
             return Set.of();
         }
         Set<Direction> sides = EnumSet.noneOf(Direction.class);
         for (AttachmentFace face : AttachmentFace.values()) {
-            if (window.trims().has(face)) {
+            if (window.trims(slot).has(face)) {
                 sides.add(WindowFaceIdentity.side(pose(state), faceReversed(state), face));
             }
         }

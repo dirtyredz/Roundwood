@@ -9,7 +9,7 @@ import java.util.List;
  * ({@code round_window_arch_left_cross}) and keys every geometry, shape and model cache.
  */
 public record WindowDesign(WindowProfile profile, WindowPattern pattern) {
-    /** The ten designs in creative order: each plain piece followed by its crossed variant. */
+    /** The twenty-six designs in creative order: each plain piece followed by its crossed variant. */
     public static List<WindowDesign> all() {
         List<WindowDesign> out = new ArrayList<>();
         for (WindowProfile profile : WindowProfile.values()) {

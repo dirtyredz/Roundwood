@@ -22,7 +22,7 @@ import java.util.function.UnaryOperator;
  * thin-mortar radial brick face across the whole ring, 0.7.0), and a quarter is turned for its
  * facing here (positions, normals, winding and cull sides) so the anchor's renderer can tessellate
  * it with world light at the quarter's own cell. (The item icon is the Universal Trim's,
- * {@code client/item/UniversalTrimModels}, since 0.9.0.)
+ * {@code client/item/TrimItemModels}, since 0.9.0.)
  */
 public final class TrimAppearanceModels {
     private record Key(TrimLooks.Look look, Direction facing, TrimPart part) {

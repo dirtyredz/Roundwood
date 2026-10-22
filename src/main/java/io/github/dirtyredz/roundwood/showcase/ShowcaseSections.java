@@ -6,12 +6,15 @@ import io.github.dirtyredz.roundwood.showcase.section.DoorsSection;
 import io.github.dirtyredz.roundwood.showcase.section.PaintsSection;
 import io.github.dirtyredz.roundwood.showcase.section.RedstoneSection;
 import io.github.dirtyredz.roundwood.showcase.section.TrimCombinationsSection;
-import io.github.dirtyredz.roundwood.showcase.section.WindowArchesSection;
-import io.github.dirtyredz.roundwood.showcase.section.WindowCornersSection;
-import io.github.dirtyredz.roundwood.showcase.section.WindowMuntinsSection;
-import io.github.dirtyredz.roundwood.showcase.section.WindowPositionsSection;
-import io.github.dirtyredz.roundwood.showcase.section.WindowTrimsSection;
-import io.github.dirtyredz.roundwood.showcase.section.WindowsSection;
+import io.github.dirtyredz.roundwood.showcase.section.window.WindowArchesSection;
+import io.github.dirtyredz.roundwood.showcase.section.window.WindowCirclesSection;
+import io.github.dirtyredz.roundwood.showcase.section.window.WindowCornersSection;
+import io.github.dirtyredz.roundwood.showcase.section.window.WindowEdgesSection;
+import io.github.dirtyredz.roundwood.showcase.section.window.WindowMuntinsSection;
+import io.github.dirtyredz.roundwood.showcase.section.window.WindowPositionsSection;
+import io.github.dirtyredz.roundwood.showcase.section.window.WindowSillsSection;
+import io.github.dirtyredz.roundwood.showcase.section.window.WindowTrimsSection;
+import io.github.dirtyredz.roundwood.showcase.section.window.WindowsSection;
 
 import java.util.List;
 
@@ -29,7 +32,10 @@ public final class ShowcaseSections {
             new RedstoneSection(),
             new PaintsSection(),
             new TrimCombinationsSection(),
-            new BrickArchesSection());
+            new BrickArchesSection(),
+            new WindowCirclesSection(),
+            new WindowSillsSection(),
+            new WindowEdgesSection());
 
     private ShowcaseSections() {
     }

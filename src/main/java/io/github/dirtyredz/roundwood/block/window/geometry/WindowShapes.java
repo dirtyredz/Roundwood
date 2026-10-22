@@ -1,25 +1,31 @@
 package io.github.dirtyredz.roundwood.block.window.geometry;
 
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimGeometry;
+import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.Piece;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Minecraft-facing window data from {@link WindowPaneGeometry}, cached per design, pose, connection
- * set and trimmed sides (a few thousand variants at most): the collision shape (the whole slab plus
- * the active junction), the outline and target shape (that plus the in-cell part of any trim) and
- * what each cell boundary shows, for face culling. Trims are attachments drawn by a renderer and
- * never take part in culling.
+ * set and attached sides (a few thousand variants at most): the collision shape (the whole slab plus
+ * the active junction), the outline and target shape (that plus the in-cell part of any perimeter
+ * trim and, since 0.10.0, any arch sill) and what each cell boundary shows, for face culling.
+ * Attachments are drawn by a renderer and never take part in culling. This class composes pane and
+ * attachment volumes ({@link #selectionBoxes}); the pane geometry itself knows nothing of trims.
  */
 public final class WindowShapes {
-    private record Key(WindowDesign design, WindowPose pose, int connections, int trimSides) {
+    private record Key(WindowDesign design, WindowPose pose, int connections, int trimSides, int sillSides) {
     }
 
     private static final ConcurrentHashMap<Key, VoxelShape> COLLISION = new ConcurrentHashMap<>();
@@ -29,17 +35,32 @@ public final class WindowShapes {
     private WindowShapes() {
     }
 
-    /** What collides: never the trim. */
+    /** What collides: never an attachment. */
     public static VoxelShape collision(WindowDesign design, WindowPose pose, Collection<Direction> connected) {
-        return COLLISION.computeIfAbsent(key(design, pose, connected, Set.of()),
+        return COLLISION.computeIfAbsent(key(design, pose, connected, Set.of(), Set.of()),
                 k -> VoxelShapeFactory.shape(WindowPaneGeometry.boxes(design, pose, connected)));
     }
 
-    /** What is outlined and targeted: the collision shape plus the in-cell trim on {@code trimSides}. */
+    /**
+     * What is outlined and targeted: the collision shape plus the in-cell perimeter trim on
+     * {@code trimSides} and the in-cell sill on {@code sillSides} (world sides along the normal).
+     */
     public static VoxelShape selection(WindowDesign design, WindowPose pose, Collection<Direction> connected,
-                                       Collection<Direction> trimSides) {
-        return SELECTION.computeIfAbsent(key(design, pose, connected, trimSides),
-                k -> VoxelShapeFactory.shape(WindowPaneGeometry.selection(design, pose, connected, trimSides)));
+                                       Collection<Direction> trimSides, Collection<Direction> sillSides) {
+        return SELECTION.computeIfAbsent(key(design, pose, connected, trimSides, sillSides),
+                k -> VoxelShapeFactory.shape(selectionBoxes(design, pose, connected, trimSides, sillSides)));
+    }
+
+    /**
+     * Outline and target boxes, plain Java: the collision boxes plus each attachment where it lies
+     * inside the cell. A band beyond the cell is targeted through the slab face under it.
+     */
+    public static List<Box> selectionBoxes(WindowDesign design, WindowPose pose, Collection<Direction> connected,
+                                           Collection<Direction> trimSides, Collection<Direction> sillSides) {
+        List<Box> boxes = new ArrayList<>(WindowPaneGeometry.boxes(design, pose, connected));
+        boxes.addAll(WindowTrimGeometry.targetBoxes(TrimSlot.PERIMETER, design.profile(), pose, trimSides));
+        boxes.addAll(WindowTrimGeometry.targetBoxes(TrimSlot.SILL, design.profile(), pose, sillSides));
+        return List.copyOf(boxes);
     }
 
     /**
@@ -59,7 +80,7 @@ public final class WindowShapes {
 
     /** What the window draws on its {@code side} cell boundary ({@link WindowPaneGeometry#boundary}). */
     public static BitSet boundary(WindowDesign design, WindowPose pose, Collection<Direction> connected, Direction side) {
-        return BOUNDARIES.computeIfAbsent(key(design, pose, connected, Set.of()), k -> {
+        return BOUNDARIES.computeIfAbsent(key(design, pose, connected, Set.of(), Set.of()), k -> {
             var boxes = WindowPaneGeometry.pieces(design, pose, connected).stream().map(Piece::box).toList();
             BitSet[] sides = new BitSet[6];
             for (Direction direction : Direction.values()) {
@@ -69,8 +90,9 @@ public final class WindowShapes {
         })[side.ordinal()];
     }
 
-    private static Key key(WindowDesign design, WindowPose pose, Collection<Direction> connected, Collection<Direction> trimSides) {
-        return new Key(design, pose, mask(connected), mask(trimSides));
+    private static Key key(WindowDesign design, WindowPose pose, Collection<Direction> connected,
+                           Collection<Direction> trimSides, Collection<Direction> sillSides) {
+        return new Key(design, pose, mask(connected), mask(trimSides), mask(sillSides));
     }
 
     private static int mask(Collection<Direction> sides) {

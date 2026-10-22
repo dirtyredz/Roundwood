@@ -6,6 +6,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
 import io.github.dirtyredz.roundwood.migration.LegacyAppearances;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
+import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.LanguageProvider;
 
@@ -32,6 +33,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
             add(ModBlocks.window(design), windowName(design));
         }
         add(ModBlocks.roundTrim(), "Universal Trim");
+        add(ModItems.ARCH_SILL_TRIM.get(), "Arch Sill");
         add(LegacyContent.windowTrim(), "Window Trim");
         for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
             add("block." + Roundwood.MOD_ID + "." + entry.id(), title(entry.id()));
@@ -49,6 +51,9 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("message.roundwood.aim_at_leaf", "Aim at the door leaf to restyle or paint it");
         add("message.roundwood.masonry_unpaintable", "Masonry trims cannot be painted");
         add("message.roundwood.masonry_trim_only", "Masonry restyles a trim; aim at the trim");
+        add("tooltip.roundwood.arch_sill_trim",
+                "Fits under the clicked face of an upper window arch; restyle with planks, masonry or dye, remove with shears");
+        add("message.roundwood.sill_upper_arch_only", "An arch sill fits only an upper window arch");
     }
 
     /** "Round Window Arch with Cross Beams, Left", "Round Window Corner, Bottom Right" and so on. */
@@ -60,6 +65,14 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
             case ARCH_RIGHT -> "Round Window Arch" + beams + ", Right";
             case BOTTOM_LEFT -> "Round Window Corner" + beams + ", Bottom Left";
             case BOTTOM_RIGHT -> "Round Window Corner" + beams + ", Bottom Right";
+            case ARCH_BOTTOM_LEFT -> "Round Window Arch" + beams + ", Bottom Left";
+            case ARCH_BOTTOM_RIGHT -> "Round Window Arch" + beams + ", Bottom Right";
+            case TOP_LEFT -> "Round Window Corner" + beams + ", Top Left";
+            case TOP_RIGHT -> "Round Window Corner" + beams + ", Top Right";
+            case EDGE_TOP -> "Round Window Edge" + beams + ", Top";
+            case EDGE_LEFT -> "Round Window Edge" + beams + ", Left";
+            case EDGE_BOTTOM -> "Round Window Edge" + beams + ", Bottom";
+            case EDGE_RIGHT -> "Round Window Edge" + beams + ", Right";
         };
     }
 

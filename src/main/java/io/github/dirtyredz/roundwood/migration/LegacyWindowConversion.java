@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.migration;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
 import net.minecraft.world.item.DyeColor;
@@ -42,7 +43,7 @@ public final class LegacyWindowConversion {
             converted.setAppearance(appearance);
             converted.setGlass(glass);
             if (trims.any()) {
-                WindowTrimActions.store(level, pos, converted, trims);
+                WindowTrimActions.store(level, pos, converted, TrimSlot.PERIMETER, trims);
             }
         }
         return LegacyCells.Result.CONVERTED;

@@ -22,8 +22,8 @@ import java.util.Optional;
  *
  * <p>The side is the hit's position along the normal against the slab's middle; the hit point is
  * first nudged into the surface it hit. An exact tie (a thin edge of the slab) goes to the viewer's
- * side, and to FRONT when there is no viewer. A point outside the slab is a trim band (when it lies
- * in an installed band on that side), connector glass on a centred pane's arms, or nothing.
+ * side, and to FRONT when there is no viewer. A point outside the slab is a trim band or an arch sill
+ * (when it lies in one installed on that side), connector glass on a centred pane's arms, or nothing.
  */
 public record WindowHitTarget(AttachmentFace face, Direction side, WindowHitRegions.Region region) {
     private static final double NUDGE = 1e-4;
@@ -34,10 +34,11 @@ public record WindowHitTarget(AttachmentFace face, Direction side, WindowHitRegi
      * @param hit       the hit point, world coordinates
      * @param hitFace   the side of the shape the ray hit
      * @param viewer    the clicking player's eye, or null
-     * @param trims     the window's installed face trims
+     * @param trims     the window's installed perimeter trims
+     * @param sills     the window's installed arch sills (0.10.0)
      */
     public static Optional<WindowHitTarget> of(BlockState state, BlockPos pos, Vec3 hit, Direction hitFace,
-                                               @Nullable Vec3 viewer, FaceTrims trims) {
+                                               @Nullable Vec3 viewer, FaceTrims trims, FaceTrims sills) {
         if (!(state.getBlock() instanceof WindowPaneBlock block)) {
             return Optional.empty();
         }
@@ -66,16 +67,19 @@ public record WindowHitTarget(AttachmentFace face, Direction side, WindowHitRegi
         AttachmentFace face = WindowFaceIdentity.face(pose, reversed, side);
         double[] uv = pose.facePoint(p[0], p[1], p[2]);
         boolean trimmed = trims.has(face);
+        boolean silled = sills.has(face);
         if (along < slabMin || along > slabMax) {
             double[] band = WindowTrimGeometry.depth(pose, side);
-            if (trimmed && along >= band[0] && along <= band[1]
-                    && WindowHitRegions.classify(block.design(), uv[0], uv[1], true) == WindowHitRegions.Region.TRIM) {
-                return Optional.of(new WindowHitTarget(face, side, WindowHitRegions.Region.TRIM));
+            if ((trimmed || silled) && along >= band[0] && along <= band[1]) {
+                WindowHitRegions.Region region = WindowHitRegions.classify(block.design(), uv[0], uv[1], trimmed, silled);
+                if (region.slot() != null) {
+                    return Optional.of(new WindowHitTarget(face, side, region));
+                }
             }
             WindowHitRegions.Region outside = WindowPaneGeometry.bridges(pose) ? WindowHitRegions.Region.CONNECTOR_GLASS
                     : WindowHitRegions.Region.NONE;
             return Optional.of(new WindowHitTarget(face, side, outside));
         }
-        return Optional.of(new WindowHitTarget(face, side, WindowHitRegions.classify(block.design(), uv[0], uv[1], trimmed)));
+        return Optional.of(new WindowHitTarget(face, side, WindowHitRegions.classify(block.design(), uv[0], uv[1], trimmed, silled)));
     }
 }

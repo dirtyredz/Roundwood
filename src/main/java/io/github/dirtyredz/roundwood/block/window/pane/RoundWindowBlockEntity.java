@@ -8,7 +8,9 @@ import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrimStore;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.attachment.TrimAttachmentSource;
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassNbt;
+import io.github.dirtyredz.roundwood.block.window.trim.WindowSillNbt;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimNbt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -29,17 +31,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 /**
- * Every window carries one of these (never ticking) for three independent things: the frame's
- * appearance (top-level {@code RoundwoodAppearance}), the face trims (0.8.0, {@link WindowTrimNbt}:
- * a FRONT and a BACK slot, each absent or present with its own look) and the glass colour
+ * Every window carries one of these (never ticking) for four independent things: the frame's
+ * appearance (top-level {@code RoundwoodAppearance}), the perimeter face trims (0.8.0,
+ * {@link WindowTrimNbt}: a FRONT and a BACK slot, each absent or present with its own look), the arch
+ * sills (0.10.0, {@link WindowSillNbt}, the same two faces in their own store) and the glass colour
  * ({@link WindowGlassNbt}). Frame and glass stay chunk-baked: the entity hands them to the model as
- * one {@link WindowAppearanceData} snapshot. The trims are drawn by a block-entity renderer, since
- * they may project beyond the cell. Loading and update packets always replace all three (the update
- * tag always carries the trim payload), so removals reach clients.
+ * one {@link WindowAppearanceData} snapshot. Trims and sills are drawn by a block-entity renderer,
+ * since they may project beyond the cell. Loading and update packets always replace everything (the
+ * update tag always carries both attachment payloads), so removals reach clients.
  *
- * <p>The {@code trimmed} blockstate is only a summary of "either face present"; it is consulted when
- * reading 0.7.0 data. A loaded summary that disagrees with the faces is corrected by a scheduled
- * block tick, never from the decoder.
+ * <p>The {@code trimmed} blockstate is only a summary of "any attachment present" (either slot, either
+ * face); it is consulted when reading 0.7.0 data, which is why the perimeter payload is always written,
+ * empty included. A loaded summary that disagrees is corrected by a scheduled block tick, never from
+ * the decoder.
  */
 public class RoundWindowBlockEntity extends BlockEntity implements AppearanceActions.Target, TrimAttachmentSource {
     /** How far a projecting trim reaches past the cell, in blocks. */
@@ -48,8 +52,10 @@ public class RoundWindowBlockEntity extends BlockEntity implements AppearanceAct
     /** Null: the block's default. */
     @Nullable
     private Appearance appearance;
-    /** The face trims, and any payload of a version this build does not understand (saved back unchanged). */
+    /** The perimeter trims, and any payload of a version this build does not understand (saved back unchanged). */
     private final FaceTrimStore trims = new FaceTrimStore(WindowTrimNbt.FORMAT);
+    /** The arch sills (0.10.0), likewise: a second store, so either payload's custody is independent. */
+    private final FaceTrimStore sills = new FaceTrimStore(WindowSillNbt.FORMAT);
     @Nullable
     private DyeColor glass;
 
@@ -67,27 +73,58 @@ public class RoundWindowBlockEntity extends BlockEntity implements AppearanceAct
         changed();
     }
 
-    /** The fitted face trims (none while an unknown payload is held). */
+    /** The fitted perimeter trims (none while an unknown payload is held). */
     @Override
     public FaceTrims trims() {
         return trims.trims();
     }
 
-    /** False while the stored trims are of an unknown future version: they must not be edited. */
+    /** The fitted attachments in {@code slot}: the perimeter trims or the arch sills (0.10.0). */
+    @Override
+    public FaceTrims trims(TrimSlot slot) {
+        return store(slot).trims();
+    }
+
+    /** False while the stored perimeter trims are of an unknown future version: they must not be edited. */
     public boolean trimsEditable() {
         return trims.editable();
     }
 
-    /**
-     * Server: replaces the face trims, saves and tells the clients. Callers keep the {@code trimmed}
-     * summary in step ({@code trim/WindowTrimActions}). Refused while an unknown payload is held.
-     */
+    /** False while the payload of {@code slot} is of an unknown future version. */
+    public boolean trimsEditable(TrimSlot slot) {
+        return store(slot).editable();
+    }
+
+    /** True when either slot has anything fitted on either face (the {@code trimmed} summary's meaning). */
+    public boolean anyAttachment() {
+        return trims.trims().any() || sills.trims().any();
+    }
+
+    /** True when neither slot holds an unknown payload, so the {@code trimmed} summary may be reconciled. */
+    public boolean attachmentsEditable() {
+        return trims.editable() && sills.editable();
+    }
+
+    /** Server: replaces the perimeter trims ({@link #setTrims(TrimSlot, FaceTrims)}). */
     public boolean setTrims(FaceTrims next) {
-        if (!trims.set(next)) {
+        return setTrims(TrimSlot.PERIMETER, next);
+    }
+
+    /**
+     * Server: replaces the attachments in {@code slot}, saves and tells the clients. Callers keep the
+     * {@code trimmed} summary in step ({@code trim/WindowTrimActions}). Refused while that slot holds
+     * an unknown payload.
+     */
+    public boolean setTrims(TrimSlot slot, FaceTrims next) {
+        if (!store(slot).set(next)) {
             return false;
         }
         changed();
         return true;
+    }
+
+    private FaceTrimStore store(TrimSlot slot) {
+        return slot == TrimSlot.SILL ? sills : trims;
     }
 
     public Optional<DyeColor> glass() {
@@ -131,7 +168,8 @@ public class RoundWindowBlockEntity extends BlockEntity implements AppearanceAct
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         writeFrameAndGlass(tag);
-        trims.save(tag);
+        trims.save(tag); // always written, empty included: a sill-only window's true summary never reads as 0.7.0 oak
+        sills.save(tag);
     }
 
     @Override
@@ -139,25 +177,27 @@ public class RoundWindowBlockEntity extends BlockEntity implements AppearanceAct
         super.load(tag);
         appearance = AppearanceNbt.read(tag).filter(AppearanceFamily.WINDOW::accepts).orElse(null);
         trims.load(tag, WindowTrimNbt.legacy(WindowPaneBlock.trimmed(getBlockState())));
+        sills.load(tag, FaceTrimStore.Legacy.NONE);
         glass = WindowGlassNbt.read(tag).orElse(null);
     }
 
-    /** Server, once in a level: a {@code trimmed} summary out of step with the faces is corrected by the block's tick. */
+    /** Server, once in a level: a {@code trimmed} summary out of step with the attachments is corrected by the block's tick. */
     @Override
     public void onLoad() {
         super.onLoad();
-        if (level != null && !level.isClientSide && trimsEditable()
-                && WindowPaneBlock.trimmed(getBlockState()) != trims().any()) {
+        if (level != null && !level.isClientSide && attachmentsEditable()
+                && WindowPaneBlock.trimmed(getBlockState()) != anyAttachment()) {
             level.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
         }
     }
 
-    /** Looks only; always the trim payload (possibly empty) so a removal reaches clients. */
+    /** Looks only; always both attachment payloads (possibly empty) so a removal reaches clients. */
     @Override
     public CompoundTag getUpdateTag() {
         CompoundTag tag = new CompoundTag();
         writeFrameAndGlass(tag);
         trims.writeUpdate(tag); // explicit empty while an unknown payload is held: clients could not read it either
+        sills.writeUpdate(tag);
         return tag;
     }
 

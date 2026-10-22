@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "roundwood:round_window_edge_cross",
+  "key": {
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    "PS",
+    "PG",
+    "PS"
+  ],
+  "result": {
+    "item": "roundwood:round_window_edge_left_cross"
+  },
+  "show_notification": true
+}

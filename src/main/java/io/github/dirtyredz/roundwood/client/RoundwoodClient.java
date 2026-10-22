@@ -2,7 +2,9 @@ package io.github.dirtyredz.roundwood.client;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
-import io.github.dirtyredz.roundwood.appearance.item.AppearanceBlockItem;
+import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
+import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
 import io.github.dirtyredz.roundwood.client.camouflage.CamouflageModels;
@@ -10,7 +12,7 @@ import io.github.dirtyredz.roundwood.client.door.DoorAppearanceModels;
 import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
 import io.github.dirtyredz.roundwood.client.door.RoundDoorRenderer;
 import io.github.dirtyredz.roundwood.client.item.AppearanceItemOverrides;
-import io.github.dirtyredz.roundwood.client.item.UniversalTrimModels;
+import io.github.dirtyredz.roundwood.client.item.TrimItemModels;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.trim.RoundTrimRenderer;
 import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
@@ -91,13 +93,14 @@ public final class RoundwoodClient {
             if (model == null) {
                 continue;
             }
-            if (!(item instanceof AppearanceBlockItem family)) {
+            if (!(item instanceof AppearanceDefaults family)) {
                 continue;
             }
+            TrimSlot slot = item instanceof TrimAttachmentItem attachment ? attachment.trimSlot() : TrimSlot.PERIMETER;
             models.put(location, switch (family.appearanceFamily()) {
                 case DOOR -> AppearanceItemOverrides.wrap(model, DoorAppearanceModels::item);
                 case WINDOW -> AppearanceItemOverrides.wrapStack(model, WindowAppearanceModel::item);
-                case TRIM -> AppearanceItemOverrides.wrap(model, UniversalTrimModels::item);
+                case TRIM -> AppearanceItemOverrides.wrap(model, (oak, look) -> TrimItemModels.item(slot, oak, look));
             });
         }
     }
@@ -106,7 +109,7 @@ public final class RoundwoodClient {
     @SubscribeEvent
     public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
         List<Item> doors = Stream.concat(ModItems.all().stream(), LegacyContent.items().stream())
-                .filter(item -> item instanceof AppearanceBlockItem family && family.appearanceFamily() == AppearanceFamily.DOOR)
+                .filter(item -> item instanceof AppearanceDefaults family && family.appearanceFamily() == AppearanceFamily.DOOR)
                 .toList();
         event.register((stack, tintIndex) -> {
             if (tintIndex != DoorAppearanceModels.PANEL_TINT) {

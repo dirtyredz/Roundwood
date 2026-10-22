@@ -5,7 +5,7 @@ import io.github.dirtyredz.roundwood.data.client.DoorModelProvider;
 import io.github.dirtyredz.roundwood.data.client.LegacyModelProvider;
 import io.github.dirtyredz.roundwood.data.client.RoundwoodLanguageProvider;
 import io.github.dirtyredz.roundwood.data.client.trim.TrimModelProvider;
-import io.github.dirtyredz.roundwood.data.client.trim.UniversalTrimItemModelProvider;
+import io.github.dirtyredz.roundwood.data.client.trim.AttachmentItemModelProvider;
 import io.github.dirtyredz.roundwood.data.client.window.OrientedWindowModelProvider;
 import io.github.dirtyredz.roundwood.data.client.window.WindowItemModelProvider;
 import io.github.dirtyredz.roundwood.data.client.window.WindowModelProvider;
@@ -38,7 +38,7 @@ public final class RoundwoodDataProviders {
         generator.addProvider(event.includeClient(), new TrimModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new DoorItemModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new WindowItemModelProvider(output, existingFiles));
-        generator.addProvider(event.includeClient(), new UniversalTrimItemModelProvider(output, existingFiles));
+        generator.addProvider(event.includeClient(), new AttachmentItemModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new LegacyModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new RoundwoodLanguageProvider(output));
 

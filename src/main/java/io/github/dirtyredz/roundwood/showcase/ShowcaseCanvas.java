@@ -14,6 +14,8 @@ import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimActions;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
+import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
@@ -166,16 +168,22 @@ public final class ShowcaseCanvas {
         pane(appearance, r, y, f, OrientedWindowBlock.withPose(piece.defaultBlockState(), pose), false);
     }
 
-    /** Places {@code window} (see {@link #pane}), then fits its face trims the way the trim item does, and tints its glass. */
+    /**
+     * Places {@code window} (see {@link #pane}), then fits its face trims and arch sills the way the
+     * items do, and tints its glass.
+     */
     public void window(ShowcaseWindow window) {
         pane(window.pane(), window.r(), window.y(), window.f(), window.state(), false);
         BlockPos pos = frame.pos(window.r(), window.y(), window.f());
-        for (AttachmentFace face : AttachmentFace.values()) {
-            window.trims().get(face).ifPresent(look -> {
-                if (!WindowTrimActions.install(level, pos, face, look)) {
-                    problem(face + " trim not fitted at " + pos.toShortString());
-                }
-            });
+        for (TrimSlot slot : TrimSlot.values()) {
+            FaceTrims fitted = slot == TrimSlot.SILL ? window.sills() : window.trims();
+            for (AttachmentFace face : AttachmentFace.values()) {
+                fitted.get(face).ifPresent(look -> {
+                    if (!WindowTrimActions.install(level, pos, slot, face, look)) {
+                        problem(face + " " + slot.getSerializedName() + " not fitted at " + pos.toShortString());
+                    }
+                });
+            }
         }
         if (window.glass().isPresent() && level.getBlockEntity(pos) instanceof RoundWindowBlockEntity entity) {
             entity.setGlass(window.glass());

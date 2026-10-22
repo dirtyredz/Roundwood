@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.attachment.item.ArchSillTrimItem;
 import io.github.dirtyredz.roundwood.block.attachment.item.UniversalTrimItem;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorItem;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowItem;
@@ -18,11 +19,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The twelve advertised items, in creative-tab order: door, the ten windows (each plain piece
- * followed by its crossed variant) and the Universal Trim ({@code round_trim}, 0.9.0: the one face-trim
- * attachment for windows and doors; it keeps its block association with the compatibility frame).
- * Their appearance travels in the stack. The hidden compatibility items (the 0.4.0 aliases and the
- * 0.8.0 {@code window_trim}) are registered by {@code migration/LegacyContent}.
+ * The 29 advertised items, in creative-tab order: door, the 26 windows (each plain piece followed by
+ * its crossed variant), the Universal Trim ({@code round_trim}, 0.9.0: the one perimeter attachment
+ * for windows and doors; it keeps its block association with the compatibility frame) and the Arch
+ * Sill ({@code arch_sill_trim}, 0.10.0: an item only, the upper arches' sill attachment). Their
+ * appearance travels in the stack. The hidden compatibility items (the 0.4.0 aliases and the 0.8.0
+ * {@code window_trim}) are registered by {@code migration/LegacyContent}.
  */
 public final class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Roundwood.MOD_ID);
@@ -35,6 +37,8 @@ public final class ModItems {
     public static final RegistryObject<RoundWindowItem> ROUND_WINDOW_ARCH_RIGHT = WINDOWS.get(WindowDesign.plain(WindowProfile.ARCH_RIGHT));
     public static final RegistryObject<UniversalTrimItem> ROUND_TRIM = ITEMS.register(UniversalTrimItem.ID,
             () -> new UniversalTrimItem(ModBlocks.roundTrim(), new Item.Properties()));
+    public static final RegistryObject<ArchSillTrimItem> ARCH_SILL_TRIM = ITEMS.register(ArchSillTrimItem.ID,
+            () -> new ArchSillTrimItem(new Item.Properties()));
 
     private ModItems() {
     }
@@ -52,17 +56,18 @@ public final class ModItems {
         return WINDOWS.get(design).get();
     }
 
-    /** The ten window items, in creative order. */
+    /** The 26 window items, in creative order. */
     public static List<Item> windows() {
         return WINDOWS.values().stream().map(RegistryObject::get).map(Item.class::cast).toList();
     }
 
-    /** The advertised items in creative order: door, the ten windows, the Universal Trim. */
+    /** The advertised items in creative order: door, the 26 windows, the Universal Trim, the Arch Sill. */
     public static List<Item> all() {
         List<Item> out = new ArrayList<>();
         out.add(ROUND_DOOR.get());
         out.addAll(windows());
         out.add(ROUND_TRIM.get());
+        out.add(ARCH_SILL_TRIM.get());
         return List.copyOf(out);
     }
 }

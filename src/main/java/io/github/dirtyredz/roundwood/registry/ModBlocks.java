@@ -25,9 +25,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The twelve canonical blocks: the round door, ten windows (the round window, the two arch pieces and
- * the two bottom corners that complete a 2 x 2 arched-top window, each plain and with cross beams)
- * and the round trim, whose look comes from their appearance (block entity), not from the block.
+ * The 28 canonical blocks: the round door, 26 windows (the round window; the upper arches and bottom
+ * corners that complete a 2 x 2 arched-top window; since 0.10.0 the lower arches that close it into
+ * a circle, the top corners and the four single-edge pieces; each plain and with cross beams) and
+ * the round trim, whose look comes from their appearance (block entity), not from the block.
  * Their behaviour is the oak counterparts' whatever the appearance. The hidden 0.4.0 aliases are
  * registered by {@code migration/LegacyContent} with the same properties.
  */
@@ -36,7 +37,7 @@ public final class ModBlocks {
 
     public static final RegistryObject<RoundDoorBlock> ROUND_DOOR = BLOCKS.register("round_door",
             () -> new RoundDoorBlock(doorProperties(), BlockSetType.OAK, ModBlockEntities::roundDoor));
-    /** The ten windows by design, in creative order (each plain piece, then its crossed variant). */
+    /** The 26 windows by design, in creative order (each plain piece, then its crossed variant). */
     private static final Map<WindowDesign, RegistryObject<WindowPaneBlock>> WINDOWS = registerWindows();
     public static final RegistryObject<RoundTrimBlock> ROUND_TRIM = BLOCKS.register("round_trim",
             () -> new RoundTrimBlock(trimProperties(), ModBlockEntities::roundTrim));
@@ -81,12 +82,12 @@ public final class ModBlocks {
         return WINDOWS.get(design).get();
     }
 
-    /** All ten canonical windows, in creative order. */
+    /** All 26 canonical windows, in creative order. */
     public static List<WindowPaneBlock> windows() {
         return WINDOWS.values().stream().map(RegistryObject::get).toList();
     }
 
-    /** The eight oriented windows (arches and corners, plain and crossed). */
+    /** The 24 oriented windows (every piece but the round window, plain and crossed). */
     public static List<OrientedWindowBlock> orientedWindows() {
         return windows().stream().filter(OrientedWindowBlock.class::isInstance).map(OrientedWindowBlock.class::cast).toList();
     }
@@ -95,7 +96,7 @@ public final class ModBlocks {
         return ROUND_TRIM.get();
     }
 
-    /** The twelve canonical blocks in creative order: door, the ten windows, trim. */
+    /** The 28 canonical blocks in creative order: door, the 26 windows, trim. */
     public static List<Block> canonical() {
         List<Block> out = new ArrayList<>();
         out.add(roundDoor());

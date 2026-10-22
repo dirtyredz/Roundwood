@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.client.window.trim;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimGeometry;
@@ -38,14 +39,14 @@ import java.util.Map;
  * side: a projecting trim must never be dropped because the neighbouring cell is solid; ordinary
  * depth testing decides what shows). Wood tiles like a block, the edge UVs folded back into the
  * sprite even at {@code -1} and {@code 17} ({@link FaceUv#tiled}); paint and masonry spread one image
- * over the round window or the whole 2 x 2 arched window ({@link WindowTrimUv}). Cached per profile,
+ * over the piece's artwork extent ({@link WindowTrimUv}). Since 0.10.0 also the arch sill. Cached per slot, profile,
  * pose, side and look; cleared with every appearance cache on reload.
  */
 public final class WindowTrimWorldModels {
     private static final ResourceLocation NAME = ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, "window_trim");
     private static final FaceBakery BAKERY = new FaceBakery();
 
-    private record Key(WindowProfile profile, WindowPose pose, Direction side, TrimLooks.Look look) {
+    private record Key(TrimSlot slot, WindowProfile profile, WindowPose pose, Direction side, TrimLooks.Look look) {
     }
 
     private static final AppearanceModelCache<Key, BakedModel> MODELS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
@@ -53,16 +54,16 @@ public final class WindowTrimWorldModels {
     private WindowTrimWorldModels() {
     }
 
-    /** The band on {@code side} (along the normal) of a window posed {@code pose}, in {@code look}. */
-    public static BakedModel model(WindowProfile profile, WindowPose pose, Direction side, TrimLooks.Look look) {
-        return MODELS.get(new Key(profile, pose, side, look), WindowTrimWorldModels::build);
+    /** The attachment in {@code slot} on {@code side} (along the normal) of a window posed {@code pose}, in {@code look}. */
+    public static BakedModel model(TrimSlot slot, WindowProfile profile, WindowPose pose, Direction side, TrimLooks.Look look) {
+        return MODELS.get(new Key(slot, profile, pose, side, look), WindowTrimWorldModels::build);
     }
 
     private static BakedModel build(Key key) {
         TextureAtlasSprite face = DonorSprites.atlas(key.look().face());
         TextureAtlasSprite edge = DonorSprites.atlas(key.look().edge());
         List<BakedQuad> quads = new ArrayList<>();
-        for (Surface surface : WindowTrimSurfaces.surfaces(key.profile(), key.pose(), key.side())) {
+        for (Surface surface : WindowTrimSurfaces.surfaces(key.slot(), key.profile(), key.pose(), key.side())) {
             boolean outward = surface.texture().equals(WindowTrimGeometry.FACE);
             TextureAtlasSprite sprite = outward ? face : edge;
             BakedQuad quad = bake(surface.backing(), surface.face(), sprite);

@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.data.server;
 
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimNbt;
+import io.github.dirtyredz.roundwood.block.window.trim.WindowSillNbt;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimNbt;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
@@ -26,7 +27,8 @@ import java.util.stream.Stream;
  * {@link AttachmentLootPools}): a styled Universal Trim ({@code round_trim}, 0.9.0, for windows too)
  * for each face that carries one, under the host's explosion rule. A door evaluates its loot with its anchor's entity
  * supplied, from whichever quarter broke. So a window with two trims drops three items, and nothing
- * ever refunds a trim outside loot except shears.
+ * ever refunds a trim outside loot except shears. The upper arches (0.10.0) add two more pools, one
+ * per face's arch sill ({@code WindowSillTrim}), so an arch with both trims and both sills drops five.
  */
 public class RoundwoodBlockLoot extends BlockLootSubProvider {
     public RoundwoodBlockLoot() {
@@ -37,25 +39,26 @@ public class RoundwoodBlockLoot extends BlockLootSubProvider {
     protected void generate() {
         add(ModBlocks.roundDoor(), door(ModItems.ROUND_DOOR.get()));
         dropSelf(ModBlocks.roundTrim());
-        ModBlocks.windows().forEach(window -> add(window, window(window.asItem())));
+        ModBlocks.windows().forEach(window -> add(window, window(window.asItem(), window.profile().takesSill())));
         LegacyContent.doors().forEach(block -> add(block, door(ModItems.ROUND_DOOR.get())));
-        LegacyContent.windows().forEach(block -> add(block, window(ModItems.ROUND_WINDOW.get())));
+        LegacyContent.windows().forEach(block -> add(block, window(ModItems.ROUND_WINDOW.get(), false)));
         LegacyContent.trims().forEach(block -> dropOther(block, ModItems.ROUND_TRIM.get()));
     }
 
-    /** The window's item, plus a Universal Trim per trimmed face. */
-    private LootTable.Builder window(Item pane) {
-        return withFaces(createSingleItemTable(pane), WindowTrimNbt.TAG);
+    /** The window's item, plus a Universal Trim per trimmed face and, on an upper arch, an Arch Sill per silled face. */
+    private LootTable.Builder window(Item pane, boolean sills) {
+        LootTable.Builder table = withFaces(createSingleItemTable(pane), TrimSlot.PERIMETER, WindowTrimNbt.TAG);
+        return sills ? withFaces(table, TrimSlot.SILL, WindowSillNbt.TAG) : table;
     }
 
     /** The door's item, plus a Universal Trim per trimmed face. */
     private LootTable.Builder door(Item door) {
-        return withFaces(createSingleItemTable(door), DoorTrimNbt.TAG);
+        return withFaces(createSingleItemTable(door), TrimSlot.PERIMETER, DoorTrimNbt.TAG);
     }
 
-    private LootTable.Builder withFaces(LootTable.Builder table, String payload) {
-        Item trim = ModItems.ROUND_TRIM.get();
-        AttachmentLootPools.faces(TrimSlot.PERIMETER, trim, payload, pool -> applyExplosionCondition(trim, pool)).forEach(table::withPool);
+    private LootTable.Builder withFaces(LootTable.Builder table, TrimSlot slot, String payload) {
+        Item item = slot == TrimSlot.SILL ? ModItems.ARCH_SILL_TRIM.get() : ModItems.ROUND_TRIM.get();
+        AttachmentLootPools.faces(slot, item, payload, pool -> applyExplosionCondition(item, pool)).forEach(table::withPool);
         return table;
     }
 

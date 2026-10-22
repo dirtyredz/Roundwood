@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowFaceIdentity;
@@ -25,7 +26,7 @@ import net.minecraftforge.client.model.data.ModelData;
 import java.util.Optional;
 
 /**
- * Draws a window's face trims (0.8.0): each fitted face's band, opaque, from cached models
+ * Draws a window's face attachments (0.8.0; arch sills since 0.10.0): each fitted face's band, opaque, from cached models
  * ({@link WindowTrimWorldModels}), tessellated like a block at the window's own cell (world light,
  * ambient occlusion) in the solid layer, without cull sides. Each face's slot is mapped to its world
  * side by the window's face identity, so a trim stays where it was fitted. A flush, floor or ceiling
@@ -45,32 +46,34 @@ public class WindowTrimRenderer implements BlockEntityRenderer<RoundWindowBlockE
                        int light, int overlay) {
         Level level = entity.getLevel();
         BlockState state = entity.getBlockState();
-        FaceTrims trims = entity.trims();
-        if (level == null || !trims.any() || !(state.getBlock() instanceof WindowPaneBlock block)) {
+        if (level == null || !entity.anyAttachment() || !(state.getBlock() instanceof WindowPaneBlock block)) {
             return;
         }
         WindowPose windowPose = block.pose(state);
         boolean reversed = WindowPaneBlock.faceReversed(state);
         BlockPos pos = entity.getBlockPos();
         VertexConsumer consumer = buffers.getBuffer(RenderType.solid());
-        for (AttachmentFace face : AttachmentFace.values()) {
-            Optional<Appearance> look = trims.get(face);
-            if (look.isEmpty()) {
-                continue;
+        for (TrimSlot slot : TrimSlot.values()) {
+            FaceTrims trims = entity.trims(slot);
+            for (AttachmentFace face : AttachmentFace.values()) {
+                Optional<Appearance> look = trims.get(face);
+                if (look.isEmpty()) {
+                    continue;
+                }
+                Direction side = WindowFaceIdentity.side(windowPose, reversed, face);
+                renderer.tesselateBlock(level, WindowTrimWorldModels.model(slot, block.profile(), windowPose, side,
+                                WindowTrimModels.look(look.get(), slot, block.profile())), state, pos, pose, consumer, false, random,
+                        state.getSeed(pos), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.solid());
             }
-            Direction side = WindowFaceIdentity.side(windowPose, reversed, face);
-            renderer.tesselateBlock(level, WindowTrimWorldModels.model(block.profile(), windowPose, side,
-                            WindowTrimModels.look(look.get(), block.profile())), state, pos, pose, consumer, false, random,
-                    state.getSeed(pos), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.solid());
         }
     }
 
     /**
-     * Like the door: a band may reach past the window's section, so a trimmed window is drawn whenever
-     * its bounds are in view. Untrimmed windows stay with their section (they draw nothing here).
+     * Like the door: a band may reach past the window's section, so a window with any attachment is
+     * drawn whenever its bounds are in view. Bare windows stay with their section (they draw nothing here).
      */
     @Override
     public boolean shouldRenderOffScreen(RoundWindowBlockEntity entity) {
-        return entity.trims().any();
+        return entity.anyAttachment();
     }
 }

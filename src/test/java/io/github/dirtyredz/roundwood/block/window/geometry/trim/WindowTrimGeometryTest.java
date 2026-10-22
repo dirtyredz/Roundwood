@@ -4,6 +4,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPaneGeometry;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPaneGeometryTest;
+import io.github.dirtyredz.roundwood.block.window.geometry.WindowShapes;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimGeometry;
@@ -47,7 +48,7 @@ class WindowTrimGeometryTest {
         }
     }
 
-    /** Written out independently: the 16/12 ring, the 32/28 ring around (16, 0) of the arches, the corners' jamb and sill. */
+    /** Written out independently: the 16/12 ring, the 32/28 ring of the arches (reflected for the lower ones), the corners' jamb and sill or head, the one framed edge. */
     static boolean expectedBand(WindowProfile profile, int u, int v) {
         double cu = u + 0.5;
         double cv = v + 0.5;
@@ -63,6 +64,18 @@ class WindowTrimGeometryTest {
             }
             case BOTTOM_LEFT -> u < 2 || v < 2;
             case BOTTOM_RIGHT -> u >= 14 || v < 2;
+            case ARCH_BOTTOM_LEFT, ARCH_BOTTOM_RIGHT -> {
+                double x = cu + (profile == WindowProfile.ARCH_BOTTOM_RIGHT ? 16 : 0) - 16;
+                double y = 16 - cv;
+                double d = x * x + y * y;
+                yield d <= 256 && d > 196;
+            }
+            case TOP_LEFT -> u < 2 || v >= 14;
+            case TOP_RIGHT -> u >= 14 || v >= 14;
+            case EDGE_TOP -> v >= 14;
+            case EDGE_LEFT -> u < 2;
+            case EDGE_BOTTOM -> v < 2;
+            case EDGE_RIGHT -> u >= 14;
         };
     }
 
@@ -116,9 +129,9 @@ class WindowTrimGeometryTest {
             for (WindowPose pose : WindowPaneGeometryTest.allPoses()) {
                 List<Box> collision = WindowPaneGeometry.boxes(design, pose, Set.of());
                 assertEquals(List.of(pose.slab()), collision, design.id() + " " + pose);
-                assertEquals(collision, WindowPaneGeometry.selection(design, pose, Set.of(), Set.of()));
+                assertEquals(collision, WindowShapes.selectionBoxes(design, pose, Set.of(), Set.of(), Set.of()));
                 for (Direction side : sides(pose)) {
-                    List<Box> selection = WindowPaneGeometry.selection(design, pose, Set.of(), Set.of(side));
+                    List<Box> selection = WindowShapes.selectionBoxes(design, pose, Set.of(), Set.of(side), Set.of());
                     boolean inCell = range(WindowTrimGeometry.pieces(design.profile(), pose, side).get(0).box(), pose.normal())[0] >= 0
                             && range(WindowTrimGeometry.pieces(design.profile(), pose, side).get(0).box(), pose.normal())[1] <= 16;
                     if (inCell != (selection.size() > collision.size())) {

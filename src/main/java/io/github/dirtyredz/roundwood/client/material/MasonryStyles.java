@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.client.material;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.material.MasonryMaterials;
-import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
+import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimLayout;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -10,8 +10,11 @@ import net.minecraft.resources.ResourceLocation;
  * (keyed by {@link MasonryMaterials.Material#artwork}). Since 0.7.0 every masonry face uses the
  * thin-mortar artwork: the door ring's 64 x 64 radial face, the round window trim's 32 x 32 radial
  * face and the arched window trim's 64 x 64 face (radial above the spring line, straight courses
- * below), and since 0.9.0 the Universal Trim icon's 32 x 32 square-frame face (straight courses). The
- * 0.5.0 thick-mortar faces stay generated, unchanged, but nothing draws them. Every masonry trim
+ * below), and since 0.9.0 the Universal Trim icon's 32 x 32 square-frame face (straight courses).
+ * 0.10.0 binds every window attachment layout explicitly ({@link WindowTrimLayout}): the lower arches
+ * the door ring's full radial face (its upper half is pixel for pixel the arched window's), the top
+ * corners a head-and-jambs face, the single edges a straight-run face and the arch sill one course.
+ * The 0.5.0 thick-mortar faces stay generated, unchanged, but nothing draws them. Every masonry trim
  * shares the granular edge.
  */
 public final class MasonryStyles {
@@ -23,14 +26,27 @@ public final class MasonryStyles {
         return texture("trim_radial_thin_" + material.artwork());
     }
 
-    /** A window trim's face, spread over the round window or the whole 2 x 2 arched window. */
-    public static ResourceLocation windowFace(MasonryMaterials.Material material, WindowProfile profile) {
-        return texture((profile == WindowProfile.ROUND ? "window_trim_round_" : "window_trim_arch_") + material.artwork());
+    /** A window attachment's face for {@code layout}, spread over the piece's whole-face artwork extent. */
+    public static ResourceLocation windowFace(MasonryMaterials.Material material, WindowTrimLayout layout) {
+        String stem = switch (layout) {
+            case ROUND -> "window_trim_round_";
+            case ARCH -> "window_trim_arch_";
+            case CIRCLE -> "trim_radial_thin_";
+            case FRAME -> "window_trim_frame_";
+            case EDGE -> "window_trim_single_";
+            case SILL -> "window_sill_";
+        };
+        return texture(stem + material.artwork());
     }
 
     /** The Universal Trim icon's square-frame face (0.9.0). */
     public static ResourceLocation squareFace(MasonryMaterials.Material material) {
         return texture("universal_trim_" + material.artwork());
+    }
+
+    /** The Arch Sill icon's face (0.10.0): the sill's own course. */
+    public static ResourceLocation sillFace(MasonryMaterials.Material material) {
+        return windowFace(material, WindowTrimLayout.SILL);
     }
 
     public static ResourceLocation edge(MasonryMaterials.Material material) {

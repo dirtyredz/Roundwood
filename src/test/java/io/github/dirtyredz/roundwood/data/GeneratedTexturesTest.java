@@ -76,11 +76,14 @@ class GeneratedTexturesTest {
             expected.add("trim_radial_thin_" + masonry);
             expected.add("window_trim_round_" + masonry);
             expected.add("window_trim_arch_" + masonry);
+            expected.add("window_trim_frame_" + masonry);
+            expected.add("window_trim_single_" + masonry);
+            expected.add("window_sill_" + masonry);
         }
         for (String masonry : MASONRY) {
             expected.add("universal_trim_" + masonry);
         }
-        assertEquals(89, expected.size());
+        assertEquals(89 + 12, expected.size()); // 89 of 0.9.0 plus frame, single and sill for the four masonries
         TreeSet<String> actual = new TreeSet<>();
         try (Stream<Path> files = Files.list(DIR)) {
             files.map(p -> p.getFileName().toString()).filter(n -> n.endsWith(".png"))
@@ -104,6 +107,9 @@ class GeneratedTexturesTest {
             assertSize("trim_radial_thin_" + masonry, 64);
             assertSize("window_trim_round_" + masonry, 32);
             assertSize("window_trim_arch_" + masonry, 64);
+            assertSize("window_trim_frame_" + masonry, 64);
+            assertSize("window_trim_single_" + masonry, 32);
+            assertSize("window_sill_" + masonry, 64);
             assertSize("universal_trim_" + masonry, 32);
         }
         for (String dye : DYES) {
@@ -186,6 +192,29 @@ class GeneratedTexturesTest {
                 entry("window_trim_face", "557ffd5b8d9e741ee20842289d7b63fdcd2a56ba667e885f63a06bdd3b9d4633"),
                 entry("window_trim_edge", "ca68630bdc82d76ec9cd94ac562618eb0a36865327ae29f124f378face8379d6"));
         assertEquals(15, hashes.size());
+        for (Map.Entry<String, String> entry : hashes.entrySet()) {
+            byte[] digest = MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(DIR.resolve(entry.getKey() + ".png")));
+            assertEquals(entry.getValue(), HexFormat.of().formatHex(digest), entry.getKey() + ".png changed");
+        }
+    }
+
+    /** The twelve files added in 0.10.0 (frame, single and sill trims) are new artwork, pinned against drift. */
+    @Test
+    void the12TexturesAddedIn0100AreTheirPinnedArtwork() throws Exception {
+        Map<String, String> hashes = Map.ofEntries(
+                entry("window_trim_frame_brick", "cd5f873b423a418b26559df8731df617254797ede9734a4c8923e9c13121daf1"),
+                entry("window_trim_frame_deepslate_brick", "1a9294a911af481a6c5068a2c8ede3b17a2324a88251822bd55825bc8d8bb41f"),
+                entry("window_trim_frame_mud_brick", "fd45c98377ac93ae33365e21c6644f5bfa121d7e96a928d728dba965523e709a"),
+                entry("window_trim_frame_stone_brick", "a1c5f955a97f271ad72989089f89d0968e49f8bfe5fab15c7443ed877c1ae7eb"),
+                entry("window_trim_single_brick", "aa53f5a34a395d81795cc1f4523023c5b463e6382b31e0c37130e063706cc124"),
+                entry("window_trim_single_deepslate_brick", "262bd8c610591552bf15043d95b318678cb99411ea357d5ae5947edcaf2d8901"),
+                entry("window_trim_single_mud_brick", "8f3112428ce1d649094d78cd46875ec60d19f7968ff22ae4cd1e52537e840a32"),
+                entry("window_trim_single_stone_brick", "0e9c3aad8a275dc6212612e090dc6a23ea344b46b3f92638c8d9e44c7823f76b"),
+                entry("window_sill_brick", "8f5d07f6a8fd1d0bc8f454c7c626f4dcdba4473268b5e972f76f12d4659d9d5f"),
+                entry("window_sill_deepslate_brick", "99cf7f30108f85d570becfee21ba045f11782d71c9d0666be1afd6e4aecad512"),
+                entry("window_sill_mud_brick", "4045ecd7a2d5da2ba752cdf729c5cd01600fff8c165c8fba367745fa73e241bb"),
+                entry("window_sill_stone_brick", "e7143d83ab4b3129a9b10ce0f8f4730c9eadf968ea9b98070ef3d25d8ccbd37b"));
+        assertEquals(12, hashes.size());
         for (Map.Entry<String, String> entry : hashes.entrySet()) {
             byte[] digest = MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(DIR.resolve(entry.getKey() + ".png")));
             assertEquals(entry.getValue(), HexFormat.of().formatHex(digest), entry.getKey() + ".png changed");

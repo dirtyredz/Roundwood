@@ -177,7 +177,7 @@ class GeneratedWindowPaneModelsTest {
             assertEquals(ModelExpectations.GLASS, model.texture("#glass"), id);
             checked++;
         }
-        assertEquals(110, checked, "window block models");
+        assertEquals(302, checked, "window block models");
     }
 
     /**
@@ -214,6 +214,14 @@ class GeneratedWindowPaneModelsTest {
             case ARCH_RIGHT -> cu * cu + cv * cv <= 196;
             case BOTTOM_LEFT -> u >= 2 && v >= 2;
             case BOTTOM_RIGHT -> u < 14 && v >= 2;
+            case ARCH_BOTTOM_LEFT -> (cu - 16) * (cu - 16) + (16 - cv) * (16 - cv) <= 196;
+            case ARCH_BOTTOM_RIGHT -> cu * cu + (16 - cv) * (16 - cv) <= 196;
+            case TOP_LEFT -> u >= 2 && v < 14;
+            case TOP_RIGHT -> u < 14 && v < 14;
+            case EDGE_TOP -> v < 14;
+            case EDGE_LEFT -> u >= 2;
+            case EDGE_BOTTOM -> v >= 2;
+            case EDGE_RIGHT -> u < 14;
         };
         boolean beam = design.pattern().name().equals("CROSS") && (hu == 15 || hu == 16 || hv == 15 || hv == 16);
         return opening && !beam;

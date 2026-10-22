@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "roundwood:round_window_edge",
+  "key": {
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "P": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    " G ",
+    "PPP"
+  ],
+  "result": {
+    "item": "roundwood:round_window_edge_bottom"
+  },
+  "show_notification": true
+}

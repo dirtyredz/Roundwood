@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.window.geometry.trim;
 
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.geometry.Box;
@@ -15,7 +16,8 @@ import java.util.List;
  * mounting face against the pane (always covered) and never a face between two band pixels. A reveal
  * on the cell's own edge is drawn too: beside a matching piece it is enclosed between two bands and
  * cannot be seen. The band keeps its full proud depth whatever the pane's depth, so a flush window's
- * wall-side band reaches one pixel past the cell. Plain Java apart from {@link Direction}.
+ * wall-side band reaches one pixel past the cell. An arch sill ({@link TrimSlot#SILL}, 0.10.0) is drawn
+ * the same way from its own pixels. Plain Java apart from {@link Direction}.
  */
 public final class WindowTrimSurfaces {
     private static final int SIZE = WindowProfile.SIZE;
@@ -23,17 +25,22 @@ public final class WindowTrimSurfaces {
     private WindowTrimSurfaces() {
     }
 
-    /** The visible surfaces of the band on {@code side} (along the normal) of a pane posed {@code pose}. */
+    /** The visible surfaces of the perimeter band on {@code side} (along the normal) of a pane posed {@code pose}. */
     public static List<Surface> surfaces(WindowProfile profile, WindowPose pose, Direction side) {
+        return surfaces(TrimSlot.PERIMETER, profile, pose, side);
+    }
+
+    /** The visible surfaces of the attachment in {@code slot} on {@code side} of a pane posed {@code pose}. */
+    public static List<Surface> surfaces(TrimSlot slot, WindowProfile profile, WindowPose pose, Direction side) {
         double[] depth = WindowTrimGeometry.depth(pose, side);
         boolean[] band = new boolean[SIZE * SIZE];
         for (int u = 0; u < SIZE; u++) {
             for (int v = 0; v < SIZE; v++) {
-                band[u * SIZE + v] = WindowTrimGeometry.inBand(profile, u, v);
+                band[u * SIZE + v] = WindowTrimGeometry.covers(slot, profile, u, v);
             }
         }
         List<Surface> out = new ArrayList<>();
-        WindowTrimGeometry.band(profile).forEach(rect -> out.add(new Surface(
+        WindowTrimGeometry.band(slot, profile).forEach(rect -> out.add(new Surface(
                 pose.toWorld(rect.u1(), rect.v1(), rect.u2(), rect.v2(), depth[0], depth[1]), side, WindowTrimGeometry.FACE)));
         Direction right = pose.right();
         Direction top = pose.top();
