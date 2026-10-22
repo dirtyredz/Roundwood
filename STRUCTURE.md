@@ -1,6 +1,6 @@
 # STRUCTURE — Roundwood
 
-<!-- Last full review: never -->
+<!-- Last full review: 2026-10-21 -->
 
 Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -41,7 +41,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `src/main/java/io/github/dirtyredz/roundwood/block/window/placement/` — targeted placement: the face-zone classifier and its polygons (one authority), the use-context adapter, round position and arch pose
 - `src/main/java/io/github/dirtyredz/roundwood/block/window/connection/` — the connection rule and junction decisions between panes, walls, bars and windows
 - `src/main/java/io/github/dirtyredz/roundwood/showcase/` — the `/roundwood showcase` command, bounded builder, coordinate frame, canvas (samples, appearance placement), the listed `ShowcaseWindow` and section registry
-- `src/main/java/io/github/dirtyredz/roundwood/showcase/section/` — one class per showcase section (doors, camouflage, windows, windows, window positions, window arches, window corners, window cross beams, window trims, redstone, paints, trim combinations, brick arches)
+- `src/main/java/io/github/dirtyredz/roundwood/showcase/section/` — one class per showcase section (doors, camouflage, windows, window positions, window arches, window corners, window cross beams (`WindowMuntinsSection`), window trims, redstone, paints, trim combinations, brick arches)
 - `src/main/java/io/github/dirtyredz/roundwood/geometry/` — pixel circles, boxes, the shared ring profile, tile-normalised UVs (`FaceUv.tiled`), tiled and whole-assembly face UVs, voxel-shape conversion (shared)
 - `src/main/java/io/github/dirtyredz/roundwood/client/` — client-only mod-bus wiring (`RoundwoodClient`)
 - `src/main/java/io/github/dirtyredz/roundwood/client/door/` — the door leaf renderer, the door trim renderer, appearance leaf models, leaf model names, targeting events, highlight, particles
@@ -71,7 +71,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 | Component | Files | Responsibility |
 |---|---|---|
 | Appearance | `appearance/Appearance`, `AppearanceFamily`, `AppearanceDefaults`, `AppearanceNbt`, `AppearanceChanges`, `AppearanceSamples` | Immutable look (wood/masonry + optional dye), which family takes what, a block's/item's default, the one NBT form, restyle rules, bounded examples |
-| Materials | `appearance/material/PlankMaterials`, `MasonryMaterials` | Plank donors by tag (+ `roundwood:appearance_planks`), the four masonry blocks and their artwork keys |
+| Materials | `appearance/material/PlankMaterials`, `MasonryMaterials`, `DonorStacks` (package-private) | Plank donors by tag (+ `roundwood:appearance_planks`), the four masonry blocks and their artwork keys; the shared rule that a stack carrying placed contents or a non-default state is never a donor |
 | Items | `appearance/item/AppearanceStacks`, `AppearanceBlockItem`, `AppearanceDrops` | Normalised stack NBT, the family item (tooltip, alias name, no block-map claim), loot decoration |
 | Gestures | `appearance/interaction/AppearanceGestures`, `AppearanceActions`, `AppearanceUseEvents` | Recognise sneak+planks/dye/masonry; one checked mutation and payment; let sneak gestures reach the block |
 | Registry | `registry/*` (incl. `ModLootConditions`) | `round_door`, ten windows (`round_window`, `round_window_arch_left/right`, `round_window_bottom_left/right`, each also `_cross`), `round_trim`: twelve canonical blocks, thirteen items (the thirteenth is `window_trim`, an item only; the `round_trim` item is the Door Trim, its block the compatibility frame); 61 block and 62 item registrations with the 49 aliases; entity types valid for canonical + aliases (the window entity serves the ten windows and 15 alias windows); tab with thirteen items; family tags (`roundwood:round_windows` lists the ten windows; `round_trims` holds the Door Trim item, and window trim as an item); the `roundwood:trim_face` loot condition type |
@@ -84,14 +84,14 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 | Leaf, selection, camouflage | `block/door/leaf/*`, `selection/*`, `camouflage/*` | Leaf geometry and swing timeline; resting and swinging outlines (`DoorSwingOutline`, 0.6.1); camouflage unchanged |
 | Trim (compatibility frame) | `block/trim/RoundTrimBlock`, `RoundTrimBlockEntity`, `appearance/TrimAppearance`, `assembly/*`, `geometry/*` | Static ring quarters from older saves with an anchor entity holding the look; no item places them any more |
 | Door trim | `block/door/trim/*` (`DoorTrimItem`, `DoorTrimNbt`, `DoorTrimGeometry`, `DoorTrimTarget`, actions), `block/door/assembly/DoorBlockEntities`, `block/door/interaction/DoorInteraction` | The Door Trim item and its per-face rings stored on the door anchor; targeting and routing ahead of restyle, camouflage and toggle |
-| Window | `block/window/*` (`WindowPaneBlock`, `RoundWindowBlock`, `OrientedWindowBlock`, `RoundWindowBlockEntity`, `RoundWindowItem`, `WindowAppearanceData`), `geometry/*` (`WindowPose`, `WindowFaceIdentity`, `WindowDepth`, `WindowPaneGeometry`, `WindowShapes`, `WindowSurfaceGeometry`), `geometry/face/*` (`WindowProfile`, `WindowArchGeometry`, `WindowCornerGeometry`, `WindowPattern`, `WindowMuntinGeometry`, `WindowDesign`), `geometry/trim/*` (`WindowTrimGeometry`, `WindowTrimSurfaces`, `WindowTrimUv`), `interaction/*` (`WindowHitRegions`, `WindowHitTarget`, `WindowUseRules`, `WindowInteraction`), `trim/*` (`WindowTrimItem`, `WindowTrimNbt`, `WindowTrimActions`), `glass/*` (`WindowGlassNbt`, `WindowGlassStacks`, `WindowGlassActions`), `placement/*` (`WindowTargetZones`, `WindowPlacement`), `connection/WindowConnections` | Pane (round, arch or corner; plain or cross beams; posed by orientation/depth/position, `face_reversed` for face identity) with a per-window frame look and glass colour handed to its chunk model as model data; the logical pieces painted into visible surfaces; the trim attachments (item, versioned payload, bands per face); the shared hit classification and the pure routing table behind the click router; zone classifier and placement; junction and connection rules |
-| Client materials | `client/material/DonorSprites`, `DonorColors`, `BuiltinWoodStyles`, `PaintStyles`, `MasonryStyles`, `ModelRetexturing`, `AppearanceModelCache` | Representative donor sprites, sampled tints, wood and paint artwork bindings, masonry faces (thin-mortar door ring, window faces), immutable quad transforms (also by position UVs), bounded caches cleared together on reload |
+| Window | `block/window/*` (`WindowPaneBlock`, `RoundWindowBlock`, `OrientedWindowBlock`, `RoundWindowBlockEntity`, `RoundWindowItem`, `WindowAppearanceData`), `placement/*` (`WindowOrientation`, `WindowPosition`, `WindowTargetZones`, `WindowPlacement`), `geometry/*` (`WindowPose`, `WindowFaceIdentity`, `WindowDepth`, `WindowPaneGeometry`, `WindowShapes`, `WindowSurfaceGeometry`), `geometry/face/*` (`WindowProfile`, `WindowArchGeometry`, `WindowCornerGeometry`, `WindowPattern`, `WindowMuntinGeometry`, `WindowDesign`), `geometry/trim/*` (`WindowTrimGeometry`, `WindowTrimSurfaces`, `WindowTrimUv`), `interaction/*` (`WindowHitRegions`, `WindowHitTarget`, `WindowUseRules`, `WindowInteraction`), `trim/*` (`WindowTrimItem`, `WindowTrimNbt`, `WindowTrimActions`, `WindowTrimTarget`), `glass/*` (`WindowGlassNbt`, `WindowGlassStacks`, `WindowGlassActions`), `connection/WindowConnections` | Pane (round, arch or corner; plain or cross beams; posed by orientation/depth/position, `face_reversed` for face identity) with a per-window frame look and glass colour handed to its chunk model as model data; the logical pieces painted into visible surfaces; the trim attachments (item, versioned payload, bands per face); the shared hit classification and the pure routing table behind the click router; zone classifier and placement; junction and connection rules |
+| Client materials | `client/material/DonorSprites`, `DonorColors`, `BuiltinWoodStyles`, `PaintStyles`, `MasonryStyles`, `GlassStyles`, `ModelRetexturing`, `AppearanceModelCache` | Representative donor sprites, sampled tints, wood, paint and glass (clear and stained) artwork bindings, masonry faces (thin-mortar door ring, window faces), immutable quad transforms (also by position UVs), bounded caches cleared together on reload |
 | Door rendering | `client/door/RoundDoorRenderer`, `DoorTrimRenderer`, `DoorAppearanceModels`, `DoorLeafModels`, `DoorParticles`, `DoorTargetingEvents`, `DoorHighlightRenderer` | BER drawing the appearance leaf (panel retextured/tinted, brass untouched); `DoorTrimRenderer` draws the face rings before the swing transforms from the frame's turned quarter models |
 | Trim / window / item rendering | `client/trim/*`, `client/window/*`, `client/render/OutlineLines`, `client/item/AppearanceItemOverrides` | Anchor BER tessellating turned quarter models; the window chunk model (frame look and glass colour, pane only); `WindowTrimRenderer` drawing trims from cached `WindowTrimWorldModels`; item cache keyed by model, wood and glass (`WindowItemModels`), trim item model per stack; placement preview and overlay (`WindowPlacementPreview`, `WindowPlacementOverlay`); per-stack item models |
 | Viewers | `client/compat/emi/*`, `client/compat/jei/*` | Optional, annotation-discovered, never loaded without the viewer |
 | Showcase | `showcase/*`, `showcase/section/*` | Op-only command; sections place canonical blocks through production paths with explicit appearances; `ShowcaseWindow` lists each window (design, pose, frame coordinates, looks) so building and the GameTest check read the same list |
-| Datagen | `data/**`, `data/client/window/*` | Oak source models + empty world models, window models as visible surfaces (`WindowModelProvider`, `OrientedWindowModelProvider`, `WindowPaneModelWriter`, `GeometryModelWriter.addSurfaces`; 110 pane-only window block models, each state one complete model, no trimmed variants), item providers (`WindowItemModelProvider`, `WindowTrimItemModelProvider`), alias compatibility resources, thirteen recipes, loot (`AttachmentLootPools`: one pool per face for windows and doors), tags, names |
-| Texture tools | `tools/generate-textures.mjs`, `tools/textures/*` | Orchestrator plus artwork modules (palettes append only, so old bytes never change); `window-glass.mjs` also writes the clearer glass, `stained-glass.mjs` the sixteen `window_glass_<dye>` textures, `window-trims.mjs` the thin-mortar trim faces |
+| Datagen | `data/**`, `data/client/window/*` | Oak source models + empty world models, window models as visible surfaces (`WindowModelProvider`, `OrientedWindowModelProvider`, `WindowPaneModelWriter`, `GeometryModelWriter.addSurfaces`; 110 pane-only window block models, each state one complete model, no trimmed variants), item providers (`WindowItemModelProvider`, `WindowTrimItemModelProvider`), display transforms (`ItemModelTransforms`), alias models (`LegacyModelProvider`), alias compatibility resources, thirteen recipes, loot (`AttachmentLootPools`: one pool per face for windows and doors), tags, names |
+| Texture tools | `tools/generate-textures.mjs`, `tools/textures/*` | Orchestrator plus artwork modules (palettes append only, so old bytes never change); `stained-glass.mjs` writes the sixteen `window_glass_<dye>` textures, `window-trims.mjs` the thin-mortar trim faces and the clearer glass (`clearWindowGlass`) |
 
 ## Dependency direction
 
@@ -149,6 +149,28 @@ rules and `ModelRetexturing`'s array arithmetic are plain enough for unit tests 
 - Window trim fitting moved from the item into the window router, so `WindowTrimItem` does not import
   `interaction/`; the bridge asks the block's router (`claimsUse`), not the item.
 - Debt: `block/window/` now has 12 entries, over the 10-entry cap (it was already 11 in 0.7.0). Split
-  later, for example by grouping `trim/` and `glass/` under a `looks/` parent.
+  later, for example by grouping `trim/` and `glass/` under a `looks/` parent (dk-846bea79).
 - `RoundWindowArchBlock` became `OrientedWindowBlock` (arches and corners); property names and
   values are unchanged. `MasonryStyles` was extracted from `PaintStyles`, which keeps paint only.
+
+## Structural debt (baseline review 2026-10-21)
+
+The first full review found no correctness problems. The debt is tracked in Docket, one line each;
+`migration/` is also over the directory breadth cap (dk-aef47f84).
+
+- dk-08d20a47 face-trim transaction duplicated (door and window trim actions)
+- dk-f9d8d245 trims and unknown-payload holder duplicated in both block entities
+- dk-992020e6 door/frame assembly mirror
+- dk-846bea79 `block/window/` has 12 entries
+- dk-73e57897 look resolver duplicated across the client trim, door and window models
+- dk-3d456d06 `generate-test-structures.mjs` mixes NBT writer, builder and fixtures
+- dk-1af2b67e texture modules split by release, not responsibility
+- dk-aef47f84 `migration/` breadth, single-file folders
+- dk-c28677ae window geometry tests do not mirror `geometry/face` and `geometry/trim`
+- dk-0dc49165 `showcase/section` at cap; verifiers far from their sections
+- dk-7fd38157 client tidy-ups
+- dk-7abe21de Direction quarter-turn helper copied three times
+- dk-75a60754 dependency direction (block -> client import, registry <-> migration cycle, Door Trim on frame concepts)
+- dk-4cf186bd `LegacyAlias` contract
+- dk-1d129342 test duplication
+- dk-d402bd77 shared appearance-family wiring (P3, only if a fourth family appears)

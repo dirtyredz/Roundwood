@@ -21,9 +21,6 @@ export const NEW_PAINT = {
   black: [54, 52, 58],
 };
 
-/** Every dye's base colour: the four legacy paints first (their artwork order), then the new ones. */
-export const ALL_PAINT = { ...PAINT, ...NEW_PAINT };
-
 /** name -> pixels: painted window boards for the new dyes (the legacy four come from legacy.mjs). */
 export function newWindowPanels() {
   return Object.fromEntries(Object.entries(NEW_PAINT).map(([dye, base], i) =>

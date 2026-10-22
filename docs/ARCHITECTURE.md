@@ -251,9 +251,11 @@ bands, never collision).
 element: a half-pixel-thick backing box with one face (the shared record is `geometry/Surface`).
 Models are authored per canonical pose (upright facing south, or front up/down with top north) and
 every other pose is a blockstate y rotation of one. Each blockstate state applies exactly one
-complete model, so there are no multipart arms: a centred upright pose has one model per
-combination of its two across-plane connections (`_arms_north`, `_arms_south`, `_arms_both`),
-and every other pose has one. The models are pane-only (frame and glass): trims are not in them
+complete model: the blockstates are multipart (`getMultipartBuilder`, `WindowPaneModelWriter.addParts`),
+but with mutually exclusive parts, one per pose and arm combination, each selected by the pose
+properties plus the connection properties it depends on, so exactly one part (one complete model)
+matches any state. A centred upright pose has one part per combination of its two across-plane
+connections (`_arms_north`, `_arms_south`, `_arms_both`), and every other pose has one. The models are pane-only (frame and glass): trims are not in them
 (0.7.0 also wrote a `_trimmed` copy of each). Names are
 `<design>[_back|_front|_up_<floor|level|ceiling>|_down_<...>][_arms_<...>]`.
 `OrientedWindowModelProvider` and `WindowModelProvider` write them (110 window block models, 132
@@ -490,7 +492,7 @@ the window trim is a trim-family item. The look is data.
   swaps the `oak_planks` quads (frame look) and the clear glass quads (tint) by the model data its
   entity hands it; window trims are drawn by `WindowTrimRenderer` (see Window trims). `AppearanceItemOverrides` resolves item stacks the same way. `DonorSprites` (shared with
   camouflage) and `DonorColors` cache 512 donors; model caches hold 2048 entries keyed by look and
-  geometry variant (the window item cache by source item model and wood); all of them clear together on every model bake.
+  geometry variant (the window item cache by source item model, wood and glass); all of them clear together on every model bake.
 - **Viewers**: `client/compat/emi` replaces each canonical index entry with a stack whose identity,
   NBT and comparison are the default's and whose icon (unbatched) cycles through `AppearanceSamples`;
   it serialises as the plain stack. Styled stacks compare by appearance key. `client/compat/jei` gives

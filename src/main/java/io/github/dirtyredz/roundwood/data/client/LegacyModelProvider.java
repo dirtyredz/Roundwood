@@ -18,8 +18,9 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 /**
  * Compatibility resources for the 49 hidden 0.4.0 aliases, kept apart from the canonical providers:
  * each alias blockstate points at its family's canonical models (empty door and trim world models,
- * the plain round window's full multipart: every position, arm combination and trim state) and each alias item model is the family's canonical item
- * model. Their historical looks come from the block's and item's default appearance at runtime, so
+ * the plain round window's multipart: every position and axis, with one part per arm combination, via
+ * {@code WindowModelProvider.panes}; trims are not in the models) and each alias item model is the
+ * family's canonical item model. Their historical looks come from the block's and item's default appearance at runtime, so
  * no per-finish model exists any more.
  */
 public class LegacyModelProvider extends BlockStateProvider {
