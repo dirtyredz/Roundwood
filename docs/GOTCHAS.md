@@ -260,3 +260,4 @@
   round door's display transforms; an owner check, not a defect.
 - **Client checks belong to the owner.** Models, item display transforms, the swing animation,
   sounds, second-client sync and EMI display are verified in game, never by agents.
+- **GameTest hits at an exact tie need binary-exact coordinates.** `WindowFixtures.hit` adds the cell-local point to the absolute block position, so a decimal such as 0.95 picks up float noise that depends on where the test runs; a test pinning an exact diagonal tie (`zoneBoundaries...`) failed once its class moved and the world positions shifted. Use values like 0.875.

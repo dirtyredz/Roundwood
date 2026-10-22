@@ -110,7 +110,7 @@ public final class WindowPlacementGameTests {
         BlockPos target = new BlockPos(4, 3, 4);
         helper.setBlock(target, Blocks.STONE);
         ServerPlayer player = player(helper, "bounds", GameType.CREATIVE, Direction.NORTH);
-        double[][] points = {{0.25, 0.25}, {0.75, 0.5}, {0.2499, 0.5}, {0.1, 0.1}, {0.95, 0.95}, {1.0, 0.0}};
+        double[][] points = {{0.25, 0.25}, {0.75, 0.5}, {0.2499, 0.5}, {0.1, 0.1}, {0.875, 0.875}, {1.0, 0.0}};
         WindowPosition[] positions = {WindowPosition.CENTER, WindowPosition.CENTER, WindowPosition.WEST, WindowPosition.WEST,
                 WindowPosition.EAST, WindowPosition.EAST};
         for (int i = 0; i < points.length; i++) {
