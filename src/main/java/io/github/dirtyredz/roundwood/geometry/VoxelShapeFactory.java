@@ -7,7 +7,11 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.Collection;
 import java.util.List;
 
-/** Converts pixel boxes to Minecraft voxel shapes; the only geometry class that touches Minecraft. */
+/**
+ * Converts pixel boxes to Minecraft voxel shapes. The only geometry class that builds Minecraft
+ * shapes ({@code Shapes}, {@code VoxelShape}); {@code Surface}, {@code FaceUv} and {@code Box} use
+ * only the plain {@code Direction} enum.
+ */
 public final class VoxelShapeFactory {
     private VoxelShapeFactory() {
     }
