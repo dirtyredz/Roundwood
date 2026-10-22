@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.archway;
 
+import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.wood;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
@@ -252,9 +253,5 @@ public final class ArchwayLifecycleGameTests {
         check(update.getCompound(ArchwayTrimNbt.TAG).getInt("Version") == ArchwayTrimNbt.VERSION
                 && !update.getCompound(ArchwayTrimNbt.TAG).contains("Front"), "clients were sent an unknown payload");
         helper.succeed();
-    }
-
-    private static Appearance wood(String block) {
-        return Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", block));
     }
 }

@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.archway;
 
+import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.wood;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
@@ -200,9 +201,5 @@ public final class ArchwayTrimGameTests {
             }
         }
         return count;
-    }
-
-    private static Appearance wood(String block) {
-        return Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", block));
     }
 }

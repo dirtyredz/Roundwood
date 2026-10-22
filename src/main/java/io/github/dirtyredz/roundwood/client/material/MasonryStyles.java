@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.client.material;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.material.MasonryMaterials;
+import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimLayout;
 import net.minecraft.resources.ResourceLocation;
 
@@ -37,8 +38,8 @@ public final class MasonryStyles {
      * An archway's face (0.12.0), also its casings': 64 x 64 over the 32 x 32 assembly, following its
      * contour (radial crown joints over straight jamb courses; the keyhole's shoulders stepped in).
      */
-    public static ResourceLocation archwayFace(MasonryMaterials.Material material, boolean keyhole) {
-        return texture((keyhole ? "keyhole_archway_" : "archway_") + material.artwork());
+    public static ResourceLocation archwayFace(MasonryMaterials.Material material, ArchwayDesign design) {
+        return texture((design == ArchwayDesign.KEYHOLE ? "keyhole_archway_" : "archway_") + material.artwork());
     }
 
     /** A window attachment's face for {@code layout}, spread over the piece's whole-face artwork extent. */

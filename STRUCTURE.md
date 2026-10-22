@@ -61,7 +61,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `src/main/java/io/github/dirtyredz/roundwood/client/window/` — the appearance-aware window blockstate/item model (frame and glass chunk model), the restyled item-model cache, the placement preview and overlay
 - `src/main/java/io/github/dirtyredz/roundwood/client/window/trim/` — the trim and sill block-entity renderer, its cached world models and the attachment look per slot and profile
 - `src/main/java/io/github/dirtyredz/roundwood/client/render/` — line drawing shared by the highlights and placement previews; baked pixel-mask slab models in a trim look (`PixelSlabModels`, 0.12.0: the arched door casing and the archways)
-- `src/main/java/io/github/dirtyredz/roundwood/client/item/` — NBT-aware item model overrides, the attachment icons (Universal Trim, Arch Sill) per look
+- `src/main/java/io/github/dirtyredz/roundwood/client/item/` — NBT-aware item model overrides, `FamilyItemModels` (the table of which wrapper each item kind gets), the attachment icons (Universal Trim, Arch Sill) per look
 - `src/main/java/io/github/dirtyredz/roundwood/client/material/` — donor sprites and colours, built-in wood and paint artwork bindings, masonry faces (thin mortar), the shared trim look resolver, quad retexturing, bounded model caches
 - `src/main/java/io/github/dirtyredz/roundwood/client/camouflage/` — static corner renderer, cached corner models
 - `src/main/java/io/github/dirtyredz/roundwood/client/compat/emi/` — optional EMI adapter: cycling preview entries, serializer
@@ -80,8 +80,8 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `src/gameTest/java/io/github/dirtyredz/roundwood/` — Forge GameTests (`fixture/`, `appearance/`, `migration/`, `block/archway/`, `block/door/`, `block/door/appearance/`, `block/door/selection/`, `block/door/camouflage/`, `block/door/trim/`, `block/trim/`, `block/window/`, `block/window/trim/`, `showcase/`, `showcase/section/` (one check class per section family beside the sections: `archway/`, `door/`, `window/`, the root for paints and brick arches), `data/`); never in the release jar
 - `src/gameTest/resources/` — GameTest structure templates (empty ones, the 0.4.0 fixture and the 0.7.0 fitted-frame fixture) and a test-only plank tag
 - `tools/` — entry points of the deterministic generators for the textures and GameTest structures (Node, not packaged)
-- `tools/textures/` — texture artwork modules: PNG encoding, noise, the 0.1.0 textures, palettes, door boards, paint panels, radial bricks, window glass, stained glass, the thin-mortar primitives and window/door ring faces (`window-trims.mjs`)
-- `tools/textures/masonry/` — the contour-following thin-mortar masonry faces built on those primitives (0.12.0 grouping): the square-frame Universal Trim face, the 0.10.0 window shape faces, the 0.11.0 arched door casing, the 0.12.0 archway faces
+- `tools/textures/` — texture artwork modules: PNG encoding, noise, the 0.1.0 textures, palettes, door boards, paint panels, radial bricks, window glass (and its clearer 0.7.0 variant), stained glass, the round window face and trim markers (`window-trims.mjs`)
+- `tools/textures/masonry/` — the contour-following thin-mortar masonry faces built on the shared thin-mortar primitives in `mortar.mjs` (joint coverage, the one parameterised polar brick position, brick and mortar colours; 0.12.0 grouping): the arched window face, the square-frame Universal Trim face, the 0.10.0 window shape faces, the 0.11.0 arched door casing, the 0.12.0 archway faces
 - `docs/` — architecture, decisions, gotchas
 
 ## Components

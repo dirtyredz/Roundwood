@@ -1,7 +1,5 @@
 package io.github.dirtyredz.roundwood.geometry;
 
-import java.util.List;
-
 /**
  * A round-headed opening on the pixel grid (0.11.0): straight sides from the floor up to the spring
  * line, then a semicircular crown whose diameter is the opening's width. Pixels follow the
@@ -38,10 +36,5 @@ public record ArchedProfile(double left, double right, double spring) {
             return false;
         }
         return y < spring || PixelCircle.inCircle((left + right) / 2, spring, right - left, u, v);
-    }
-
-    /** The profile's pixels within a {@code width} x {@code height} grid, merged into rectangles. */
-    public List<PixelCircle.Rect> rects(int width, int height) {
-        return PixelCircle.rasterize(width, height, this::contains);
     }
 }

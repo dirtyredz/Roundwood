@@ -63,7 +63,7 @@ public class RoundwoodBlockLoot extends BlockLootSubProvider {
     }
 
     private LootTable.Builder withFaces(LootTable.Builder table, TrimSlot slot, String payload) {
-        Item item = slot == TrimSlot.SILL ? ModItems.ARCH_SILL_TRIM.get() : ModItems.ROUND_TRIM.get();
+        Item item = slot.item();
         AttachmentLootPools.faces(slot, item, payload, pool -> applyExplosionCondition(item, pool)).forEach(table::withPool);
         return table;
     }

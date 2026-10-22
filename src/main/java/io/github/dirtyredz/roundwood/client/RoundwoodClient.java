@@ -3,21 +3,15 @@ package io.github.dirtyredz.roundwood.client;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
-import io.github.dirtyredz.roundwood.block.archway.ArchwayItem;
-import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
-import io.github.dirtyredz.roundwood.client.archway.ArchwayModels;
 import io.github.dirtyredz.roundwood.client.archway.ArchwayRenderer;
-import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
-import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
 import io.github.dirtyredz.roundwood.client.camouflage.CamouflageModels;
 import io.github.dirtyredz.roundwood.client.door.DoorAppearanceModels;
 import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
 import io.github.dirtyredz.roundwood.client.door.RoundDoorRenderer;
-import io.github.dirtyredz.roundwood.client.item.AppearanceItemOverrides;
-import io.github.dirtyredz.roundwood.client.item.TrimItemModels;
+import io.github.dirtyredz.roundwood.client.item.FamilyItemModels;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.trim.RoundTrimRenderer;
 import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
@@ -30,7 +24,6 @@ import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -102,19 +95,7 @@ public final class RoundwoodClient {
             if (model == null) {
                 continue;
             }
-            if (!(item instanceof AppearanceDefaults family)) {
-                continue;
-            }
-            TrimSlot slot = item instanceof TrimAttachmentItem attachment ? attachment.trimSlot() : TrimSlot.PERIMETER;
-            DoorDesign design = item instanceof BlockItem block && block.getBlock() instanceof AssemblyDoorBlock door
-                    ? door.design() : DoorDesign.ROUND;
-            models.put(location, switch (family.appearanceFamily()) {
-                case DOOR -> AppearanceItemOverrides.wrap(model, (oak, look) -> DoorAppearanceModels.item(design, oak, look));
-                case WINDOW -> AppearanceItemOverrides.wrapStack(model, WindowAppearanceModel::item);
-                case TRIM -> item instanceof ArchwayItem archway
-                        ? AppearanceItemOverrides.wrap(model, (oak, look) -> ArchwayModels.item(archway.archway().design(), oak, look))
-                        : AppearanceItemOverrides.wrap(model, (oak, look) -> TrimItemModels.item(slot, oak, look));
-            });
+            models.put(location, FamilyItemModels.wrap(item, model));
         }
     }
 

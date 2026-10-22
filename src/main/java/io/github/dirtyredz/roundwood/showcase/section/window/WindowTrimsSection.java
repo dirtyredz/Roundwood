@@ -12,7 +12,8 @@ import io.github.dirtyredz.roundwood.showcase.ShowcaseFrame;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseWindow;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import static io.github.dirtyredz.roundwood.showcase.ShowcaseSamples.vanillaMasonry;
+import static io.github.dirtyredz.roundwood.showcase.ShowcaseSamples.vanillaWood;
 import net.minecraft.world.item.DyeColor;
 
 import java.util.ArrayList;
@@ -36,14 +37,6 @@ public final class WindowTrimsSection implements ShowcaseSection {
         return "window trims";
     }
 
-    private static Appearance block(String id) {
-        return Appearance.masonry(ResourceLocation.fromNamespaceAndPath("minecraft", id));
-    }
-
-    private static Appearance wood(String id) {
-        return Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", id + "_planks"));
-    }
-
     public static List<ShowcaseWindow> windows(ShowcaseFrame frame) {
         Direction forward = frame.forward();
         Direction.Axis across = frame.right().getAxis();
@@ -54,21 +47,21 @@ public final class WindowTrimsSection implements ShowcaseSection {
         WindowPose roundCentred = WindowPosition.CENTER.pose(across);
         List<ShowcaseWindow> out = new ArrayList<>();
         out.add(ShowcaseWindow.of(round, roundCentred, 60, 0, ROW1_F, oak).trimmed(oak));
-        out.add(ShowcaseWindow.of(round, roundCentred, 62, 0, ROW1_F, oak).trimmed(AttachmentFace.FRONT, block("bricks")));
-        out.add(ShowcaseWindow.of(round, roundCentred, 63, 0, ROW1_F, oak).trimmed(AttachmentFace.BACK, block("stone_bricks")));
+        out.add(ShowcaseWindow.of(round, roundCentred, 62, 0, ROW1_F, oak).trimmed(AttachmentFace.FRONT, vanillaMasonry("bricks")));
+        out.add(ShowcaseWindow.of(round, roundCentred, 63, 0, ROW1_F, oak).trimmed(AttachmentFace.BACK, vanillaMasonry("stone_bricks")));
         ShowcaseWindow.arched(WindowPattern.PLAIN, centred, frame, 64, 0, ROW1_F, oak)
-                .forEach(w -> out.add(w.trimmed(AttachmentFace.FRONT, block("bricks")).trimmed(AttachmentFace.BACK, wood("spruce"))));
+                .forEach(w -> out.add(w.trimmed(AttachmentFace.FRONT, vanillaMasonry("bricks")).trimmed(AttachmentFace.BACK, vanillaWood("spruce_planks"))));
         ShowcaseWindow.arched(WindowPattern.CROSS, centred, frame, 67, 0, ROW1_F, oak)
-                .forEach(w -> out.add(w.trimmed(block("stone_bricks"))));
-        ShowcaseWindow.arched(WindowPattern.PLAIN, centred, frame, 70, 0, ROW1_F, wood("spruce"))
-                .forEach(w -> out.add(w.trimmed(AttachmentFace.FRONT, block("deepslate_bricks"))));
-        out.add(ShowcaseWindow.of(roundCross, roundCentred, 72, 0, ROW1_F, wood("spruce"))
-                .trimmed(AttachmentFace.FRONT, block("mud_bricks")).glass(DyeColor.LIGHT_BLUE));
+                .forEach(w -> out.add(w.trimmed(vanillaMasonry("stone_bricks"))));
+        ShowcaseWindow.arched(WindowPattern.PLAIN, centred, frame, 70, 0, ROW1_F, vanillaWood("spruce_planks"))
+                .forEach(w -> out.add(w.trimmed(AttachmentFace.FRONT, vanillaMasonry("deepslate_bricks"))));
+        out.add(ShowcaseWindow.of(roundCross, roundCentred, 72, 0, ROW1_F, vanillaWood("spruce_planks"))
+                .trimmed(AttachmentFace.FRONT, vanillaMasonry("mud_bricks")).glass(DyeColor.LIGHT_BLUE));
         int r = 60;
         for (WindowPosition position : List.of(WindowPosition.NORTH, WindowPosition.EAST, WindowPosition.SOUTH,
                 WindowPosition.WEST, WindowPosition.UP, WindowPosition.DOWN)) {
             out.add(ShowcaseWindow.of(round, position.pose(across), r, 1, ROW2_F, oak)
-                    .trimmed(AttachmentFace.FRONT, block("bricks")).trimmed(AttachmentFace.BACK, oak.painted(DyeColor.RED)));
+                    .trimmed(AttachmentFace.FRONT, vanillaMasonry("bricks")).trimmed(AttachmentFace.BACK, oak.painted(DyeColor.RED)));
             r += 2;
         }
         return List.copyOf(out);

@@ -21,3 +21,11 @@ export function windowGlass(seed) {
   }
   return px;
 }
+
+/** Glass alpha drop outside the diagonal accents: 92..104 before, 24..36 now (accents keep 176). */
+export const CLEAR_ALPHA_DROP = 68;
+
+/** The 0.7.0 window glazing: window_glass with only the non-accent texels made clearer. */
+export function clearWindowGlass(seed) {
+  return windowGlass(seed).map(([r, g, b, a]) => (a === 176 ? [r, g, b, a] : [r, g, b, a - CLEAR_ALPHA_DROP]));
+}

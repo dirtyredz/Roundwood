@@ -5,9 +5,11 @@ import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
+import io.github.dirtyredz.roundwood.showcase.ShowcaseSamples;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
+import static io.github.dirtyredz.roundwood.showcase.ShowcaseSamples.vanillaMasonry;
+import static io.github.dirtyredz.roundwood.showcase.ShowcaseSamples.vanillaWood;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,18 +45,16 @@ public final class ArchwaysSection implements ShowcaseSection {
     /** Every archway of the section, in building order. */
     public static List<Exhibit> archways() {
         Appearance oak = Appearance.DEFAULT;
-        Appearance spruce = wood("spruce_planks");
-        Appearance stoneBrick = masonry("stone_bricks");
-        Appearance deepslate = masonry("deepslate_bricks");
-        List<Appearance> looks = List.of(oak, spruce, wood("dark_oak_planks"), wood("cherry_planks"), oak.painted(DyeColor.BLUE),
-                masonry("bricks"), stoneBrick, deepslate, masonry("mud_bricks"));
-        List<String> labels = List.of("oak", "spruce", "dark oak", "cherry", "blue paint", "bricks", "stone bricks",
-                "deepslate bricks", "mud bricks");
+        Appearance spruce = vanillaWood("spruce_planks");
+        Appearance stoneBrick = vanillaMasonry("stone_bricks");
+        Appearance deepslate = vanillaMasonry("deepslate_bricks");
+        List<Appearance> looks = List.of(oak, spruce, vanillaWood("dark_oak_planks"), vanillaWood("cherry_planks"), oak.painted(DyeColor.BLUE),
+                vanillaMasonry("bricks"), stoneBrick, deepslate, vanillaMasonry("mud_bricks"));
         List<Exhibit> out = new ArrayList<>();
         for (ArchwayDesign design : ArchwayDesign.values()) {
             int f = ROW_F[design.ordinal()];
             for (int i = 0; i < looks.size(); i++) {
-                out.add(new Exhibit(r(i), f, design, looks.get(i), FaceTrims.NONE, labels.get(i)));
+                out.add(new Exhibit(r(i), f, design, looks.get(i), FaceTrims.NONE, ShowcaseSamples.label(looks.get(i))));
             }
             out.add(new Exhibit(r(looks.size()), f, design, oak, new FaceTrims(Optional.of(stoneBrick), Optional.empty()),
                     "front trim"));
@@ -75,13 +75,5 @@ public final class ArchwaysSection implements ShowcaseSection {
 
     private static int r(int index) {
         return R0 + PITCH * index;
-    }
-
-    private static Appearance wood(String block) {
-        return Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", block));
-    }
-
-    private static Appearance masonry(String block) {
-        return Appearance.masonry(ResourceLocation.fromNamespaceAndPath("minecraft", block));
     }
 }

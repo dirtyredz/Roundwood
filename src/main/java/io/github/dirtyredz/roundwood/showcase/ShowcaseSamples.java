@@ -38,6 +38,16 @@ public final class ShowcaseSamples {
         return samples.stream().filter(a -> !a.isWood()).toList();
     }
 
+    /** A bare vanilla wood sample by its planks id, e.g. {@code spruce_planks}. */
+    public static Appearance vanillaWood(String planks) {
+        return Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", planks));
+    }
+
+    /** A vanilla masonry sample by its block id, e.g. {@code stone_bricks}. */
+    public static Appearance vanillaMasonry(String block) {
+        return Appearance.masonry(ResourceLocation.fromNamespaceAndPath("minecraft", block));
+    }
+
     /** A short sign label for an appearance: the material's name, or the dye's. */
     public static String label(Appearance appearance) {
         if (appearance.paint().isPresent()) {

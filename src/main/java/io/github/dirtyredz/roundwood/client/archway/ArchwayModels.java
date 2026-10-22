@@ -46,7 +46,7 @@ public final class ArchwayModels {
 
     /** What {@code appearance} draws on {@code design} (masonry follows its contour). */
     public static TrimLooks.Look look(ArchwayDesign design, Appearance appearance) {
-        return TrimLooks.of(appearance, material -> MasonryStyles.archwayFace(material, design == ArchwayDesign.KEYHOLE));
+        return TrimLooks.of(appearance, material -> MasonryStyles.archwayFace(material, design));
     }
 
     /** The frame in {@code part}'s cell of an archway facing {@code facing}. */

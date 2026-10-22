@@ -2,9 +2,6 @@ package io.github.dirtyredz.roundwood.geometry;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,23 +44,6 @@ class ArchedProfileTest {
                 for (int v = 0; v < 40; v++) {
                     assertEquals(profile.contains(u, v), profile.contains(width - 1 - u, v), profile + " at " + u + "," + v);
                 }
-            }
-        }
-    }
-
-    @Test
-    void rectsCoverTheProfileExactlyOnce() {
-        Set<String> covered = new HashSet<>();
-        for (PixelCircle.Rect rect : DOOR.rects(16, 32)) {
-            for (int u = rect.u1(); u < rect.u2(); u++) {
-                for (int v = rect.v1(); v < rect.v2(); v++) {
-                    assertTrue(covered.add(u + "," + v), "covered twice " + u + "," + v);
-                }
-            }
-        }
-        for (int u = 0; u < 16; u++) {
-            for (int v = 0; v < 32; v++) {
-                assertEquals(DOOR.contains(u, v), covered.contains(u + "," + v), "pixel " + u + "," + v);
             }
         }
     }

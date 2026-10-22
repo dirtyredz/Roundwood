@@ -8,13 +8,14 @@ import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
+import static io.github.dirtyredz.roundwood.showcase.ShowcaseSamples.vanillaMasonry;
+import static io.github.dirtyredz.roundwood.showcase.ShowcaseSamples.vanillaWood;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,14 +52,14 @@ public final class ArchedDoorsSection implements ShowcaseSection {
     /** Every door of the section, in building order. */
     public static List<Exhibit> doors() {
         Appearance oak = Appearance.DEFAULT;
-        Appearance spruce = wood("spruce_planks");
-        Appearance darkOak = wood("dark_oak_planks");
-        Appearance cherry = wood("cherry_planks");
-        Appearance birch = wood("birch_planks");
+        Appearance spruce = vanillaWood("spruce_planks");
+        Appearance darkOak = vanillaWood("dark_oak_planks");
+        Appearance cherry = vanillaWood("cherry_planks");
+        Appearance birch = vanillaWood("birch_planks");
         Appearance blue = oak.painted(DyeColor.BLUE);
-        Appearance stoneBrick = masonry("stone_bricks");
-        Appearance deepslate = masonry("deepslate_bricks");
-        Appearance mudBrick = masonry("mud_bricks");
+        Appearance stoneBrick = vanillaMasonry("stone_bricks");
+        Appearance deepslate = vanillaMasonry("deepslate_bricks");
+        Appearance mudBrick = vanillaMasonry("mud_bricks");
         List<Exhibit> out = new ArrayList<>();
         out.add(exhibit(0, 0, DoorHingeSide.LEFT, false, oak, FaceTrims.NONE, null, "hinge left"));
         out.add(exhibit(0, 1, DoorHingeSide.RIGHT, false, oak, FaceTrims.NONE, null, "hinge right"));
@@ -115,13 +116,5 @@ public final class ArchedDoorsSection implements ShowcaseSection {
 
     private static FaceTrims front(Appearance front, Optional<Appearance> back) {
         return new FaceTrims(Optional.of(front), back);
-    }
-
-    private static Appearance wood(String block) {
-        return Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", block));
-    }
-
-    private static Appearance masonry(String block) {
-        return Appearance.masonry(ResourceLocation.fromNamespaceAndPath("minecraft", block));
     }
 }

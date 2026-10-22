@@ -2,7 +2,8 @@
 // single-edge pieces' straight runs and the arch sill's course. Thin mortar, two texels per model
 // pixel, like the other window trims. New files only; the lower arches need no new art (they use the
 // door ring's full radial face, trim_radial_thin_*, whose upper half is the arched window face's).
-import { ARCH_FACE_SIZE, archWindowFace, brickColour, jointCoverage, withMortar } from '../window-trims.mjs';
+import { ARCH_FACE_SIZE, archWindowFace } from './arch-window.mjs';
+import { brickColour, jointCoverage, nearest, withMortar } from './mortar.mjs';
 
 /** A single-edge piece's face: its own 16 model pixels at two texels each. */
 export const SINGLE_FACE_SIZE = 32;
@@ -30,10 +31,6 @@ export function frameWindowFace(palette, seed) {
     }
   }
   return px;
-}
-
-function nearest(lines, at) {
-  return Math.min(...lines.map((line) => Math.abs(at - line)));
 }
 
 /**

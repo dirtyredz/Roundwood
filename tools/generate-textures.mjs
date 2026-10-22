@@ -34,14 +34,14 @@ import { newWindowPanels } from './textures/paint-panels.mjs';
 import { DOOR_WOOD, MASONRY, STAINED_GLASS } from './textures/palettes.mjs';
 import { DOOR_PANEL_SIZE, doorPanel } from './textures/door-panels.mjs';
 import { EDGE_SIZE, RADIAL_SIZE, radialEdge, radialFace } from './textures/radial-bricks.mjs';
-import { GLASS_SIZE, windowGlass } from './textures/window-glass.mjs';
+import { GLASS_SIZE, clearWindowGlass, windowGlass } from './textures/window-glass.mjs';
 import { stainedWindowGlass } from './textures/stained-glass.mjs';
 import { SQUARE_FACE_SIZE, squareFrameFace } from './textures/masonry/square-trims.mjs';
 import { SILL_FACE_SIZE, SINGLE_FACE_SIZE, frameWindowFace, sillFace, singleEdgeFace } from './textures/masonry/window-shape-trims.mjs';
 import { DOOR_CASING_FACE_SIZE, archedCasingFace } from './textures/masonry/door-casings.mjs';
 import { ARCHWAY_FACE_SIZE, archwayFace } from './textures/masonry/archways.mjs';
-import { ARCH_FACE_SIZE, ROUND_BRICKS, ROUND_FACE_SIZE, archWindowFace, clearWindowGlass, thinRadialFace, trimMarker }
-  from './textures/window-trims.mjs';
+import { ARCH_FACE_SIZE, archWindowFace } from './textures/masonry/arch-window.mjs';
+import { ROUND_BRICKS, ROUND_FACE_SIZE, thinRadialFace, trimMarker } from './textures/window-trims.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = join(root, 'src/main/resources/assets/roundwood/textures/block');

@@ -104,6 +104,16 @@ public final class GeometryModelWriter {
      */
     public static <T extends ModelBuilder<T>> T addSurfaces(T builder, List<Surface> surfaces, boolean cullBlockFaces,
                                                             Function<Surface, String> texture) {
+        return addSurfaces(builder, surfaces, cullBlockFaces, texture, 0, 0);
+    }
+
+    /**
+     * As above for the cell-local surfaces of one cell of a larger assembly: the elements are moved to
+     * the cell's place ({@code originX}, {@code originY} pixels) while the UVs stay the cell's own, so a
+     * multi-cell inventory model tiles like the blocks it stands for. Never with cullfaces.
+     */
+    public static <T extends ModelBuilder<T>> T addSurfaces(T builder, List<Surface> surfaces, boolean cullBlockFaces,
+                                                            Function<Surface, String> texture, double originX, double originY) {
         for (Surface surface : surfaces) {
             Box box = surface.backing();
             if (!box.within(Box.cell())) {
@@ -111,9 +121,10 @@ public final class GeometryModelWriter {
             }
             Direction direction = surface.face();
             float[] uv = FaceUv.of(box, direction);
+            Box placed = box.translate(originX, originY, 0);
             ModelBuilder<T>.ElementBuilder element = builder.element()
-                    .from((float) box.minX(), (float) box.minY(), (float) box.minZ())
-                    .to((float) box.maxX(), (float) box.maxY(), (float) box.maxZ());
+                    .from((float) placed.minX(), (float) placed.minY(), (float) placed.minZ())
+                    .to((float) placed.maxX(), (float) placed.maxY(), (float) placed.maxZ());
             ModelBuilder<T>.ElementBuilder.FaceBuilder face = element.face(direction)
                     .texture("#" + texture.apply(surface)).uvs(uv[0], uv[1], uv[2], uv[3]);
             if (cullBlockFaces && onCellBoundary(box, direction)) {

@@ -9,7 +9,7 @@
 //     each shoulder course is one corbel stone, and the wide courses alternate a split pair with one
 //     long stone (a running bond), so the transition reads as deliberate stonework.
 // The face is mirror-symmetric about the centre line. New files only.
-import { brickColour, jointCoverage, withMortar } from '../window-trims.mjs';
+import { brickColour, jointCoverage, polar, withMortar } from './mortar.mjs';
 
 /** The archway face: the 32 x 32 model pixel assembly at two texels each. */
 export const ARCHWAY_FACE_SIZE = 64;
@@ -29,18 +29,9 @@ const SHOULDER_FOOT = 48;
 const OUTER_ARRIS = 31;
 const INNER_ARRIS = 29;
 
-/** Polar position of a texel centre about the crown centre: the voussoir, how far across it, the radius. */
-function voussoir(x, y) {
-  const dx = x + 0.5 - CENTRE;
-  const dy = CENTRE - (y + 0.5);
-  const width = Math.PI / VOUSSOIRS;
-  const turns = (Math.atan2(dx, dy) + width / 2) / width;
-  return { index: Math.floor(turns), across: turns - Math.floor(turns), radius: Math.hypot(dx, dy), width };
-}
-
 /** The crown's texel: radial voussoirs with thin joints. */
 function crown(palette, x, y, seed) {
-  const { index, across, radius, width } = voussoir(x, y);
+  const { index, across, radius, width } = polar(x, y, CENTRE, CENTRE, VOUSSOIRS, Math.PI);
   const colour = brickColour(palette, index, across, radius, OUTER_ARRIS, INNER_ARRIS, x, y, seed);
   return withMortar(colour, palette, jointCoverage(Math.min(across, 1 - across) * width * radius), x, y, seed);
 }

@@ -343,7 +343,7 @@ matches any state. A centred upright pose has one part per combination of its tw
 connections (`_arms_north`, `_arms_south`, `_arms_both`), and every other pose has one. The models are pane-only (frame and glass): trims are not in them
 (0.7.0 also wrote a `_trimmed` copy of each). Names are
 `<design>[_back|_front|_up_<floor|level|ceiling>|_down_<...>][_arms_<...>]`.
-`OrientedWindowModelProvider` and `WindowModelProvider` write them (110 window block models, 132
+`OrientedWindowModelProvider` and `WindowModelProvider` write them (302 window block models, 331
 block models in all); `GeometryModelWriter` drops an element whose faces are all buried.
 
 **Face identity.** A window has two faces, FRONT and BACK (`block/attachment/AttachmentFace`, saved
@@ -598,7 +598,7 @@ of its cells (z 0..1, authored facing north), cut into cell-local quarters.
 
 ## Appearance (0.5.0)
 
-One canonical block and item per door and trim; the window family has ten blocks (since 0.7.0) and
+One canonical block and item per door and trim; the window family has 26 blocks (ten since 0.7.0; the arch, corner and edge pieces followed) and
 the window trim is a trim-family item. The look is data.
 
 - **Value** (`appearance/Appearance`): kind (wood/masonry), the donor block's id and an optional dye.
@@ -697,14 +697,18 @@ another texture variable (a frame's sides) or explicit UVs: door panels and whol
 `AssemblyFaceUv`, which spreads one image across the whole 32 x 32 front and back. Door: two leaf
 templates, two oak leaves (`round_door_leaf_<hinge>`), one empty world model and a single `""`
 variant. Window: pane-only visible-surface models per design, pose and arm combination (trims are
-not in them; see Window), in one-model-per-state blockstates; 110 window block models (132 block
-models in all), ten window item models. Textures:
+not in them; see Window), in one-model-per-state blockstates; 302 window block models (331 block
+models in all), 26 window item models. Textures:
 `window_glass_clear`, `window_glass_<dye>` (sixteen), `trim_radial_thin_<m>`,
 `window_trim_round_<m>`, `window_trim_arch_<m>`, `universal_trim_<m>` (0.9.0); `window_trim_face`
-and `_edge` are still generated but unused. The Universal Trim item model is the square frame
-(`data/client/trim/UniversalTrimItemModelProvider`), and `item/window_trim` parents it.
+and `_edge` are still generated but unused. The Universal Trim and Arch Sill item models are the attachment icons
+(`data/client/trim/AttachmentItemModelProvider`), and `item/window_trim` parents the Universal Trim.
+Archway: `data/client/archway/ArchwayModelProvider` writes the two world models and
+`ArchwayItemModelProvider` the two inventory models, cut per cell from the frame mask by `PixelSlab`
+through `GeometryModelWriter.addSurfaces` (the same surfaces `client/render/PixelSlabModels` bakes for
+a styled stack).
 Frame (`data/client/trim/TrimModelProvider`): quarter templates in two families (tiled,
 whole-image), oak source quarters per family, one empty world model and a single `""` variant. `LegacyModelProvider` gives the 49 aliases blockstates
 over the canonical models and item models parenting the canonical items. Items carry front GUI light
-and computed centred transforms. Plus twelve recipes and their advancements, loot (aliases drop the
+and computed centred transforms. Plus 32 recipes and their advancements, loot (aliases drop the
 canonical item; windows and doors add one trim pool per face), tags and English names.
