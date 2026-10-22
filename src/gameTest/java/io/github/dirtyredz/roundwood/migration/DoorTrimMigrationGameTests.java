@@ -4,8 +4,9 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimActions;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
@@ -90,8 +91,8 @@ public final class DoorTrimMigrationGameTests {
             check(((RoundWindowBlockEntity) helper.getLevel().getBlockEntity(flush)).appearance().equals(SPRUCE)
                     && WindowPaneBlock.trimmed(helper.getLevel().getBlockState(flush)), "brick window frame or summary");
 
-            DoorLayout.Assembly closed = new DoorLayout.Assembly(helper.absolutePos(new BlockPos(1, 2, 3)), Direction.NORTH, DoorHingeSide.LEFT);
-            DoorLayout.Assembly open = new DoorLayout.Assembly(helper.absolutePos(new BlockPos(5, 2, 3)), Direction.NORTH, DoorHingeSide.RIGHT);
+            DoorLayout.Assembly closed = new DoorLayout.Assembly(helper.absolutePos(new BlockPos(1, 2, 3)), Direction.NORTH, DoorHingeSide.LEFT, DoorDesign.ROUND);
+            DoorLayout.Assembly open = new DoorLayout.Assembly(helper.absolutePos(new BlockPos(5, 2, 3)), Direction.NORTH, DoorHingeSide.RIGHT, DoorDesign.ROUND);
             check(anchor(helper, closed).trims().equals(FaceTrims.NONE.with(AttachmentFace.FRONT, SPRUCE)), "closed door: " + anchor(helper, closed).trims());
             check(anchor(helper, open).trims().equals(FaceTrims.NONE.with(AttachmentFace.FRONT, Appearance.DEFAULT)), "open door: " + anchor(helper, open).trims());
             check(helper.getLevel().getBlockState(open.anchor()).getValue(DoorBlock.OPEN), "the open door closed");
@@ -191,7 +192,7 @@ public final class DoorTrimMigrationGameTests {
     @GameTest(template = TEMPLATE)
     public static void aLateDoorConvertsItsFrame(GameTestHelper helper) {
         floor(helper);
-        DoorLayout.Assembly planned = new DoorLayout.Assembly(helper.absolutePos(ANCHOR), Direction.NORTH, DoorHingeSide.LEFT);
+        DoorLayout.Assembly planned = new DoorLayout.Assembly(helper.absolutePos(ANCHOR), Direction.NORTH, DoorHingeSide.LEFT, DoorDesign.ROUND);
         TrimLayout.Assembly frame = fitted(planned);
         check(TrimPlacement.placeAt(helper.getLevel(), ModBlocks.roundTrim(), frame, SPRUCE), "frame");
         migrate(helper);

@@ -2,9 +2,10 @@ package io.github.dirtyredz.roundwood.block.door.selection;
 
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageGeometry;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimGeometry;
 import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.geometry.Box;
@@ -75,45 +76,46 @@ public final class DoorSelectionShapes {
         if (!corners && rings == 0) {
             return Shapes.empty();
         }
+        DoorDesign design = assembly.design();
         int turns = VoxelShapeFactory.quarterTurns(state.getValue(DoorBlock.FACING));
         DoorLayout.Part part = DoorLayout.partOf(state);
         int column = part.column.index();
         int row = part.row();
-        int key = (turns << 5) | (column << 4) | (row << 3) | ((corners ? 1 : 0) << 2) | rings;
+        int key = (design.ordinal() << 7) | (turns << 5) | (column << 4) | (row << 3) | ((corners ? 1 : 0) << 2) | rings;
         return STATIC.computeIfAbsent(key, k -> {
-            List<Box> boxes = new ArrayList<>(corners ? CamouflageGeometry.corners() : List.of());
-            addRings(boxes, rings, false);
+            List<Box> boxes = new ArrayList<>(corners ? CamouflageGeometry.corners(design) : List.of());
+            addRings(boxes, design, rings, false);
             return VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes, column, row), turns));
         });
     }
 
     private static VoxelShape shape(BlockState state, boolean corners, int rings, boolean target) {
-        return shape(state.getValue(DoorBlock.FACING), state.getValue(DoorBlock.HINGE), DoorLayout.partOf(state),
-                state.getValue(DoorBlock.OPEN), corners, rings, target);
+        return shape(DoorLayout.designOf(state), state.getValue(DoorBlock.FACING), state.getValue(DoorBlock.HINGE),
+                DoorLayout.partOf(state), state.getValue(DoorBlock.OPEN), corners, rings, target);
     }
 
     /**
-     * @param rings  bit 0 the FRONT ring, bit 1 the BACK ring
-     * @param target true for the rays' in-cell ring targets, false for the rings as drawn
+     * @param rings  bit 0 the FRONT casing, bit 1 the BACK casing
+     * @param target true for the rays' in-cell casing targets, false for the casings as drawn
      */
-    public static VoxelShape shape(Direction facing, DoorHingeSide hinge, DoorLayout.Part part, boolean open, boolean corners,
-                                   int rings, boolean target) {
+    public static VoxelShape shape(DoorDesign design, Direction facing, DoorHingeSide hinge, DoorLayout.Part part, boolean open,
+                                   boolean corners, int rings, boolean target) {
         int turns = VoxelShapeFactory.quarterTurns(facing);
         int column = part.column.index();
         int row = part.row();
-        int key = (turns << 9) | ((hinge == DoorHingeSide.LEFT ? 0 : 1) << 8) | (column << 7) | (row << 6)
-                | ((open ? 1 : 0) << 5) | ((corners ? 1 : 0) << 4) | (rings << 1) | (target ? 1 : 0);
+        int key = (design.ordinal() << 11) | (turns << 9) | ((hinge == DoorHingeSide.LEFT ? 0 : 1) << 8) | (column << 7)
+                | (row << 6) | ((open ? 1 : 0) << 5) | ((corners ? 1 : 0) << 4) | (rings << 1) | (target ? 1 : 0);
         return SHAPES.computeIfAbsent(key, k -> {
-            List<Box> boxes = new ArrayList<>(DoorOutlineGeometry.outline(hinge, open, corners));
-            addRings(boxes, rings, target);
+            List<Box> boxes = new ArrayList<>(DoorOutlineGeometry.outline(design, hinge, open, corners));
+            addRings(boxes, design, rings, target);
             return VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes, column, row), turns));
         });
     }
 
-    private static void addRings(List<Box> boxes, int rings, boolean target) {
+    private static void addRings(List<Box> boxes, DoorDesign design, int rings, boolean target) {
         for (AttachmentFace face : AttachmentFace.values()) {
             if ((rings & bit(face)) != 0) {
-                boxes.addAll(target ? DoorTrimGeometry.target(face) : DoorTrimGeometry.ring(face));
+                boxes.addAll(target ? DoorTrimGeometry.target(design, face) : DoorTrimGeometry.ring(design, face));
             }
         }
     }

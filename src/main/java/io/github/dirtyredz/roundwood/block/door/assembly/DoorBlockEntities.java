@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.assembly;
 
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -25,7 +25,7 @@ public final class DoorBlockEntities {
 
     /** The anchor entity of the assembly {@code pos} belongs to, if it is there. */
     public static Optional<RoundDoorBlockEntity> anchor(BlockGetter level, BlockPos pos, BlockState state) {
-        if (!(state.getBlock() instanceof RoundDoorBlock)) {
+        if (!(state.getBlock() instanceof AssemblyDoorBlock)) {
             return Optional.empty();
         }
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
@@ -34,7 +34,7 @@ public final class DoorBlockEntities {
             return Optional.empty();
         }
         BlockState anchorState = level.getBlockState(anchor);
-        if (!(anchorState.getBlock() instanceof RoundDoorBlock) || !DoorLayout.of(anchor, anchorState).equals(assembly)) {
+        if (!(anchorState.getBlock() instanceof AssemblyDoorBlock) || !DoorLayout.of(anchor, anchorState).equals(assembly)) {
             return Optional.empty();
         }
         return level.getBlockEntity(anchor) instanceof RoundDoorBlockEntity entity ? Optional.of(entity) : Optional.empty();
@@ -43,7 +43,7 @@ public final class DoorBlockEntities {
     /** For loot from any part: the anchor as found in the world, else the captured entity if it is the anchor's. */
     public static Optional<RoundDoorBlockEntity> forLoot(LootParams.Builder builder, BlockState state) {
         Vec3 origin = builder.getOptionalParameter(LootContextParams.ORIGIN);
-        if (origin != null && state.getBlock() instanceof RoundDoorBlock) {
+        if (origin != null && state.getBlock() instanceof AssemblyDoorBlock) {
             Optional<RoundDoorBlockEntity> anchor = anchor(builder.getLevel(), BlockPos.containing(origin), state);
             if (anchor.isPresent()) {
                 return anchor;

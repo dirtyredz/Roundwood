@@ -1,0 +1,50 @@
+package io.github.dirtyredz.roundwood.data.client.door;
+
+import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
+import io.github.dirtyredz.roundwood.data.client.ItemModelTransforms;
+import net.minecraft.data.PackOutput;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
+import net.minecraftforge.client.model.generators.ItemModelBuilder;
+import net.minecraftforge.client.model.generators.ItemModelProvider;
+import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.common.data.ExistingFileHelper;
+import org.joml.Vector3f;
+
+/**
+ * The doors' inventory models, one per design: the whole closed leaf (left hinge) face-on, from one
+ * template per design carrying the display transforms (two blocks tall, so both draw at half a
+ * block's scale, centred on the leaf), bound to oak; the client retextures its panel per stack
+ * appearance, keyed by design.
+ */
+public class DoorItemModelProvider extends ItemModelProvider {
+    public DoorItemModelProvider(PackOutput output, ExistingFileHelper existingFiles) {
+        super(output, Roundwood.MOD_ID, existingFiles);
+    }
+
+    @Override
+    public String getName() {
+        return "Roundwood door item models";
+    }
+
+    /** The item template of {@code design} ({@code template_round_door}, {@code template_arched_door}). */
+    static String template(DoorDesign design) {
+        return DoorModelProvider.TEMPLATE + design.id();
+    }
+
+    @Override
+    protected void registerModels() {
+        for (DoorDesign design : DoorDesign.values()) {
+            ItemModelBuilder template = getBuilder(template(design))
+                    .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + DoorModelProvider.template(design, DoorHingeSide.LEFT))));
+            // The leaf's middle, in model pixels.
+            ItemModelTransforms.assembly(template, new Vector3f(design.width() / 2F, DoorDesign.HEIGHT / 2F,
+                    (float) DoorGeometry.PIVOT_Z));
+            getBuilder(design.id()).parent(template)
+                    .texture(DoorGeometry.PANEL, modLoc(DoorModelProvider.OAK_PANEL))
+                    .texture(DoorGeometry.BRASS, modLoc("block/brass"))
+                    .texture("particle", modLoc(DoorModelProvider.OAK_PANEL));
+        }
+    }
+}

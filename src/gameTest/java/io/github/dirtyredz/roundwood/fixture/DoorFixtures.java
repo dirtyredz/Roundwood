@@ -3,9 +3,10 @@ package io.github.dirtyredz.roundwood.fixture;
 import com.mojang.authlib.GameProfile;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -203,7 +204,11 @@ public final class DoorFixtures {
 
     /** The assembly anchored at a relative position, in absolute coordinates. */
     public static DoorLayout.Assembly assembly(GameTestHelper helper, BlockPos anchor, Direction facing, DoorHingeSide hinge) {
-        return new DoorLayout.Assembly(helper.absolutePos(anchor), facing, hinge);
+        return assembly(helper, anchor, facing, hinge, DoorDesign.ROUND);
+    }
+
+    public static DoorLayout.Assembly assembly(GameTestHelper helper, BlockPos anchor, Direction facing, DoorHingeSide hinge, DoorDesign design) {
+        return new DoorLayout.Assembly(helper.absolutePos(anchor), facing, hinge, design);
     }
 
     /** As above with the hinge a centre click gives in open space. */
@@ -231,7 +236,7 @@ public final class DoorFixtures {
 
     /** Asserts all four parts are present with the expected open state. */
     public static void assertAssembly(GameTestHelper helper, DoorLayout.Assembly assembly, Block block, boolean open) {
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : assembly.parts()) {
             BlockState state = helper.getLevel().getBlockState(assembly.pos(part));
             check(assembly.isPart(state, block, part), part + " missing or wrong at " + assembly.pos(part) + ": " + state);
             check(state.getValue(DoorBlock.OPEN) == open, part + " open=" + state.getValue(DoorBlock.OPEN) + ", expected " + open);

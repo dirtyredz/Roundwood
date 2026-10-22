@@ -7,9 +7,10 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.window.pane.OrientedWindowBlock;
@@ -21,11 +22,12 @@ import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.section.BrickArchesSection;
-import io.github.dirtyredz.roundwood.showcase.section.CamouflageSection;
-import io.github.dirtyredz.roundwood.showcase.section.DoorsSection;
+import io.github.dirtyredz.roundwood.showcase.section.door.ArchedDoorsChecks;
+import io.github.dirtyredz.roundwood.showcase.section.door.CamouflageSection;
+import io.github.dirtyredz.roundwood.showcase.section.door.DoorsSection;
 import io.github.dirtyredz.roundwood.showcase.section.PaintsSection;
-import io.github.dirtyredz.roundwood.showcase.section.RedstoneSection;
-import io.github.dirtyredz.roundwood.showcase.section.TrimCombinationsSection;
+import io.github.dirtyredz.roundwood.showcase.section.door.RedstoneSection;
+import io.github.dirtyredz.roundwood.showcase.section.door.TrimCombinationsSection;
 import io.github.dirtyredz.roundwood.showcase.section.window.WindowArchesSection;
 import io.github.dirtyredz.roundwood.showcase.section.window.WindowPositionsSection;
 import io.github.dirtyredz.roundwood.showcase.section.window.WindowsSection;
@@ -153,6 +155,7 @@ public final class ShowcaseGameTests {
         verifyWindowPositions(level, frame);
         verifyWindowArches(level, frame);
         ShowcaseWindowChecks.verifyNewWindowSections(level, frame);
+        ArchedDoorsChecks.verify(level, frame);
         verifyRedstone(level, frame);
         verifyTrims(level, frame);
         verifyArches(level, frame);
@@ -166,6 +169,8 @@ public final class ShowcaseGameTests {
             verifyWindowPositions(level, frame);
             verifyWindowArches(level, frame);
             ShowcaseWindowChecks.verifyNewWindowSections(level, frame);
+            ArchedDoorsChecks.verify(level, frame);
+            ArchedDoorsChecks.verifyRedstone(level, frame);
             clearSilently(helper);
             helper.succeed();
         });
@@ -202,15 +207,15 @@ public final class ShowcaseGameTests {
     }
 
     private static List<Appearance> woods() {
-        return ShowcaseCanvas.sampleSet().stream().filter(a -> a.isWood() && !a.isPainted()).toList();
+        return ShowcaseSamples.all().stream().filter(a -> a.isWood() && !a.isPainted()).toList();
     }
 
     private static List<Appearance> paints() {
-        return ShowcaseCanvas.sampleSet().stream().filter(Appearance::isPainted).toList();
+        return ShowcaseSamples.all().stream().filter(Appearance::isPainted).toList();
     }
 
     private static List<Appearance> masonry() {
-        return ShowcaseCanvas.sampleSet().stream().filter(a -> !a.isWood()).toList();
+        return ShowcaseSamples.all().stream().filter(a -> !a.isWood()).toList();
     }
 
     private static Appearance doorLook(ServerLevel level, BlockPos anchor) {
@@ -239,12 +244,12 @@ public final class ShowcaseGameTests {
             for (int variant = 0; variant < 4; variant++) {
                 int r = DoorsSection.r(i, variant);
                 int f = DoorsSection.f(i);
-                DoorLayout.Assembly assembly = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), DoorsSection.hinge(variant));
+                DoorLayout.Assembly assembly = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), DoorsSection.hinge(variant), DoorDesign.ROUND);
                 String what = wood.key() + " variant " + variant;
                 check(assembly.complete(level, block), what + ": door missing or incomplete");
                 check(level.getBlockState(assembly.anchor()).getValue(DoorBlock.OPEN) == DoorsSection.open(variant), what + ": wrong open state");
                 check(wood.equals(doorLook(level, assembly.anchor())), what + ": anchor shows " + doorLook(level, assembly.anchor()));
-                check(signSays(level, frame.pos(r, 0, f - 1), ShowcaseCanvas.label(wood)), what + ": label sign missing");
+                check(signSays(level, frame.pos(r, 0, f - 1), ShowcaseSamples.label(wood)), what + ": label sign missing");
             }
             BlockPos windowPos = frame.pos(WindowsSection.ROW_R + i, 0, WindowsSection.ROW_F);
             BlockState state = level.getBlockState(windowPos);
@@ -392,7 +397,7 @@ public final class ShowcaseGameTests {
                 int f = TrimCombinationsSection.f(i);
                 String what = material.key() + " sample " + j;
                 DoorLayout.Assembly assembly = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(),
-                        TrimCombinationsSection.hinge(i, j));
+                        TrimCombinationsSection.hinge(i, j), DoorDesign.ROUND);
                 check(assembly.complete(level, ModBlocks.roundDoor()), what + ": door missing or incomplete");
                 check(TrimCombinationsSection.door(j).equals(doorLook(level, assembly.anchor())), what + ": door look");
                 check(level.getBlockState(assembly.anchor()).getValue(DoorBlock.OPEN) == TrimCombinationsSection.open(j), what + ": open state");
@@ -404,7 +409,7 @@ public final class ShowcaseGameTests {
                 check(expected.equals(shown), what + ": door trims " + shown);
                 check(!(level.getBlockState(frame.pos(r, 0, f - 1)).getBlock() instanceof io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock),
                         what + ": a frame block stands in front of the door");
-                check(signSays(level, frame.pos(r, 0, f - 2), ShowcaseCanvas.label(material)), what + ": label sign missing");
+                check(signSays(level, frame.pos(r, 0, f - 2), ShowcaseSamples.label(material)), what + ": label sign missing");
             }
         }
     }
@@ -428,7 +433,7 @@ public final class ShowcaseGameTests {
             Appearance paint = paints.get(i);
             int r = PaintsSection.r(i);
             int f = PaintsSection.f(i);
-            DoorLayout.Assembly door = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), DoorHingeSide.LEFT);
+            DoorLayout.Assembly door = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), DoorHingeSide.LEFT, DoorDesign.ROUND);
             check(door.complete(level, ModBlocks.roundDoor()) && paint.equals(doorLook(level, door.anchor())), paint.key() + ": door");
             check(level.getBlockEntity(door.anchor()) instanceof RoundDoorBlockEntity entity
                     && entity.trims().equals(FaceTrims.NONE.with(AttachmentFace.FRONT, paint)), paint.key() + ": door trim");
@@ -437,7 +442,7 @@ public final class ShowcaseGameTests {
                     && tinted.appearance().equals(Appearance.DEFAULT), paint.key() + ": tinted glass");
             BlockPos window = frame.pos(r + PaintsSection.WINDOW_OFFSET, 0, f);
             check(level.getBlockState(window).is(ModBlocks.roundWindow()) && paint.equals(windowLook(level, window)), paint.key() + ": window");
-            check(signSays(level, frame.pos(r, 0, f - 1), ShowcaseCanvas.label(paint)), paint.key() + ": label sign missing");
+            check(signSays(level, frame.pos(r, 0, f - 1), ShowcaseSamples.label(paint)), paint.key() + ": label sign missing");
         }
     }
 

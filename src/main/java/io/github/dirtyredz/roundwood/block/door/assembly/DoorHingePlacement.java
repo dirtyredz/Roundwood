@@ -13,10 +13,11 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * Picks the leaf's hinge the way vanilla {@code DoorBlock.getHinge} does, but judged at the two
- * outside edges of the 2-wide assembly instead of beside a single column:
+ * outside edges of the assembly's actual footprint (two columns for the round door, one for the
+ * arched door since 0.11.0):
  * <ol>
  *     <li>a door of the same block standing just outside one edge puts the hinge on the other edge
- *     (a pair of round doors then opens from the middle, as vanilla pairs do);</li>
+ *     (a pair of doors then opens from the middle, as vanilla pairs do);</li>
  *     <li>otherwise the edge with more full blocks beside it (lower and upper row) gets the hinge;</li>
  *     <li>on a tie, the half of the clicked cell the player aimed at: left half, left hinge.</li>
  * </ol>
@@ -26,12 +27,13 @@ public final class DoorHingePlacement {
     private DoorHingePlacement() {
     }
 
-    public static DoorHingeSide choose(Block door, BlockPlaceContext context, BlockPos anchor, Direction facing) {
+    /** @param columns the footprint's width in cells: the outside-right cell is that far right of the anchor */
+    public static DoorHingeSide choose(Block door, BlockPlaceContext context, BlockPos anchor, Direction facing, int columns) {
         BlockGetter level = context.getLevel();
         Direction left = facing.getCounterClockWise();
         Direction right = facing.getClockWise();
         BlockPos outsideLeft = anchor.relative(left);
-        BlockPos outsideRight = anchor.relative(right, 2);
+        BlockPos outsideRight = anchor.relative(right, columns);
 
         int solid = (full(level, outsideLeft) ? -1 : 0) + (full(level, outsideLeft.above()) ? -1 : 0)
                 + (full(level, outsideRight) ? 1 : 0) + (full(level, outsideRight.above()) ? 1 : 0);

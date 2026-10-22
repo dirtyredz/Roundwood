@@ -1,22 +1,28 @@
 package io.github.dirtyredz.roundwood.block.door.camouflage;
 
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.PixelCircle;
+import io.github.dirtyredz.roundwood.geometry.PixelSlab;
+import io.github.dirtyredz.roundwood.geometry.Surface;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
-import java.util.function.IntPredicate;
+import java.util.Map;
 
 /**
- * The four static corners a camouflage material fills: everything inside the assembly's 32 x 32
- * square that the round leaf does not cover, at the closed leaf's depth (z 13..16), in the assembly
- * frame {@link DoorGeometry} uses. They never move: not with the hinge, not when the door opens.
- * Plain Java: selection shapes, hit classification and the client renderer all read it.
+ * The static corners a camouflage material fills: everything inside the assembly's rectangle that
+ * the leaf does not cover, at the closed leaf's depth (z 13..16), in the assembly frame
+ * {@link DoorGeometry} uses. The round door has four (the square minus the disc); the arched door
+ * (0.11.0) only the two upper exterior corners beside its crown. They never move: not with the
+ * hinge, not when the door opens. Plain Java: selection shapes, hit classification and the client
+ * renderer all read it.
  */
 public final class CamouflageGeometry {
-    public static final int SIZE = DoorGeometry.DIAMETER;
     public static final double BACK = DoorGeometry.BACK;
     public static final double FRONT = DoorGeometry.FRONT;
     /** Tolerance for hits that land exactly on a corner's surface. */
@@ -34,27 +40,33 @@ public final class CamouflageGeometry {
     public record Face(Box box, Side side) {
     }
 
-    private static final List<Box> CORNERS = PixelCircle.rasterize(SIZE, SIZE, CamouflageGeometry::inCorner).stream()
-            .map(rect -> rect.extrude(BACK, FRONT)).toList();
+    private static final Map<DoorDesign, List<Box>> CORNERS = new EnumMap<>(DoorDesign.class);
+
+    static {
+        for (DoorDesign design : DoorDesign.values()) {
+            CORNERS.put(design, PixelCircle.rasterize(design.width(), DoorDesign.HEIGHT, (u, v) -> inCorner(design, u, v)).stream()
+                    .map(rect -> rect.extrude(BACK, FRONT)).toList());
+        }
+    }
 
     private CamouflageGeometry() {
     }
 
-    /** True when pixel (u, v) of the 32 x 32 face is a corner pixel (inside the square, outside the disc). */
-    public static boolean inCorner(int u, int v) {
-        return u >= 0 && v >= 0 && u < SIZE && v < SIZE && !PixelCircle.inDisc(SIZE, SIZE, u, v);
+    /** True when pixel (u, v) of the door's rectangle is a corner pixel (inside the rectangle, outside the leaf). */
+    public static boolean inCorner(DoorDesign design, int u, int v) {
+        return u >= 0 && v >= 0 && u < design.width() && v < DoorDesign.HEIGHT && !design.inLeaf(u, v);
     }
 
-    /** All four corners as assembly-coordinate boxes. */
-    public static List<Box> corners() {
-        return CORNERS;
+    /** All the design's corners as assembly-coordinate boxes. */
+    public static List<Box> corners(DoorDesign design) {
+        return CORNERS.get(design);
     }
 
-    /** The corner pieces inside one cell (column 0..1, row 0..1), cell-local (0..16), still facing north. */
-    public static List<Box> quarter(int column, int row) {
+    /** The corner pieces inside one cell (column, row 0..1), cell-local (0..16), still facing north. */
+    public static List<Box> quarter(DoorDesign design, int column, int row) {
         Box cell = cell(column, row);
         List<Box> out = new ArrayList<>();
-        for (Box box : CORNERS) {
+        for (Box box : corners(design)) {
             box.intersect(cell).map(b -> b.translate(-16 * column, -16 * row, 0)).ifPresent(out::add);
         }
         return out;
@@ -62,67 +74,42 @@ public final class CamouflageGeometry {
 
     /**
      * Only the surfaces of one cell's corner that can be seen: front and back of every piece, and
-     * each side face only where the neighbouring pixel is not corner (the disc, or outside the
-     * square). Cell-local, facing north. Internal faces between merged pieces are never emitted.
+     * each side face only where the neighbouring pixel is not corner (the leaf, or outside the
+     * rectangle). Cell-local, facing north. Internal faces between merged pieces are never emitted.
      */
-    public static List<Face> exposedFaces(int column, int row) {
-        int u0 = 16 * column;
-        int v0 = 16 * row;
+    public static List<Face> exposedFaces(DoorDesign design, int column, int row) {
         List<Face> faces = new ArrayList<>();
-        for (PixelCircle.Rect rect : PixelCircle.rasterize(16, 16, (u, v) -> inCorner(u0 + u, v0 + v))) {
-            faces.add(new Face(rect.extrude(BACK, FRONT), Side.NORTH));
-            faces.add(new Face(rect.extrude(BACK, FRONT), Side.SOUTH));
-        }
-        for (int line = 0; line < 16; line++) {
-            int l = line;
-            // Rows for the top/bottom faces, columns for the side faces; each a strip of exposed pixels.
-            strips(faces, Side.UP, (i) -> exposed(u0 + i, v0 + l, 0, 1), (a, b) -> new Box(a, l, BACK, b, l + 1, FRONT));
-            strips(faces, Side.DOWN, (i) -> exposed(u0 + i, v0 + l, 0, -1), (a, b) -> new Box(a, l, BACK, b, l + 1, FRONT));
-            strips(faces, Side.EAST, (i) -> exposed(u0 + l, v0 + i, 1, 0), (a, b) -> new Box(l, a, BACK, l + 1, b, FRONT));
-            strips(faces, Side.WEST, (i) -> exposed(u0 + l, v0 + i, -1, 0), (a, b) -> new Box(l, a, BACK, l + 1, b, FRONT));
+        for (Surface surface : PixelSlab.cellFaces((u, v) -> inCorner(design, u, v), 16 * column, 16 * row, BACK, FRONT, "")) {
+            faces.add(new Face(surface.backing(), side(surface.face())));
         }
         return faces;
-    }
-
-    /** A corner pixel whose neighbour in direction (du, dv) is not corner: its face on that side shows. */
-    private static boolean exposed(int u, int v, int du, int dv) {
-        return inCorner(u, v) && !inCorner(u + du, v + dv);
-    }
-
-    private interface StripBox {
-        Box of(int from, int to);
-    }
-
-    /** Adds one face per maximal run of exposed pixels along a 16-pixel line. */
-    private static void strips(List<Face> out, Side side, IntPredicate exposed, StripBox box) {
-        int i = 0;
-        while (i < 16) {
-            if (!exposed.test(i)) {
-                i++;
-                continue;
-            }
-            int start = i;
-            while (i < 16 && exposed.test(i)) {
-                i++;
-            }
-            out.add(new Face(box.of(start, i), side));
-        }
     }
 
     /**
      * True when an assembly-frame point (pixels) lies in a corner and not in the leaf: the corner
      * region at the closed leaf's depth, minus whatever the leaf in its current pose covers.
      */
-    public static boolean isCornerHit(DoorHingeSide hinge, boolean open, double x, double y, double z) {
-        if (z < BACK - EDGE || z > FRONT + EDGE || !inCorner((int) Math.floor(x), (int) Math.floor(y))) {
+    public static boolean isCornerHit(DoorDesign design, DoorHingeSide hinge, boolean open, double x, double y, double z) {
+        if (z < BACK - EDGE || z > FRONT + EDGE || !inCorner(design, (int) Math.floor(x), (int) Math.floor(y))) {
             return false;
         }
-        for (Box box : DoorGeometry.placedEnvelope(hinge, open)) {
+        for (Box box : DoorGeometry.placedEnvelope(design, hinge, open)) {
             if (box.minX() < x && x < box.maxX() && box.minY() < y && y < box.maxY() && box.minZ() < z && z < box.maxZ()) {
                 return false;
             }
         }
         return true;
+    }
+
+    private static Side side(Direction direction) {
+        return switch (direction) {
+            case DOWN -> Side.DOWN;
+            case UP -> Side.UP;
+            case NORTH -> Side.NORTH;
+            case SOUTH -> Side.SOUTH;
+            case WEST -> Side.WEST;
+            case EAST -> Side.EAST;
+        };
     }
 
     private static Box cell(int column, int row) {

@@ -1,6 +1,6 @@
 package io.github.dirtyredz.roundwood.migration;
 
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.migration.trim.DoorTrimConversion;

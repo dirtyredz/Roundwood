@@ -29,6 +29,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
     protected void addTranslations() {
         add("itemGroup." + Roundwood.MOD_ID, "Roundwood");
         add(ModBlocks.roundDoor(), "Round Door");
+        add(ModBlocks.archedDoor(), "Arched Door");
         for (WindowDesign design : WindowDesign.all()) {
             add(ModBlocks.window(design), windowName(design));
         }
@@ -44,7 +45,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("tooltip.roundwood.unavailable", "Material %s is not installed (shown as oak)");
         add("tooltip.roundwood.restyle", "Restyle placed: planks or dye (doors: sneak + planks)");
         add("tooltip.roundwood.universal_trim",
-                "Trims the clicked face of a window or round door; restyle with planks, masonry or dye, remove with shears");
+                "Trims the clicked face of a window or door; restyle with planks, masonry or dye, remove with shears");
         add("tooltip.roundwood.glass", "Glass: %s");
         add("tooltip.roundwood.preview", "Preview of a possible look");
         add("tooltip.roundwood.preview_note", "Crafting gives oak; restyle it in the world");

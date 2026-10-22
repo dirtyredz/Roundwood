@@ -2,6 +2,7 @@
   "block.roundwood.acacia_round_door": "Acacia Round Door",
   "block.roundwood.acacia_round_trim": "Acacia Round Trim",
   "block.roundwood.acacia_round_window": "Acacia Round Window",
+  "block.roundwood.arched_door": "Arched Door",
   "block.roundwood.bamboo_round_door": "Bamboo Round Door",
   "block.roundwood.bamboo_round_trim": "Bamboo Round Trim",
   "block.roundwood.bamboo_round_window": "Bamboo Round Window",
@@ -91,6 +92,6 @@
   "tooltip.roundwood.preview_note": "Crafting gives oak; restyle it in the world",
   "tooltip.roundwood.restyle": "Restyle placed: planks or dye (doors: sneak + planks)",
   "tooltip.roundwood.unavailable": "Material %s is not installed (shown as oak)",
-  "tooltip.roundwood.universal_trim": "Trims the clicked face of a window or round door; restyle with planks, masonry or dye, remove with shears",
+  "tooltip.roundwood.universal_trim": "Trims the clicked face of a window or door; restyle with planks, masonry or dye, remove with shears",
   "tooltip.roundwood.wood": "Wood: %s"
 }

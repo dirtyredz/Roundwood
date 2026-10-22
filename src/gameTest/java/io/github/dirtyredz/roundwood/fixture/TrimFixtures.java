@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.fixture;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
@@ -97,7 +98,7 @@ public final class TrimFixtures {
     /** A hit on the frame's front face at ({@code a}, {@code h}), as a player standing in front sends it. */
     public static BlockHitResult frontHit(TrimLayout.Assembly trim, double a, double h) {
         // The frame's front face is one pixel in front of the back of its cells: d = 15/16 from the cells' front.
-        DoorLayout.Assembly frame = new DoorLayout.Assembly(trim.anchor(), trim.facing(), DoorHingeSide.LEFT);
+        DoorLayout.Assembly frame = new DoorLayout.Assembly(trim.anchor(), trim.facing(), DoorHingeSide.LEFT, DoorDesign.ROUND);
         Vec3 location = point(frame, a, h, 15.0 / 16);
         Direction out = trim.facing().getOpposite();
         BlockPos cell = BlockPos.containing(location.add(Vec3.atLowerCornerOf(trim.facing().getNormal()).scale(1e-4)));

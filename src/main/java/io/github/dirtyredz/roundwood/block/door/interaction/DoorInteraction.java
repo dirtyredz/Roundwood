@@ -6,8 +6,8 @@ import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceGestures;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.appearance.DoorAppearance;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorBlockEntities;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
@@ -52,7 +52,7 @@ public final class DoorInteraction {
     private DoorInteraction() {
     }
 
-    public static InteractionResult use(RoundDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
+    public static InteractionResult use(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
                                         InteractionHand hand, BlockHitResult hit) {
         if (heldTrim(player, hand)) {
             Optional<AttachmentFace> face = fitFace(state, pos, player, hand, hit);
@@ -95,7 +95,7 @@ public final class DoorInteraction {
         NONE, REMOVE, RESTYLE
     }
 
-    private static Optional<InteractionResult> ring(RoundDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
+    private static Optional<InteractionResult> ring(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
                                                     InteractionHand hand, BlockHitResult hit) {
         RingAction action = ringAction(state, level, pos, player, hand, hit);
         if (action == RingAction.NONE) {
@@ -150,7 +150,7 @@ public final class DoorInteraction {
         return DoorTrimTarget.fit(state, pos, hit);
     }
 
-    private static Optional<RoundDoorBlockEntity> anchor(Level level, BlockPos pos, BlockState state, RoundDoorBlock block) {
+    private static Optional<RoundDoorBlockEntity> anchor(Level level, BlockPos pos, BlockState state, AssemblyDoorBlock block) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
         if (!assembly.loaded(level) || !assembly.complete(level, block)) {
             return Optional.empty();

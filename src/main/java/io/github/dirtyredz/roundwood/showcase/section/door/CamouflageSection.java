@@ -1,7 +1,7 @@
-package io.github.dirtyredz.roundwood.showcase.section;
+package io.github.dirtyredz.roundwood.showcase.section.door;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageMaterial;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;

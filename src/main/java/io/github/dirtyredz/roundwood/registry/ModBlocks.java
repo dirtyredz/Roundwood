@@ -1,7 +1,10 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.ArchedDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
@@ -25,8 +28,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The 28 canonical blocks: the round door, 26 windows (the round window; the upper arches and bottom
- * corners that complete a 2 x 2 arched-top window; since 0.10.0 the lower arches that close it into
+ * The 29 canonical blocks: the round door and (0.11.0) the arched door, 26 windows (the round window;
+ * the upper arches and bottom corners that complete a 2 x 2 arched-top window; since 0.10.0 the lower arches that close it into
  * a circle, the top corners and the four single-edge pieces; each plain and with cross beams) and
  * the round trim, whose look comes from their appearance (block entity), not from the block.
  * Their behaviour is the oak counterparts' whatever the appearance. The hidden 0.4.0 aliases are
@@ -35,8 +38,11 @@ import java.util.Map;
 public final class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Roundwood.MOD_ID);
 
-    public static final RegistryObject<RoundDoorBlock> ROUND_DOOR = BLOCKS.register("round_door",
+    public static final RegistryObject<RoundDoorBlock> ROUND_DOOR = BLOCKS.register(DoorDesign.ROUND.id(),
             () -> new RoundDoorBlock(doorProperties(), BlockSetType.OAK, ModBlockEntities::roundDoor));
+    /** The 1 x 2 arched door (0.11.0); its anchor entity is the round door's type. */
+    public static final RegistryObject<ArchedDoorBlock> ARCHED_DOOR = BLOCKS.register(DoorDesign.ARCHED.id(),
+            () -> new ArchedDoorBlock(doorProperties(), BlockSetType.OAK, ModBlockEntities::roundDoor));
     /** The 26 windows by design, in creative order (each plain piece, then its crossed variant). */
     private static final Map<WindowDesign, RegistryObject<WindowPaneBlock>> WINDOWS = registerWindows();
     public static final RegistryObject<RoundTrimBlock> ROUND_TRIM = BLOCKS.register("round_trim",
@@ -57,6 +63,15 @@ public final class ModBlocks {
 
     public static RoundDoorBlock roundDoor() {
         return ROUND_DOOR.get();
+    }
+
+    public static ArchedDoorBlock archedDoor() {
+        return ARCHED_DOOR.get();
+    }
+
+    /** The canonical doors, round then arched. */
+    public static List<AssemblyDoorBlock> doors() {
+        return List.of(roundDoor(), archedDoor());
     }
 
     /** The plain round window (the block id since 0.3). */
@@ -96,10 +111,10 @@ public final class ModBlocks {
         return ROUND_TRIM.get();
     }
 
-    /** The 28 canonical blocks in creative order: door, the 26 windows, trim. */
+    /** The 29 canonical blocks in creative order: the two doors, the 26 windows, trim. */
     public static List<Block> canonical() {
         List<Block> out = new ArrayList<>();
-        out.add(roundDoor());
+        out.addAll(doors());
         out.addAll(windows());
         out.add(roundTrim());
         return List.copyOf(out);

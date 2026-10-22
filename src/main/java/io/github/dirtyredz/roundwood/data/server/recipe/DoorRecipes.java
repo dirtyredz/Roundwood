@@ -11,7 +11,12 @@ import net.minecraft.world.item.Items;
 
 import java.util.function.Consumer;
 
-/** The door recipe: eight planks (mixed types allowed) around a gold nugget (the 0.4.0 shape). */
+/**
+ * The door recipes, any planks (mixed types allowed) and a gold nugget for the hardware: the round
+ * door's eight planks around the nugget (the 0.4.0 shape), and the arched door's (0.11.0) six planks
+ * standing in an arch over it, the top corners left empty (a crown), so neither grid matches the
+ * other or vanilla's six-plank door.
+ */
 public final class DoorRecipes {
     private DoorRecipes() {
     }
@@ -22,6 +27,13 @@ public final class DoorRecipes {
                 .define('P', ItemTags.PLANKS)
                 .define('N', Items.GOLD_NUGGET)
                 .group(Roundwood.MOD_ID + ":round_door")
+                .unlockedBy("has_planks", unlock)
+                .save(writer);
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModItems.ARCHED_DOOR.get())
+                .pattern(" P ").pattern("PNP").pattern("PPP")
+                .define('P', ItemTags.PLANKS)
+                .define('N', Items.GOLD_NUGGET)
+                .group(Roundwood.MOD_ID + ":arched_door")
                 .unlockedBy("has_planks", unlock)
                 .save(writer);
     }

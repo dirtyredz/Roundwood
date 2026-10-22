@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.client.camouflage;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import net.minecraft.client.Minecraft;
@@ -41,11 +41,11 @@ public final class CamouflageRenderer {
         ModelBlockRenderer renderer = Minecraft.getInstance().getBlockRenderer().getModelRenderer();
         VertexConsumer consumer = buffers.getBuffer(RenderType.solid());
         BlockPos anchor = assembly.anchor();
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : assembly.parts()) {
             BlockPos cell = assembly.pos(part);
             pose.pushPose();
             pose.translate(cell.getX() - anchor.getX(), cell.getY() - anchor.getY(), cell.getZ() - anchor.getZ());
-            renderer.tesselateBlock(level, CamouflageModels.quarter(donor, assembly.facing(), part), donor, cell, pose, consumer,
+            renderer.tesselateBlock(level, CamouflageModels.quarter(donor, assembly.design(), assembly.facing(), part), donor, cell, pose, consumer,
                     false, RANDOM, donor.getSeed(cell), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.solid());
             pose.popPose();
         }

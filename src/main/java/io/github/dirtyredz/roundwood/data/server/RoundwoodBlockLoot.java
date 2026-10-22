@@ -38,6 +38,7 @@ public class RoundwoodBlockLoot extends BlockLootSubProvider {
     @Override
     protected void generate() {
         add(ModBlocks.roundDoor(), door(ModItems.ROUND_DOOR.get()));
+        add(ModBlocks.archedDoor(), door(ModItems.ARCHED_DOOR.get()));
         dropSelf(ModBlocks.roundTrim());
         ModBlocks.windows().forEach(window -> add(window, window(window.asItem(), window.profile().takesSill())));
         LegacyContent.doors().forEach(block -> add(block, door(ModItems.ROUND_DOOR.get())));

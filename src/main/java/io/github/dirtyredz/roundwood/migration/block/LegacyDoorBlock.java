@@ -1,8 +1,8 @@
 package io.github.dirtyredz.roundwood.migration.block;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.migration.LegacyAppearances;
 import io.github.dirtyredz.roundwood.migration.LegacyChunkMigration;
 import net.minecraft.core.BlockPos;

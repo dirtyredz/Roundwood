@@ -6,6 +6,8 @@ import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
 import io.github.dirtyredz.roundwood.client.camouflage.CamouflageModels;
 import io.github.dirtyredz.roundwood.client.door.DoorAppearanceModels;
@@ -25,6 +27,7 @@ import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -63,8 +66,10 @@ public final class RoundwoodClient {
 
     @SubscribeEvent
     public static void registerSourceModels(ModelEvent.RegisterAdditional event) {
-        for (DoorHingeSide hinge : DoorHingeSide.values()) {
-            event.register(DoorLeafModels.location(hinge));
+        for (DoorDesign design : DoorDesign.values()) {
+            for (DoorHingeSide hinge : DoorHingeSide.values()) {
+                event.register(DoorLeafModels.location(design, hinge));
+            }
         }
         for (TrimPart part : TrimPart.values()) {
             event.register(TrimModelNames.quarterLocation(part, false));
@@ -97,8 +102,10 @@ public final class RoundwoodClient {
                 continue;
             }
             TrimSlot slot = item instanceof TrimAttachmentItem attachment ? attachment.trimSlot() : TrimSlot.PERIMETER;
+            DoorDesign design = item instanceof BlockItem block && block.getBlock() instanceof AssemblyDoorBlock door
+                    ? door.design() : DoorDesign.ROUND;
             models.put(location, switch (family.appearanceFamily()) {
-                case DOOR -> AppearanceItemOverrides.wrap(model, DoorAppearanceModels::item);
+                case DOOR -> AppearanceItemOverrides.wrap(model, (oak, look) -> DoorAppearanceModels.item(design, oak, look));
                 case WINDOW -> AppearanceItemOverrides.wrapStack(model, WindowAppearanceModel::item);
                 case TRIM -> AppearanceItemOverrides.wrap(model, (oak, look) -> TrimItemModels.item(slot, oak, look));
             });

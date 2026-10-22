@@ -1,10 +1,7 @@
 package io.github.dirtyredz.roundwood.showcase;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.appearance.AppearanceSamples;
-import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
-import io.github.dirtyredz.roundwood.appearance.material.MasonryMaterials;
-import io.github.dirtyredz.roundwood.appearance.material.PlankMaterials;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
@@ -22,8 +19,6 @@ import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
@@ -52,39 +47,21 @@ public final class ShowcaseCanvas {
     ShowcaseCanvas(ServerLevel level, ShowcaseFrame frame) {
         this.level = level;
         this.frame = frame;
-        this.trimSamples = sampleSet();
+        this.trimSamples = ShowcaseSamples.all();
     }
 
-    /**
-     * The shared bounded samples (every vanilla wood, up to eight present modded planks, every paint on
-     * oak, the four masonry materials), discovered now, so a tag or resource reload shows next build.
-     */
-    public static List<Appearance> sampleSet() {
-        return AppearanceSamples.forFamily(AppearanceFamily.TRIM, PlankMaterials.present(), MasonryMaterials.blocks());
-    }
-
-    /** Every bare wood sample: the vanilla woods, then up to eight present modded planks. */
+    /** This build's bare wood samples ({@link ShowcaseSamples#woods}). */
     public List<Appearance> woods() {
-        return trimSamples.stream().filter(a -> a.isWood() && !a.isPainted()).toList();
+        return ShowcaseSamples.woods(trimSamples);
     }
 
-    /** One oak sample per dye, in dye order. */
+    /** This build's paint samples ({@link ShowcaseSamples#paints}). */
     public List<Appearance> paints() {
-        return trimSamples.stream().filter(Appearance::isPainted).toList();
+        return ShowcaseSamples.paints(trimSamples);
     }
 
     public List<Appearance> masonry() {
-        return trimSamples.stream().filter(a -> !a.isWood()).toList();
-    }
-
-    /** A short sign label for an appearance: the material's name, or the dye's. */
-    public static String label(Appearance appearance) {
-        if (appearance.paint().isPresent()) {
-            String dye = appearance.paint().get().getName().replace('_', ' ');
-            return Character.toUpperCase(dye.charAt(0)) + dye.substring(1) + " paint";
-        }
-        ResourceLocation id = appearance.material();
-        return BuiltInRegistries.BLOCK.containsKey(id) ? BuiltInRegistries.BLOCK.get(id).getName().getString() : id.toString();
+        return ShowcaseSamples.masonry(trimSamples);
     }
 
     public ServerLevel level() {
@@ -117,8 +94,13 @@ public final class ShowcaseCanvas {
      * side they see.
      */
     public boolean door(Appearance appearance, int r, int f, DoorHingeSide hinge, boolean open) {
-        DoorLayout.Assembly assembly = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), hinge);
-        boolean placed = DoorPlacement.placeAt(level, ModBlocks.roundDoor(), assembly, open, appearance);
+        return door(ModBlocks.roundDoor(), appearance, r, f, hinge, open);
+    }
+
+    /** As {@link #door(Appearance, int, int, DoorHingeSide, boolean)} for any door design (0.11.0: the arched door). */
+    public boolean door(AssemblyDoorBlock block, Appearance appearance, int r, int f, DoorHingeSide hinge, boolean open) {
+        DoorLayout.Assembly assembly = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), hinge, block.design());
+        boolean placed = DoorPlacement.placeAt(level, block, assembly, open, appearance);
         if (!placed) {
             problem("door not placed at " + assembly.anchor().toShortString());
         }

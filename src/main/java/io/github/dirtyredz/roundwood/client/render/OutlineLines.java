@@ -7,8 +7,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * Line drawing in vanilla's block-outline style ({@code RenderType.lines()}: position, colour and
- * the line's direction as its normal), camera-relative. Shared by the door highlight and the window
- * placement overlay.
+ * the line's direction as its normal), camera-relative. Shared by the door highlight, the door
+ * placement preview and the window placement overlay.
  */
 public final class OutlineLines {
     private OutlineLines() {

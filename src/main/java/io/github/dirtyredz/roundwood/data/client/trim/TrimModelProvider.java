@@ -4,7 +4,7 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
 import io.github.dirtyredz.roundwood.block.trim.geometry.TrimGeometry;
 import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
-import io.github.dirtyredz.roundwood.data.client.DoorModelProvider;
+import io.github.dirtyredz.roundwood.data.client.door.DoorModelProvider;
 import io.github.dirtyredz.roundwood.data.client.GeometryModelWriter;
 import io.github.dirtyredz.roundwood.geometry.AssemblyFaceUv;
 import io.github.dirtyredz.roundwood.geometry.Box;

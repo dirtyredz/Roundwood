@@ -1,8 +1,9 @@
 package io.github.dirtyredz.roundwood.migration;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
@@ -91,7 +92,7 @@ final class LegacyMigrationFixtures {
     static DoorLayout.Assembly rawDoor(GameTestHelper helper, BlockPos anchor, String id, DoorHingeSide hinge, boolean open,
                                        String anchorSnbt) {
         Block block = legacy(id);
-        DoorLayout.Assembly door = new DoorLayout.Assembly(anchor, Direction.NORTH, hinge);
+        DoorLayout.Assembly door = new DoorLayout.Assembly(anchor, Direction.NORTH, hinge, DoorDesign.ROUND);
         return rawDoor(helper, door, new Block[] {block, block, block, block}, open, anchorSnbt);
     }
 

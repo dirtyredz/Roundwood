@@ -3,8 +3,8 @@ package io.github.dirtyredz.roundwood.client.door;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorSelectionShapes;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorSwingOutline;
@@ -49,7 +49,7 @@ public final class DoorHighlightRenderer {
         }
         BlockPos pos = event.getTarget().getBlockPos();
         BlockState state = level.getBlockState(pos);
-        if (!(state.getBlock() instanceof RoundDoorBlock door)) {
+        if (!(state.getBlock() instanceof AssemblyDoorBlock door)) {
             return;
         }
         event.setCanceled(true);
@@ -67,7 +67,7 @@ public final class DoorHighlightRenderer {
                 && anchor.swing().moving(now)) {
             OutlineLines.edges(pose, lines, DoorSelectionShapes.visibleStatic(state, level, pos), x, y, z, 0F, 0F, 0F, ALPHA);
             DoorLayout.Part part = DoorLayout.partOf(state);
-            for (DoorSwingOutline.Edge e : DoorSwingOutline.forCell(state.getValue(DoorBlock.HINGE), anchor.swing().progress(now),
+            for (DoorSwingOutline.Edge e : DoorSwingOutline.forCell(door.design(), state.getValue(DoorBlock.HINGE), anchor.swing().progress(now),
                     part.column.index(), part.row(), VoxelShapeFactory.quarterTurns(state.getValue(DoorBlock.FACING)))) {
                 OutlineLines.line(pose, lines, x + e.x1() / 16, y + e.y1() / 16, z + e.z1() / 16,
                         x + e.x2() / 16, y + e.y2() / 16, z + e.z2() / 16, 0F, 0F, 0F, ALPHA);

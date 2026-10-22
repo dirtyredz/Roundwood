@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.camouflage;
 
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorHitRegion;
 import net.minecraft.core.BlockPos;
@@ -44,7 +44,7 @@ public final class CamouflageInteraction {
      * toggle the door instead (never for the offhand: the main hand already chose).
      */
     @Nullable
-    public static InteractionResult use(RoundDoorBlock block, BlockState state, DoorHitRegion.Region region, Level level,
+    public static InteractionResult use(AssemblyDoorBlock block, BlockState state, DoorHitRegion.Region region, Level level,
                                         BlockPos pos, Player player, InteractionHand hand) {
         boolean corner = region == DoorHitRegion.Region.CORNER;
         boolean sneaking = player.isSecondaryUseActive();
@@ -70,7 +70,7 @@ public final class CamouflageInteraction {
         return null;
     }
 
-    private static InteractionResult apply(RoundDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
+    private static InteractionResult apply(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
                                            ItemStack stack) {
         Optional<BlockState> material = CamouflageMaterial.fromStack(stack);
         if (material.isEmpty()) {
@@ -100,7 +100,7 @@ public final class CamouflageInteraction {
         return InteractionResult.CONSUME;
     }
 
-    private static InteractionResult clear(RoundDoorBlock block, BlockState state, Level level, BlockPos pos, Player player) {
+    private static InteractionResult clear(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos, Player player) {
         if (level.isClientSide) {
             return InteractionResult.SUCCESS;
         }
@@ -120,7 +120,7 @@ public final class CamouflageInteraction {
     }
 
     /** The anchor entity, if the player may edit and the assembly is whole and loaded. */
-    private static Optional<RoundDoorBlockEntity> editable(RoundDoorBlock block, BlockState state, Level level, BlockPos pos,
+    private static Optional<RoundDoorBlockEntity> editable(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos,
                                                            Player player) {
         if (!player.mayBuild() || !level.mayInteract(player, pos)) {
             return Optional.empty();
@@ -128,7 +128,7 @@ public final class CamouflageInteraction {
         return anchorEntity(block, state, level, pos);
     }
 
-    private static Optional<RoundDoorBlockEntity> anchorEntity(RoundDoorBlock block, BlockState state, Level level, BlockPos pos) {
+    private static Optional<RoundDoorBlockEntity> anchorEntity(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
         if (!assembly.loaded(level) || !assembly.complete(level, block)) {
             return Optional.empty();

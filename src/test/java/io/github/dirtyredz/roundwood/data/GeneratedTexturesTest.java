@@ -79,11 +79,12 @@ class GeneratedTexturesTest {
             expected.add("window_trim_frame_" + masonry);
             expected.add("window_trim_single_" + masonry);
             expected.add("window_sill_" + masonry);
+            expected.add("door_casing_arched_" + masonry);
         }
         for (String masonry : MASONRY) {
             expected.add("universal_trim_" + masonry);
         }
-        assertEquals(89 + 12, expected.size()); // 89 of 0.9.0 plus frame, single and sill for the four masonries
+        assertEquals(89 + 12 + 4, expected.size()); // 89 of 0.9.0, frame, single and sill (0.10.0), arched door casing (0.11.0)
         TreeSet<String> actual = new TreeSet<>();
         try (Stream<Path> files = Files.list(DIR)) {
             files.map(p -> p.getFileName().toString()).filter(n -> n.endsWith(".png"))
@@ -110,6 +111,7 @@ class GeneratedTexturesTest {
             assertSize("window_trim_frame_" + masonry, 64);
             assertSize("window_trim_single_" + masonry, 32);
             assertSize("window_sill_" + masonry, 64);
+            assertSize("door_casing_arched_" + masonry, 64);
             assertSize("universal_trim_" + masonry, 32);
         }
         for (String dye : DYES) {
@@ -218,6 +220,22 @@ class GeneratedTexturesTest {
         for (Map.Entry<String, String> entry : hashes.entrySet()) {
             byte[] digest = MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(DIR.resolve(entry.getKey() + ".png")));
             assertEquals(entry.getValue(), HexFormat.of().formatHex(digest), entry.getKey() + ".png changed");
+        }
+    }
+
+    /** The arched door casing faces (0.11.0) are 64 x 64 and fully opaque. */
+    @Test
+    void theArchedDoorCasingFacesAreOpaque() throws IOException {
+        for (String masonry : MASONRY) {
+            String name = "door_casing_arched_" + masonry;
+            BufferedImage image = read(name);
+            assertEquals(64, image.getWidth(), name + " width");
+            assertEquals(64, image.getHeight(), name + " height");
+            for (int y = 0; y < 64; y++) {
+                for (int x = 0; x < 64; x++) {
+                    assertEquals(255, alpha(image, x, y), name + ": translucent texel at " + x + "," + y);
+                }
+            }
         }
     }
 

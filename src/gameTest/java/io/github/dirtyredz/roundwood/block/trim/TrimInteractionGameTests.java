@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.block.trim;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorHitResolver;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;

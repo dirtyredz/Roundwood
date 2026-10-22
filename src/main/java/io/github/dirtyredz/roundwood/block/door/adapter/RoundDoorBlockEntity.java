@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.block.door;
+package io.github.dirtyredz.roundwood.block.door.adapter;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
@@ -28,8 +28,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 /**
- * The anchor (lower-left part) of every assembly carries this entity, so the client has one place
- * to draw the whole leaf from, and the assembly has one place to keep its appearance (wood and
+ * The anchor (lower-left part) of every door assembly (round, and arched since 0.11.0; the entity
+ * type keeps its {@code round_door} id) carries this entity, so the client has one place to draw
+ * the whole leaf from, and the assembly has one place to keep its appearance (wood and
  * paint, {@link Appearance}), its camouflage and its face trims (0.8.0, {@link DoorTrimNbt}). It never
  * ticks: the blockstate stays authoritative for open/closed, and the client-side {@link DoorSwing}
  * only animates between states it is told about through {@link #setBlockState}.
@@ -182,7 +183,7 @@ public class RoundDoorBlockEntity extends BlockEntity implements TrimAttachmentS
     @Override
     public AABB getRenderBoundingBox() {
         BlockState state = getBlockState();
-        if (state.getBlock() instanceof RoundDoorBlock) {
+        if (state.getBlock() instanceof AssemblyDoorBlock) {
             return DoorLayout.of(getBlockPos(), state).sweepBounds();
         }
         return new AABB(getBlockPos());

@@ -21,13 +21,13 @@ class DoorGeometryTest {
 
     @Test
     void pivotsSitInTheMiddleOfTheHingeSideThickness() {
-        assertEquals(1.5, DoorGeometry.pivotX(DoorHingeSide.LEFT), EPS);
-        assertEquals(30.5, DoorGeometry.pivotX(DoorHingeSide.RIGHT), EPS);
+        assertEquals(1.5, DoorGeometry.pivotX(DoorDesign.ROUND, DoorHingeSide.LEFT), EPS);
+        assertEquals(30.5, DoorGeometry.pivotX(DoorDesign.ROUND, DoorHingeSide.RIGHT), EPS);
         assertEquals(14.5, DoorGeometry.PIVOT_Z, EPS);
         // The pivot itself never moves.
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
-            double[] p = DoorGeometry.turn(DoorGeometry.pivotX(hinge), DoorGeometry.PIVOT_Z, 37, hinge);
-            assertArrayEquals(new double[] {DoorGeometry.pivotX(hinge), DoorGeometry.PIVOT_Z}, p, EPS);
+            double[] p = DoorGeometry.turn(DoorDesign.ROUND, DoorGeometry.pivotX(DoorDesign.ROUND, hinge), DoorGeometry.PIVOT_Z, 37, hinge);
+            assertArrayEquals(new double[] {DoorGeometry.pivotX(DoorDesign.ROUND, hinge), DoorGeometry.PIVOT_Z}, p, EPS);
         }
     }
 
@@ -36,26 +36,26 @@ class DoorGeometryTest {
         float left = DoorGeometry.openDegrees(DoorHingeSide.LEFT);
         float right = DoorGeometry.openDegrees(DoorHingeSide.RIGHT);
         // Facing north the front is +z; the free edge must end up at z = -16 (one block past the cells).
-        assertArrayEquals(new double[] {3, -16}, DoorGeometry.turn(32, 16, left, DoorHingeSide.LEFT), EPS);
-        assertArrayEquals(new double[] {0, -16}, DoorGeometry.turn(32, 13, left, DoorHingeSide.LEFT), EPS);
-        assertArrayEquals(new double[] {29, -16}, DoorGeometry.turn(0, 16, right, DoorHingeSide.RIGHT), EPS);
-        assertArrayEquals(new double[] {32, -16}, DoorGeometry.turn(0, 13, right, DoorHingeSide.RIGHT), EPS);
+        assertArrayEquals(new double[] {3, -16}, DoorGeometry.turn(DoorDesign.ROUND, 32, 16, left, DoorHingeSide.LEFT), EPS);
+        assertArrayEquals(new double[] {0, -16}, DoorGeometry.turn(DoorDesign.ROUND, 32, 13, left, DoorHingeSide.LEFT), EPS);
+        assertArrayEquals(new double[] {29, -16}, DoorGeometry.turn(DoorDesign.ROUND, 0, 16, right, DoorHingeSide.RIGHT), EPS);
+        assertArrayEquals(new double[] {32, -16}, DoorGeometry.turn(DoorDesign.ROUND, 0, 13, right, DoorHingeSide.RIGHT), EPS);
         // Same convention as Axis.YP.rotationDegrees: +90 degrees takes +x to -z.
-        assertArrayEquals(new double[] {1.5, 4.5}, DoorGeometry.turn(11.5, 14.5, 90, DoorHingeSide.LEFT), EPS);
+        assertArrayEquals(new double[] {1.5, 4.5}, DoorGeometry.turn(DoorDesign.ROUND, 11.5, 14.5, 90, DoorHingeSide.LEFT), EPS);
     }
 
     @Test
     void theQuarterTurnIsRigidAndMatchesThePointTransform() {
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
-            for (Piece piece : DoorGeometry.leaf(hinge)) {
+            for (Piece piece : DoorGeometry.leaf(DoorDesign.ROUND, hinge)) {
                 Box closed = piece.box();
-                Box open = DoorGeometry.swing(closed, hinge);
+                Box open = DoorGeometry.swing(DoorDesign.ROUND, closed, hinge);
                 assertEquals(closed.volume(), open.volume(), EPS, "volume changed: " + piece);
                 assertEquals(closed.maxY() - closed.minY(), open.maxY() - open.minY(), EPS);
                 // Widths swap between x and z under a quarter turn.
                 assertEquals(closed.maxX() - closed.minX(), open.maxZ() - open.minZ(), EPS);
                 assertEquals(closed.maxZ() - closed.minZ(), open.maxX() - open.minX(), EPS);
-                double[] corner = DoorGeometry.turn(closed.minX(), closed.minZ(), DoorGeometry.openDegrees(hinge), hinge);
+                double[] corner = DoorGeometry.turn(DoorDesign.ROUND, closed.minX(), closed.minZ(), DoorGeometry.openDegrees(hinge), hinge);
                 assertTrue(near(corner[0], open.minX(), open.maxX()) && near(corner[1], open.minZ(), open.maxZ()),
                         "turned corner not on the swung box: " + piece);
             }
@@ -69,7 +69,7 @@ class DoorGeometryTest {
     @Test
     void openLeafLiesAlongTheHingeWallAndProjectsOneBlock() {
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
-            for (Box box : DoorGeometry.placedEnvelope(hinge, true)) {
+            for (Box box : DoorGeometry.placedEnvelope(DoorDesign.ROUND, hinge, true)) {
                 if (hinge == DoorHingeSide.LEFT) {
                     assertTrue(box.minX() >= 0 && box.maxX() <= 3, "left open leaf off its wall: " + box);
                 } else {
@@ -77,7 +77,7 @@ class DoorGeometryTest {
                 }
                 assertTrue(box.minZ() >= -16 && box.maxZ() <= 16, "leaf beyond one block of projection: " + box);
             }
-            assertEquals(volume(DoorGeometry.envelope()), volume(DoorGeometry.placedEnvelope(hinge, true)), EPS);
+            assertEquals(volume(DoorGeometry.envelope(DoorDesign.ROUND)), volume(DoorGeometry.placedEnvelope(DoorDesign.ROUND, hinge, true)), EPS);
         }
     }
 
@@ -87,14 +87,14 @@ class DoorGeometryTest {
             double total = 0;
             for (int column = 0; column < 2; column++) {
                 for (int row = 0; row < 2; row++) {
-                    for (Box box : DoorGeometry.cellEnvelope(hinge, column, row, false)) {
+                    for (Box box : DoorGeometry.cellEnvelope(DoorDesign.ROUND, hinge, column, row, false)) {
                         assertTrue(box.within(Box.cell()), "outside cell: " + box);
                         assertTrue(box.minZ() >= 13, "closed leaf out of its front slab: " + box);
                         total += box.volume();
                     }
                 }
             }
-            assertEquals(volume(DoorGeometry.envelope()), total, EPS, "four quarters must make the whole disc");
+            assertEquals(volume(DoorGeometry.envelope(DoorDesign.ROUND)), total, EPS, "four quarters must make the whole disc");
         }
     }
 
@@ -105,9 +105,9 @@ class DoorGeometryTest {
             double kept = 0;
             double nearest = hingeColumn == 0 ? 0 : 16;
             for (int row = 0; row < 2; row++) {
-                assertTrue(DoorGeometry.cellEnvelope(hinge, 1 - hingeColumn, row, true).isEmpty(),
+                assertTrue(DoorGeometry.cellEnvelope(DoorDesign.ROUND, hinge, 1 - hingeColumn, row, true).isEmpty(),
                         "the free column must be empty when open");
-                for (Box box : DoorGeometry.cellEnvelope(hinge, hingeColumn, row, true)) {
+                for (Box box : DoorGeometry.cellEnvelope(DoorDesign.ROUND, hinge, hingeColumn, row, true)) {
                     assertTrue(box.within(Box.cell()), "outside cell: " + box);
                     assertTrue(hingeColumn == 0 ? box.maxX() <= 3 : box.minX() >= 13, "thicker than 3/16: " + box);
                     nearest = hingeColumn == 0 ? Math.max(nearest, box.maxX()) : Math.min(nearest, box.minX());
@@ -115,7 +115,7 @@ class DoorGeometryTest {
                 }
             }
             // Exactly the hinge half of the leaf stays in the cells; the other half is the visual-only projection.
-            assertEquals(volume(DoorGeometry.envelope()) / 2, kept, EPS);
+            assertEquals(volume(DoorGeometry.envelope(DoorDesign.ROUND)) / 2, kept, EPS);
             double clear = hingeColumn == 0 ? 32 - nearest : 16 + nearest;
             assertEquals(29, clear, EPS, "clear width");
         }
@@ -123,7 +123,7 @@ class DoorGeometryTest {
 
     @Test
     void closedCornersAreEmptyAndTheCentreIsSolid() {
-        List<Box> lowerLeft = DoorGeometry.cellEnvelope(DoorHingeSide.LEFT, 0, 0, false);
+        List<Box> lowerLeft = DoorGeometry.cellEnvelope(DoorDesign.ROUND, DoorHingeSide.LEFT, 0, 0, false);
         assertTrue(!covers(lowerLeft, 0.5, 0.5), "outer corner should be open");
         assertTrue(covers(lowerLeft, 15.5, 15.5), "centre should be solid");
         assertTrue(covers(lowerLeft, 0.5, 15.5), "disc reaches the outer edge at mid height");
@@ -136,7 +136,7 @@ class DoorGeometryTest {
     @Test
     void bothLeavesAreOneWholeDiscWithHardwareOnTheHingeSide() {
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
-            List<Piece> leaf = DoorGeometry.leaf(hinge);
+            List<Piece> leaf = DoorGeometry.leaf(DoorDesign.ROUND, hinge);
             for (Piece piece : leaf) {
                 Box bounds = piece.texture().equals(DoorGeometry.PANEL)
                         ? new Box(0, 0, 13, 32, 32, 16) : new Box(0, 0, 11, 32, 32, 18);
@@ -150,15 +150,15 @@ class DoorGeometryTest {
                     .filter(p -> p.box().maxX() - p.box().minX() <= 3).count();
             assertEquals(2, handles, "one handle on each face");
         }
-        double left = DoorGeometry.leaf(DoorHingeSide.LEFT).stream().mapToDouble(p -> p.box().volume()).sum();
-        double right = DoorGeometry.leaf(DoorHingeSide.RIGHT).stream().mapToDouble(p -> p.box().volume()).sum();
+        double left = DoorGeometry.leaf(DoorDesign.ROUND, DoorHingeSide.LEFT).stream().mapToDouble(p -> p.box().volume()).sum();
+        double right = DoorGeometry.leaf(DoorDesign.ROUND, DoorHingeSide.RIGHT).stream().mapToDouble(p -> p.box().volume()).sum();
         assertEquals(left, right, EPS);
     }
 
     @Test
     void theKnobIsCentredOnBothFacesForBothHinges() {
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
-            List<Box> knobs = DoorGeometry.leaf(hinge).stream().filter(p -> p.texture().equals(DoorGeometry.BRASS))
+            List<Box> knobs = DoorGeometry.leaf(DoorDesign.ROUND, hinge).stream().filter(p -> p.texture().equals(DoorGeometry.BRASS))
                     .map(Piece::box).filter(b -> b.maxX() - b.minX() <= 3).toList();
             assertEquals(2, knobs.size(), hinge + ": one knob per face");
             boolean front = false;
@@ -178,7 +178,7 @@ class DoorGeometryTest {
     void thePanelIsTheFullDiscAndNothingElseIsTextured() {
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
             int[][] grid = new int[32][32];
-            for (Piece piece : DoorGeometry.leaf(hinge)) {
+            for (Piece piece : DoorGeometry.leaf(DoorDesign.ROUND, hinge)) {
                 assertTrue(piece.texture().equals(DoorGeometry.PANEL) || piece.texture().equals(DoorGeometry.BRASS),
                         "unexpected texture: " + piece);
                 if (!piece.texture().equals(DoorGeometry.PANEL)) {
@@ -219,7 +219,7 @@ class DoorGeometryTest {
     }
 
     private static void assertHardware(List<Box> expected, DoorHingeSide hinge) {
-        List<Box> actual = DoorGeometry.leaf(hinge).stream().filter(p -> p.texture().equals(DoorGeometry.BRASS))
+        List<Box> actual = DoorGeometry.leaf(DoorDesign.ROUND, hinge).stream().filter(p -> p.texture().equals(DoorGeometry.BRASS))
                 .map(Piece::box).toList();
         assertEquals(expected.size(), actual.size(), hinge + ": brass piece count");
         for (Box box : expected) {
@@ -230,7 +230,7 @@ class DoorGeometryTest {
     @Test
     void theCollisionEnvelopeIsExactlyTheDiscSlab() {
         double volume = 0;
-        for (Box box : DoorGeometry.envelope()) {
+        for (Box box : DoorGeometry.envelope(DoorDesign.ROUND)) {
             assertEquals(13, box.minZ(), EPS, "envelope back: " + box);
             assertEquals(16, box.maxZ(), EPS, "envelope front: " + box);
             volume += box.volume();
@@ -252,13 +252,13 @@ class DoorGeometryTest {
     void theHardwareStaysInsideTheRenderSweepAtEveryAngle() {
         double margin = DoorGeometry.SWEEP_MARGIN;
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
-            for (Piece piece : DoorGeometry.leaf(hinge)) {
+            for (Piece piece : DoorGeometry.leaf(DoorDesign.ROUND, hinge)) {
                 Box box = piece.box();
                 for (int degrees = 0; degrees <= 90; degrees++) {
                     double angle = DoorGeometry.openDegrees(hinge) * (degrees / 90.0);
                     for (double x : new double[] {box.minX(), box.maxX()}) {
                         for (double z : new double[] {box.minZ(), box.maxZ()}) {
-                            double[] p = DoorGeometry.turn(x, z, angle, hinge);
+                            double[] p = DoorGeometry.turn(DoorDesign.ROUND, x, z, angle, hinge);
                             String where = hinge + " " + piece.texture() + " " + box + " at " + degrees + " deg -> "
                                     + p[0] + "," + p[1];
                             assertTrue(p[0] >= -margin - EPS && p[0] <= 32 + margin + EPS, "x outside the sweep: " + where);

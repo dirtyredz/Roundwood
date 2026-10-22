@@ -82,6 +82,25 @@ class AssemblyFaceUvTest {
         assertTrue(uv[1] >= v0 - TOL && uv[3] <= v0 + 8 + TOL, label + " v out of quadrant: " + Arrays.toString(uv));
     }
 
+    /** 0.11.0: the 16 x 32 arched leaf samples the left half of the 32-pixel image at the same scale, never stretched. */
+    @Test
+    void aNarrowAssemblyUsesTheLeftHalfAtTheSameScale() {
+        Box whole = new Box(0, 0, 0, 16, 32, 1);
+        assertArrayEquals(new float[] {0, 0, 8, 16}, AssemblyFaceUv.of(whole, Direction.SOUTH, 16, 32, SIZE), 0F, "front");
+        assertArrayEquals(new float[] {0, 0, 8, 16}, AssemblyFaceUv.of(whole, Direction.NORTH, 16, 32, SIZE), 0F,
+                "back, mirrored within its own width");
+        Box board = new Box(4, 6, 0, 10, 20, 1);
+        float[] narrow = AssemblyFaceUv.of(board, Direction.SOUTH, 16, 32, SIZE);
+        assertArrayEquals(AssemblyFaceUv.of(board, Direction.SOUTH, SIZE), narrow, 0F, "the front samples the round door's texels");
+        float[] back = AssemblyFaceUv.of(board, Direction.NORTH, 16, 32, SIZE);
+        assertArrayEquals(new float[] {(16 - 10) / 2F, (32 - 20) / 2F, (16 - 4) / 2F, (32 - 6) / 2F}, back, TOL, "back");
+        assertEquals(narrow[2] - narrow[0], (board.maxX() - board.minX()) / 2, TOL, "one texel per model pixel");
+        double[] point = AssemblyFaceUv.point(16, 0, true, 16, 32, SIZE);
+        assertEquals(8, point[0], 0);
+        assertEquals(16, point[1], 0);
+        assertNull(AssemblyFaceUv.of(board, Direction.EAST, 16, 32, SIZE));
+    }
+
     @Test
     void randomBoxesInsideTheAssemblyStayInsideTheSprite() {
         Random random = new Random(42);

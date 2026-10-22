@@ -4,8 +4,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimGeometry;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
@@ -32,6 +33,10 @@ import java.util.Optional;
  * one pixel past the door's cells, render-only), the BACK ring moved into the door's own cells
  * ({@code z 12..13}). Both keep their rear surfaces, which the opening leaf exposes. Tessellated with
  * world light, no cull sides, in the solid layer.
+ *
+ * <p>The arched door's casings (0.11.0) are built from its own outline instead ({@link DoorTrimModels},
+ * jambs and crown, already at their depth), one piece per door cell. The round door keeps the frame
+ * quarters, so its rings look exactly as before.
  */
 public final class DoorTrimRenderer {
     private final ModelBlockRenderer renderer;
@@ -47,6 +52,10 @@ public final class DoorTrimRenderer {
             return;
         }
         VertexConsumer consumer = buffers.getBuffer(RenderType.solid());
+        if (assembly.design() != DoorDesign.ROUND) {
+            renderCasings(anchor, assembly, level, pose, consumer);
+            return;
+        }
         Direction front = assembly.facing().getOpposite();
         for (AttachmentFace face : AttachmentFace.values()) {
             Optional<Appearance> look = anchor.trims().get(face);
@@ -67,6 +76,29 @@ public final class DoorTrimRenderer {
                         cell.getZ() - assembly.anchor().getZ() + front.getStepZ() * shift);
                 renderer.tesselateBlock(level, TrimAppearanceModels.quarter(painted, assembly.facing(), part), state, cell, pose,
                         consumer, false, random, state.getSeed(door), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.solid());
+                pose.popPose();
+            }
+        }
+    }
+
+    /** Each door cell's piece of each installed casing, at that cell with its light. */
+    private void renderCasings(RoundDoorBlockEntity anchor, DoorLayout.Assembly assembly, Level level, PoseStack pose,
+                               VertexConsumer consumer) {
+        for (AttachmentFace face : AttachmentFace.values()) {
+            Optional<Appearance> look = anchor.trims().get(face);
+            if (look.isEmpty()) {
+                continue;
+            }
+            TrimLooks.Look painted = DoorTrimModels.look(assembly.design(), look.get());
+            for (DoorLayout.Part part : assembly.parts()) {
+                BlockPos cell = assembly.pos(part);
+                BlockState state = level.getBlockState(cell);
+                pose.pushPose();
+                pose.translate(cell.getX() - assembly.anchor().getX(), cell.getY() - assembly.anchor().getY(),
+                        cell.getZ() - assembly.anchor().getZ());
+                renderer.tesselateBlock(level, DoorTrimModels.casing(assembly.design(), face, part, assembly.facing(), painted),
+                        state, cell, pose, consumer, false, random, state.getSeed(cell), OverlayTexture.NO_OVERLAY,
+                        ModelData.EMPTY, RenderType.solid());
                 pose.popPose();
             }
         }

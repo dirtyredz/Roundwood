@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.door;
 
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceSamples;
 import io.github.dirtyredz.roundwood.Roundwood;

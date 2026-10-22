@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.appearance;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorSwing;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;

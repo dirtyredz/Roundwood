@@ -2,9 +2,10 @@ package io.github.dirtyredz.roundwood.client.door;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
 import io.github.dirtyredz.roundwood.client.camouflage.CamouflageRenderer;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
@@ -22,8 +23,9 @@ import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraftforge.client.model.data.ModelData;
 
 /**
- * Draws the whole round leaf of an assembly from its anchor: the leaf model for the hinge side in the
- * door's appearance ({@link DoorAppearanceModels}, cached, never rebuilt per frame), turned for the
+ * Draws the whole leaf of an assembly from its anchor: the leaf model for the door's design (round or,
+ * since 0.11.0, arched) and hinge side in the door's appearance ({@link DoorAppearanceModels},
+ * cached, never rebuilt per frame), turned for the
  * facing, then swung about the hinge axis by the animated angle. Uses the normal baked-model path
  * (entity-solid block sheet, packed light, overlay), no custom shader; a donor tint reaches only the
  * panel's tinted quads, never the brass.
@@ -45,7 +47,7 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
                        int light, int overlay) {
         Level level = entity.getLevel();
         BlockState state = entity.getBlockState();
-        if (level == null || !(state.getBlock() instanceof RoundDoorBlock door)
+        if (level == null || !(state.getBlock() instanceof AssemblyDoorBlock door)
                 || DoorLayout.partOf(state) != DoorLayout.Part.LOWER_LEFT) {
             return;
         }
@@ -59,7 +61,8 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
 
         DoorHingeSide hinge = state.getValue(DoorBlock.HINGE);
         DoorAppearanceModels.Look look = DoorAppearanceModels.look(entity.appearance());
-        BakedModel model = DoorAppearanceModels.leaf(look, hinge);
+        DoorDesign design = door.design();
+        BakedModel model = DoorAppearanceModels.leaf(look, design, hinge);
         float red = look.tint() < 0 ? 1F : ((look.tint() >> 16) & 0xFF) / 255F;
         float green = look.tint() < 0 ? 1F : ((look.tint() >> 8) & 0xFF) / 255F;
         float blue = look.tint() < 0 ? 1F : (look.tint() & 0xFF) / 255F;
@@ -71,7 +74,7 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
         pose.mulPose(Axis.YP.rotationDegrees(-90F * VoxelShapeFactory.quarterTurns(state.getValue(DoorBlock.FACING))));
         pose.translate(-0.5, 0, -0.5);
         // Swing the whole leaf about its hinge axis.
-        double pivotX = DoorGeometry.pivotX(hinge) / 16.0;
+        double pivotX = DoorGeometry.pivotX(design, hinge) / 16.0;
         double pivotZ = DoorGeometry.PIVOT_Z / 16.0;
         pose.translate(pivotX, 0, pivotZ);
         pose.mulPose(Axis.YP.rotationDegrees((float) DoorGeometry.swingDegrees(hinge, progress)));

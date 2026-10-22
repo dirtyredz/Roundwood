@@ -2,8 +2,8 @@ package io.github.dirtyredz.roundwood.migration;
 
 import com.mojang.logging.LogUtils;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.migration.block.LegacyDoorBlock;

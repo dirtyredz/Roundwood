@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.registry;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.attachment.item.ArchSillTrimItem;
 import io.github.dirtyredz.roundwood.block.attachment.item.UniversalTrimItem;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorItem;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorItem;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowItem;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
@@ -19,7 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The 29 advertised items, in creative-tab order: door, the 26 windows (each plain piece followed by
+ * The 30 advertised items, in creative-tab order: the round door and (0.11.0) the arched door, the
+ * 26 windows (each plain piece followed by
  * its crossed variant), the Universal Trim ({@code round_trim}, 0.9.0: the one perimeter attachment
  * for windows and doors; it keeps its block association with the compatibility frame) and the Arch
  * Sill ({@code arch_sill_trim}, 0.10.0: an item only, the upper arches' sill attachment). Their
@@ -31,6 +32,8 @@ public final class ModItems {
 
     public static final RegistryObject<RoundDoorItem> ROUND_DOOR = ITEMS.register("round_door",
             () -> new RoundDoorItem(ModBlocks.roundDoor(), new Item.Properties()));
+    public static final RegistryObject<RoundDoorItem> ARCHED_DOOR = ITEMS.register("arched_door",
+            () -> new RoundDoorItem(ModBlocks.archedDoor(), new Item.Properties()));
     private static final Map<WindowDesign, RegistryObject<RoundWindowItem>> WINDOWS = registerWindows();
     public static final RegistryObject<RoundWindowItem> ROUND_WINDOW = WINDOWS.get(WindowDesign.plain(WindowProfile.ROUND));
     public static final RegistryObject<RoundWindowItem> ROUND_WINDOW_ARCH_LEFT = WINDOWS.get(WindowDesign.plain(WindowProfile.ARCH_LEFT));
@@ -61,10 +64,11 @@ public final class ModItems {
         return WINDOWS.values().stream().map(RegistryObject::get).map(Item.class::cast).toList();
     }
 
-    /** The advertised items in creative order: door, the 26 windows, the Universal Trim, the Arch Sill. */
+    /** The advertised items in creative order: the two doors, the 26 windows, the Universal Trim, the Arch Sill. */
     public static List<Item> all() {
         List<Item> out = new ArrayList<>();
         out.add(ROUND_DOOR.get());
+        out.add(ARCHED_DOOR.get());
         out.addAll(windows());
         out.add(ROUND_TRIM.get());
         out.add(ARCH_SILL_TRIM.get());

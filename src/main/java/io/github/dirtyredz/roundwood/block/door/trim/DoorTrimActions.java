@@ -7,8 +7,8 @@ import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.attachment.TrimFitting;
 import io.github.dirtyredz.roundwood.block.attachment.TrimHost;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -43,7 +43,7 @@ public final class DoorTrimActions {
     /** Fits {@code look} on {@code face} of the complete door at {@code pos} without a player (showcase, fixtures). */
     public static boolean install(Level level, BlockPos pos, AttachmentFace face, Appearance look) {
         BlockState state = level.getBlockState(pos);
-        if (!(state.getBlock() instanceof RoundDoorBlock door)) {
+        if (!(state.getBlock() instanceof AssemblyDoorBlock door)) {
             return false;
         }
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
@@ -60,7 +60,7 @@ public final class DoorTrimActions {
 
     /** The anchor of the complete, loaded door at {@code pos}, if {@code player} may edit all of it. */
     private static Optional<TrimHost> editable(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!(state.getBlock() instanceof RoundDoorBlock door) || !player.mayBuild()) {
+        if (!(state.getBlock() instanceof AssemblyDoorBlock door) || !player.mayBuild()) {
             return Optional.empty();
         }
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);

@@ -24,7 +24,7 @@ public final class DoorHitRegion {
     public static Region classify(BlockState state, BlockPos pos, BlockHitResult hit) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
         Vec3 local = assembly.toAuthored(DoorHitResolver.insidePoint(hit));
-        boolean corner = CamouflageGeometry.isCornerHit(state.getValue(DoorBlock.HINGE), state.getValue(DoorBlock.OPEN),
+        boolean corner = CamouflageGeometry.isCornerHit(assembly.design(), state.getValue(DoorBlock.HINGE), state.getValue(DoorBlock.OPEN),
                 local.x, local.y, local.z);
         return corner ? Region.CORNER : Region.LEAF;
     }

@@ -1,0 +1,103 @@
+package io.github.dirtyredz.roundwood.client.door;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorItem;
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacementPlan;
+import io.github.dirtyredz.roundwood.block.door.selection.DoorHitResolver;
+import io.github.dirtyredz.roundwood.block.door.selection.DoorPlacementOutline;
+import io.github.dirtyredz.roundwood.block.door.selection.DoorSwingOutline;
+import io.github.dirtyredz.roundwood.client.render.OutlineLines;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RenderHighlightEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * While a door item is held (0.11.0, both designs), draws where using it would put the door: the
+ * leaf's silhouette as it will stand, the cells it will own and the hinge it will turn on. The
+ * placement is the server's own decision ({@link DoorPlacementPlan#of}, from a
+ * {@link BlockPlaceContext} for the held stack and the door-resolved hit); when it would place
+ * nothing, nothing is drawn. Sneaking changes nothing. Nothing here calls a block's or item's use, so
+ * whatever an interactive block does with the click is not predicted (as for the window preview).
+ * Receives cancelled highlight events (the door highlight cancels its own) and never changes their
+ * cancellation. Client-only, on the Forge bus.
+ */
+@Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+public final class DoorPlacementPreview {
+    private static final float[] LEAF = {0.35F, 0.8F, 1F, 0.9F};
+    private static final float[] CELLS = {0F, 0F, 0F, 0.35F};
+    private static final float[] HINGE = {1F, 0.8F, 0.2F, 1F};
+
+    private DoorPlacementPreview() {
+    }
+
+    /** The plan for {@code player} aiming at {@code hit}, or empty when no door is held, the hit is refused or nothing would be placed. */
+    public static Optional<DoorPlacementPlan> of(Player player, Level level, BlockHitResult hit) {
+        InteractionHand hand = doorHand(player);
+        if (hand == null) {
+            return Optional.empty();
+        }
+        Optional<BlockHitResult> resolved = DoorHitResolver.resolve(level, hit);
+        if (resolved.isEmpty()) {
+            return Optional.empty(); // the open leaf's projection: the click is refused
+        }
+        ItemStack stack = player.getItemInHand(hand);
+        return DoorPlacementPlan.of(((RoundDoorItem) stack.getItem()).door(),
+                new BlockPlaceContext(player, hand, stack, resolved.get()));
+    }
+
+    @SubscribeEvent(receiveCanceled = true)
+    public static void onBlockHighlight(RenderHighlightEvent.Block event) {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.level == null || minecraft.player == null) {
+            return;
+        }
+        of(minecraft.player, minecraft.level, event.getTarget()).ifPresent(plan -> {
+            Vec3 camera = event.getCamera().getPosition();
+            BlockPos anchor = plan.assembly().anchor();
+            Vec3 origin = new Vec3(anchor.getX() - camera.x, anchor.getY() - camera.y, anchor.getZ() - camera.z);
+            PoseStack pose = event.getPoseStack();
+            VertexConsumer lines = event.getMultiBufferSource().getBuffer(RenderType.lines());
+            draw(pose, lines, origin, DoorPlacementOutline.footprint(plan.assembly()), CELLS);
+            draw(pose, lines, origin, DoorPlacementOutline.silhouette(plan.assembly(), plan.open()), LEAF);
+            draw(pose, lines, origin, List.of(DoorPlacementOutline.hingeAxis(plan.assembly())), HINGE);
+        });
+    }
+
+    /** The main hand's door, else the offhand's when the main hand is empty; null when neither holds one. */
+    @Nullable
+    static InteractionHand doorHand(Player player) {
+        if (player.getMainHandItem().getItem() instanceof RoundDoorItem) {
+            return InteractionHand.MAIN_HAND;
+        }
+        if (player.getMainHandItem().isEmpty() && player.getOffhandItem().getItem() instanceof RoundDoorItem) {
+            return InteractionHand.OFF_HAND;
+        }
+        return null;
+    }
+
+    /** Edges in pixels relative to the anchor cell, drawn from the camera-relative {@code origin}. */
+    private static void draw(PoseStack pose, VertexConsumer lines, Vec3 origin, List<DoorSwingOutline.Edge> edges, float[] colour) {
+        for (DoorSwingOutline.Edge e : edges) {
+            OutlineLines.line(pose, lines, origin.x + e.x1() / 16, origin.y + e.y1() / 16, origin.z + e.z1() / 16,
+                    origin.x + e.x2() / 16, origin.y + e.y2() / 16, origin.z + e.z2() / 16,
+                    colour[0], colour[1], colour[2], colour[3]);
+        }
+    }
+}

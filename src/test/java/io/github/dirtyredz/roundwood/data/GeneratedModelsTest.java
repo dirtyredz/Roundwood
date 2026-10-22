@@ -38,13 +38,21 @@ class GeneratedModelsTest {
 
     /** Assembly-mapped UVs: one image across a 32-pixel face, front (south) and back (north). */
     static double[] assemblyUv(String face, double[] from, double[] to, double offsetX, double offsetY) {
+        return assemblyUv(face, from, to, offsetX, offsetY, 32);
+    }
+
+    /**
+     * As above for an assembly {@code width} pixels wide (0.11.0: the 16-wide arched door), still one
+     * texel per pixel of a 32-pixel image, its back mirrored within its own width.
+     */
+    static double[] assemblyUv(String face, double[] from, double[] to, double offsetX, double offsetY, double width) {
         double x1 = from[0] + offsetX;
         double x2 = to[0] + offsetX;
         double v1 = (32 - (to[1] + offsetY)) / 2;
         double v2 = (32 - (from[1] + offsetY)) / 2;
         return switch (face) {
             case "south" -> new double[] {x1 / 2, v1, x2 / 2, v2};
-            case "north" -> new double[] {(32 - x2) / 2, v1, (32 - x1) / 2, v2};
+            case "north" -> new double[] {(width - x2) / 2, v1, (width - x1) / 2, v2};
             default -> null;
         };
     }
@@ -56,12 +64,15 @@ class GeneratedModelsTest {
      */
     private static Object[] assemblyMapping(String id) {
         if (id.startsWith("roundwood:block/template_round_door_leaf_")) {
-            return new Object[] {"#panel", 0.0, 0.0};
+            return new Object[] {"#panel", 0.0, 0.0, 32.0};
+        }
+        if (id.startsWith("roundwood:block/template_arched_door_leaf_")) {
+            return new Object[] {"#panel", 0.0, 0.0, 16.0};
         }
         String quarter = "roundwood:block/template_round_trim_whole_";
         if (id.startsWith(quarter)) {
             String part = id.substring(quarter.length());
-            return new Object[] {"#face", part.endsWith("right") ? 16.0 : 0.0, part.startsWith("upper") ? 16.0 : 0.0};
+            return new Object[] {"#face", part.endsWith("right") ? 16.0 : 0.0, part.startsWith("upper") ? 16.0 : 0.0, 32.0};
         }
         return null;
     }
@@ -94,7 +105,7 @@ class GeneratedModelsTest {
                     JsonArray uv = f.has("uv") ? f.getAsJsonArray("uv") : array(defaultUv(face.getKey(), from, to));
                     double[] expected = defaultUv(face.getKey(), localFrom, localTo);
                     double[] whole = mapping != null && mapping[0].equals(f.get("texture").getAsString())
-                            ? assemblyUv(face.getKey(), from, to, (Double) mapping[1], (Double) mapping[2]) : null;
+                            ? assemblyUv(face.getKey(), from, to, (Double) mapping[1], (Double) mapping[2], (Double) mapping[3]) : null;
                     if (whole != null) {
                         expected = whole;
                         assembly++;
@@ -129,6 +140,27 @@ class GeneratedModelsTest {
             }
         }
         ModelExpectations.assertDisplay(item, "door", new double[] {16, 16, 14.5});
+    }
+
+    /**
+     * 0.11.0: the arched door's item is its whole closed leaf: 16 x 32, straight sides to y 24 then a
+     * radius-eight crown about (8, 24), written out here independently; oak placeholders as the round door's.
+     */
+    @Test
+    void archedDoorItemIsTheWholeClosedArchedLeaf() {
+        Resolved item = resolve("roundwood:item/arched_door");
+        assertEquals(PANEL_OAK, item.texture("#panel"));
+        assertEquals(BRASS, item.texture("#brass"));
+        for (int u = 0; u < 20; u++) {
+            for (int v = 0; v < 32; v++) {
+                double dx = u + 0.5 - 8;
+                double dy = v + 0.5 - 24;
+                boolean leaf = u < 16 && (v < 24 || dx * dx + dy * dy <= 64);
+                boolean covered = frontCovered(item, u, v, PANEL_OAK) || frontCovered(item, u, v, BRASS);
+                assertEquals(leaf, covered, "arched door face at " + u + "," + v);
+            }
+        }
+        ModelExpectations.assertDisplay(item, "door", new double[] {8, 16, 14.5});
     }
 
     @Test

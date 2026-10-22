@@ -1,23 +1,22 @@
-package io.github.dirtyredz.roundwood.block.door;
+package io.github.dirtyredz.roundwood.block.door.adapter;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
+import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceUseTarget;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceDrops;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import io.github.dirtyredz.roundwood.block.door.appearance.DoorAppearance;
-import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceUseTarget;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorBlockEntities;
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorColumn;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorIntegrity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorRemoval;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorStateController;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageDrops;
 import io.github.dirtyredz.roundwood.block.door.interaction.DoorInteraction;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorShapes;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorSelectionShapes;
 import io.github.dirtyredz.roundwood.client.door.DoorParticles;
@@ -40,16 +39,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -61,23 +58,25 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * One quarter of a round door. Stays a {@link DoorBlock} (same properties, wooden-door tags, hand
- * opening) so villager AI, pathfinding and other mods see an ordinary wooden door; it adds only the
- * {@link #COLUMN} identity. The callbacks here hand off to the assembly, selection and camouflage
- * services; the lower-left part carries the {@link RoundDoorBlockEntity} the client draws the leaf
- * and the camouflage from, and which holds the door's appearance (picked and dropped with the item).
+ * One part of a Roundwood door assembly, whatever its design (extracted from {@link RoundDoorBlock}
+ * in 0.11.0, when the arched door joined it). Stays a {@link DoorBlock} (same properties,
+ * wooden-door tags, hand opening) so villager AI, pathfinding and other mods see an ordinary wooden
+ * door. The callbacks hand off to the assembly, selection and camouflage services, which read the
+ * design ({@link #design}) and the membership ({@link DoorLayout}); the lower-left part carries the
+ * {@link RoundDoorBlockEntity} the client draws the leaf, camouflage and casings from, and which
+ * holds the door's appearance (picked and dropped with the item). Subclasses add only the design
+ * and any state identity of their own (the round door's {@code column}).
  */
-public class RoundDoorBlock extends DoorBlock implements EntityBlock, AppearanceDefaults, AppearanceUseTarget {
-    public static final EnumProperty<DoorColumn> COLUMN = EnumProperty.create("column", DoorColumn.class);
-
+public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock, AppearanceDefaults, AppearanceUseTarget {
     private final Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType;
 
-    public RoundDoorBlock(Properties properties, BlockSetType type, Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType) {
+    protected AssemblyDoorBlock(Properties properties, BlockSetType type, Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType) {
         super(properties, type);
         this.entityType = entityType;
-        // Extend the inherited default (never stateDefinition.any()): other mods inject properties into DoorBlock.
-        registerDefaultState(defaultBlockState().setValue(COLUMN, DoorColumn.LEFT));
     }
+
+    /** The leaf's design: its outline, the cells it owns and its hardware. */
+    public abstract DoorDesign design();
 
     @Override
     public AppearanceFamily appearanceFamily() {
@@ -93,12 +92,6 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock, Appearance
     /** The item picks and drops are made of: this block's own (the aliases name the canonical door's). */
     public Item familyItem() {
         return asItem();
-    }
-
-    @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        super.createBlockStateDefinition(builder);
-        builder.add(COLUMN);
     }
 
     @Override
@@ -137,12 +130,12 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock, Appearance
         return null;
     }
 
-    /** The item writes all four cells itself; the vanilla upper-half write must not run. */
+    /** The item writes every cell itself; the vanilla upper-half write must not run. */
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
     }
 
-    /** The sneak-use bridge lets through the clicks the router handles: trim rings and restyling ({@link DoorInteraction#claims}). */
+    /** The sneak-use bridge lets through the clicks the router handles: trim casings and restyling ({@link DoorInteraction#claims}). */
     @Override
     public boolean claimsUse(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand,
                              BlockHitResult hit) {
@@ -174,9 +167,9 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock, Appearance
     }
 
     /**
-     * The ordinary loot (one door per assembly) carrying the door's appearance, plus one door trim per
-     * trimmed face (0.8.0). Whichever part broke, the loot is evaluated with the anchor's entity, so
-     * the trim pools see the door's faces.
+     * The ordinary loot (one door per assembly) carrying the door's appearance, plus one Universal Trim
+     * per trimmed face (0.8.0). Whichever part broke, the loot is evaluated with the anchor's entity,
+     * so the trim pools see the door's faces.
      */
     @Override
     @SuppressWarnings("deprecation")
@@ -219,13 +212,6 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock, Appearance
         return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
     }
 
-    /** Mirroring swaps which column is on the left as well as the physical hinge (vanilla cycles the hinge). */
-    @Override
-    public BlockState mirror(BlockState state, Mirror mirror) {
-        BlockState mirrored = super.mirror(state, mirror);
-        return mirror == Mirror.NONE ? mirrored : mirrored.cycle(COLUMN);
-    }
-
     @Override
     @SuppressWarnings("deprecation")
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
@@ -253,6 +239,6 @@ public class RoundDoorBlock extends DoorBlock implements EntityBlock, Appearance
                 && neighbor.getValue(HALF) != state.getValue(HALF)
                 && neighbor.getValue(FACING) == state.getValue(FACING)
                 && neighbor.getValue(HINGE) == state.getValue(HINGE)
-                && neighbor.getValue(COLUMN) == state.getValue(COLUMN);
+                && DoorLayout.columnOf(neighbor) == DoorLayout.columnOf(state);
     }
 }

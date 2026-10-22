@@ -5,6 +5,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
+import io.github.dirtyredz.roundwood.showcase.ShowcaseSamples;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -76,7 +77,7 @@ public final class WindowArchesSection implements ShowcaseSection {
         List<Appearance> looks = looks();
         for (int i = 0; i < looks.size(); i++) {
             pair(canvas, looks.get(i), LOOKS_R + LOOKS_PITCH * i, LOOKS_F, centred(forward),
-                    ShowcaseCanvas.label(looks.get(i)), "arch pair");
+                    ShowcaseSamples.label(looks.get(i)), "arch pair");
         }
     }
 

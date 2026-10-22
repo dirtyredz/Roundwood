@@ -1,10 +1,11 @@
-package io.github.dirtyredz.roundwood.showcase.section;
+package io.github.dirtyredz.roundwood.showcase.section.door;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
+import io.github.dirtyredz.roundwood.showcase.ShowcaseSamples;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Blocks;
@@ -20,7 +21,7 @@ import java.util.Optional;
  * oak with stone-brick camouflage (closed, hinge right, the next material on its back face too, so
  * the two faces differ) and red-painted (open, hinge alternating by material: the ring stays put
  * while the leaf swings). Five materials per band, bands running away from the builder; a sign two
- * blocks nearer the builder. Painted trims are in {@link PaintsSection}. Occupies
+ * blocks nearer the builder. Painted trims are in {@code PaintsSection}. Occupies
  * {@code r 0..57, f 42..73} (an open leaf projects to {@code f + 1}).
  */
 public final class TrimCombinationsSection implements ShowcaseSection {
@@ -104,7 +105,7 @@ public final class TrimCombinationsSection implements ShowcaseSection {
                     canvas.doorTrim(material, r, f, AttachmentFace.FRONT);
                     back(materials, i, j).ifPresent(look -> canvas.doorTrim(look, r, f, AttachmentFace.BACK));
                 }
-                canvas.sign(r, f - 2, ShowcaseCanvas.label(material) + " trim", ShowcaseCanvas.label(door(j)) + " door",
+                canvas.sign(r, f - 2, ShowcaseSamples.label(material) + " trim", ShowcaseSamples.label(door(j)) + " door",
                         open(j) ? "open" : "closed", camouflaged(j) ? "camo, back trim" : "");
             }
         }

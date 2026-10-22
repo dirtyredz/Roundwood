@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.selection;
 
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageGeometry;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
@@ -10,9 +11,9 @@ import java.util.List;
 
 /**
  * The selection outline of a whole assembly, so that every part outlines the complete door instead
- * of its own quarter. Built in the assembly frame (facing north) from the leaf in its resting pose,
- * open or closed, plus the static corners when they are targetable; then expressed relative to the
- * queried cell. Collision is separate and stays clipped to each cell ({@code leaf/DoorShapes}).
+ * of its own cell. Built in the assembly frame (facing north) from the design's leaf in its resting
+ * pose, open or closed, plus the static corners when they are targetable; then expressed relative to
+ * the queried cell. Collision is separate and stays clipped to each cell ({@code leaf/DoorShapes}).
  * Plain Java.
  */
 public final class DoorOutlineGeometry {
@@ -20,10 +21,10 @@ public final class DoorOutlineGeometry {
     }
 
     /** The whole outline in assembly coordinates: the leaf at rest, and the corners if asked for. */
-    public static List<Box> outline(DoorHingeSide hinge, boolean open, boolean corners) {
-        List<Box> boxes = new ArrayList<>(DoorGeometry.placedEnvelope(hinge, open));
+    public static List<Box> outline(DoorDesign design, DoorHingeSide hinge, boolean open, boolean corners) {
+        List<Box> boxes = new ArrayList<>(DoorGeometry.placedEnvelope(design, hinge, open));
         if (corners) {
-            boxes.addAll(CamouflageGeometry.corners());
+            boxes.addAll(CamouflageGeometry.corners(design));
         }
         return boxes;
     }

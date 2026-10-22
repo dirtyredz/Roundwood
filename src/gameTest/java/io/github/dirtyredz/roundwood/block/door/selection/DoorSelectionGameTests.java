@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.selection;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import net.minecraft.core.BlockPos;

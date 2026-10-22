@@ -1,6 +1,6 @@
 package io.github.dirtyredz.roundwood.block.door.selection;
 
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -32,7 +32,7 @@ public final class DoorHitResolver {
     public static Optional<BlockHitResult> resolve(Level level, BlockHitResult hit) {
         BlockPos hitPos = hit.getBlockPos();
         BlockState state = level.getBlockState(hitPos);
-        if (!(state.getBlock() instanceof RoundDoorBlock door)) {
+        if (!(state.getBlock() instanceof AssemblyDoorBlock door)) {
             return Optional.of(hit);
         }
         BlockPos cell = containingCell(hit);

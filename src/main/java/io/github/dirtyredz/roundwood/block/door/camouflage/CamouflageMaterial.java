@@ -1,6 +1,6 @@
 package io.github.dirtyredz.roundwood.block.door.camouflage;
 
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.BlockItem;
@@ -42,7 +42,7 @@ public final class CamouflageMaterial {
      */
     public static boolean isValid(BlockState state) {
         Block block = state.getBlock();
-        if (state.isAir() || block instanceof RoundDoorBlock || state != block.defaultBlockState()) {
+        if (state.isAir() || block instanceof AssemblyDoorBlock || state != block.defaultBlockState()) {
             return false;
         }
         BlockGetter level = EmptyBlockGetter.INSTANCE;

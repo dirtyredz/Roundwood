@@ -13,7 +13,8 @@ import java.util.Optional;
 
 /**
  * Which door trim face a click addresses (0.8.0), from the hit point in the door's authored frame
- * (nudged into the surface hit). The ring is static, so the rule ignores the swing animation:
+ * (nudged into the surface hit), against the door design's own casing outline (0.11.0: the round
+ * ring or the arched jambs and crown). The casing is static, so the rule ignores the swing animation:
  * <ul>
  *     <li>{@link #ring}: a hit on a ring's footprint, at the depth of that face's ring or of its
  *     in-cell target (closed: anywhere on the leaf's face over the footprint) - restyling, shears;</li>
@@ -28,7 +29,7 @@ public final class DoorTrimTarget {
     /** The face whose ring (installed or not) the hit is on, if any. */
     public static Optional<AttachmentFace> ring(BlockState state, BlockPos pos, BlockHitResult hit) {
         Vec3 local = authored(state, pos, hit);
-        if (!DoorTrimGeometry.onRing(local.x, local.y)) {
+        if (!DoorTrimGeometry.onRing(DoorLayout.designOf(state), local.x, local.y)) {
             return Optional.empty();
         }
         AttachmentFace face = DoorTrimGeometry.face(local.z);
@@ -44,7 +45,8 @@ public final class DoorTrimTarget {
             return ring(state, pos, hit);
         }
         Vec3 local = authored(state, pos, hit);
-        return DoorTrimGeometry.withinRing(local.x, local.y) ? Optional.of(DoorTrimGeometry.face(local.z)) : Optional.empty();
+        return DoorTrimGeometry.withinRing(DoorLayout.designOf(state), local.x, local.y)
+                ? Optional.of(DoorTrimGeometry.face(local.z)) : Optional.empty();
     }
 
     private static Vec3 authored(BlockState state, BlockPos pos, BlockHitResult hit) {

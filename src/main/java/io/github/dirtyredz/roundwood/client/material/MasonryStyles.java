@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
  * 0.10.0 binds every window attachment layout explicitly ({@link WindowTrimLayout}): the lower arches
  * the door ring's full radial face (its upper half is pixel for pixel the arched window's), the top
  * corners a head-and-jambs face, the single edges a straight-run face and the arch sill one course.
+ * 0.11.0 adds the arched door's casing: straight jamb courses and a radial crown on its own contour.
  * The 0.5.0 thick-mortar faces stay generated, unchanged, but nothing draws them. Every masonry trim
  * shares the granular edge.
  */
@@ -24,6 +25,11 @@ public final class MasonryStyles {
     /** The door ring's face. */
     public static ResourceLocation doorFace(MasonryMaterials.Material material) {
         return texture("trim_radial_thin_" + material.artwork());
+    }
+
+    /** The arched door casing's face (0.11.0): 64 x 64 over 32 x 32 pixels, the casing in its left half. */
+    public static ResourceLocation archedDoorCasingFace(MasonryMaterials.Material material) {
+        return texture("door_casing_arched_" + material.artwork());
     }
 
     /** A window attachment's face for {@code layout}, spread over the piece's whole-face artwork extent. */

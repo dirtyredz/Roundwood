@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.selection;
 
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
+
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorSwing;
 import io.github.dirtyredz.roundwood.geometry.Box;
@@ -50,12 +52,12 @@ class DoorSwingOutlineTest {
 
     @Test
     void theClosedSilhouetteTracesTheLeafDisc() {
-        List<DoorSwingOutline.Edge> closed = DoorSwingOutline.closed();
+        List<DoorSwingOutline.Edge> closed = DoorSwingOutline.closed(DoorDesign.ROUND);
         assertFalse(closed.isEmpty());
         double minX = Double.MAX_VALUE;
         double maxX = -Double.MAX_VALUE;
         for (double[] p : endpoints(closed)) {
-            assertTrue(onSurface(p, DoorGeometry.envelope()), "off the leaf: " + p[0] + "," + p[1] + "," + p[2]);
+            assertTrue(onSurface(p, DoorGeometry.envelope(DoorDesign.ROUND)), "off the leaf: " + p[0] + "," + p[1] + "," + p[2]);
             minX = Math.min(minX, p[0]);
             maxX = Math.max(maxX, p[0]);
         }
@@ -71,9 +73,9 @@ class DoorSwingOutlineTest {
     @Test
     void atRestTheOutlineSitsOnTheRestingLeaf() {
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
-            assertEquals(DoorSwingOutline.closed(), DoorSwingOutline.at(hinge, 0));
-            for (double[] p : endpoints(DoorSwingOutline.at(hinge, 1))) {
-                assertTrue(onSurface(p, DoorGeometry.placedEnvelope(hinge, true)),
+            assertEquals(DoorSwingOutline.closed(DoorDesign.ROUND), DoorSwingOutline.at(DoorDesign.ROUND, hinge, 0));
+            for (double[] p : endpoints(DoorSwingOutline.at(DoorDesign.ROUND, hinge, 1))) {
+                assertTrue(onSurface(p, DoorGeometry.placedEnvelope(DoorDesign.ROUND, hinge, true)),
                         hinge + ": open outline off the open leaf at " + p[0] + "," + p[1] + "," + p[2]);
             }
         }
@@ -91,18 +93,18 @@ class DoorSwingOutlineTest {
             swing.retarget(true, 100); // the blockstate is open from here on
             for (double t = 100; t <= 100 + FULL + 1; t += 0.25) {
                 double progress = swing.progress(t);
-                List<DoorSwingOutline.Edge> outline = DoorSwingOutline.at(hinge, progress);
+                List<DoorSwingOutline.Edge> outline = DoorSwingOutline.at(DoorDesign.ROUND, hinge, progress);
                 double degrees = DoorGeometry.swingDegrees(hinge, progress);
                 // Every vertex is the closed leaf's vertex turned exactly as the renderer turns the model.
-                List<double[]> closed = endpoints(DoorSwingOutline.closed());
+                List<double[]> closed = endpoints(DoorSwingOutline.closed(DoorDesign.ROUND));
                 List<double[]> turned = endpoints(outline);
                 for (int i = 0; i < closed.size(); i++) {
-                    double[] expected = DoorGeometry.turn(closed.get(i)[0], closed.get(i)[2], degrees, hinge);
+                    double[] expected = DoorGeometry.turn(DoorDesign.ROUND, closed.get(i)[0], closed.get(i)[2], degrees, hinge);
                     assertEquals(expected[0], turned.get(i)[0], EPS);
                     assertEquals(closed.get(i)[1], turned.get(i)[1], EPS);
                     assertEquals(expected[1], turned.get(i)[2], EPS);
                 }
-                boolean arrived = turned.stream().allMatch(p -> onSurface(p, DoorGeometry.placedEnvelope(hinge, true)));
+                boolean arrived = turned.stream().allMatch(p -> onSurface(p, DoorGeometry.placedEnvelope(DoorDesign.ROUND, hinge, true)));
                 assertEquals(!swing.moving(t), arrived, hinge + " at t " + t + " (progress " + progress + ")");
             }
             // Reversed half way: the outline turns back from where the leaf is, never jumping to closed.
@@ -128,7 +130,7 @@ class DoorSwingOutlineTest {
                 Set<List<Long>> first = null;
                 for (int column = 0; column < 2; column++) {
                     for (int row = 0; row < 2; row++) {
-                        Set<List<Long>> world = world(DoorSwingOutline.forCell(hinge, 0.37, column, row, turns), turns, column, row);
+                        Set<List<Long>> world = world(DoorSwingOutline.forCell(DoorDesign.ROUND, hinge, 0.37, column, row, turns), turns, column, row);
                         if (first == null) {
                             first = world;
                         } else {

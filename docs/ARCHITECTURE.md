@@ -2,6 +2,9 @@
 
 ## Door assembly
 
+There are two door designs (`leaf/DoorDesign`: ROUND, ARCHED; see "The arched door" below). This
+section describes the round door's four-part assembly; the arched door is the two-part case.
+
 An assembly is four ordinary `DoorBlock` states of one block, 2 wide x 2 high x 1 deep, showing one
 round leaf. Each part has the vanilla `facing`, `half`, `hinge`, `open`, `powered` plus `column`
 (left/right). **Identity** is `column` + `half`; **`hinge`** is the physical side the single leaf
@@ -119,6 +122,32 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   swing, sine ease-in-out; a reversal starts from the current progress over the proportional time.
   A new entity (placement, chunk load, relog) starts at rest. The server never animates: `open` and
   collision switch at once.
+
+## The arched door (0.11.0)
+
+- **Membership is explicit.** `DoorLayout.Assembly(anchor, facing, hinge, design)` knows its design;
+  `parts()` is two cells (arched) or four (round); `designOf(state)` reads it from the block (it throws
+  for a non-door state) and `columnOf(state)` exists only for the round door. The arched door has no
+  `column` property: lower and upper halves only, no fictitious right column.
+- **One adapter.** `block/door/adapter/AssemblyDoorBlock` holds everything a door part does;
+  `RoundDoorBlock` adds only `column` (the 0.4.0 aliases and the 0.7.0 frame migration recognise
+  exactly this class) and `ArchedDoorBlock` fixes the design. Both anchor on `RoundDoorBlockEntity`
+  (type id `round_door`), so appearance family DOOR, camouflage, trim storage and lifecycle are shared.
+- **One placement plan.** `assembly/DoorPlacementPlan` is the immutable, read-only decision (`of(block,
+  context)` for players, `at(level, block, assembly, open)` for the showcase and commands): cells,
+  hinge, open state, or empty when refused. `DoorPlacement` only writes a plan. The client preview
+  (`client/door/DoorPlacementPreview`, via `selection/DoorPlacementOutline`) draws the same plan for
+  both doors, so preview and result cannot drift.
+- **Per-design geometry.** `DoorGeometry`, `DoorShapes`, `CamouflageGeometry`, `DoorTrimGeometry` and
+  the client model caches take the design and key on it. The arched leaf is 16 x 32 pixels from
+  `geometry/ArchedProfile` (straight sides, semicircular crown of radius 8 at (8, 24)), pivot x 1.5 or
+  14.5; open, it lies inside its own column (13/16 clear), collision clipped to the two cells, nothing
+  projecting. Its panels sample the left half of the 32x32 board image through the rectangular
+  `AssemblyFaceUv` mapping.
+- **Camouflage and casing.** Camouflage is the two upper corners beside the crown (built with
+  `geometry/PixelSlab`). The trim is a two-pixel jamb-and-crown casing along the arched outline
+  (FRONT z 16..17, BACK z 12..13, no threshold), built from geometry by `client/door/DoorTrimModels`;
+  the round ring keeps the frame quarter models. Masonry uses `door_casing_arched_<material>`.
 
 ## Camouflage
 

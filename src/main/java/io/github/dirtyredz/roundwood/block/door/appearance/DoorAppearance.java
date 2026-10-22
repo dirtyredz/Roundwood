@@ -3,8 +3,8 @@ package io.github.dirtyredz.roundwood.block.door.appearance;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorBlockEntities;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import net.minecraft.core.BlockPos;
@@ -39,7 +39,7 @@ public final class DoorAppearance {
     }
 
     /** The whole door as a restyling target, if it is loaded and complete. */
-    public static Optional<AppearanceActions.Target> target(RoundDoorBlock block, BlockState state, Level level, BlockPos pos) {
+    public static Optional<AppearanceActions.Target> target(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
         if (!assembly.loaded(level) || !assembly.complete(level, block)
                 || !(level.getBlockEntity(assembly.anchor()) instanceof RoundDoorBlockEntity entity)) {

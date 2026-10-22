@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.trim;
 
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
+
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import org.junit.jupiter.api.Test;
@@ -22,17 +24,17 @@ import static org.junit.jupiter.api.Assertions.fail;
 class DoorTrimGeometryTest {
     @Test
     void ringsSitOnePixelProudOfEachFace() {
-        assertDepth(DoorTrimGeometry.ring(AttachmentFace.FRONT), 16, 17);
-        assertDepth(DoorTrimGeometry.ring(AttachmentFace.BACK), 12, 13);
-        assertDepth(DoorTrimGeometry.target(AttachmentFace.FRONT), 15, 16);
-        assertDepth(DoorTrimGeometry.target(AttachmentFace.BACK), 12, 13);
+        assertDepth(DoorTrimGeometry.ring(DoorDesign.ROUND, AttachmentFace.FRONT), 16, 17);
+        assertDepth(DoorTrimGeometry.ring(DoorDesign.ROUND, AttachmentFace.BACK), 12, 13);
+        assertDepth(DoorTrimGeometry.target(DoorDesign.ROUND, AttachmentFace.FRONT), 15, 16);
+        assertDepth(DoorTrimGeometry.target(DoorDesign.ROUND, AttachmentFace.BACK), 12, 13);
     }
 
     @Test
     void theRingIsTheThirtyTwoTwentyEightProfile() {
         for (AttachmentFace face : AttachmentFace.values()) {
             Set<String> covered = new HashSet<>();
-            for (Box box : DoorTrimGeometry.ring(face)) {
+            for (Box box : DoorTrimGeometry.ring(DoorDesign.ROUND, face)) {
                 for (int x = (int) box.minX(); x < box.maxX(); x++) {
                     for (int y = (int) box.minY(); y < box.maxY(); y++) {
                         if (!covered.add(x + "," + y)) {
@@ -44,7 +46,7 @@ class DoorTrimGeometryTest {
             for (int x = 0; x < 32; x++) {
                 for (int y = 0; y < 32; y++) {
                     boolean expected = expectedRing(x, y);
-                    if (expected != covered.contains(x + "," + y) || expected != DoorTrimGeometry.onRing(x + 0.5, y + 0.5)) {
+                    if (expected != covered.contains(x + "," + y) || expected != DoorTrimGeometry.onRing(DoorDesign.ROUND, x + 0.5, y + 0.5)) {
                         fail(face + ": ring mismatch at " + x + "," + y);
                     }
                 }
@@ -59,17 +61,17 @@ class DoorTrimGeometryTest {
         assertEquals(AttachmentFace.BACK, DoorTrimGeometry.face(14.49));
         assertEquals(AttachmentFace.BACK, DoorTrimGeometry.face(12.1));
         for (AttachmentFace face : AttachmentFace.values()) {
-            for (Box box : DoorTrimGeometry.target(face)) {
+            for (Box box : DoorTrimGeometry.target(DoorDesign.ROUND, face)) {
                 assertTrue(box.minZ() >= 0 && box.maxZ() <= 16, face + ": target leaves the door's cells " + box);
             }
         }
         assertTrue(DoorTrimGeometry.inTargetDepth(AttachmentFace.FRONT, 15.5));
         assertFalse(DoorTrimGeometry.inTargetDepth(AttachmentFace.FRONT, 14));
         assertTrue(DoorTrimGeometry.inTargetDepth(AttachmentFace.BACK, 12.5));
-        assertTrue(DoorTrimGeometry.withinRing(16, 16), "the disc centre is inside the ring");
-        assertFalse(DoorTrimGeometry.onRing(16, 16));
-        assertFalse(DoorTrimGeometry.withinRing(0.5, 0.5), "a corner is outside");
-        assertFalse(DoorTrimGeometry.withinRing(-0.5, 16));
+        assertTrue(DoorTrimGeometry.withinRing(DoorDesign.ROUND, 16, 16), "the disc centre is inside the ring");
+        assertFalse(DoorTrimGeometry.onRing(DoorDesign.ROUND, 16, 16));
+        assertFalse(DoorTrimGeometry.withinRing(DoorDesign.ROUND, 0.5, 0.5), "a corner is outside");
+        assertFalse(DoorTrimGeometry.withinRing(DoorDesign.ROUND, -0.5, 16));
     }
 
     private static boolean expectedRing(int x, int y) {

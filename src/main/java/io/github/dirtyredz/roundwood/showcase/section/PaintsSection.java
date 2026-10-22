@@ -6,6 +6,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
+import io.github.dirtyredz.roundwood.showcase.ShowcaseSamples;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseWindow;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
@@ -49,7 +50,7 @@ public final class PaintsSection implements ShowcaseSection {
             Appearance paint = paints.get(i);
             int r = r(i);
             int f = f(i);
-            canvas.sign(r, f - 1, ShowcaseCanvas.label(paint), "door and trim,", "glass, window");
+            canvas.sign(r, f - 1, ShowcaseSamples.label(paint), "door and trim,", "glass, window");
             if (canvas.door(paint, r, f, DoorHingeSide.LEFT, false)) {
                 canvas.doorTrim(paint, r, f, AttachmentFace.FRONT);
             }

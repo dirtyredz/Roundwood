@@ -12,7 +12,7 @@ import net.minecraft.tags.ItemTags;
 import java.util.function.Consumer;
 
 /**
- * Coordinates the 29 recipes (0.10.0: split by family under {@code recipe/}): the door
+ * Coordinates the 30 recipes (0.10.0: split by family under {@code recipe/}): the two doors
  * ({@link DoorRecipes}), the 26 windows ({@link WindowRecipes}) and the two attachments
  * ({@link TrimRecipes}). Every recipe takes raw materials over any planks (mixed types allowed), so
  * no recipe ever consumes a styled object and loses its look; each is unlocked by holding planks. No

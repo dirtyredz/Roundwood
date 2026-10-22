@@ -119,7 +119,17 @@
   offset by the opposite facing, all eight cells loaded). A freestanding frame placed exactly where
   a fitted one would be converts too, since the two cannot be told apart. Other frames stay as
   legacy content and drop a Universal Trim in their look. A door holding an unknown `DoorTrim`
-  version is not editable, so its fitted frame stays.
+  version is not editable, so its fitted frame stays. The conversion, like the 0.4.0 aliases, is
+  restricted to `RoundDoorBlock`/`ModBlocks.roundDoor()` (0.11.0): a legacy frame in front of an
+  arched door is never converted (`ArchedDoorMigrationGameTests`).
+- **Every door cache must key on the design** (0.11.0). Item models, leaf models, collision,
+  selection, outline, camouflage and casing caches keyed by look alone would draw one door's shape
+  for the other. `DoorLayout.designOf(state)` throws for a non-door state: ask it only of Roundwood
+  door parts.
+- **Door art stays square** (0.11.0). A non-square texture without `.mcmeta` is read as square
+  animation frames, so the arched door samples the left part of the square 32x32 board image (and
+  its casing art lives in the left half of a 64x64 image) through `AssemblyFaceUv`'s rectangular
+  mapping; never author a 16x32 texture.
 - **Old trim stacks stay distinct until used** (0.9.0). `window_trim`, `round_trim` and the 19
   0.4.0 trim aliases are separate item ids, so old stacks do not merge with new Universal Trims in
   an inventory. They are never rewritten (no inventory scan, no id remap); every id fits windows and
@@ -216,6 +226,8 @@
 - **Armor stands do not block placement**; use a mob in entity-obstruction tests.
 - **Generated resources are tracked, the datagen cache is not.** `src/generated/resources/.cache/`
   is ignored and excluded from the jar. `runData` is deterministic: two runs give identical bytes.
-- **Doors are always dry.** Placement refuses any fluid in the four cells.
+- **Doors are always dry.** Placement refuses any fluid in the door's cells (two or four).
+- **The arched door's icon is the closed left-hinge leaf at half a block's scale** (0.11.0), with the
+  round door's display transforms; an owner check, not a defect.
 - **Client checks belong to the owner.** Models, item display transforms, the swing animation,
   sounds, second-client sync and EMI display are verified in game, never by agents.

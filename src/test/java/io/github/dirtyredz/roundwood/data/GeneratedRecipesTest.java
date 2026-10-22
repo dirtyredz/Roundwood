@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * The 29 Roundwood recipes (door, 26 windows, round trim, arch sill) and their advancements,
+ * The 30 Roundwood recipes (round door, arched door (0.11.0), 26 windows, round trim, arch sill) and their advancements,
  * written out independently of the mod: exact patterns, ingredients, results and groups, plus the
  * guarantee that no two recipes can fill the same crafting grid, mirrored or shifted.
  */
@@ -54,8 +54,8 @@ class GeneratedRecipesTest {
     }
 
     @Test
-    void thereAreExactlyTheTwentyNineRecipes() throws IOException {
-        assertEquals(new TreeSet<>(List.of("round_door", "round_window", "round_window_arch_left",
+    void thereAreExactlyTheThirtyRecipes() throws IOException {
+        assertEquals(new TreeSet<>(List.of("round_door", "arched_door", "round_window", "round_window_arch_left",
                 "round_window_arch_right", "round_window_bottom_left", "round_window_bottom_right",
                 "round_window_cross", "round_window_arch_left_cross", "round_window_arch_right_cross",
                 "round_window_bottom_left_cross", "round_window_bottom_right_cross", "round_trim",
@@ -66,12 +66,13 @@ class GeneratedRecipesTest {
                 "round_window_top_right_cross", "round_window_edge_top_cross", "round_window_edge_left_cross",
                 "round_window_edge_bottom_cross", "round_window_edge_right_cross", "arch_sill_trim")),
                 recipeNames());
-        assertEquals(29, recipeNames().size());
+        assertEquals(30, recipeNames().size());
     }
 
     @Test
-    void theTwentyNineRecipesAreExactlyAsDesigned() {
+    void theThirtyRecipesAreExactlyAsDesigned() {
         assertRecipe("round_door", "roundwood:round_door", List.of("PPP", "PNP", "PPP"), Map.of("P", PLANKS, "N", NUGGET));
+        assertRecipe("arched_door", "roundwood:arched_door", List.of(" P ", "PNP", "PPP"), Map.of("P", PLANKS, "N", NUGGET));
         assertRecipe("round_window", "roundwood:round_window", List.of(" P ", "PGP", " P "), Map.of("P", PLANKS, "G", PANE));
         assertRecipe("round_window_arch_left", "roundwood:round_window_arch", List.of("PP", "PG", "P "),
                 Map.of("P", PLANKS, "G", PANE));
@@ -147,7 +148,7 @@ class GeneratedRecipesTest {
             }
             grids.put(name, placements);
         }
-        assertEquals(29, grids.size());
+        assertEquals(30, grids.size());
         for (String a : grids.keySet()) {
             for (String b : grids.keySet()) {
                 if (a.compareTo(b) < 0) {
@@ -168,7 +169,7 @@ class GeneratedRecipesTest {
                 for (Path file : files.toList()) {
                     String name = file.getFileName().toString().replace(".json", "");
                     assertTrue(seen.add(name), name + " appears in two categories");
-                    assertEquals(category.equals("redstone"), name.equals("round_door"), name + " in " + category);
+                    assertEquals(category.equals("redstone"), name.equals("round_door") || name.equals("arched_door"), name + " in " + category);
                     JsonObject advancement = json(file);
                     assertEquals("roundwood:" + name, advancement.getAsJsonObject("rewards").getAsJsonArray("recipes")
                             .get(0).getAsString(), name);

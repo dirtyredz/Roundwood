@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.data;
 
-import io.github.dirtyredz.roundwood.data.client.DoorItemModelProvider;
-import io.github.dirtyredz.roundwood.data.client.DoorModelProvider;
+import io.github.dirtyredz.roundwood.data.client.door.DoorItemModelProvider;
+import io.github.dirtyredz.roundwood.data.client.door.DoorModelProvider;
 import io.github.dirtyredz.roundwood.data.client.LegacyModelProvider;
 import io.github.dirtyredz.roundwood.data.client.RoundwoodLanguageProvider;
 import io.github.dirtyredz.roundwood.data.client.trim.TrimModelProvider;

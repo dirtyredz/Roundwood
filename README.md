@@ -1,6 +1,6 @@
 # Roundwood
 
-Forge 1.20.1 mod: a round 2x2 wooden door, a round window with arch, corner and edge pieces (each
+Forge 1.20.1 mod: a round 2x2 wooden door and an arched 1x2 one, a round window with arch, corner and edge pieces (each
 plain or with cross beams), a Universal Trim for both and an Arch Sill, hobbit-hole style. Each is one item you
 restyle in the world: any planks (vanilla or modded) set the wood, any of the 16 dyes paints it,
 and trims can also be faced with radial brick. Install on **both** the server and every client.
@@ -16,12 +16,12 @@ Generic: not tied to any modpack.
 
 ## Content
 
-29 items: **Round Door**, thirteen window pieces, each in a plain and a cross-beam version
+30 items: **Round Door**, **Arched Door** (0.11.0), thirteen window pieces, each in a plain and a cross-beam version
 (**Round Window**, **Round Window Arch, Left** and **Right**, **Round Window Corner, Bottom Left**
 and **Bottom Right**, and since 0.10.0 **Round Window Arch, Bottom Left** and **Bottom Right**,
 **Round Window Corner, Top Left** and **Top Right**, and **Round Window Edge, Top**, **Left**,
 **Bottom** and **Right**; the crossed ones are named "... with Cross Beams"), the **Universal Trim**
-and the **Arch Sill**. Creative tab order: door, then each plain window piece followed by its
+and the **Arch Sill**. Creative tab order: round door, arched door, then each plain window piece followed by its
 crossed variant (round, arch left, arch right, corner bottom left, corner bottom right, arch bottom
 left, arch bottom right, corner top left, corner top right, edge top, left, bottom, right),
 Universal Trim, Arch Sill. They are crafted (and found in the creative tab) in oak;
@@ -32,7 +32,10 @@ hobbit door: vertical boards running the full height of the door, brass straps o
 and a prominent brass knob standing out from the middle of each face. It swings 90 degrees away
 from you with a short animation; the open leaf lies along the hinge-side wall and leaves 29/16 of
 clear width. Looking at any part outlines the whole door as it is: the leaf (open or closed) plus
-any filled camouflage corners. The knobs and straps are decoration and do not collide.
+any filled camouflage corners. The knobs and straps are decoration and do not collide. Holding the
+door item (main hand, or offhand with an empty main hand) previews the placement since 0.11.0: the
+leaf as it will stand (open if the spot is powered), the cells it will own and the hinge axis. It is
+drawn from the same plan the server places from and shows nothing when placement would be refused.
 
 - Placement: the cell you target becomes the **lower-left** part (seen from where you stand); the
   door extends one block to your right and one up. All four cells must be empty or replaceable,
@@ -52,6 +55,34 @@ any filled camouflage corners. The knobs and straps are decoration and do not co
 - Breaking any part removes the whole door and drops **one** door in its look (none in creative),
   plus the stored camouflage block. Pistons cannot move it. To the game it is a normal wooden door
   (villagers, pathfinding, `minecraft:doors`, fuel, axe).
+
+**Arched door** (0.11.0, one item places a 1 wide x 2 high assembly). A single round-headed leaf,
+16 x 32 pixels: straight sides, a flat bottom and a semicircular crown, with the same boards, brass
+straps (two, on both faces) and brass knobs as the round door. It swings 90 degrees with the same
+short animation; the knobs and straps do not collide.
+
+- Placement: the cell you target (or the replaceable cell you click) becomes the **lower** half and
+  the door extends one block up. Both cells must be empty or replaceable, dry, free of mobs, inside
+  the world and border, loaded and buildable by you, with a solid floor under the lower half. A
+  powered spot places it open. If anything is in the way nothing is placed and the item is kept; a
+  placement cancelled by a protection mod rolls back both cells and the item.
+- Hinge: chosen like the round door but at the single column's two outer edges. Next to another door
+  of the same block it hinges on the far side (a pair opens from the middle); otherwise the side with
+  more full blocks beside it; otherwise the half of the clicked cell you aimed at.
+- Use: clicking either half, a villager, or any mod calling `setOpen` moves both halves. Redstone on
+  either half opens it; removing the last signal closes it.
+- Open, the leaf lies along the hinge-side wall inside its own column and leaves 13/16 of the doorway
+  clear. Nothing projects outside the two cells (unlike the round door's open leaf), and collision is
+  clipped to them.
+- Camouflage: only the two upper corners beside the crown can take one block's look, with the round
+  door's gestures and one-block payment and refund. The lower cell has no corner.
+- Universal Trim: fits the door's face and adds a static two-pixel casing following the arched
+  outline (both jambs and the crown, no threshold across the floor), one pixel proud of the face. It
+  restyles (planks, brickwork, dye) and comes off with shears like the round door's ring.
+- Breaking either half removes the door and drops **one** door in its look (none in creative), plus
+  its trims and the stored camouflage block. To the game it is a normal wooden door
+  (`minecraft:doors`, `minecraft:wooden_doors`, fuel, axe, villagers). The same placement preview as
+  the round door's is drawn while you hold it. The item icon is the closed left-hinge leaf.
 
 **Round window** (single block). A thin square wooden pane with round tinted glass in the middle.
 It can stand upright and centred, or flush against any side of its cell (four walls, floor,
@@ -98,7 +129,7 @@ shared cross. The beams use the pane's wood or paint, run the full thickness of 
 is cut away under them. Plain and crossed are chosen by the item, not by a click or toggle.
 
 **Universal Trim** (`round_trim`, one item, one piece per face, since 0.9.0). One trim item for every
-window and round door; its icon is a flat square frame in the trim's look. The older Window Trim and
+window and door; its icon is a flat square frame in the trim's look. The older Window Trim and
 Door Trim items still work everywhere (see Upgrading).
 
 *On a window* the trim fits onto any of the 26 windows (plain or crossed) and follows its shape: a
@@ -234,13 +265,16 @@ and flush, plus a row of round windows flush against all six sides); since 0.10.
 and edges plus each edge alone; a lever-driven door; every
 paint on a door with a painted door trim, on a tinted-glass window and on a painted window; every
 wood and masonry door trim on a blue, a camouflaged oak and an open red door; and the legacy
-freestanding frames (older saves).
+freestanding frames (older saves). Since 0.11.0 an arched door section (oak closed and open on both
+hinges, a lever-driven door, other woods and a paint, trims and camouflage) stands at r 40..49,
+f 0..7.
 
 ## Recipes
 
 | Result | Recipe |
 |---|---|
 | Round door | 8 planks (any, mixed allowed) around 1 gold nugget |
+| Arched door (0.11.0) | Rows ` P ` / `PNP` / `PPP` (P any planks, N gold nugget) |
 | Round window | 4 planks around 1 glass pane (plus shape) |
 | Round window arch, left | Rows `PP` / `PG` / `P ` (P planks, G glass pane) |
 | Round window arch, right | Rows `PPP` / ` G ` / ` P ` (P planks, G glass pane) |
@@ -277,7 +311,7 @@ the left and right edges differ by where the pane sits.
 Crafting always gives the oak object; restyle it in the world. With **EMI** each item is one index
 entry whose icon cycles through example looks (the tooltip says it is a preview; taking or
 bookmarking it gives the plain oak item); styled stacks in your inventory are told apart by their
-look. With **JEI** styled stacks are separate subtypes and the 29 plain items are listed.
+look. With **JEI** styled stacks are separate subtypes and the 30 plain items are listed.
 Neither viewer is required.
 
 ## Upgrading
@@ -343,6 +377,11 @@ game: plain and crossed full circles (front and back seams), top corners and run
 centred, flush, floor, ceiling and waterlogged placement and the preview; sills fitted, restyled and
 removed independently of trims on both faces; glass tint under a sill; drops; masonry art on lower
 arches (radial), top corners (head), edges and sills; the Arch Sill icon; F3+T.
+0.11.0 (the 1 x 2 arched door and the door placement preview) is built and tested headless. Owner
+checks in game: place both door designs on both hinges; the preview before placing (open when
+powered, hidden when refused); refusals keep the item; the open arched leaf's 13/16 clearance with
+nothing outside its cells; straps and knobs; swing and highlight; static trims on the arched outline;
+upper-corner camouflage; redstone from either half; villager passage; save and reload; item icons.
 Not covered by a unit test: the client-side trim retexturing. The flow follows DankRecipeTransfer: an immutable
 GitHub prerelease asset, then a direct-URL `mods/roundwood.pw.toml` (with SHA-256, `side = "both"`)
 in the pack repo. Both steps need the owner's go-ahead.

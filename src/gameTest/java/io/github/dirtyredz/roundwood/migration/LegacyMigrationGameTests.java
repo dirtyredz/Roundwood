@@ -4,8 +4,9 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
@@ -106,7 +107,7 @@ public final class LegacyMigrationGameTests {
                 .forEach(pos -> template.add(pos.immutable()));
         loadAndTick(helper, template);
         helper.runAfterDelay(2, () -> {
-            DoorLayout.Assembly spruce = new DoorLayout.Assembly(helper.absolutePos(new BlockPos(1, 2, 1)), Direction.NORTH, DoorHingeSide.LEFT);
+            DoorLayout.Assembly spruce = new DoorLayout.Assembly(helper.absolutePos(new BlockPos(1, 2, 1)), Direction.NORTH, DoorHingeSide.LEFT, DoorDesign.ROUND);
             for (BlockPos cell : spruce.positions()) {
                 check(isCanonicalDoor(helper.getLevel().getBlockState(cell)), "spruce door cell not converted: " + helper.getLevel().getBlockState(cell));
             }
@@ -119,7 +120,7 @@ public final class LegacyMigrationGameTests {
             check(camouflage != null && camouflage.material().is(Blocks.POLISHED_GRANITE) && camouflage.paid(),
                     "camouflage or its refund lost: " + camouflage);
 
-            DoorLayout.Assembly red = new DoorLayout.Assembly(helper.absolutePos(new BlockPos(4, 2, 1)), Direction.NORTH, DoorHingeSide.RIGHT);
+            DoorLayout.Assembly red = new DoorLayout.Assembly(helper.absolutePos(new BlockPos(4, 2, 1)), Direction.NORTH, DoorHingeSide.RIGHT, DoorDesign.ROUND);
             check(red.complete(helper.getLevel(), ModBlocks.roundDoor()), "red door not converted or incomplete");
             check(helper.getLevel().getBlockState(red.anchor()).getValue(DoorBlock.OPEN), "the open red door closed");
             check(((RoundDoorBlockEntity) helper.getLevel().getBlockEntity(red.anchor())).appearance().equals(oak(DyeColor.RED)), "red door look");
@@ -209,7 +210,7 @@ public final class LegacyMigrationGameTests {
         floor(helper);
         Block alias = legacy("oak_round_door");
         Block canonical = ModBlocks.roundDoor();
-        DoorLayout.Assembly door = new DoorLayout.Assembly(helper.absolutePos(ANCHOR), Direction.NORTH, DoorHingeSide.RIGHT);
+        DoorLayout.Assembly door = new DoorLayout.Assembly(helper.absolutePos(ANCHOR), Direction.NORTH, DoorHingeSide.RIGHT, DoorDesign.ROUND);
         rawDoor(helper, door, new Block[] {canonical, alias, canonical, alias}, true,
                 "{id:\"roundwood:round_door\",RoundwoodAppearance:{Version:1,Kind:\"wood\",Material:\"minecraft:warped_planks\",Paint:\"white\"}}");
         loadAndTick(helper, door.positions());
@@ -251,13 +252,13 @@ public final class LegacyMigrationGameTests {
     public static void anIncompleteOldDoorIsClearedWithAStyledDrop(GameTestHelper helper) {
         floor(helper);
         Block alias = legacy("jungle_round_door");
-        DoorLayout.Assembly door = new DoorLayout.Assembly(helper.absolutePos(ANCHOR), Direction.NORTH, DoorHingeSide.LEFT);
+        DoorLayout.Assembly door = new DoorLayout.Assembly(helper.absolutePos(ANCHOR), Direction.NORTH, DoorHingeSide.LEFT, DoorDesign.ROUND);
         rawDoor(helper, door, new Block[] {alias, alias, alias, null}, false, PLAIN);
         clearDrops(helper);
         loadAndTick(helper, door.positions());
         helper.runAfterDelay(4, () -> {
             for (BlockPos cell : door.positions()) {
-                check(!(helper.getLevel().getBlockState(cell).getBlock() instanceof io.github.dirtyredz.roundwood.block.door.RoundDoorBlock),
+                check(!(helper.getLevel().getBlockState(cell).getBlock() instanceof io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock),
                         "an incomplete door part survived at " + cell);
             }
             int styled = dropped(helper, ModItems.ROUND_DOOR.get(), planks("jungle"));
@@ -273,7 +274,7 @@ public final class LegacyMigrationGameTests {
         floor(helper);
         BlockPos windowRel = new BlockPos(6, 1, 6);
         helper.setBlock(windowRel, legacy("cherry_round_window").defaultBlockState());
-        DoorLayout.Assembly door = new DoorLayout.Assembly(helper.absolutePos(ANCHOR), Direction.NORTH, DoorHingeSide.LEFT);
+        DoorLayout.Assembly door = new DoorLayout.Assembly(helper.absolutePos(ANCHOR), Direction.NORTH, DoorHingeSide.LEFT, DoorDesign.ROUND);
         Block alias = legacy("yellow_round_door");
         for (DoorLayout.Part part : DoorLayout.Part.values()) {
             helper.getLevel().setBlockAndUpdate(door.pos(part), door.stateFor(part, alias, false, false));
@@ -299,7 +300,7 @@ public final class LegacyMigrationGameTests {
         check(AppearanceStacks.read(new ItemStack(oldDoor)).equals(planks("cherry")), "the old door item lost its look");
         ServerPlayer player = player(helper, "old_items", GameType.SURVIVAL, Direction.NORTH);
         check(placeDoor(helper, player, new ItemStack(oldDoor), ANCHOR, DoorHingeSide.LEFT).consumesAction(), "old door item did not place");
-        DoorLayout.Assembly door = new DoorLayout.Assembly(helper.absolutePos(ANCHOR), Direction.NORTH, DoorHingeSide.LEFT);
+        DoorLayout.Assembly door = new DoorLayout.Assembly(helper.absolutePos(ANCHOR), Direction.NORTH, DoorHingeSide.LEFT, DoorDesign.ROUND);
         check(door.complete(helper.getLevel(), ModBlocks.roundDoor()), "the old item placed something other than the canonical door");
         check(((RoundDoorBlockEntity) helper.getLevel().getBlockEntity(door.anchor())).appearance().equals(planks("cherry")), "placed look");
         ItemStack picked = pick(helper, door.pos(DoorLayout.Part.UPPER_RIGHT));

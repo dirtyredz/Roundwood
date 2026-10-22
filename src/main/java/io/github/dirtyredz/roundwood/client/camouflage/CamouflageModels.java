@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.client.camouflage;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageGeometry;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.FaceUv;
@@ -39,7 +40,7 @@ public final class CamouflageModels {
     private static final ResourceLocation NAME = ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, "camouflage");
     private static final FaceBakery BAKERY = new FaceBakery();
 
-    private record Key(BlockState donor, Direction facing, DoorLayout.Part part) {
+    private record Key(BlockState donor, DoorDesign design, Direction facing, DoorLayout.Part part) {
     }
 
     private static final Map<Key, BakedModel> CACHE = new LinkedHashMap<>(64, 0.75F, true) {
@@ -53,8 +54,8 @@ public final class CamouflageModels {
     }
 
     /** The corner model for {@code part} of a door facing {@code facing}, in {@code donor}'s materials. */
-    public static synchronized BakedModel quarter(BlockState donor, Direction facing, DoorLayout.Part part) {
-        return CACHE.computeIfAbsent(new Key(donor, facing, part), CamouflageModels::build);
+    public static synchronized BakedModel quarter(BlockState donor, DoorDesign design, Direction facing, DoorLayout.Part part) {
+        return CACHE.computeIfAbsent(new Key(donor, design, facing, part), CamouflageModels::build);
     }
 
     /** Resource reload: sprites and donor models may all have changed (the donor sprites are cleared with them). */
@@ -65,7 +66,7 @@ public final class CamouflageModels {
     private static BakedModel build(Key key) {
         int turns = VoxelShapeFactory.quarterTurns(key.facing());
         List<BakedQuad> quads = new ArrayList<>();
-        for (CamouflageGeometry.Face face : CamouflageGeometry.exposedFaces(key.part().column.index(), key.part().row())) {
+        for (CamouflageGeometry.Face face : CamouflageGeometry.exposedFaces(key.design(), key.part().column.index(), key.part().row())) {
             Box box = face.box().rotateY(turns);
             Direction side = turn(direction(face.side()), turns);
             DonorSprites.FaceMaterial material = DonorSprites.face(key.donor(), side);

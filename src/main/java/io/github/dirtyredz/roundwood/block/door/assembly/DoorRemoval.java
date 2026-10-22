@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.block.door.assembly;
 
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyTeardown;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageDrops;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
@@ -23,7 +23,7 @@ public final class DoorRemoval {
     }
 
     /** Called from {@code onRemove} of the part at {@code pos}, whose new state is already in the world. */
-    public static void onRemove(RoundDoorBlock block, BlockState state, Level level, BlockPos pos, BlockState newState) {
+    public static void onRemove(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos, BlockState newState) {
         if (level.isClientSide || newState.is(block) || level.restoringBlockSnapshots
                 || AssemblyMutationBatch.isMutating(level, pos)) {
             // Same block (a state change), a cancelled placement being rolled back, or our own batch.

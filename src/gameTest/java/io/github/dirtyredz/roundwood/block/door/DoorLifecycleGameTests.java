@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door;
 
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorColumn;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;

@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.client.door;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.BuiltinWoodStyles;
 import io.github.dirtyredz.roundwood.client.material.DonorColors;
@@ -39,7 +40,8 @@ public final class DoorAppearanceModels {
         }
     }
 
-    private record Key(Look look, String variant) {
+    /** Design-keyed (0.11.0): two door shapes share looks, so a look alone would hand one door the other's model. */
+    private record Key(Look look, DoorDesign design, String variant) {
     }
 
     private static final AppearanceModelCache<Key, BakedModel> MODELS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
@@ -60,16 +62,17 @@ public final class DoorAppearanceModels {
                 .orElse(new Look(BuiltinWoodStyles.OAK_DOOR_PANEL, -1));
     }
 
-    /** The baked leaf for {@code hinge} in {@code look}. */
-    public static BakedModel leaf(Look look, DoorHingeSide hinge) {
-        BakedModel oak = Minecraft.getInstance().getModelManager().getModel(DoorLeafModels.location(hinge));
-        return look.isOakTemplate() ? oak : MODELS.get(new Key(look, hinge.getSerializedName()), key -> retexture(oak, look));
+    /** The baked leaf of {@code design} for {@code hinge} in {@code look}. */
+    public static BakedModel leaf(Look look, DoorDesign design, DoorHingeSide hinge) {
+        BakedModel oak = Minecraft.getInstance().getModelManager().getModel(DoorLeafModels.location(design, hinge));
+        return look.isOakTemplate() ? oak
+                : MODELS.get(new Key(look, design, hinge.getSerializedName()), key -> retexture(oak, look));
     }
 
-    /** {@code oakItem} (the door's item model) in {@code appearance}. */
-    public static BakedModel item(BakedModel oakItem, Appearance appearance) {
+    /** {@code oakItem} ({@code design}'s item model) in {@code appearance}. */
+    public static BakedModel item(DoorDesign design, BakedModel oakItem, Appearance appearance) {
         Look look = look(appearance);
-        return look.isOakTemplate() ? oakItem : MODELS.get(new Key(look, "item"), key -> retexture(oakItem, look));
+        return look.isOakTemplate() ? oakItem : MODELS.get(new Key(look, design, "item"), key -> retexture(oakItem, look));
     }
 
     private static BakedModel retexture(BakedModel oak, Look look) {

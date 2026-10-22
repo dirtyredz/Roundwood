@@ -1,8 +1,8 @@
 package io.github.dirtyredz.roundwood.block.door.camouflage;
 
 import com.mojang.logging.LogUtils;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -57,7 +57,7 @@ public final class CamouflageDrops {
      * anchor is found from the removed part's old state; an unloaded anchor is left alone (its own
      * integrity cleanup owns the payload later).
      */
-    public static void releaseOnTeardown(RoundDoorBlock block, BlockState oldState, Level level, BlockPos pos) {
+    public static void releaseOnTeardown(AssemblyDoorBlock block, BlockState oldState, Level level, BlockPos pos) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, oldState);
         BlockPos anchor = assembly.anchor();
         if (!level.isLoaded(anchor)) {

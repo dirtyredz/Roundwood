@@ -1,8 +1,8 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlock;
-import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
@@ -18,7 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The anchors: the door's (id {@code round_door}, unchanged since 0.2.0 so saved camouflage loads),
+ * The anchors: the doors' (id {@code round_door}, unchanged since 0.2.0 so saved camouflage loads; it also
+ * anchors the arched door since 0.11.0),
  * the window's and the trim's. Each is valid for its canonical block(s) and that family's hidden
  * 0.4.0 aliases, so saved entities load into unconverted blocks. The window entity (id
  * {@code round_window}) serves all 26 canonical windows and the fifteen window aliases.
@@ -30,7 +31,7 @@ public final class ModBlockEntities {
     @SuppressWarnings("DataFlowIssue") // the data fixer type is unused for mod block entities
     public static final RegistryObject<BlockEntityType<RoundDoorBlockEntity>> ROUND_DOOR = BLOCK_ENTITIES.register("round_door",
             () -> BlockEntityType.Builder.of((pos, state) -> new RoundDoorBlockEntity(roundDoor(), pos, state),
-                    with(ModBlocks.roundDoor(), LegacyContent.doors()).toArray(RoundDoorBlock[]::new)).build(null));
+                    doors().toArray(AssemblyDoorBlock[]::new)).build(null));
 
     @SuppressWarnings("DataFlowIssue")
     public static final RegistryObject<BlockEntityType<RoundWindowBlockEntity>> ROUND_WINDOW = BLOCK_ENTITIES.register("round_window",
@@ -55,6 +56,13 @@ public final class ModBlockEntities {
 
     public static BlockEntityType<RoundTrimBlockEntity> roundTrim() {
         return ROUND_TRIM.get();
+    }
+
+    /** Both canonical doors and the door aliases: every door anchor is this one entity type. */
+    private static List<AssemblyDoorBlock> doors() {
+        List<AssemblyDoorBlock> out = new ArrayList<>(ModBlocks.doors());
+        out.addAll(LegacyContent.doors());
+        return out;
     }
 
     private static List<WindowPaneBlock> windows() {

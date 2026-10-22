@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.showcase.section;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
+import io.github.dirtyredz.roundwood.showcase.ShowcaseSamples;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public final class BrickArchesSection implements ShowcaseSection {
         List<Appearance> masonry = canvas.masonry();
         for (int i = 0; i < masonry.size(); i++) {
             canvas.trim(masonry.get(i), r(i), F);
-            canvas.sign(r(i) - 1, F, ShowcaseCanvas.label(masonry.get(i)), "legacy frame", "(older saves)");
+            canvas.sign(r(i) - 1, F, ShowcaseSamples.label(masonry.get(i)), "legacy frame", "(older saves)");
         }
     }
 }

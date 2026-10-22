@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.selection;
 
+import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
+
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageGeometry;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
 import io.github.dirtyredz.roundwood.geometry.Box;
@@ -54,7 +56,7 @@ class DoorOutlineGeometryTest {
         Set<Set<Box>> distinct = new HashSet<>();
         for (int column = 0; column < 2; column++) {
             for (int row = 0; row < 2; row++) {
-                distinct.add(world(DoorGeometry.cellEnvelope(DoorHingeSide.LEFT, column, row, false), 0, column, row));
+                distinct.add(world(DoorGeometry.cellEnvelope(DoorDesign.ROUND, DoorHingeSide.LEFT, column, row, false), 0, column, row));
             }
         }
         assertEquals(4, distinct.size(), "the clipped pieces are quarters, not the door");
@@ -66,7 +68,7 @@ class DoorOutlineGeometryTest {
             for (DoorHingeSide hinge : DoorHingeSide.values()) {
                 for (boolean open : new boolean[] {false, true}) {
                     for (boolean corners : new boolean[] {false, true}) {
-                        List<Box> outline = DoorOutlineGeometry.outline(hinge, open, corners);
+                        List<Box> outline = DoorOutlineGeometry.outline(DoorDesign.ROUND, hinge, open, corners);
                         Set<Box> expected = null;
                         for (int column = 0; column < 2; column++) {
                             for (int row = 0; row < 2; row++) {
@@ -87,15 +89,15 @@ class DoorOutlineGeometryTest {
     @Test
     void closedOutlineIsTheWholeDiscAndOpenIncludesTheProjection() {
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
-            Box closed = bounds(DoorOutlineGeometry.outline(hinge, false, false));
+            Box closed = bounds(DoorOutlineGeometry.outline(DoorDesign.ROUND, hinge, false, false));
             assertEquals(new Box(0, 0, DoorGeometry.BACK, 32, 32, DoorGeometry.FRONT), closed, hinge + " closed bounds");
-            Box open = bounds(DoorOutlineGeometry.outline(hinge, true, false));
+            Box open = bounds(DoorOutlineGeometry.outline(DoorDesign.ROUND, hinge, true, false));
             // The open leaf lies along the hinge wall and reaches one block past the cells (z -16).
             assertEquals(-16, open.minZ(), EPS, hinge + ": projection missing from the open outline");
             assertEquals(16, open.maxZ(), EPS);
             assertTrue(hinge == DoorHingeSide.LEFT ? open.maxX() <= 3 : open.minX() >= 29, hinge + ": open leaf off its wall");
-            double volume = DoorOutlineGeometry.outline(hinge, true, false).stream().mapToDouble(Box::volume).sum();
-            double disc = DoorGeometry.envelope().stream().mapToDouble(Box::volume).sum();
+            double volume = DoorOutlineGeometry.outline(DoorDesign.ROUND, hinge, true, false).stream().mapToDouble(Box::volume).sum();
+            double disc = DoorGeometry.envelope(DoorDesign.ROUND).stream().mapToDouble(Box::volume).sum();
             assertEquals(disc, volume, EPS, "the outline is the whole leaf, not a clipped part");
         }
     }
@@ -104,14 +106,14 @@ class DoorOutlineGeometryTest {
     void cornersAddTheStaticSquareInEveryPose() {
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
             for (boolean open : new boolean[] {false, true}) {
-                List<Box> plain = DoorOutlineGeometry.outline(hinge, open, false);
-                List<Box> withCorners = DoorOutlineGeometry.outline(hinge, open, true);
-                assertEquals(plain.size() + CamouflageGeometry.corners().size(), withCorners.size());
-                assertTrue(withCorners.containsAll(CamouflageGeometry.corners()), "corners move with the pose");
+                List<Box> plain = DoorOutlineGeometry.outline(DoorDesign.ROUND, hinge, open, false);
+                List<Box> withCorners = DoorOutlineGeometry.outline(DoorDesign.ROUND, hinge, open, true);
+                assertEquals(plain.size() + CamouflageGeometry.corners(DoorDesign.ROUND).size(), withCorners.size());
+                assertTrue(withCorners.containsAll(CamouflageGeometry.corners(DoorDesign.ROUND)), "corners move with the pose");
             }
         }
-        assertNotEquals(DoorOutlineGeometry.outline(DoorHingeSide.LEFT, false, false),
-                DoorOutlineGeometry.outline(DoorHingeSide.LEFT, false, true));
+        assertNotEquals(DoorOutlineGeometry.outline(DoorDesign.ROUND, DoorHingeSide.LEFT, false, false),
+                DoorOutlineGeometry.outline(DoorDesign.ROUND, DoorHingeSide.LEFT, false, true));
     }
 
     private static Box bounds(List<Box> boxes) {

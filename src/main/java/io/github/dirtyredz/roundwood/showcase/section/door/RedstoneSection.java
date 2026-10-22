@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.showcase.section;
+package io.github.dirtyredz.roundwood.showcase.section.door;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;

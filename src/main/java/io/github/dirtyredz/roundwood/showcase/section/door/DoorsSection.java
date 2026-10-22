@@ -1,7 +1,8 @@
-package io.github.dirtyredz.roundwood.showcase.section;
+package io.github.dirtyredz.roundwood.showcase.section.door;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
+import io.github.dirtyredz.roundwood.showcase.ShowcaseSamples;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSection;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 
@@ -49,7 +50,7 @@ public final class DoorsSection implements ShowcaseSection {
             for (int variant = 0; variant < 4; variant++) {
                 int r = r(i, variant);
                 canvas.door(wood, r, f(i), hinge(variant), open(variant));
-                canvas.sign(r, f(i) - 1, ShowcaseCanvas.label(wood), open(variant) ? "open" : "closed",
+                canvas.sign(r, f(i) - 1, ShowcaseSamples.label(wood), open(variant) ? "open" : "closed",
                         hinge(variant) == DoorHingeSide.LEFT ? "hinge left" : "hinge right");
             }
         }

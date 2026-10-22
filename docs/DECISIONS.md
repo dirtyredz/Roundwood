@@ -2,6 +2,46 @@
 
 Newest first.
 
+## 2026-10-22 - One shared door adapter with an explicit design (0.11.0)
+
+The arched door is a second design of the existing door family, not a second family:
+`AssemblyDoorBlock` holds everything a door part does, `DoorDesign` (ROUND, ARCHED) names the
+outline, columns, width and hardware, and `DoorLayout.Assembly` carries the design. The arched door
+reuses the round door's anchor entity type (id `round_door`), appearance family DOOR, camouflage, trim
+storage and lifecycle; `RoundDoorBlock` adds only `column`. Rejected: a separate block entity type and
+id (more registrations, nothing gained), and keeping `column` on the arched door (a fictitious right
+column for a one-wide door).
+
+## 2026-10-22 - One placement plan for the server and the preview (0.11.0)
+
+`DoorPlacementPlan` is the single read-only placement decision, for both doors: players use
+`of(block, context)`, the showcase and commands `at(level, block, assembly, open)`, and the client
+preview draws the same plan, so what is outlined is what is placed (nothing when the plan is empty).
+`DoorPlacement` only writes a plan. Rejected: re-deriving placement on the client (it would drift from
+the server's checks).
+
+## 2026-10-22 - Rectangular UV over the existing board art (0.11.0)
+
+The 32x32 board panels are vertical boards with no round-specific feature, so the arched leaf
+samples their left half at the same one-texel-per-pixel scale (`AssemblyFaceUv.of(box, face, width,
+height, image)`); wood, paint and the neutral fallback come for free and no panel art is new.
+Rejected: stretching the square panel (boards would change scale), and a 16x32 texture (Minecraft
+reads a non-square texture without metadata as square frames).
+
+## 2026-10-22 - The arched casing is built from geometry; the round ring is not moved (0.11.0)
+
+The arched door's casing is built from the design's outline (`client/door/DoorTrimModels`,
+`geometry/PixelSlab`), while the round ring keeps the legacy frame quarter models so its verified look
+cannot change. Tradeoff: two casing render paths until the round ring is moved too; named so the owner
+can decide, since moving it risks a visible change to a look already trialled.
+
+## 2026-10-22 - Arched profile and pixel slab sit flat in geometry (0.11.0)
+
+`ArchedProfile` (the round-headed opening, shared by the arched leaf and casing and meant for the
+0.12.0 archways) and `PixelSlab` (a pixel mask's visible surfaces inside one cell, extracted from the
+camouflage corners) live directly in `geometry/` (now 10 entries) instead of the plan's single-file
+`geometry/aperture/` folder, which would have been a folder for two files with no sibling group.
+
 ## 2026-10-22 - Explicit reflected and single-edge window profiles (0.10.0)
 
 Lower arches, top corners and four single-edge pieces are new `WindowProfile`s (sixteen blocks with

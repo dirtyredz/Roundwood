@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "group": "roundwood:arched_door",
+  "key": {
+    "N": {
+      "item": "minecraft:gold_nugget"
+    },
+    "P": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    " P ",
+    "PNP",
+    "PPP"
+  ],
+  "result": {
+    "item": "roundwood:arched_door"
+  },
+  "show_notification": true
+}
