@@ -6,9 +6,8 @@ import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
-import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
-import io.github.dirtyredz.roundwood.block.attachment.TrimFitting;
-import io.github.dirtyredz.roundwood.block.attachment.TrimHost;
+import io.github.dirtyredz.roundwood.block.attachment.host.TrimFitting;
+import io.github.dirtyredz.roundwood.block.attachment.host.TrimHost;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -49,7 +48,7 @@ public final class ArchwayTrimActions {
         }
         ArchwayLayout.Assembly assembly = ArchwayLayout.of(pos, state);
         return assembly.complete(level, block) && level.getBlockEntity(assembly.anchor()) instanceof ArchwayBlockEntity anchor
-                && TrimFitting.install(host(anchor, pos), face, look);
+                && TrimFitting.install(TrimHost.anchored(anchor, TrimSlot.PERIMETER, pos), face, look);
     }
 
     /** One face's casing as a restyling target, if the archway is complete and loaded. */
@@ -62,8 +61,8 @@ public final class ArchwayTrimActions {
                 || !(level.getBlockEntity(assembly.anchor()) instanceof ArchwayBlockEntity anchor)) {
             return Optional.empty();
         }
-        return Optional.of(TrimFitting.target(host(anchor, pos), face,
-                player -> assembly.positions().stream().allMatch(cell -> level.mayInteract(player, cell))));
+        return Optional.of(TrimFitting.target(TrimHost.anchored(anchor, TrimSlot.PERIMETER, pos), face,
+                player -> assembly.mayEditAll(level, player)));
     }
 
     /** The anchor of the complete, loaded archway at {@code pos}, if {@code player} may edit all of it. */
@@ -73,40 +72,10 @@ public final class ArchwayTrimActions {
         }
         ArchwayLayout.Assembly assembly = ArchwayLayout.of(pos, state);
         if (!assembly.loaded(level) || !assembly.complete(level, block)
-                || !assembly.positions().stream().allMatch(cell -> level.mayInteract(player, cell))
+                || !assembly.mayEditAll(level, player)
                 || !(level.getBlockEntity(assembly.anchor()) instanceof ArchwayBlockEntity anchor)) {
             return Optional.empty();
         }
-        return Optional.of(host(anchor, pos));
-    }
-
-    /** The anchor's perimeter trims as a host, announced at {@code origin} (the cell that was used). */
-    private static TrimHost host(ArchwayBlockEntity anchor, BlockPos origin) {
-        return new TrimHost() {
-            @Override
-            public TrimSlot slot() {
-                return TrimSlot.PERIMETER;
-            }
-
-            @Override
-            public FaceTrims trims() {
-                return anchor.trims();
-            }
-
-            @Override
-            public boolean editable() {
-                return anchor.trimsEditable();
-            }
-
-            @Override
-            public boolean store(FaceTrims next) {
-                return anchor.setTrims(next);
-            }
-
-            @Override
-            public BlockPos origin() {
-                return origin;
-            }
-        };
+        return Optional.of(TrimHost.anchored(anchor, TrimSlot.PERIMETER, pos));
     }
 }

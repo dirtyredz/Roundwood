@@ -15,7 +15,9 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   saves) while its item, the Universal Trim, attaches to window, door and archway faces; `window_trim` is
   a hidden compatibility item that behaves the same. The Arch Sill is the second attachment slot
   (`TrimSlot.SILL`, upper arches only). Trim attachments go through
-  `block/attachment` (`FaceTrimStore`, `TrimFitting`, `TrimHost`, `TrimSlot`), never a host copy. Which
+  `block/attachment` (`storage/FaceTrimStore`, `host/TrimFitting`, `host/TrimHost`, `TrimSlot`; anchor persistence in
+  `entity/AppearanceAnchorBlockEntity`, held items in `interaction/HeldTrimTool`), never a host copy. Doors, archways and
+  the frame share `block/assembly` (`Assembly` contract, integrity, removal, anchors, placement); never copy a lifecycle. Which
   items restyle: `appearance/material` (tagged planks, the fixed four masonry). What a look draws:
   `client/material` (`BuiltinWoodStyles`, `PaintStyles`) plus the generated art. Examples:
   `AppearanceSamples`. History: `migration/LegacyAppearances` is frozen, never edit it. New artwork

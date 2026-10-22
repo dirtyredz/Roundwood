@@ -65,7 +65,7 @@ public final class DoorTrimRenderer {
             TrimLooks.Look painted = TrimAppearanceModels.look(look.get());
             // A quarter model's ring lies on the facing side of its cell (authored z 0..1). FRONT: the cell in
             // front of the door (z 16..17). BACK: the door's own cell, moved towards the front to z 12..13.
-            double shift = face == AttachmentFace.FRONT ? 0 : (DoorGeometry.BACK - DoorTrimGeometry.PROUD) / 16.0;
+            double shift = face == AttachmentFace.FRONT ? 0 : (DoorGeometry.BACK - AttachmentFace.PROUD) / 16.0;
             for (TrimPart part : TrimPart.values()) {
                 BlockPos door = assembly.pos(doorPart(part));
                 BlockPos cell = face == AttachmentFace.FRONT ? door.relative(front) : door;

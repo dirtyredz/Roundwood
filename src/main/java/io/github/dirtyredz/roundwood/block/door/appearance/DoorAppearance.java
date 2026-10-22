@@ -3,12 +3,12 @@ package io.github.dirtyredz.roundwood.block.door.appearance;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
+import io.github.dirtyredz.roundwood.block.assembly.appearance.AssemblyAppearanceTarget;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorBlockEntities;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -18,9 +18,9 @@ import java.util.Optional;
 
 /**
  * A door's appearance lives once, on the anchor's block entity, and is read from any part through
- * the anchor (never loading it). This resolves it for picks, drops and rendering, and offers the
- * whole loaded, complete assembly as a restyling target. Placement installs it itself
- * ({@code assembly/DoorPlacement}).
+ * the anchor (never loading it). This resolves it for picks, drops and rendering, with the block's
+ * default when the anchor is not available, and offers the whole loaded, complete assembly as a
+ * restyling target ({@link AssemblyAppearanceTarget}). Placement installs it itself.
  */
 public final class DoorAppearance {
     private DoorAppearance() {
@@ -38,33 +38,8 @@ public final class DoorAppearance {
                 .orElseGet(() -> AppearanceDefaults.of(state.getBlock()));
     }
 
-    /** The whole door as a restyling target, if it is loaded and complete. */
+    /** The whole door as a restyling target, if it is loaded and complete; announced at the clicked part. */
     public static Optional<AppearanceActions.Target> target(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos) {
-        DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
-        if (!assembly.loaded(level) || !assembly.complete(level, block)
-                || !(level.getBlockEntity(assembly.anchor()) instanceof RoundDoorBlockEntity entity)) {
-            return Optional.empty();
-        }
-        return Optional.of(new AppearanceActions.Target() {
-            @Override
-            public Optional<Appearance> current() {
-                return Optional.of(entity.appearance());
-            }
-
-            @Override
-            public boolean mayEdit(Player player) {
-                return assembly.positions().stream().allMatch(cell -> level.mayInteract(player, cell));
-            }
-
-            @Override
-            public void set(Appearance appearance) {
-                entity.setAppearance(appearance);
-            }
-
-            @Override
-            public BlockPos origin() {
-                return pos;
-            }
-        });
+        return AssemblyAppearanceTarget.of(level, pos, block, DoorLayout.of(pos, state), RoundDoorBlockEntity.class);
     }
 }

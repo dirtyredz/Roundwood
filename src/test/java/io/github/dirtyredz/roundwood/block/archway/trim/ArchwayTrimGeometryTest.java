@@ -33,10 +33,10 @@ class ArchwayTrimGeometryTest {
 
     @Test
     void theNearerFaceIsChosenByDepth() {
-        assertEquals(AttachmentFace.FRONT, ArchwayTrimGeometry.face(15.9999));
-        assertEquals(AttachmentFace.FRONT, ArchwayTrimGeometry.face(8));
-        assertEquals(AttachmentFace.BACK, ArchwayTrimGeometry.face(7.9));
-        assertEquals(AttachmentFace.BACK, ArchwayTrimGeometry.face(0.0001));
-        assertTrue(ArchwayTrimGeometry.PROUD > 0);
+        assertEquals(AttachmentFace.FRONT, AttachmentFace.at(15.9999, ArchwayTrimGeometry.MIDDLE));
+        assertEquals(AttachmentFace.FRONT, AttachmentFace.at(8, ArchwayTrimGeometry.MIDDLE));
+        assertEquals(AttachmentFace.BACK, AttachmentFace.at(7.9, ArchwayTrimGeometry.MIDDLE));
+        assertEquals(AttachmentFace.BACK, AttachmentFace.at(0.0001, ArchwayTrimGeometry.MIDDLE));
+        assertTrue(AttachmentFace.PROUD > 0);
     }
 }

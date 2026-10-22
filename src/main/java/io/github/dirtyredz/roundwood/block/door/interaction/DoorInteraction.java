@@ -5,7 +5,7 @@ import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceGestures;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
-import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
+import io.github.dirtyredz.roundwood.block.attachment.interaction.HeldTrimTool;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.appearance.DoorAppearance;
@@ -20,13 +20,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.Tags;
 
 import java.util.Optional;
 
@@ -54,13 +51,14 @@ public final class DoorInteraction {
 
     public static InteractionResult use(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
                                         InteractionHand hand, BlockHitResult hit) {
-        if (heldTrim(player, hand)) {
-            Optional<AttachmentFace> face = fitFace(state, pos, player, hand, hit);
+        HeldTrimTool tool = HeldTrimTool.of(player, hand);
+        if (tool.is(HeldTrimTool.Kind.ATTACHMENT)) {
+            Optional<AttachmentFace> face = fitFace(state, pos, tool, hit);
             return face.isPresent()
-                    ? DoorTrimActions.fit(level, pos, state, player, player.getItemInHand(hand), face.get())
+                    ? DoorTrimActions.fit(level, pos, state, player, tool.stack(), face.get())
                     : InteractionResult.FAIL;
         }
-        Optional<InteractionResult> ring = ring(block, state, level, pos, player, hand, hit);
+        Optional<InteractionResult> ring = ring(block, state, level, pos, player, tool, hit);
         if (ring.isPresent()) {
             return ring.get();
         }
@@ -74,7 +72,7 @@ public final class DoorInteraction {
         }
         if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty()
                 && (AppearanceGestures.of(AppearanceFamily.DOOR, player, InteractionHand.OFF_HAND).isPresent()
-                || TrimAttachmentItem.slotOf(player.getOffhandItem()).isPresent())) {
+                || HeldTrimTool.of(player, InteractionHand.OFF_HAND).is(HeldTrimTool.Kind.ATTACHMENT))) {
             return InteractionResult.PASS; // the offhand's turn
         }
         InteractionResult camouflage = CamouflageInteraction.use(block, state, region, level, pos, player, hand);
@@ -84,10 +82,11 @@ public final class DoorInteraction {
     /** The sneak-use bridge: a trim fit, a trim-ring action, or the door's ordinary restyling gesture. */
     public static boolean claims(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand,
                                  BlockHitResult hit) {
-        if (heldTrim(player, hand)) {
-            return fitFace(state, pos, player, hand, hit).isPresent();
+        HeldTrimTool tool = HeldTrimTool.of(player, hand);
+        if (tool.is(HeldTrimTool.Kind.ATTACHMENT)) {
+            return fitFace(state, pos, tool, hit).isPresent();
         }
-        return ringAction(state, level, pos, player, hand, hit) != RingAction.NONE
+        return ringAction(state, level, pos, tool, hit) != RingAction.NONE
                 || AppearanceGestures.of(AppearanceFamily.DOOR, player, hand).isPresent();
     }
 
@@ -96,55 +95,39 @@ public final class DoorInteraction {
     }
 
     private static Optional<InteractionResult> ring(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
-                                                    InteractionHand hand, BlockHitResult hit) {
-        RingAction action = ringAction(state, level, pos, player, hand, hit);
+                                                    HeldTrimTool tool, BlockHitResult hit) {
+        RingAction action = ringAction(state, level, pos, tool, hit);
         if (action == RingAction.NONE) {
             return Optional.empty();
         }
         AttachmentFace face = DoorTrimTarget.ring(state, pos, hit).orElseThrow();
-        ItemStack stack = player.getItemInHand(hand);
         if (action == RingAction.REMOVE) {
-            return Optional.of(DoorTrimActions.remove(level, pos, state, player, hand, stack, face));
+            return Optional.of(DoorTrimActions.remove(level, pos, state, player, tool.hand(), tool.stack(), face));
         }
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
-        return AppearanceGestures.donor(AppearanceFamily.TRIM, player, hand).map(gesture -> AppearanceActions.apply(level, player,
-                gesture, () -> anchor(level, pos, state, block)
-                        .map(anchor -> DoorTrimActions.target(anchor, assembly, level, face, pos))));
+        return Optional.of(AppearanceActions.apply(level, player, tool.donor().orElseThrow(), () -> anchor(level, pos, state, block)
+                .map(anchor -> DoorTrimActions.target(anchor, assembly, level, face, pos))));
     }
 
-    private static RingAction ringAction(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand,
-                                         BlockHitResult hit) {
-        if (hand == InteractionHand.OFF_HAND && !player.getMainHandItem().isEmpty()) {
-            return RingAction.NONE;
-        }
-        ItemStack stack = player.getItemInHand(hand);
-        if (stack.isEmpty()) {
+    /** Shears on a ring remove it (installed or not: a free no-op); a trim donor restyles an installed one. */
+    private static RingAction ringAction(BlockState state, BlockGetter level, BlockPos pos, HeldTrimTool tool, BlockHitResult hit) {
+        if (!tool.is(HeldTrimTool.Kind.SHEARS) && !tool.is(HeldTrimTool.Kind.DONOR)) {
             return RingAction.NONE;
         }
         Optional<AttachmentFace> face = DoorTrimTarget.ring(state, pos, hit);
         if (face.isEmpty()) {
             return RingAction.NONE;
         }
-        if (stack.getItem() instanceof ShearsItem || stack.is(Tags.Items.SHEARS)) {
+        if (tool.is(HeldTrimTool.Kind.SHEARS)) {
             return RingAction.REMOVE;
         }
         boolean installed = DoorBlockEntities.anchor(level, pos, state).map(anchor -> anchor.trims().has(face.get())).orElse(false);
-        return installed && AppearanceGestures.donor(AppearanceFamily.TRIM, player, hand).isPresent()
-                ? RingAction.RESTYLE : RingAction.NONE;
+        return installed ? RingAction.RESTYLE : RingAction.NONE;
     }
 
-    /** A trim attachment in the acting hand (the offhand acts only while the main hand is empty). */
-    private static boolean heldTrim(Player player, InteractionHand hand) {
-        if (hand == InteractionHand.OFF_HAND && !player.getMainHandItem().isEmpty()) {
-            return false;
-        }
-        return TrimAttachmentItem.slotOf(player.getItemInHand(hand)).isPresent();
-    }
-
-    /** The face a held trim fits for this hit; doors take only perimeter trims. */
-    private static Optional<AttachmentFace> fitFace(BlockState state, BlockPos pos, Player player, InteractionHand hand,
-                                                    BlockHitResult hit) {
-        if (TrimAttachmentItem.slotOf(player.getItemInHand(hand)).filter(slot -> slot == TrimSlot.PERIMETER).isEmpty()) {
+    /** The face a held trim fits for this hit; doors take only perimeter trims (an Arch Sill is refused as FAIL, unclaimed). */
+    private static Optional<AttachmentFace> fitFace(BlockState state, BlockPos pos, HeldTrimTool tool, BlockHitResult hit) {
+        if (!tool.attachment(TrimSlot.PERIMETER)) {
             return Optional.empty();
         }
         return DoorTrimTarget.fit(state, pos, hit);

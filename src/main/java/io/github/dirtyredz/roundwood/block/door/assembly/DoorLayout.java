@@ -4,10 +4,8 @@ import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
-import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -16,7 +14,6 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -67,24 +64,23 @@ public final class DoorLayout {
         }
     }
 
-    /** One assembly: the anchor cell, the direction the placing player faced, the leaf's hinge and the door's design. */
-    public record Assembly(BlockPos anchor, Direction facing, DoorHingeSide hinge, DoorDesign design) {
+    /**
+     * One assembly: the anchor cell, the direction the placing player faced, the leaf's hinge and the
+     * door's design. The shared traversal (positions, loaded, present parts, completeness, the authored
+     * frame) is the {@link io.github.dirtyredz.roundwood.block.assembly.Assembly} contract's.
+     */
+    public record Assembly(BlockPos anchor, Direction facing, DoorHingeSide hinge, DoorDesign design)
+            implements io.github.dirtyredz.roundwood.block.assembly.Assembly<Part> {
         /** The parts this assembly owns (four for the round door, two for the arched door). */
+        @Override
         public List<Part> parts() {
             return Part.of(design);
         }
 
+        @Override
         public BlockPos pos(Part part) {
             BlockPos pos = part.column == DoorColumn.LEFT ? anchor : anchor.relative(facing.getClockWise());
             return part.half == DoubleBlockHalf.LOWER ? pos : pos.above();
-        }
-
-        public List<BlockPos> positions() {
-            List<BlockPos> out = new ArrayList<>(4);
-            for (Part part : parts()) {
-                out.add(pos(part));
-            }
-            return out;
         }
 
         /** The block state a part should have, open/powered as given; keeps any injected properties. */
@@ -98,7 +94,11 @@ public final class DoorLayout {
             return state.hasProperty(RoundDoorBlock.COLUMN) ? state.setValue(RoundDoorBlock.COLUMN, part.column) : state;
         }
 
-        /** True when {@code state} is exactly this assembly's {@code part} of {@code block}. */
+        /**
+         * True when {@code state} is exactly this assembly's {@code part} of {@code block}: same block,
+         * design, facing, hinge, column and half; {@code open} and {@code powered} are not identity.
+         */
+        @Override
         public boolean isPart(BlockState state, Block block, Part part) {
             return state.is(block)
                     && designOf(state) == design
@@ -106,51 +106,6 @@ public final class DoorLayout {
                     && state.getValue(DoorBlock.HINGE) == hinge
                     && columnOf(state) == part.column
                     && state.getValue(DoorBlock.HALF) == part.half;
-        }
-
-        /** True when every cell of the assembly is in a loaded chunk. */
-        public boolean loaded(Level level) {
-            for (Part part : parts()) {
-                if (!level.isLoaded(pos(part))) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        /** The parts currently present and matching; never reads an unloaded cell. */
-        public List<Part> presentParts(Level level, Block block) {
-            List<Part> present = new ArrayList<>(4);
-            for (Part part : parts()) {
-                BlockPos pos = pos(part);
-                if (level.isLoaded(pos) && isPart(level.getBlockState(pos), block, part)) {
-                    present.add(part);
-                }
-            }
-            return present;
-        }
-
-        /** True when every cell is loaded and holds this assembly's parts. */
-        public boolean complete(Level level, Block block) {
-            return presentParts(level, block).size() == parts().size();
-        }
-
-        /**
-         * A world point in the assembly's authored frame (the frame {@code DoorGeometry} is written
-         * in), in pixels: x across from the left edge (0..width), y up from the floor (0..32), z the
-         * depth with the front face (the placing player's side) at 16 and the back at 0.
-         */
-        public Vec3 toAuthored(Vec3 world) {
-            double x = (world.x - anchor.getX()) * 16;
-            double y = (world.y - anchor.getY()) * 16;
-            double z = (world.z - anchor.getZ()) * 16;
-            // Undo the facing's clockwise quarter turns about the anchor cell's centre: (x, z) <- (16 - z, x).
-            for (int i = 0; i < VoxelShapeFactory.quarterTurns(facing); i++) {
-                double turnedX = z;
-                z = 16 - x;
-                x = turnedX;
-            }
-            return new Vec3(x, y, z);
         }
 
         /**

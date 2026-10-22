@@ -2,16 +2,13 @@ package io.github.dirtyredz.roundwood.block.archway.assembly;
 
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
-import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
+import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,68 +22,34 @@ public final class ArchwayLayout {
     private ArchwayLayout() {
     }
 
-    /** One archway: its anchor (lower-left) cell, the direction the placing player faced, its design. */
-    public record Assembly(BlockPos anchor, Direction facing, ArchwayDesign design) {
-        public BlockPos pos(ArchwayPart part) {
-            return anchor.relative(facing.getClockWise(), part.column).above(part.row);
+    /** The four cells in the shared part order. */
+    private static final List<ArchwayPart> PARTS = List.of(ArchwayPart.values());
+
+    /**
+     * One archway: its anchor (lower-left) cell, the direction the placing player faced, its design. The
+     * shared traversal and the authored frame are the {@link io.github.dirtyredz.roundwood.block.assembly.Assembly}
+     * contract's.
+     */
+    public record Assembly(BlockPos anchor, Direction facing, ArchwayDesign design)
+            implements io.github.dirtyredz.roundwood.block.assembly.Assembly<ArchwayPart> {
+        @Override
+        public List<ArchwayPart> parts() {
+            return PARTS;
         }
 
-        public List<BlockPos> positions() {
-            List<BlockPos> out = new ArrayList<>(4);
-            for (ArchwayPart part : ArchwayPart.values()) {
-                out.add(pos(part));
-            }
-            return out;
+        @Override
+        public BlockPos pos(ArchwayPart part) {
+            return anchor.relative(facing.getClockWise(), part.column).above(part.row);
         }
 
         public BlockState stateFor(ArchwayPart part, Block block) {
             return block.defaultBlockState().setValue(ArchwayBlock.FACING, facing).setValue(ArchwayBlock.PART, part);
         }
 
+        /** Same block (so the same design), facing and part. */
+        @Override
         public boolean isPart(BlockState state, Block block, ArchwayPart part) {
             return state.is(block) && state.getValue(ArchwayBlock.FACING) == facing && state.getValue(ArchwayBlock.PART) == part;
-        }
-
-        public boolean loaded(Level level) {
-            for (BlockPos pos : positions()) {
-                if (!level.isLoaded(pos)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        /** The cells currently present and matching; never reads an unloaded cell. */
-        public List<ArchwayPart> presentParts(Level level, Block block) {
-            List<ArchwayPart> present = new ArrayList<>(4);
-            for (ArchwayPart part : ArchwayPart.values()) {
-                BlockPos pos = pos(part);
-                if (level.isLoaded(pos) && isPart(level.getBlockState(pos), block, part)) {
-                    present.add(part);
-                }
-            }
-            return present;
-        }
-
-        public boolean complete(Level level, Block block) {
-            return presentParts(level, block).size() == ArchwayPart.values().length;
-        }
-
-        /**
-         * A world point in the archway's authored frame: pixels from the anchor cell's origin, the
-         * facing's turn undone (x across from the left, y up, z depth with the front at 16).
-         */
-        public Vec3 toAuthored(Vec3 world) {
-            double x = (world.x - anchor.getX()) * 16;
-            double y = (world.y - anchor.getY()) * 16;
-            double z = (world.z - anchor.getZ()) * 16;
-            // Undo the facing's clockwise quarter turns about the anchor cell's centre: (x, z) <- (z, 16 - x).
-            for (int i = 0; i < VoxelShapeFactory.quarterTurns(facing); i++) {
-                double turnedX = z;
-                z = 16 - x;
-                x = turnedX;
-            }
-            return new Vec3(x, y, z);
         }
 
         /** The four cells, plus the one pixel each face casing stands proud of them (drawn whenever any of it shows). */
@@ -95,7 +58,7 @@ public final class ArchwayLayout {
             for (BlockPos pos : positions()) {
                 box = box.minmax(new AABB(pos));
             }
-            double proud = 1 / 16.0;
+            double proud = AttachmentFace.PROUD / 16.0;
             return box.inflate(Math.abs(facing.getStepX()) * proud, 0, Math.abs(facing.getStepZ()) * proud);
         }
     }

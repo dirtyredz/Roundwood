@@ -1,15 +1,13 @@
 package io.github.dirtyredz.roundwood.block.archway.assembly;
 
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import io.github.dirtyredz.roundwood.block.assembly.placement.AssemblyPlacementPlan;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
-import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,7 +16,8 @@ import java.util.Optional;
  * design) and the state every cell gets. The server's placement writes exactly these states
  * ({@link ArchwayPlacement}); the client's preview draws exactly this plan's assembly
  * ({@code client/archway/ArchwayPlacementPreview}), so what is shown is what is placed. No plan means
- * the click places nothing and nothing is previewed.
+ * the click places nothing and nothing is previewed. The checks are the shared skeleton's
+ * ({@link AssemblyPlacementPlan}).
  *
  * <p>An ordinary click: the clicked (or replaceable) cell is the lower-left anchor as the placer sees
  * it, and the archway extends right and up, facing the placer's horizontal direction (four facings,
@@ -34,24 +33,14 @@ public record ArchwayPlacementPlan(ArchwayLayout.Assembly assembly, Map<ArchwayP
 
     /** The plan for using an archway item in {@code context}, or empty when the click would place nothing. */
     public static Optional<ArchwayPlacementPlan> of(ArchwayBlock block, BlockPlaceContext context) {
-        if (!context.canPlace()) {
+        ArchwayLayout.Assembly assembly = new ArchwayLayout.Assembly(context.getClickedPos().immutable(),
+                context.getHorizontalDirection(), block.design());
+        if (!AssemblyPlacementPlan.playerCells(context, assembly, pos -> {
+        })) {
             return Optional.empty();
         }
-        Direction facing = context.getHorizontalDirection();
-        ArchwayLayout.Assembly assembly = new ArchwayLayout.Assembly(context.getClickedPos().immutable(), facing, block.design());
-        Level level = context.getLevel();
         Player player = context.getPlayer();
-        for (BlockPos pos : assembly.positions()) {
-            if (!placeable(level, pos)
-                    || !level.getBlockState(pos).canBeReplaced(BlockPlaceContext.at(context, pos, context.getClickedFace()))) {
-                return Optional.empty();
-            }
-            if (player != null && (!level.mayInteract(player, pos)
-                    || !player.mayUseItemAt(pos, context.getClickedFace(), context.getItemInHand()))) {
-                return Optional.empty();
-            }
-        }
-        return states(level, block, assembly, player == null ? CollisionContext.empty() : CollisionContext.of(player));
+        return plan(context.getLevel(), block, assembly, player == null ? CollisionContext.empty() : CollisionContext.of(player));
     }
 
     /**
@@ -60,15 +49,10 @@ public record ArchwayPlacementPlan(ArchwayLayout.Assembly assembly, Map<ArchwayP
      * {@code assembly} is not {@code block}'s design.
      */
     public static Optional<ArchwayPlacementPlan> at(Level level, ArchwayBlock block, ArchwayLayout.Assembly assembly) {
-        if (assembly.design() != block.design()) {
+        if (assembly.design() != block.design() || !AssemblyPlacementPlan.playerlessCells(level, assembly)) {
             return Optional.empty();
         }
-        for (BlockPos pos : assembly.positions()) {
-            if (!placeable(level, pos) || !level.getBlockState(pos).canBeReplaced()) {
-                return Optional.empty();
-            }
-        }
-        return states(level, block, assembly, CollisionContext.empty());
+        return plan(level, block, assembly, CollisionContext.empty());
     }
 
     /** The anchor's state (the lower-left part). */
@@ -76,23 +60,16 @@ public record ArchwayPlacementPlan(ArchwayLayout.Assembly assembly, Map<ArchwayP
         return states.get(ArchwayPart.LOWER_LEFT);
     }
 
-    private static boolean placeable(Level level, BlockPos pos) {
-        return !level.isOutsideBuildHeight(pos) && level.getWorldBorder().isWithinBounds(pos) && level.isLoaded(pos)
-                && level.getFluidState(pos).isEmpty();
+    /** The same decision as the shared plan the installer writes. */
+    public AssemblyPlacementPlan<ArchwayPart> shared() {
+        return new AssemblyPlacementPlan<>(assembly, states);
     }
 
     /** Every part's state, if none is obstructed and both lower cells have a sturdy floor. */
-    private static Optional<ArchwayPlacementPlan> states(Level level, ArchwayBlock block, ArchwayLayout.Assembly assembly,
-                                                         CollisionContext collision) {
-        Map<ArchwayPart, BlockState> states = new EnumMap<>(ArchwayPart.class);
-        for (ArchwayPart part : ArchwayPart.values()) {
-            BlockPos pos = assembly.pos(part);
-            BlockState state = assembly.stateFor(part, block);
-            if (!level.isUnobstructed(state, pos, collision) || part.lower() && !state.canSurvive(level, pos)) {
-                return Optional.empty();
-            }
-            states.put(part, state);
-        }
-        return Optional.of(new ArchwayPlacementPlan(assembly, states));
+    private static Optional<ArchwayPlacementPlan> plan(Level level, ArchwayBlock block, ArchwayLayout.Assembly assembly,
+                                                       CollisionContext collision) {
+        return AssemblyPlacementPlan.of(assembly, part -> assembly.stateFor(part, block),
+                        AssemblyPlacementPlan.unobstructed(level, collision, ArchwayPart::lower))
+                .map(plan -> new ArchwayPlacementPlan(assembly, plan.states()));
     }
 }

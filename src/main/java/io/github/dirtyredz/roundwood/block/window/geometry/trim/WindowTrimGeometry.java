@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.window.geometry.trim;
 
+import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
@@ -41,8 +42,6 @@ public final class WindowTrimGeometry {
     public static final String TRIM = "trim";
     public static final String FACE = "trim_face";
     public static final String EDGE = "trim_edge";
-    /** How far a band stands proud of its face, in pixels. */
-    public static final double PROUD = 1;
     private static final int RING_OUTER = 32;
     private static final int RING_INNER = 28;
     private static final int SIZE = WindowProfile.SIZE;
@@ -85,7 +84,7 @@ public final class WindowTrimGeometry {
      * the negative side of the slab, index 1 the band on its positive side.
      */
     public static double[][] depths(WindowDepth depth) {
-        return new double[][] {{depth.slabMin() - PROUD, depth.slabMin()}, {depth.slabMax(), depth.slabMax() + PROUD}};
+        return new double[][] {{depth.slabMin() - AttachmentFace.PROUD, depth.slabMin()}, {depth.slabMax(), depth.slabMax() + AttachmentFace.PROUD}};
     }
 
     /** The depth range of the band on {@code side} of the slab ({@code side} lies along the normal). */

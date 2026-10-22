@@ -7,12 +7,12 @@ import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceUseTarget;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceDrops;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyIntegrity;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyRemoval;
 import io.github.dirtyredz.roundwood.block.door.appearance.DoorAppearance;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorBlockEntities;
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorIntegrity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorRemoval;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorStateController;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageDrops;
 import io.github.dirtyredz.roundwood.block.door.interaction.DoorInteraction;
@@ -217,20 +217,25 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
         super.onPlace(state, level, pos, oldState, moving);
         DoorStateController.reconcileExternalOpen(this, oldState, state, level, pos);
-        DoorIntegrity.scheduleCheck(this, oldState, level, pos);
+        AssemblyIntegrity.scheduleCheck(this, oldState, level, pos);
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         super.tick(state, level, pos, random);
-        DoorIntegrity.check(this, state, level, pos);
+        AssemblyIntegrity.check(this, DoorLayout.of(pos, state), level, pos);
     }
 
+    /**
+     * Removing one part removes the door ({@link AssemblyRemoval}); stored camouflage is released first,
+     * while the anchor still exists, found from this part's old state ({@link CamouflageDrops}).
+     */
     @Override
     @SuppressWarnings("deprecation")
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
-        DoorRemoval.onRemove(this, state, level, pos, newState);
+        AssemblyRemoval.onRemove(this, level, pos, newState, () -> DoorLayout.of(pos, state),
+                () -> CamouflageDrops.releaseOnTeardown(this, state, level, pos));
         super.onRemove(state, level, pos, newState, moving);
     }
 

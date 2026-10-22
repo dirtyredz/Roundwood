@@ -40,7 +40,7 @@ public final class ArchwayTrimTarget {
         ArchwayLayout.Assembly assembly = ArchwayLayout.of(pos, state);
         Vec3 normal = Vec3.atLowerCornerOf(hit.getDirection().getNormal());
         Vec3 local = assembly.toAuthored(hit.getLocation().subtract(normal.scale(INWARD)));
-        AttachmentFace face = ArchwayTrimGeometry.face(local.z);
+        AttachmentFace face = AttachmentFace.at(local.z, ArchwayTrimGeometry.MIDDLE);
         Direction side = hit.getDirection();
         boolean planar = side == assembly.facing() || side == assembly.facing().getOpposite();
         return new Hit(planar ? Region.FACE : Region.BODY, face);

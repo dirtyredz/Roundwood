@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.block.attachment;
 /**
  * A block entity that carries face trims (a window, a door's anchor). Read-only: what is fitted
  * now. The loot condition ({@code loot/TrimFaceCondition}) reads it from the captured entity, and
- * renderers draw from it; changes go through {@link TrimFitting} with a host-built {@link TrimHost}.
+ * renderers draw from it; changes go through {@code host/TrimFitting} with a host-built {@code host/TrimHost}.
  */
 public interface TrimAttachmentSource {
     /** The perimeter trims (every host has them). */

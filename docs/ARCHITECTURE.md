@@ -24,8 +24,8 @@ always the lower-left part.
 **Invariants**
 
 - All present parts share `hinge`, `open` and `powered`.
-- Every write Roundwood makes goes through `DoorPlacement`, `DoorStateController` or `DoorRemoval`,
-  inside an `AssemblyMutationBatch` naming the four cells.
+- Every write Roundwood makes goes through `DoorPlacement` (the shared installation), `DoorStateController`
+  or the shared removal (`AssemblyRemoval`), inside an `AssemblyMutationBatch` naming the cells.
 - Nothing reads an unloaded cell. State changes and redstone do nothing while any cell is unloaded
   (deferred, not treated as air); removal only clears loaded partners.
 
@@ -47,12 +47,58 @@ value to the partners, silently: the writer owns the sound. Our own batches and 
 are ignored.
 
 **Integrity.** A part appearing from anything but an in-place change (structure templates,
-commands, our own placement) schedules a block tick (`DoorIntegrity`, 1 tick later, after the
+commands, our own placement) schedules a block tick (`block/assembly/AssemblyIntegrity`, shared with archways and frames, 1 tick later, after the
 writer finished). If all four cells are loaded and the assembly is incomplete, the part is broken
-with its own loot and `DoorRemoval` (via `AssemblyTeardown`) clears its matching partners: at most one item. Missing parts
+with its own loot and `AssemblyRemoval` (via `AssemblyTeardown`) clears its matching partners: at most one item. Missing parts
 are never created; an unloaded cell re-schedules the check (every 20 ticks) without being read.
 Vertically, `updateShape` keeps a part only while the cell above/below is its own column's other
 half. Mirroring cycles `hinge` (vanilla) and `column`; rotation turns `facing` only.
+
+## Shared assembly services
+
+Doors (both designs), archways and the compatibility frame share one lifecycle; windows share only
+the anchor persistence and the attachment services.
+
+- **Contract** (`block/assembly/Assembly<P>`): anchor, facing, the ordered parts (lower-left,
+  upper-left, lower-right, upper-right; the arched door only the first two), `pos` and the family's
+  exact `isPart`. `positions`, `loaded`, `presentParts`, `complete`, `mayEditAll` and `toAuthored`
+  are shared and ask `isLoaded` before every read. `DoorLayout.Assembly`, `ArchwayLayout.Assembly`
+  and `TrimLayout.Assembly` implement it and keep their own `stateFor` and bounds; door membership
+  includes design and hinge, never `open` or `powered`.
+- **Lifecycle.** `AssemblyIntegrity` schedules from `onPlace` (not for an in-place change or a
+  snapshot restore) and checks one tick later: retry every 20 ticks while a cell is unloaded, break
+  an incomplete part with its loot. `AssemblyRemoval` stands down for the same block, a snapshot
+  restore or our own batch, runs the family's pre-teardown hook (the door's camouflage release,
+  resolved from the removed part's old state) and clears the loaded partners through
+  `AssemblyTeardown`. The blocks call both directly.
+- **Anchors** (`AssemblyAnchors`): from any part, the loaded anchor cell holding the same family class
+  whose reconstructed layout equals the part's. That is anchor identity, which lets canonical and alias
+  cells share an anchor, unlike exact membership. Loot falls back to the captured entity of the right
+  type. `DoorBlockEntities`, `ArchwayBlockEntities` and `TrimAppearance` are typed facades.
+  `appearance/AssemblyAppearanceTarget` is the whole-assembly restyling target: loaded, complete,
+  typed anchor, permission over every cell, announced at the clicked cell.
+- **Placement** (`placement/`). `AssemblyPlacementPlan` is the read-only skeleton: every cell in
+  the world and dry first; then replaceable in the click's context with `mayInteract` and
+  `mayUseItemAt` at every cell, or plainly replaceable without a player; then the family's per-part
+  policy. `DoorPlacementPlan` and `ArchwayPlacementPlan` stay typed facades (hinge, power, design,
+  obstruction against their own collision); the frame uses the skeleton with survival only and no
+  entity check. `AssemblyInstallation` writes the plan (`UPDATE_ALL`, in part order, inside one
+  batch), then the look on the anchor; success means all of it happened. A refused write or batch, a
+  missing anchor entity or an exception puts every cell back, block state and block-entity data, with
+  drops and teardown suppressed (`restoringBlockSnapshots` on and capture off, both restored in a
+  `finally`), drops only the block snapshots it added, and fails. Entry during a snapshot restore is
+  refused. `AssemblyPlacement` adds the player's effects only on success: criterion, sound,
+  `BLOCK_PLACE`, one item (none in creative), `CONSUME`. Forge's cancellation of the multi-place
+  event is unchanged.
+- **Anchor persistence** (`block/attachment/entity/AppearanceAnchorBlockEntity`). The door, archway,
+  window and frame entities extend it and declare their appearance family and per-slot store formats
+  in the constructor (the frame declares none, so it is never a trim host). It owns the look,
+  normalised against the block's default; the guarded trim setters (a refused write neither dirties
+  nor syncs); the save, load and update templates (disk keeps an unknown payload, updates always carry
+  every store, explicit empty while one is unknown); and the packets (no tag means the default look
+  and every store explicitly empty). Family hooks: door camouflage (saved with its refund, sent without
+  it, explicit empty when cleared), window glass, the window's 0.7.0 perimeter `legacy` reader and its
+  client model refresh (`afterClientUpdate`). Constructors and entity types are unchanged.
 
 ## Loot ownership
 
@@ -133,7 +179,7 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   `RoundDoorBlock` adds only `column` (the 0.4.0 aliases and the 0.7.0 frame migration recognise
   exactly this class) and `ArchedDoorBlock` fixes the design. Both anchor on `RoundDoorBlockEntity`
   (type id `round_door`), so appearance family DOOR, camouflage, trim storage and lifecycle are shared.
-- **One placement plan.** `assembly/DoorPlacementPlan` is the immutable, read-only decision (`of(block,
+- **One placement plan.** `assembly/DoorPlacementPlan` (a typed facade over the shared skeleton) is the immutable, read-only decision (`of(block,
   context)` for players, `at(level, block, assembly, open)` for the showcase and commands): cells,
   hinge, open state, or empty when refused. `DoorPlacement` only writes a plan. The client preview
   (`client/door/DoorPlacementPreview`, via `selection/DoorPlacementOutline`) draws the same plan for
@@ -167,22 +213,22 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   read-only decision: anchor = clicked or replaceable cell, facing = the placer's horizontal
   direction, right column = facing's clockwise side, four cells checked for bounds, border, loaded,
   permission, replaceable, dry, entity obstruction against the frame's own collision, and a sturdy
-  floor under both lower cells. `ArchwayPlacement` writes exactly the plan inside an
-  `AssemblyMutationBatch` (one Forge multi-place event, rolled back on cancel) and charges once;
+  floor under both lower cells. `ArchwayPlacement` writes exactly the plan through the
+  shared `AssemblyPlacement` and `AssemblyInstallation` (one Forge multi-place event, rolled back on cancel) and charges once;
   `client/archway/ArchwayPlacementPreview` draws the same plan (frame outline from
   `ArchwayGeometry.placed`, the four-cell footprint).
 - **Lifecycle.** Integrity is deferred one tick and retried while a cell is unloaded
-  (`ArchwayIntegrity`); removing a cell clears the loaded partners silently (`ArchwayRemoval` over
+  (`AssemblyIntegrity`); removing a cell clears the loaded partners silently (`AssemblyRemoval` over
   `AssemblyTeardown`); survival harvests defer removal (`AssemblyHarvest`) so loot reads the anchor;
   lower cells break when their floor goes. Loot: one archway in its look (`AppearanceDrops.decorate`
   by item, so the trims keep theirs) plus one `round_trim` per trimmed face via `AttachmentLootPools`
   keyed `ArchwayTrim`, evaluated with the anchor entity from whichever cell broke.
 - **Face casings.** `ArchwayTrimNbt` (`ArchwayTrim` v1, no legacy, empty omitted) through
-  `FaceTrimStore`; fitting, removal and restyling through `TrimFitting` with an anchor `TrimHost`
-  (`ArchwayTrimActions`). A casing covers the whole frame face (`ArchwayTrimGeometry.inCasing` = the
+  `FaceTrimStore`; fitting, removal and restyling through `TrimFitting` with the anchor's live
+  `TrimHost.anchored` view (`ArchwayTrimActions`). A casing covers the whole frame face (`ArchwayTrimGeometry.inCasing` = the
   frame mask), FRONT z 16..17, BACK -1..0, render-only. Targeting (`ArchwayTrimTarget`): a hit on the
   front or back plane addresses that face; any other surface is the archway; a held Universal Trim
-  fits the nearer face by depth. The router (`ArchwayInteraction`) is the window convention: plain
+  fits the nearer face by depth. The router (`ArchwayInteraction`, the held item classified by `HeldTrimTool`) is the window convention: plain
   click, sneaking identical through `claimsUse`, main hand first.
 - **Rendering.** `ArchwayRenderer` (anchor BER, solid layer, per-cell world light) draws each cell's
   frame and installed casing pieces from `ArchwayModels`, which bakes them with the shared
@@ -214,7 +260,7 @@ change; the 0.2.0 passage is unchanged.
   Permission (`mayBuild`, `mayInteract`) and a complete loaded assembly are checked first.
   Survival consumes one item and stores it as the refund; creative consumes and stores nothing.
 - **Exactly-once refunds** (`CamouflageDrops`): replace/clear give the old paid item to the player
-  (overflow dropped). Teardown: `DoorRemoval.onRemove` first withdraws the payload from the anchor
+  (overflow dropped). Teardown: the door's pre-teardown hook in `AssemblyRemoval.onRemove` first withdraws the payload from the anchor
   (found from the removed part's old state; never loaded on demand) and pops it at the removed
   part (`Block.popResource`, so `doTileDrops` applies) before partners go. Whoever withdraws it is
   the only one who can drop it, so partner removal and repeated callbacks find nothing. Creative
@@ -361,8 +407,8 @@ takes wood, paint or the four masonry materials). One item trims one face, the
 clicked one, so a window takes up to two trims, each with its own look. A plain click fits it (no
 sneaking); a face that already has a trim is a free no-op and nothing is used. The item has no use
 of its own: the window router fits it (see Hit classification and routing). Fitting, removal and
-restyling go through the shared `TrimFitting` with a `WindowTrimActions` host whose writes keep the
-`trimmed` summary in step.
+restyling go through the shared `TrimFitting` with a `WindowTrimActions` host (`TrimHost.of`) whose writes keep the
+`trimmed` summary in step (`WindowAttachmentState`).
 
 - **State and payload.** The shared value is `block/attachment/FaceTrims` (two optional looks;
   whether a face has a trim never depends on its look) with one codec, `FaceTrimsNbt`:
@@ -495,24 +541,32 @@ plug in as further slots and hosts, not copies.
 - **Slot** (`block/attachment/TrimSlot`): `PERIMETER` (the Universal Trim, item `round_trim`) and
   `SILL` (0.10.0, the Arch Sill, item `arch_sill_trim`, stored by the upper arch windows). A slot names the canonical item
   a removed or dropped attachment becomes, and is the loot condition's `slot`.
-- **Storage** (`FaceTrimStore`): one host's FRONT/BACK pair in one slot plus custody of an unknown
+- **Storage** (`storage/FaceTrimStore`): one host's FRONT/BACK pair in one slot plus custody of an unknown
   payload. The host supplies a `Format` (key, version, whether an empty pair is written: windows
   yes, doors no) and, at load, a `Legacy` reader (the window's 0.7.0 adapter; doors have none).
   The current version decodes through `FaceTrimsNbt`; anything not understood reads as no trims,
   is kept and saved back byte-for-byte, and `set` refuses until a build that understands it loads
   it. Update packets always carry the payload, explicit empty while an unknown one is held. One
-  store per slot, so slots never see each other's payload. Both block entities delegate to it.
-- **Transaction** (`TrimFitting`, on a `TrimHost`): fit (empty face takes the stack's look, one item
+  store per slot, so slots never see each other's payload. The anchor entities declare their stores
+  through `entity/AppearanceAnchorBlockEntity` (see Shared assembly services).
+- **Transaction** (`host/TrimFitting`, on a `host/TrimHost`): fit (empty face takes the stack's look, one item
   unless creative; occupied is a free no-op), remove (shears: the slot's item in that look back or
   dropped, one wear), install (no player), restyle and a per-face `AppearanceActions.Target`. A host
-  adapter (`DoorTrimActions`, `WindowTrimActions`) does only its own lookup and checks (complete,
-  loaded, permission over every cell) and its store hook.
+  adapter (`DoorTrimActions`, `ArchwayTrimActions`, `WindowTrimActions`) does only its own lookup and
+  checks (complete, loaded, permission over every cell) and hands over a live view:
+  `TrimHost.anchored(anchor, slot, origin)`, or `TrimHost.of(...)` for the window's summary
+  bookkeeping. The origin is the clicked cell.
 - **Items** (`block/attachment/item`): `TrimAttachmentItem` names a slot; hosts recognise trims
-  through `TrimAttachmentItem.slotOf`, never a class or id. `UniversalTrimItem` is registered as the
+  through `TrimAttachmentItem.slotOf`, never a class or id. The three routers classify the acting hand
+  once through `interaction/HeldTrimTool`: an attachment with its slot, shears (class or `forge:shears`),
+  a TRIM donor with its gesture, or other. Each router keeps its own claim policy. `UniversalTrimItem` is registered as the
   advertised `round_trim` (it keeps its block association with the compatibility frame, never places
   one, and claims the frame's item mapping) and, hidden, as every older id: the 19 0.4.0 trim aliases
   (historical looks) and the 0.8.0 `window_trim` (`migration/LegacyContent`). Its own use does
   nothing: the host router fits, so a click is never fitted twice.
+- **Face rule.** `AttachmentFace.at(depth, middle)` (a tie is FRONT) and `AttachmentFace.PROUD` (one
+  pixel) are the one authority for the door (middle 14.5) and archway (middle 8) targeting and every
+  host's casing depth. Windows keep their pose-aware face identity.
 - **Loot.** `roundwood:trim_face` takes an optional `slot` (omitted = perimeter, which is how it is
   written, so 0.8.0 tables are unchanged). `AttachmentLootPools` builds a slot's two face pools;
   windows and doors drop `round_trim`.
@@ -542,7 +596,7 @@ services (see Face-trim attachments). Until 0.9.0 the `round_trim` item was the 
   swings and has no collision, pathfinding, support or redstone effect.
 - **Storage.** `DoorTrim: {Version: 1, Front, Back}` on the door anchor entity (`DoorTrimNbt`, the
   `FaceTrimsNbt` codec; an unknown version is kept and fails closed). The update tag always carries
-  it. `block/door/assembly/DoorBlockEntities` (extracted from `DoorAppearance`) finds the anchor entity.
+  it. `block/door/assembly/DoorBlockEntities`, a typed facade over `AssemblyAnchors`, finds the anchor entity.
 - **Targeting.** `DoorSelectionShapes` adds in-cell proxies to the target shape: installed rings
   (the FRONT proxy at z 15..16 inside the door cells, the BACK ring itself), and both while the Door
   Trim is held, so an open door can be fitted. The highlight's visible shape draws installed rings
@@ -577,15 +631,15 @@ of its cells (z 0..1, authored facing north), cut into cell-local quarters.
 - **Fitted frames** (0.7.0) stood in the cells in front of a closed door, the ring one pixel proud of
   the leaf. Migration turns them into the door's FRONT trim (see Migration). `TrimPlacement` no
   longer reads doors; it keeps the checks below for `placeAt`.
-- **Checks** (`TrimPlacement`): loaded, inside build height and border, editable, replaceable, dry,
+- **Checks** (`TrimPlacement`, the shared player-less skeleton with the frame's policy): loaded, inside build height and border, editable, replaceable, dry,
   both lower quarters on a sturdy floor. No entity check (nothing collides). Door cells are not
   replaceable, so a frame never overwrites a door. `placeAt` does the same without a player.
 - **Behaviour**: empty collision and support shapes, pathfindable, no occlusion, not a redstone
   conductor, `PushReaction.BLOCK`; only the anchor quarter has a block entity (the look). The selection shape is only the quarter's own
   ring piece, so rays pass through the centre and the corners to the door behind.
-- **Lifecycle**: the door's pattern, through the shared `block/assembly` services: `TrimRemoval`
+- **Lifecycle**: the door's pattern, through the shared `block/assembly` services: `AssemblyRemoval`
   clears loaded partners with drops suppressed (one item from the initiating quarter),
-  `TrimIntegrity` removes an incomplete frame a tick later (deferred while a cell is unloaded),
+  `AssemblyIntegrity` removes an incomplete frame a tick later (deferred while a cell is unloaded),
   losing the floor under a lower quarter breaks it. Door and frame never remove each other.
   Rotation turns `facing`; mirroring mirrors it and swaps the column of `part`.
 - **Looks** (see Appearance): vanilla woods in their stripped log, tiled per block; other woods in

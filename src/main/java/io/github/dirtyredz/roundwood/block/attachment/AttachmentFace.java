@@ -12,6 +12,9 @@ public enum AttachmentFace implements StringRepresentable {
     FRONT("Front"),
     BACK("Back");
 
+    /** How far an attachment stands proud of its host's face, in authored pixels (every host and slot). */
+    public static final double PROUD = 1;
+
     private final String key;
 
     AttachmentFace(String key) {
@@ -21,6 +24,15 @@ public enum AttachmentFace implements StringRepresentable {
     /** The compound key the slot is saved under ({@code Front}, {@code Back}). */
     public String key() {
         return key;
+    }
+
+    /**
+     * The face a point at authored depth {@code depth} addresses on a host whose two faces meet at
+     * {@code middle} (the front is the deeper side): the front from the middle on, so a tie is FRONT.
+     * Hosts whose face identity follows a pose (windows) decide it themselves.
+     */
+    public static AttachmentFace at(double depth, double middle) {
+        return depth >= middle ? FRONT : BACK;
     }
 
     public AttachmentFace opposite() {

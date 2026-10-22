@@ -3,11 +3,9 @@ package io.github.dirtyredz.roundwood.block.window.interaction;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceGestures;
-import io.github.dirtyredz.roundwood.appearance.material.MasonryMaterials;
-import io.github.dirtyredz.roundwood.appearance.material.PlankMaterials;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
-import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
+import io.github.dirtyredz.roundwood.block.attachment.interaction.HeldTrimTool;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassActions;
@@ -18,12 +16,10 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.Tags;
 
 import java.util.Optional;
 
@@ -86,10 +82,7 @@ public final class WindowInteraction {
     /** The action for this click, or empty when the hand, the item or the hit is nothing to a window. */
     public static Optional<Plan> plan(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand,
                                       BlockHitResult hit) {
-        if (hand == InteractionHand.OFF_HAND && !player.getMainHandItem().isEmpty()) {
-            return Optional.empty();
-        }
-        WindowUseRules.Item item = item(player.getItemInHand(hand));
+        WindowUseRules.Item item = item(HeldTrimTool.of(player, hand));
         if (item == WindowUseRules.Item.OTHER) {
             return Optional.empty();
         }
@@ -101,28 +94,21 @@ public final class WindowInteraction {
                 .map(target -> new Plan(WindowUseRules.decide(item, target.region(), takesSill), target));
     }
 
-    /** What {@code stack} is to a window: each attachment item by its slot, then the restyling and tool items. */
-    public static WindowUseRules.Item item(ItemStack stack) {
-        if (stack.isEmpty()) {
-            return WindowUseRules.Item.OTHER;
-        }
-        Optional<TrimSlot> slot = TrimAttachmentItem.slotOf(stack);
-        if (slot.isPresent()) {
-            return slot.get() == TrimSlot.SILL ? WindowUseRules.Item.ARCH_SILL : WindowUseRules.Item.UNIVERSAL_TRIM;
-        }
-        if (stack.getItem() instanceof ShearsItem || stack.is(Tags.Items.SHEARS)) {
-            return WindowUseRules.Item.SHEARS;
-        }
-        if (stack.getItem() instanceof DyeItem) {
-            return WindowUseRules.Item.DYE;
-        }
-        if (PlankMaterials.fromStack(stack).isPresent()) {
-            return WindowUseRules.Item.PLANKS;
-        }
-        if (MasonryMaterials.fromStack(stack).isPresent()) {
-            return WindowUseRules.Item.MASONRY;
-        }
-        return WindowUseRules.Item.OTHER;
+    /**
+     * What the held tool is to a window: each attachment by its slot, shears, then a trim donor by its
+     * kind (dye paints, planks re-wood, masonry is refused on the frame), else nothing.
+     */
+    public static WindowUseRules.Item item(HeldTrimTool tool) {
+        return switch (tool.kind()) {
+            case ATTACHMENT -> tool.attachment(TrimSlot.SILL) ? WindowUseRules.Item.ARCH_SILL : WindowUseRules.Item.UNIVERSAL_TRIM;
+            case SHEARS -> WindowUseRules.Item.SHEARS;
+            case DONOR -> switch (tool.donor().orElseThrow().type()) {
+                case PAINT -> WindowUseRules.Item.DYE;
+                case WOOD -> WindowUseRules.Item.PLANKS;
+                case MASONRY -> WindowUseRules.Item.MASONRY;
+            };
+            case OTHER -> WindowUseRules.Item.OTHER;
+        };
     }
 
     private static Optional<RoundWindowBlockEntity> window(Level level, BlockPos pos) {

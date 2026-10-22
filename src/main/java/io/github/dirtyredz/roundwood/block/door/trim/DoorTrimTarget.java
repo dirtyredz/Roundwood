@@ -32,7 +32,7 @@ public final class DoorTrimTarget {
         if (!DoorTrimGeometry.onRing(DoorLayout.designOf(state), local.x, local.y)) {
             return Optional.empty();
         }
-        AttachmentFace face = DoorTrimGeometry.face(local.z);
+        AttachmentFace face = AttachmentFace.at(local.z, DoorTrimGeometry.MIDDLE);
         if (!state.getValue(DoorBlock.OPEN) || DoorTrimGeometry.inTargetDepth(face, local.z)) {
             return Optional.of(face);
         }
@@ -46,7 +46,7 @@ public final class DoorTrimTarget {
         }
         Vec3 local = authored(state, pos, hit);
         return DoorTrimGeometry.withinRing(DoorLayout.designOf(state), local.x, local.y)
-                ? Optional.of(DoorTrimGeometry.face(local.z)) : Optional.empty();
+                ? Optional.of(AttachmentFace.at(local.z, DoorTrimGeometry.MIDDLE)) : Optional.empty();
     }
 
     private static Vec3 authored(BlockState state, BlockPos pos, BlockHitResult hit) {
