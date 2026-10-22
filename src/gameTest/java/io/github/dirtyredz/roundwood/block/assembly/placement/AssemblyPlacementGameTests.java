@@ -8,6 +8,7 @@ import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPart;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPlacement;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPlacementPlan;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
@@ -26,22 +27,29 @@ import io.github.dirtyredz.roundwood.fixture.assembly.PlacementEffects;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
@@ -67,6 +75,8 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
 @PrefixGameTestTemplate(false)
 public final class AssemblyPlacementGameTests {
     private static final BlockPos ANCHOR = new BlockPos(3, 1, 3);
+    /** How deep {@link AssemblyMutationBatch} lets batches nest (its {@code MAX_DEPTH}). */
+    private static final int BATCH_DEPTH = 4;
     private static final Appearance LOOK = Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", "dark_oak_planks"));
 
     /** One family placed by a player with an item: its name, its item and its cells when anchored at {@link #ANCHOR}. */
@@ -251,6 +261,139 @@ public final class AssemblyPlacementGameTests {
             clear(helper, archway.positions());
         }
         helper.succeed();
+    }
+
+    /**
+     * A write refused part-way (the last cell already holds exactly its planned state) puts every cell
+     * back: block states and block-entity data (a sign's text), nothing dropped, no archway left.
+     */
+    @GameTest(template = TEMPLATE)
+    public static void aRefusedLaterWriteRollsEveryCellBack(GameTestHelper helper) {
+        floor(helper);
+        ServerLevel level = helper.getLevel();
+        ArchwayLayout.Assembly archway = ArchwayFixtures.assembly(helper, ANCHOR, Direction.NORTH, ArchwayDesign.ORDINARY);
+        ArchwayPlacementPlan plan = ArchwayPlacementPlan.at(level, ArchwayFixtures.block(ArchwayDesign.ORDINARY), archway).orElseThrow();
+        BlockPos signed = archway.pos(ArchwayPart.LOWER_RIGHT); // on the floor, so the sign stands
+        BlockPos taken = archway.pos(ArchwayPart.UPPER_RIGHT);
+        level.setBlock(signed, Blocks.OAK_SIGN.defaultBlockState(), Block.UPDATE_CLIENTS);
+        SignBlockEntity sign = (SignBlockEntity) level.getBlockEntity(signed);
+        sign.updateText(text -> text.setMessage(0, Component.literal("kept")), true);
+        CompoundTag signData = sign.saveWithoutMetadata();
+        // The last cell already holds its planned state, so its write is refused (nothing changes there).
+        AssemblyMutationBatch.run(level, List.of(taken), () -> level.setBlock(taken, plan.states().get(ArchwayPart.UPPER_RIGHT),
+                Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE));
+        DoorFixtures.clearDrops(helper);
+
+        check(!AssemblyInstallation.install(level, plan.shared(), LOOK, ArchwayBlockEntity.class), "a refused write reported success");
+        check(level.getBlockState(archway.pos(ArchwayPart.LOWER_LEFT)).isAir(), "the anchor was not put back");
+        check(level.getBlockState(archway.pos(ArchwayPart.UPPER_LEFT)).isAir(), "the upper left cell was not put back");
+        check(level.getBlockState(signed).is(Blocks.OAK_SIGN), "the sign was not put back: " + level.getBlockState(signed));
+        check(level.getBlockEntity(signed) instanceof SignBlockEntity restored && restored.saveWithoutMetadata().equals(signData),
+                "the sign's text was not put back");
+        check(level.getBlockState(taken).equals(plan.states().get(ArchwayPart.UPPER_RIGHT)), "the refused cell changed");
+        check(DoorFixtures.dropped(helper, ArchwayFixtures.block(ArchwayDesign.ORDINARY).asItem()) == 0
+                && DoorFixtures.dropped(helper, Items.OAK_SIGN) == 0, "the rollback dropped something");
+        AssemblyMutationBatch.run(level, List.of(taken, signed), () -> {
+            level.setBlock(taken, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+            level.setBlock(signed, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
+        });
+        helper.succeed();
+    }
+
+    /** Nested too deep, during a snapshot restore, or with no anchor entity of the expected kind: refused, nothing changed. */
+    @GameTest(template = TEMPLATE)
+    public static void refusedInstallationsChangeNothing(GameTestHelper helper) {
+        floor(helper);
+        ServerLevel level = helper.getLevel();
+        ArchwayLayout.Assembly archway = ArchwayFixtures.assembly(helper, ANCHOR, Direction.NORTH, ArchwayDesign.KEYHOLE);
+        ArchwayPlacementPlan plan = ArchwayPlacementPlan.at(level, ArchwayFixtures.block(ArchwayDesign.KEYHOLE), archway).orElseThrow();
+
+        boolean[] installed = {true};
+        nested(level, BATCH_DEPTH, () -> installed[0] = AssemblyInstallation.install(level, plan.shared(), LOOK,
+                ArchwayBlockEntity.class));
+        check(!installed[0], "installed past the batch depth");
+        assertAir(helper, archway.positions(), "batch depth");
+
+        level.restoringBlockSnapshots = true;
+        try {
+            installed[0] = AssemblyInstallation.install(level, plan.shared(), LOOK, ArchwayBlockEntity.class);
+        } finally {
+            level.restoringBlockSnapshots = false;
+        }
+        check(!installed[0], "installed during a snapshot restore");
+        assertAir(helper, archway.positions(), "snapshot restore");
+
+        check(!AssemblyInstallation.install(level, plan.shared(), LOOK, RoundTrimBlockEntity.class), "installed without its anchor entity");
+        assertAir(helper, archway.positions(), "missing anchor");
+        helper.succeed();
+    }
+
+    /** A rollback inside an enclosing block-snapshot capture drops only its own snapshots and leaves capture on. */
+    @GameTest(template = TEMPLATE)
+    public static void aRollbackKeepsTheEnclosingSnapshots(GameTestHelper helper) {
+        floor(helper);
+        ServerLevel level = helper.getLevel();
+        ArchwayLayout.Assembly archway = ArchwayFixtures.assembly(helper, ANCHOR, Direction.NORTH, ArchwayDesign.ORDINARY);
+        ArchwayPlacementPlan plan = ArchwayPlacementPlan.at(level, ArchwayFixtures.block(ArchwayDesign.ORDINARY), archway).orElseThrow();
+        BlockSnapshot outer = BlockSnapshot.create(level.dimension(), level, helper.absolutePos(new BlockPos(7, 1, 7)));
+        level.captureBlockSnapshots = true;
+        level.capturedBlockSnapshots.add(outer);
+        boolean installed;
+        List<BlockSnapshot> after;
+        boolean stillCapturing;
+        try {
+            installed = AssemblyInstallation.install(level, plan.shared(), LOOK, RoundTrimBlockEntity.class);
+        } finally {
+            stillCapturing = level.captureBlockSnapshots;
+            after = List.copyOf(level.capturedBlockSnapshots);
+            level.captureBlockSnapshots = false;
+            level.capturedBlockSnapshots.clear();
+        }
+        check(!installed, "installed without its anchor entity");
+        check(stillCapturing, "the rollback switched the enclosing capture off");
+        check(after.size() == 1 && after.get(0) == outer, "the enclosing snapshots changed: " + after.size());
+        assertAir(helper, archway.positions(), "captured rollback");
+        helper.succeed();
+    }
+
+    /** A player's placement whose installation is refused is FAIL: nothing written, charged, announced. */
+    @GameTest(template = TEMPLATE)
+    public static void aRefusedPlayerPlacementHasNoSuccessEffects(GameTestHelper helper) {
+        floor(helper);
+        BlockPos anchor = helper.absolutePos(ANCHOR);
+        for (Family family : Family.values()) {
+            ServerPlayer player = player(helper, "refused_" + family, GameType.SURVIVAL, Direction.NORTH);
+            ItemStack stack = styled(family.item(), LOOK);
+            InteractionResult[] result = {null};
+            PlacementEffects.watch(anchor, () -> "");
+            List<String> effects;
+            try {
+                nested(helper.getLevel(), BATCH_DEPTH, () -> result[0] = family.place(helper, player, stack));
+            } finally {
+                effects = PlacementEffects.stop(anchor);
+            }
+            check(result[0] != null && !result[0].consumesAction(), family + ": expected a refusal, got " + result[0]);
+            check(stack.getCount() == 1, family + ": the item was charged");
+            check(effects.isEmpty(), family + ": success effects " + effects);
+            assertAir(helper, family.cells(helper), family.toString());
+        }
+        helper.succeed();
+    }
+
+
+    /** Runs {@code inner} inside {@code depth} nested mutation batches over a cell no test uses. */
+    private static void nested(ServerLevel level, int depth, Runnable inner) {
+        if (depth == 0) {
+            inner.run();
+            return;
+        }
+        AssemblyMutationBatch.run(level, List.of(BlockPos.ZERO), () -> nested(level, depth - 1, inner));
+    }
+
+    private static void assertAir(GameTestHelper helper, List<BlockPos> cells, String what) {
+        for (BlockPos cell : cells) {
+            check(helper.getLevel().getBlockState(cell).isAir(), what + ": a cell was left written at " + cell);
+        }
     }
 
     private static DoorLayout.Assembly door(GameTestHelper helper, DoorDesign design) {

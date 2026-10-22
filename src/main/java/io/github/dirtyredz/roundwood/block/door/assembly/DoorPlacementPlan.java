@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.door.assembly;
 
+import io.github.dirtyredz.roundwood.block.assembly.placement.AssemblyPlacementPlan;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import net.minecraft.core.BlockPos;
@@ -12,7 +13,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.shapes.CollisionContext;
 
-import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,12 +21,14 @@ import java.util.Optional;
  * hinge, design) and the state every cell gets. The server's placement writes exactly these states
  * ({@link DoorPlacement}); the client's preview draws exactly this plan's assembly
  * ({@code selection/DoorPlacementOutline}), so what is shown is what is placed. No plan means the
- * click places nothing and nothing is previewed.
+ * click places nothing and nothing is previewed. The checks are the shared skeleton's
+ * ({@link AssemblyPlacementPlan}); the door adds its hinge choice, its power and its policy.
  *
  * <p>The clicked (or replaceable) cell is the lower anchor and the assembly extends up and to the
  * right; the hinge follows {@link DoorHingePlacement} at the footprint's real outer edges. Every cell
  * is checked: world bounds and border, loaded, the player's permission, replaceable, dry, free of
- * entities, and each column standing on a sturdy floor. Sneaking changes nothing.
+ * entities, and each column standing on a sturdy floor. A powered cell places the door open and
+ * powered. Sneaking changes nothing.
  */
 public record DoorPlacementPlan(DoorLayout.Assembly assembly, Map<DoorLayout.Part, BlockState> states) {
     public DoorPlacementPlan {
@@ -44,21 +46,12 @@ public record DoorPlacementPlan(DoorLayout.Assembly assembly, Map<DoorLayout.Par
         DoorLayout.Assembly assembly = new DoorLayout.Assembly(anchor, facing,
                 DoorHingePlacement.choose(block, context, anchor, facing, design.columns()), design);
         Level level = context.getLevel();
-        Player player = context.getPlayer();
-        boolean powered = false;
-        for (BlockPos pos : assembly.positions()) {
-            if (!placeable(level, pos)
-                    || !level.getBlockState(pos).canBeReplaced(BlockPlaceContext.at(context, pos, context.getClickedFace()))) {
-                return Optional.empty();
-            }
-            if (player != null && (!level.mayInteract(player, pos)
-                    || !player.mayUseItemAt(pos, context.getClickedFace(), context.getItemInHand()))) {
-                return Optional.empty();
-            }
-            powered |= level.hasNeighborSignal(pos);
+        boolean[] powered = {false};
+        if (!AssemblyPlacementPlan.playerCells(context, assembly, pos -> powered[0] |= level.hasNeighborSignal(pos))) {
+            return Optional.empty();
         }
-        return states(level, block, assembly, powered, powered,
-                player == null ? CollisionContext.empty() : CollisionContext.of(player));
+        Player player = context.getPlayer();
+        return plan(level, block, assembly, powered[0], powered[0], player == null ? CollisionContext.empty() : CollisionContext.of(player));
     }
 
     /**
@@ -67,15 +60,10 @@ public record DoorPlacementPlan(DoorLayout.Assembly assembly, Map<DoorLayout.Par
      * the requested open state. Empty when {@code assembly} is not {@code block}'s design.
      */
     public static Optional<DoorPlacementPlan> at(Level level, AssemblyDoorBlock block, DoorLayout.Assembly assembly, boolean open) {
-        if (assembly.design() != block.design()) {
+        if (assembly.design() != block.design() || !AssemblyPlacementPlan.playerlessCells(level, assembly)) {
             return Optional.empty();
         }
-        for (BlockPos pos : assembly.positions()) {
-            if (!placeable(level, pos) || !level.getBlockState(pos).canBeReplaced()) {
-                return Optional.empty();
-            }
-        }
-        return states(level, block, assembly, open, false, CollisionContext.empty());
+        return plan(level, block, assembly, open, false, CollisionContext.empty());
     }
 
     /** The anchor's state (the lower-left part). */
@@ -88,24 +76,16 @@ public record DoorPlacementPlan(DoorLayout.Assembly assembly, Map<DoorLayout.Par
         return anchorState().getValue(DoorBlock.OPEN);
     }
 
-    private static boolean placeable(Level level, BlockPos pos) {
-        return !level.isOutsideBuildHeight(pos) && level.getWorldBorder().isWithinBounds(pos) && level.isLoaded(pos)
-                && level.getFluidState(pos).isEmpty(); // doors are never waterlogged
+    /** The same decision as the shared plan the installer writes. */
+    public AssemblyPlacementPlan<DoorLayout.Part> shared() {
+        return new AssemblyPlacementPlan<>(assembly, states);
     }
 
     /** Every part's state, if none is obstructed and each column has a sturdy floor. */
-    private static Optional<DoorPlacementPlan> states(Level level, AssemblyDoorBlock block, DoorLayout.Assembly assembly,
-                                                      boolean open, boolean powered, CollisionContext collision) {
-        Map<DoorLayout.Part, BlockState> states = new EnumMap<>(DoorLayout.Part.class);
-        for (DoorLayout.Part part : assembly.parts()) {
-            BlockPos pos = assembly.pos(part);
-            BlockState state = assembly.stateFor(part, block, open, powered);
-            if (!level.isUnobstructed(state, pos, collision)
-                    || part.half == DoubleBlockHalf.LOWER && !state.canSurvive(level, pos)) {
-                return Optional.empty();
-            }
-            states.put(part, state);
-        }
-        return Optional.of(new DoorPlacementPlan(assembly, states));
+    private static Optional<DoorPlacementPlan> plan(Level level, AssemblyDoorBlock block, DoorLayout.Assembly assembly,
+                                                    boolean open, boolean powered, CollisionContext collision) {
+        return AssemblyPlacementPlan.of(assembly, part -> assembly.stateFor(part, block, open, powered),
+                        AssemblyPlacementPlan.unobstructed(level, collision, part -> part.half == DoubleBlockHalf.LOWER))
+                .map(plan -> new DoorPlacementPlan(assembly, plan.states()));
     }
 }
