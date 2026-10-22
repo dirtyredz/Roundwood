@@ -2,6 +2,50 @@
 
 Newest first.
 
+## 2026-10-22 - One assembly contract; the compatibility frame adopts it (0.12.0 refactor)
+
+Doors, archways and the compatibility frame implement one narrow `block/assembly/Assembly` contract
+(anchor, facing, ordered parts, pos, family membership) and share integrity, removal, anchor lookup,
+the restyling target, the placement skeleton and the installation (dk-992020e6). This supersedes the
+lifecycle part of "Archways keep their own lifecycle" below; their model baking stands. The frame
+adopts the contract rather than being frozen: freezing it would have left a third lifecycle copy.
+Its compatibility identity, empty collision, floor-only checks, restyling and migration stay family
+policy, and adoption does not restore player placement. Typed facades stay (`DoorBlockEntities`,
+`ArchwayBlockEntities`, `DoorPlacementPlan`, `ArchwayPlacementPlan`) because previews, items, the
+showcase, renderers and migration read family types; they hold no lifecycle loop. Rejected: a
+universal block-family registry, a generic multiblock framework.
+
+## 2026-10-22 - One anchor-entity lifecycle with narrow family hooks (0.12.0 refactor)
+
+`AppearanceAnchorBlockEntity` owns the look, the declared per-slot trim stores, the guarded setters
+and the save, load, update and packet templates for the door, archway, window and frame entities.
+Families add only their own state through hooks (camouflage, glass, the window's 0.7.0 perimeter
+reading, the window's model refresh), declared through the constructor so nothing overridable runs
+during construction. A packet without a tag reads every store explicitly empty for every family. That
+is what the window did; for the others it equals their missing-payload reading. The trim methods are
+inherited, but the frame declares no store and does not implement `TrimAttachmentSource`, so it is
+never a writable trim host. Rejected: per-family copies, a universal persistence registry.
+
+## 2026-10-22 - A placement that fails part-way rolls back (0.12.0 refactor, the one behaviour change)
+
+Installation used to ignore a refused write, a refused batch and a missing anchor entity. It still
+reported success, and the player was charged. `AssemblyInstallation` is now all or nothing. It
+restores every captured cell's state and block-entity data, with drops and teardown suppressed, and
+then fails, so the player gets no criterion, sound, game event or charge. The rollback removes only
+the block snapshots it added and leaves an enclosing Forge capture on. Forge's own cancellation of
+the multi-place event stays the outer transaction's rollback. Success paths, write order and flags
+are unchanged. Rejected: leaving a half-written assembly to the integrity check, which drops loot and
+has already charged the player.
+
+## 2026-10-22 - HeldTrimTool classifies the hand; routers keep their policies (0.12.0 refactor)
+
+One classifier (dk-ff89f8e5) decides what the acting hand holds for a trim host: attachment and slot,
+shears by class or `forge:shears` tag, a TRIM donor with its gesture (kind, hand, paying stack), or
+other. Routing stays with each host. The door returns an unclaimed FAIL for a sill or an invalid
+open-door fit, where windows and archways claim and refuse with a hint. The door leaf keeps its
+sneak gestures and its offhand hand-over. `AppearanceUseEvents` and `WindowUseRules` are unchanged.
+Rejected: routing actions through the classifier (each host's claim rules differ on purpose).
+
 ## 2026-10-22 - Archway proportions, depth and an open floor (0.12.0)
 
 Both archways are 32 x 32 pixels outside (straight outer jambs to y 16, a radius-16 crown at
@@ -24,6 +68,8 @@ always hits the archway (a casing could then never be restyled), sneaking to swi
 rules out sneak-click mechanics).
 
 ## 2026-10-22 - Archways keep their own lifecycle and bake their models from the mask (0.12.0)
+
+Superseded for the lifecycle by "One assembly contract" above; the model baking stands.
 
 As the plan chose, the archway has its own layout, plan, integrity and removal over the shared
 mutation batch, teardown and harvest, rather than a generic multiblock framework; the duplication with

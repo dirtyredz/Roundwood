@@ -1,5 +1,23 @@
 # Gotchas - Roundwood
 
+- **A window packet without a tag clears its trims.** The shared anchor reads a tagless packet as
+  every store explicitly empty. Read as "missing" instead, a window whose state says `trimmed=true`
+  would get oak trims on both faces from its 0.7.0 legacy reading. `AnchorPersistenceGameTests` guards
+  it.
+- **Door camouflage differs on disk and in updates.** Saves keep the refund, updates never carry it,
+  and an update carries an explicit empty compound once it is cleared. `takeCamouflage` only marks
+  the entity dirty. Loading never touches `DoorSwing`.
+- **Assembly targets announce at the clicked cell.** `AssemblyAppearanceTarget` and every `TrimHost`
+  use the cell that was used as the origin, never the anchor. Sounds and game events come from there.
+- **Anchor identity is not part membership.** `AssemblyAnchors` accepts any block of the family class
+  whose reconstructed layout matches, so canonical and 0.4.0 alias cells share an anchor. Integrity
+  and teardown use the exact `isPart` (same block). `DoorSelectionShapes` keeps its own looser anchor
+  read. Don't swap one for another.
+- **An installation rollback owns only its own snapshots.** Inside Forge's capture (a player
+  placement), `AssemblyInstallation` drops just the block snapshots it added and leaves capture on.
+  Clearing the outer list or switching capture off would break the enclosing transaction.
+  `AssemblyPlacementGameTests` guards it.
+
 - **An archway's loot holds two trim-family items.** The archway and its Universal Trims are both
   TRIM family, so `AppearanceDrops.decorate(drops, family, look)` would stamp the archway's look on
   the trims; the archway decorates by item. `ArchwayTrimGameTests` guards it.
