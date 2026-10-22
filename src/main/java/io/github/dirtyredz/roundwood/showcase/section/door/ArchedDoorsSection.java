@@ -33,8 +33,8 @@ public final class ArchedDoorsSection implements ShowcaseSection {
     private static final int R0 = 40;
     private static final int PITCH = 2;
     private static final int[] ROW_F = {1, 4, 7};
-    /** The redstone door is the last of the first row; its lever stands on its right. */
-    public static final int LEVER_R = R0 + 4 * PITCH + 1;
+    /** The redstone door is the last of the first row; its lever stands on its left (the column to its right is the next section's label). */
+    public static final int LEVER_R = R0 + 4 * PITCH - 1;
 
     /**
      * One exhibited door: its anchor at ({@code r}, 0, {@code f}), hinge, open state, leaf look, face
