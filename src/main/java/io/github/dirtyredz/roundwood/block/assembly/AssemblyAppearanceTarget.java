@@ -1,9 +1,8 @@
-package io.github.dirtyredz.roundwood.block.assembly.appearance;
+package io.github.dirtyredz.roundwood.block.assembly;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
-import io.github.dirtyredz.roundwood.block.assembly.Assembly;
-import io.github.dirtyredz.roundwood.block.attachment.entity.AppearanceAnchorBlockEntity;
+import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;

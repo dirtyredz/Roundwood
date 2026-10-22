@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.migration;
+package io.github.dirtyredz.roundwood.migration.conversion;
 
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import net.minecraft.core.BlockPos;
@@ -18,12 +18,12 @@ import java.util.Map;
  * object is canonical are its neighbours told. States keep every property the canonical block also
  * has, including ones other mods inject (Dramatic Doors' {@code waterlogged}).
  */
-final class LegacyCells {
+public final class LegacyCells {
     /** Clients only, no shape cascade, drops suppressed: nothing reacts to the half-converted object. */
     private static final int SILENT = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
 
     /** What one attempt at converting an object did. */
-    enum Result {
+    public enum Result {
         /** Now canonical. */
         CONVERTED,
         /** A cell is unloaded: try again later, never loading it. */

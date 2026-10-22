@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.migration;
+package io.github.dirtyredz.roundwood.migration.conversion;
 
 import com.mojang.logging.LogUtils;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
@@ -32,7 +32,7 @@ public final class LegacyDoorConversion {
     private LegacyDoorConversion() {
     }
 
-    static LegacyCells.Result convert(ServerLevel level, BlockPos pos, BlockState state) {
+    public static LegacyCells.Result convert(ServerLevel level, BlockPos pos, BlockState state) {
         if (!(state.getBlock() instanceof LegacyDoorBlock legacy)) {
             return LegacyCells.Result.NOT_LEGACY;
         }

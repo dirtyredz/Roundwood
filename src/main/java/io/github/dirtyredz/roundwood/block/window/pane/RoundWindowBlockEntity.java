@@ -6,7 +6,7 @@ import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.TrimAttachmentSource;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
-import io.github.dirtyredz.roundwood.block.attachment.entity.AppearanceAnchorBlockEntity;
+import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
 import io.github.dirtyredz.roundwood.block.attachment.storage.FaceTrimStore;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassNbt;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowSillNbt;

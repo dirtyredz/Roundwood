@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.block.door.appearance;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
-import io.github.dirtyredz.roundwood.block.assembly.appearance.AssemblyAppearanceTarget;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyAppearanceTarget;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorBlockEntities;

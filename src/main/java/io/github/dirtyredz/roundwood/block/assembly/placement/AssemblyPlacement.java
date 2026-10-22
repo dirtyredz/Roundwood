@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.block.assembly.placement;
 
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
-import io.github.dirtyredz.roundwood.block.attachment.entity.AppearanceAnchorBlockEntity;
+import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;

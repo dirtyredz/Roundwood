@@ -5,7 +5,7 @@ import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
 import io.github.dirtyredz.roundwood.block.archway.trim.ArchwayTrimNbt;
 import io.github.dirtyredz.roundwood.block.attachment.TrimAttachmentSource;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
-import io.github.dirtyredz.roundwood.block.attachment.entity.AppearanceAnchorBlockEntity;
+import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;

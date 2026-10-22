@@ -4,7 +4,7 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyAnchors;
-import io.github.dirtyredz.roundwood.block.assembly.appearance.AssemblyAppearanceTarget;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyAppearanceTarget;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;

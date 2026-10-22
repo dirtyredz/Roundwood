@@ -1,12 +1,9 @@
-package io.github.dirtyredz.roundwood.block.attachment.loot;
+package io.github.dirtyredz.roundwood.block.attachment;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
-import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
-import io.github.dirtyredz.roundwood.block.attachment.TrimAttachmentSource;
-import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.registry.ModLootConditions;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.StringRepresentable;

@@ -90,7 +90,7 @@ the anchor persistence and the attachment services.
   refused. `AssemblyPlacement` adds the player's effects only on success: criterion, sound,
   `BLOCK_PLACE`, one item (none in creative), `CONSUME`. Forge's cancellation of the multi-place
   event is unchanged.
-- **Anchor persistence** (`block/attachment/entity/AppearanceAnchorBlockEntity`). The door, archway,
+- **Anchor persistence** (`block/attachment/AppearanceAnchorBlockEntity`). The door, archway,
   window and frame entities extend it and declare their appearance family and per-slot store formats
   in the constructor (the frame declares none, so it is never a trim host). It owns the look,
   normalised against the block's default; the guarded trim setters (a refused write neither dirties
@@ -479,7 +479,7 @@ restyling go through the shared `TrimFitting` with a `WindowTrimActions` host (`
   `RoundwoodAppearance`), built by `data/server/AttachmentLootPools`. The four upper-arch tables
   (0.10.0) add two sill pools (`"slot": "sill"`, `WindowSillTrim.<Face>.RoundwoodAppearance`,
   dropping `arch_sill_trim`), so two trims and two sills drop five items. The condition
-  (`block/attachment/loot/TrimFaceCondition`, registered by `registry/ModLootConditions`) reads the
+  (`block/attachment/TrimFaceCondition`, registered by `registry/ModLootConditions`) reads the
   loot context's block entity only (a `TrimAttachmentSource`), never the block state. Breaking
   yields the pane and one trim per trimmed face; the pane drops with its frame look and glass;
   trims are never in pick-block.
@@ -722,7 +722,7 @@ property, restores look and camouflage on the new anchor, then notifies neighbou
 refunds or sounds. An unloaded cell defers; a loaded incomplete object is cleared by integrity with a
 canonical drop in its old look.
 
-**0.7.0 fitted frames.** `migration/trim/DoorTrimConversion` converts a fitted frame into the door's
+**0.7.0 fitted frames.** `migration/conversion/DoorTrimConversion` converts a fitted frame into the door's
 FRONT trim only when the arrangement is exact: a complete canonical frame with the same facing as a
 complete canonical door, the frame anchor equal to the door anchor offset by `facing.getOpposite()`,
 all eight cells loaded and the door's FRONT absent. Open doors are eligible. In one

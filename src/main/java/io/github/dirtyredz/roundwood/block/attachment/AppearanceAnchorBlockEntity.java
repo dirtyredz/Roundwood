@@ -1,11 +1,9 @@
-package io.github.dirtyredz.roundwood.block.attachment.entity;
+package io.github.dirtyredz.roundwood.block.attachment;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
-import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
-import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.storage.FaceTrimStore;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;

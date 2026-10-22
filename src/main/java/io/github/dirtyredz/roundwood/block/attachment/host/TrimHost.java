@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.block.attachment.host;
 
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
-import io.github.dirtyredz.roundwood.block.attachment.entity.AppearanceAnchorBlockEntity;
+import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
 import net.minecraft.core.BlockPos;
 
 import java.util.function.BooleanSupplier;

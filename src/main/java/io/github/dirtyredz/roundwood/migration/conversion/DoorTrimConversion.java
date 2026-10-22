@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.migration.trim;
+package io.github.dirtyredz.roundwood.migration.conversion;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;

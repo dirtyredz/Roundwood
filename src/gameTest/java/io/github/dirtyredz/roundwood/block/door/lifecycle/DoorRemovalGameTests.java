@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.block.door;
+package io.github.dirtyredz.roundwood.block.door.lifecycle;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;

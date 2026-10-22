@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.block.attachment.entity;
+package io.github.dirtyredz.roundwood.block.attachment;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
@@ -7,9 +7,6 @@ import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.archway.trim.ArchwayTrimNbt;
-import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
-import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
-import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;

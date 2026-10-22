@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.block.window;
+package io.github.dirtyredz.roundwood.block.window.design;
 
 import io.github.dirtyredz.roundwood.block.window.pane.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.Roundwood;

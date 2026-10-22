@@ -1,9 +1,7 @@
-package io.github.dirtyredz.roundwood.block.window;
+package io.github.dirtyredz.roundwood.block.window.placement;
 
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
-import io.github.dirtyredz.roundwood.block.window.placement.WindowTargetZones;
 import io.github.dirtyredz.roundwood.fixture.AppearanceFixtures;
 import io.github.dirtyredz.roundwood.fixture.PlacementCanceller;
 import io.github.dirtyredz.roundwood.fixture.WindowFixtures;

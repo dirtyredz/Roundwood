@@ -1,10 +1,8 @@
-package io.github.dirtyredz.roundwood.block.window;
+package io.github.dirtyredz.roundwood.block.window.placement;
 
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
-import io.github.dirtyredz.roundwood.block.window.placement.WindowTargetZones;
 import io.github.dirtyredz.roundwood.fixture.WindowFixtures;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.core.BlockPos;

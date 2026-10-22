@@ -7,7 +7,7 @@ import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayBlockEntities;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
-import io.github.dirtyredz.roundwood.block.assembly.appearance.AssemblyAppearanceTarget;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyAppearanceTarget;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;

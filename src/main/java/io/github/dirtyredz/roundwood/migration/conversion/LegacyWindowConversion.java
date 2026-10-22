@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.migration;
+package io.github.dirtyredz.roundwood.migration.conversion;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
@@ -26,7 +26,7 @@ public final class LegacyWindowConversion {
     private LegacyWindowConversion() {
     }
 
-    static LegacyCells.Result convert(ServerLevel level, BlockPos pos, BlockState state) {
+    public static LegacyCells.Result convert(ServerLevel level, BlockPos pos, BlockState state) {
         if (!(state.getBlock() instanceof LegacyWindowBlock legacy)) {
             return LegacyCells.Result.NOT_LEGACY;
         }

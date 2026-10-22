@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.block.trim;
 
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
-import io.github.dirtyredz.roundwood.block.attachment.entity.AppearanceAnchorBlockEntity;
+import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;

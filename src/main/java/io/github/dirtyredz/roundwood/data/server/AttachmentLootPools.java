@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.data.server;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
-import io.github.dirtyredz.roundwood.block.attachment.loot.TrimFaceCondition;
+import io.github.dirtyredz.roundwood.block.attachment.TrimFaceCondition;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootItem;

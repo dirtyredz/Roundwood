@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.attachment.loot.TrimFaceCondition;
+import io.github.dirtyredz.roundwood.block.attachment.TrimFaceCondition;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.minecraftforge.registries.DeferredRegister;

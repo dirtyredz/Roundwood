@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.block.assembly.placement;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.assembly.Assembly;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
-import io.github.dirtyredz.roundwood.block.attachment.entity.AppearanceAnchorBlockEntity;
+import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;

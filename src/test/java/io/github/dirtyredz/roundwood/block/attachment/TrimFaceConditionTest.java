@@ -1,9 +1,7 @@
-package io.github.dirtyredz.roundwood.block.attachment.loot;
+package io.github.dirtyredz.roundwood.block.attachment;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
-import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
