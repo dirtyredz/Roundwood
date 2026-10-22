@@ -239,7 +239,7 @@ public final class WindowSillGameTests {
         copy.load(saved);
         check(!copy.trims().any(), "a sill-only window reloaded with a perimeter trim: " + copy.trims());
         check(copy.trims(TrimSlot.SILL).equals(FaceTrims.NONE.with(AttachmentFace.FRONT, BRICKS)), "sill reloaded " + copy.trims(TrimSlot.SILL));
-        WindowTrimActions.store(helper.getLevel(), abs, window, TrimSlot.SILL, FaceTrims.NONE);
+        WindowAttachmentState.store(helper.getLevel(), abs, window, TrimSlot.SILL, FaceTrims.NONE);
         check(!WindowPaneBlock.trimmed(helper.getBlockState(AT)), "summary cleared with the last sill");
         copy.handleUpdateTag(window.getUpdateTag());
         check(!copy.trims(TrimSlot.SILL).any(), "client kept a removed sill");
@@ -345,7 +345,7 @@ public final class WindowSillGameTests {
 
         helper.getLevel().setBlock(abs, helper.getBlockState(AT).setValue(WindowPaneBlock.TRIMMED, true), 3);
         check(entity(helper) == window, key + ": the entity was replaced by a state change");
-        check(WindowTrimActions.store(helper.getLevel(), abs, window, edited, FaceTrims.NONE), key + ": " + edited + " removal refused");
+        check(WindowAttachmentState.store(helper.getLevel(), abs, window, edited, FaceTrims.NONE), key + ": " + edited + " removal refused");
         check(!window.trims(edited).any(), key + ": " + edited + " not removed");
         check(WindowPaneBlock.trimmed(helper.getBlockState(AT)), key + ": the summary was reconciled to clear while a payload is unknown");
         check(window.saveWithFullMetadata().getCompound(key).equals(payload), key + ": the unknown payload was not kept");

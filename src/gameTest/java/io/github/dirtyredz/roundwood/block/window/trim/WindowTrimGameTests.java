@@ -300,7 +300,7 @@ public final class WindowTrimGameTests {
         RoundWindowBlockEntity copy = new RoundWindowBlockEntity(window.getType(), helper.absolutePos(AT), helper.getBlockState(AT));
         copy.load(saved);
         check(copy.appearance().equals(SPRUCE) && copy.trims().equals(FaceTrims.NONE.with(AttachmentFace.BACK, BRICKS)), "reloaded " + copy.trims());
-        WindowTrimActions.store(helper.getLevel(), helper.absolutePos(AT), window, TrimSlot.PERIMETER, FaceTrims.NONE);
+        WindowAttachmentState.store(helper.getLevel(), helper.absolutePos(AT), window, TrimSlot.PERIMETER, FaceTrims.NONE);
         CompoundTag update = window.getUpdateTag();
         check(update.contains("WindowTrim") && update.getCompound("WindowTrim").getInt("Version") == 2, "a removal must be sent: " + update);
         copy.handleUpdateTag(update);

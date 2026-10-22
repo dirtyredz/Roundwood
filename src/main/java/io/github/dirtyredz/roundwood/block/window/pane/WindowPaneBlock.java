@@ -17,7 +17,7 @@ import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowFaceIdentity;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassStacks;
-import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
+import io.github.dirtyredz.roundwood.block.window.trim.WindowAttachmentState;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import java.util.function.UnaryOperator;
@@ -210,7 +210,7 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
     @SuppressWarnings("deprecation")
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         super.tick(state, level, pos, random);
-        WindowTrimActions.reconcile(level, pos);
+        WindowAttachmentState.reconcile(level, pos);
     }
 
     /**
