@@ -60,8 +60,8 @@ entity and on the item stack), and the chunk model swaps the clear glass quads f
 generated `window_glass_<dye>` textures (the clear glass's mask, drawn darker). One colour covers the
 whole window including connector arms; another dye replaces it, and only a new window is clear
 again. Drops and pick-block keep frame look and glass. Rejected: tinting the whole model (the wood
-would change), a blockstate colour (16 times the models and states) and tinting by drawing (the
-glints need their own alpha). The cost is a viewer key that now includes the glass colour.
+would change) and a blockstate colour (16 times the models and states).
+The cost is a viewer key that now includes the glass colour.
 
 ## 2026-10-21 - Flush trim projects one pixel beyond the cell, drawn by a block-entity renderer (0.8.0, owner report; supersedes the 0.7.0 flush inlay)
 
