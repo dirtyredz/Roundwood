@@ -7,8 +7,8 @@ import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayBlockEntities;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
+import io.github.dirtyredz.roundwood.block.assembly.appearance.AssemblyAppearanceTarget;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +19,7 @@ import java.util.Optional;
 /**
  * An archway's look (0.12.0) lives once, on the anchor's entity, and is read from any cell through it
  * (never loading it): for picks, drops and rendering, and as the whole loaded, complete archway for
- * restyling. Placement installs it itself ({@code assembly/ArchwayPlacement}).
+ * restyling ({@link AssemblyAppearanceTarget}). Placement installs it itself.
  */
 public final class ArchwayAppearance {
     private ArchwayAppearance() {
@@ -35,33 +35,8 @@ public final class ArchwayAppearance {
                 .orElseGet(() -> AppearanceDefaults.of(state.getBlock()));
     }
 
-    /** The whole archway as a restyling target, if it is loaded and complete. */
+    /** The whole archway as a restyling target, if it is loaded and complete; announced at the clicked cell. */
     public static Optional<AppearanceActions.Target> target(ArchwayBlock block, BlockState state, Level level, BlockPos pos) {
-        ArchwayLayout.Assembly assembly = ArchwayLayout.of(pos, state);
-        if (!assembly.loaded(level) || !assembly.complete(level, block)
-                || !(level.getBlockEntity(assembly.anchor()) instanceof ArchwayBlockEntity entity)) {
-            return Optional.empty();
-        }
-        return Optional.of(new AppearanceActions.Target() {
-            @Override
-            public Optional<Appearance> current() {
-                return Optional.of(entity.appearance());
-            }
-
-            @Override
-            public boolean mayEdit(Player player) {
-                return assembly.positions().stream().allMatch(cell -> level.mayInteract(player, cell));
-            }
-
-            @Override
-            public void set(Appearance appearance) {
-                entity.setAppearance(appearance);
-            }
-
-            @Override
-            public BlockPos origin() {
-                return pos;
-            }
-        });
+        return AssemblyAppearanceTarget.of(level, pos, block, ArchwayLayout.of(pos, state), ArchwayBlockEntity.class);
     }
 }

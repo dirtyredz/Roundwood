@@ -9,13 +9,14 @@ import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.archway.appearance.ArchwayAppearance;
 import io.github.dirtyredz.roundwood.block.archway.appearance.ArchwayInteraction;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayBlockEntities;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayIntegrity;
+import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPart;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayRemoval;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayShapes;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyIntegrity;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyRemoval;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -215,19 +216,20 @@ public class ArchwayBlock extends Block implements EntityBlock, AppearanceDefaul
     @SuppressWarnings("deprecation")
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
         super.onPlace(state, level, pos, oldState, moving);
-        ArchwayIntegrity.scheduleCheck(this, oldState, level, pos);
+        AssemblyIntegrity.scheduleCheck(this, oldState, level, pos);
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        ArchwayIntegrity.check(this, state, level, pos);
+        AssemblyIntegrity.check(this, ArchwayLayout.of(pos, state), level, pos);
     }
 
+    /** Removing one cell removes the archway; its loot (the archway and its trims) drops once ({@link AssemblyRemoval}). */
     @Override
     @SuppressWarnings("deprecation")
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
-        ArchwayRemoval.onRemove(this, state, level, pos, newState);
+        AssemblyRemoval.onRemove(this, level, pos, newState, () -> ArchwayLayout.of(pos, state));
         super.onRemove(state, level, pos, newState, moving);
     }
 }

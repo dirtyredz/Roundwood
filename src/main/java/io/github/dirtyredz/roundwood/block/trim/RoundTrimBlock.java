@@ -8,11 +8,12 @@ import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceGestures;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceDrops;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyIntegrity;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyRemoval;
 import io.github.dirtyredz.roundwood.block.trim.appearance.TrimAppearance;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimIntegrity;
+import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimRemoval;
 import io.github.dirtyredz.roundwood.block.trim.geometry.TrimShapes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -211,19 +212,20 @@ public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefa
     @SuppressWarnings("deprecation")
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean moving) {
         super.onPlace(state, level, pos, oldState, moving);
-        TrimIntegrity.scheduleCheck(this, oldState, level, pos);
+        AssemblyIntegrity.scheduleCheck(this, oldState, level, pos);
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        TrimIntegrity.check(this, state, level, pos);
+        AssemblyIntegrity.check(this, TrimLayout.of(pos, state), level, pos);
     }
 
+    /** Removing one quarter removes the frame; a door it was fitted to is another assembly ({@link AssemblyRemoval}). */
     @Override
     @SuppressWarnings("deprecation")
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
-        TrimRemoval.onRemove(this, state, level, pos, newState);
+        AssemblyRemoval.onRemove(this, level, pos, newState, () -> TrimLayout.of(pos, state));
         super.onRemove(state, level, pos, newState, moving);
     }
 }

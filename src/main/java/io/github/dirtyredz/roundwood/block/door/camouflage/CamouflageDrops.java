@@ -52,7 +52,7 @@ public final class CamouflageDrops {
     }
 
     /**
-     * From the start of a teardown ({@code DoorRemoval.onRemove} of the part at {@code pos}, before its
+     * From the start of a teardown (the door's pre-teardown hook in {@code AssemblyRemoval.onRemove} of the part at {@code pos}, before its
      * partners go): withdraws the assembly's camouflage and drops the paid item at {@code pos}. The
      * anchor is found from the removed part's old state; an unloaded anchor is left alone (its own
      * integrity cleanup owns the payload later).
