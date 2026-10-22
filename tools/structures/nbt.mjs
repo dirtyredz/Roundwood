@@ -45,4 +45,3 @@ export function file(size, palette, blocks) {
   });
   return gzipSync(Buffer.concat([u8(TAG.compound), str(''), payload(body)]), { level: 9 });
 }
-
