@@ -135,6 +135,9 @@ public final class WindowTrimGameTests {
     public static void everyDesignInEveryPoseTakesIndependentFaceTrims(GameTestHelper helper) {
         ServerPlayer player = player(helper, "trim_faces", GameType.SURVIVAL, Direction.NORTH);
         for (WindowDesign design : WindowDesign.all()) {
+            if (design.pattern() == io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern.CROSS) {
+                continue; // retired: converted to a plain pane plus Cross Beams, never a live host
+            }
             for (WindowPose pose : POSES) {
                 io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, pose);
                 String what = design.id() + " " + pose;

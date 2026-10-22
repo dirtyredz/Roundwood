@@ -82,12 +82,19 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
 @PrefixGameTestTemplate(false)
 public final class HeldTrimToolGameTests {
     @GameTest(template = TEMPLATE)
-    public static void crossBeamsAreRefusedByDoorsAndArchways(GameTestHelper helper) {
+    public static void crossBeamsAreRefusedByDoors(GameTestHelper helper) {
         Scene door = door(helper, "beam_door", false);
         var stack = new ItemStack(ModItems.CROSS_BEAMS.get());
         door.hold(stack, ItemStack.EMPTY);
         check(!door.claims(MAIN) && door.use(MAIN) == InteractionResult.FAIL, "door accepted beams");
         check(stack.getCount() == 1 && !door.trims.get().any(), "door fitted or charged beams");
+        helper.succeed();
+    }
+
+    /** Its own test: a door and an archway cannot share the anchor cell. */
+    @GameTest(template = TEMPLATE)
+    public static void crossBeamsAreRefusedByArchways(GameTestHelper helper) {
+        var stack = new ItemStack(ModItems.CROSS_BEAMS.get());
         Scene archway = archway(helper, "beam_arch", false);
         archway.hold(stack, ItemStack.EMPTY);
         check(archway.claims(MAIN) && archway.use(MAIN).consumesAction(), "archway did not claim refusal");

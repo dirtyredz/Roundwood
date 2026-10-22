@@ -92,7 +92,7 @@ public final class CrossWindowItemCompatibilityGameTests {
         check(!WindowFixtures.place(owner, stack, hit).consumesAction(), "accepted unsupported beam payload");
         check(ItemStack.matches(stack, before) && helper.getBlockState(at).isAir(), "refused placement changed contents");
         stack = new ItemStack(item, 5);
-        var cancelled = player(helper, io.github.dirtyredz.roundwood.fixture.PlacementCanceller.PLAYER, GameType.SURVIVAL, Direction.NORTH);
+        var cancelled = player(helper, io.github.dirtyredz.roundwood.fixture.PlacementCanceller.PLAYER.substring("rw_".length()), GameType.SURVIVAL, Direction.NORTH);
         check(!WindowFixtures.place(cancelled, stack, hit).consumesAction(), "cancelled placement succeeded");
         check(stack.getCount() == 5 && helper.getBlockState(at).isAir(), "cancelled placement consumed or left a pane");
         helper.succeed();
