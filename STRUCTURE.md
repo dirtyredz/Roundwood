@@ -19,7 +19,7 @@ src/main/java/.../roundwood/
   data/{client,server}
 src/test/...      mirrors main (pure JUnit)
 src/gameTest/...  mirrors main (Forge GameTests; door/{lifecycle,placement}, window/{design,placement})
-tools/{textures/masonry}   deterministic texture and structure generators
+tools/{textures/masonry,structures}   deterministic texture and structure generators
 ```
 
 Per-family `appearance/` and `interaction/` folders (door, archway, window, trim), and the one-file `block/window/connection/` and `showcase/section/archway/`, are deliberate: every family keeps the same sibling set so a reader finds the same thing in the same place, and each is expected to grow.
@@ -238,6 +238,8 @@ rules and `ModelRetexturing`'s array arithmetic are plain enough for unit tests 
 - `RoundWindowArchBlock` became `OrientedWindowBlock` (arches and corners); property names and
   values are unchanged. `MasonryStyles` was extracted from `PaintStyles`, which keeps paint only.
 
+The structure generator delegates binary encoding to `tools/structures/nbt.mjs`, ordered palettes and cell placement to `structure-builder.mjs`, and each historical build to its own fixture module. The 0.4.0 and 0.7.0 bytes are unchanged; `window-cross-v0120.mjs` records all thirteen retired window IDs independently of Java registration.
+
 ## Structural debt (baseline review 2026-10-21)
 
 The first full review found no correctness problems. The debt is tracked in Docket, one line each;
@@ -246,7 +248,7 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-992020e6 done: one `Assembly` contract and shared lifecycle, anchors, placement and anchor persistence (the frame adopted it)
 - dk-ff89f8e5 done: `HeldTrimTool` classifies the acting hand for the three trim routers
 - dk-73e57897 look resolver duplicated across the door and window pane models (the trim part is shared since 0.9.0, `TrimLooks`)
-- dk-3d456d06 `generate-test-structures.mjs` mixes NBT writer, builder and fixtures
+- dk-3d456d06 done: `tools/structures/` owns the NBT writer, shared builder and independent historical fixtures; the entry script only writes their output
 - dk-1af2b67e texture modules split by release, not responsibility; partly done (`masonry/` grouping, `mortar.mjs` and `arch-window.mjs`, `clearWindowGlass` moved); left: `trimMarker` in its own module, `radial-bricks.mjs` on the shared polar, one glass-streak mask
 - dk-aef47f84 done: `migration/` grouped under `conversion/` (seven entries), no-growth single-file folders folded, the per-family `appearance/` and `interaction/` pairs declared deliberate
 - dk-7279982a done: GameTest `block/door/` and `block/window/` grouped, tree diagram in Layout, one-file folders declared
