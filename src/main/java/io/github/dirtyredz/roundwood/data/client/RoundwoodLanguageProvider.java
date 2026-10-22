@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.data.client;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
 import io.github.dirtyredz.roundwood.migration.LegacyAppearances;
@@ -33,6 +34,8 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         for (WindowDesign design : WindowDesign.all()) {
             add(ModBlocks.window(design), windowName(design));
         }
+        add(ModBlocks.archway(ArchwayDesign.ORDINARY), "Archway");
+        add(ModBlocks.archway(ArchwayDesign.KEYHOLE), "Keyhole Archway");
         add(ModBlocks.roundTrim(), "Universal Trim");
         add(ModItems.ARCH_SILL_TRIM.get(), "Arch Sill");
         add(LegacyContent.windowTrim(), "Window Trim");
@@ -45,7 +48,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("tooltip.roundwood.unavailable", "Material %s is not installed (shown as oak)");
         add("tooltip.roundwood.restyle", "Restyle placed: planks or dye (doors: sneak + planks)");
         add("tooltip.roundwood.universal_trim",
-                "Trims the clicked face of a window or door; restyle with planks, masonry or dye, remove with shears");
+                "Trims the clicked face of a window, door or archway; restyle with planks, masonry or dye, remove with shears");
         add("tooltip.roundwood.glass", "Glass: %s");
         add("tooltip.roundwood.preview", "Preview of a possible look");
         add("tooltip.roundwood.preview_note", "Crafting gives oak; restyle it in the world");

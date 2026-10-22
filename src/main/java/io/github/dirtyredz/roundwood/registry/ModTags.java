@@ -14,6 +14,9 @@ public final class ModTags {
     public static final TagKey<Block> ROUND_WINDOWS = BlockTags.create(id("round_windows"));
     public static final TagKey<Item> ROUND_DOOR_ITEMS = ItemTags.create(id("round_doors"));
     public static final TagKey<Item> ROUND_WINDOW_ITEMS = ItemTags.create(id("round_windows"));
+    /** The archways (0.12.0): their own family, never doors. */
+    public static final TagKey<Block> ARCHWAYS = BlockTags.create(id("archways"));
+    public static final TagKey<Item> ARCHWAY_ITEMS = ItemTags.create(id("archways"));
     public static final TagKey<Block> ROUND_TRIMS = BlockTags.create(id("round_trims"));
     public static final TagKey<Item> ROUND_TRIM_ITEMS = ItemTags.create(id("round_trims"));
 

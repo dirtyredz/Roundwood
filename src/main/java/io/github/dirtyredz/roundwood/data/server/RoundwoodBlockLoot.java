@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.data.server;
 
+import io.github.dirtyredz.roundwood.block.archway.trim.ArchwayTrimNbt;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimNbt;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowSillNbt;
@@ -29,6 +30,8 @@ import java.util.stream.Stream;
  * supplied, from whichever quarter broke. So a window with two trims drops three items, and nothing
  * ever refunds a trim outside loot except shears. The upper arches (0.10.0) add two more pools, one
  * per face's arch sill ({@code WindowSillTrim}), so an arch with both trims and both sills drops five.
+ * An archway (0.12.0) drops itself plus a Universal Trim per trimmed face ({@code ArchwayTrim}),
+ * evaluated with its anchor's entity from whichever cell broke.
  */
 public class RoundwoodBlockLoot extends BlockLootSubProvider {
     public RoundwoodBlockLoot() {
@@ -41,6 +44,8 @@ public class RoundwoodBlockLoot extends BlockLootSubProvider {
         add(ModBlocks.archedDoor(), door(ModItems.ARCHED_DOOR.get()));
         dropSelf(ModBlocks.roundTrim());
         ModBlocks.windows().forEach(window -> add(window, window(window.asItem(), window.profile().takesSill())));
+        ModBlocks.archways().forEach(archway -> add(archway,
+                withFaces(createSingleItemTable(archway.asItem()), TrimSlot.PERIMETER, ArchwayTrimNbt.TAG)));
         LegacyContent.doors().forEach(block -> add(block, door(ModItems.ROUND_DOOR.get())));
         LegacyContent.windows().forEach(block -> add(block, window(ModItems.ROUND_WINDOW.get(), false)));
         LegacyContent.trims().forEach(block -> dropOther(block, ModItems.ROUND_TRIM.get()));

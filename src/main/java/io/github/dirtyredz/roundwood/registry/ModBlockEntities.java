@@ -1,6 +1,8 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
+import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
@@ -43,7 +45,17 @@ public final class ModBlockEntities {
             () -> BlockEntityType.Builder.of((pos, state) -> new RoundTrimBlockEntity(roundTrim(), pos, state),
                     with(ModBlocks.roundTrim(), LegacyContent.trims()).toArray(RoundTrimBlock[]::new)).build(null));
 
+    /** The archways' anchor (0.12.0), for both designs; archways have no aliases. */
+    @SuppressWarnings("DataFlowIssue")
+    public static final RegistryObject<BlockEntityType<ArchwayBlockEntity>> ARCHWAY = BLOCK_ENTITIES.register("archway",
+            () -> BlockEntityType.Builder.of((pos, state) -> new ArchwayBlockEntity(archway(), pos, state),
+                    ModBlocks.archways().toArray(ArchwayBlock[]::new)).build(null));
+
     private ModBlockEntities() {
+    }
+
+    public static BlockEntityType<ArchwayBlockEntity> archway() {
+        return ARCHWAY.get();
     }
 
     public static BlockEntityType<RoundDoorBlockEntity> roundDoor() {

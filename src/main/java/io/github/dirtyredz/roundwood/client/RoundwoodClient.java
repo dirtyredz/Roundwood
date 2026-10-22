@@ -3,7 +3,10 @@ package io.github.dirtyredz.roundwood.client;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
+import io.github.dirtyredz.roundwood.block.archway.ArchwayItem;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
+import io.github.dirtyredz.roundwood.client.archway.ArchwayModels;
+import io.github.dirtyredz.roundwood.client.archway.ArchwayRenderer;
 import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
@@ -46,7 +49,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * Client-only wiring on the mod bus: the door, frame and window-trim renderers, the source models they draw (no
+ * Client-only wiring on the mod bus: the door, frame, window-trim and (0.12.0) archway renderers, the source models they draw (no
  * blockstate references them, so they are registered for baking here), the appearance-aware window
  * blockstate and item models (every trim id draws the Universal Trim's square icon), the door items'
  * panel tint, and dropping every appearance, donor and camouflage cache whenever models are re-baked.
@@ -62,6 +65,7 @@ public final class RoundwoodClient {
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_DOOR.get(), RoundDoorRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_TRIM.get(), RoundTrimRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_WINDOW.get(), WindowTrimRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.ARCHWAY.get(), ArchwayRenderer::new);
     }
 
     @SubscribeEvent
@@ -107,7 +111,9 @@ public final class RoundwoodClient {
             models.put(location, switch (family.appearanceFamily()) {
                 case DOOR -> AppearanceItemOverrides.wrap(model, (oak, look) -> DoorAppearanceModels.item(design, oak, look));
                 case WINDOW -> AppearanceItemOverrides.wrapStack(model, WindowAppearanceModel::item);
-                case TRIM -> AppearanceItemOverrides.wrap(model, (oak, look) -> TrimItemModels.item(slot, oak, look));
+                case TRIM -> item instanceof ArchwayItem archway
+                        ? AppearanceItemOverrides.wrap(model, (oak, look) -> ArchwayModels.item(archway.archway().design(), oak, look))
+                        : AppearanceItemOverrides.wrap(model, (oak, look) -> TrimItemModels.item(slot, oak, look));
             });
         }
     }

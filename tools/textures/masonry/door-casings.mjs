@@ -1,7 +1,7 @@
 // 0.11.0 door casing artwork: the arched door casing's 64x64 masonry face, thin mortar, two texels
 // per model pixel like the window trims. The casing (16 x 32 model pixels, straight jambs under a
 // semicircular crown) lives in the left 32 texel columns; the right half is a copy. New files only.
-import { brickColour, jointCoverage, withMortar } from './window-trims.mjs';
+import { brickColour, jointCoverage, withMortar } from '../window-trims.mjs';
 
 /** The casing face: a 32 x 32 model pixel area at two texels each. */
 export const DOOR_CASING_FACE_SIZE = 64;

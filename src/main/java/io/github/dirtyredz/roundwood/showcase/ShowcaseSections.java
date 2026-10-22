@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.showcase;
 
 import io.github.dirtyredz.roundwood.showcase.section.BrickArchesSection;
+import io.github.dirtyredz.roundwood.showcase.section.archway.ArchwaysSection;
 import io.github.dirtyredz.roundwood.showcase.section.door.ArchedDoorsSection;
 import io.github.dirtyredz.roundwood.showcase.section.door.CamouflageSection;
 import io.github.dirtyredz.roundwood.showcase.section.door.DoorsSection;
@@ -37,7 +38,8 @@ public final class ShowcaseSections {
             new WindowCirclesSection(),
             new WindowSillsSection(),
             new WindowEdgesSection(),
-            new ArchedDoorsSection());
+            new ArchedDoorsSection(),
+            new ArchwaysSection());
 
     private ShowcaseSections() {
     }

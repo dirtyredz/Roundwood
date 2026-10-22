@@ -1,6 +1,8 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
+import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.door.adapter.ArchedDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
@@ -28,10 +30,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The 29 canonical blocks: the round door and (0.11.0) the arched door, 26 windows (the round window;
+ * The 31 canonical blocks: the round door and (0.11.0) the arched door, 26 windows (the round window;
  * the upper arches and bottom corners that complete a 2 x 2 arched-top window; since 0.10.0 the lower arches that close it into
- * a circle, the top corners and the four single-edge pieces; each plain and with cross beams) and
- * the round trim, whose look comes from their appearance (block entity), not from the block.
+ * a circle, the top corners and the four single-edge pieces; each plain and with cross beams), the
+ * ordinary and keyhole archways (0.12.0) and the round trim, whose look comes from their appearance
+ * (block entity), not from the block.
  * Their behaviour is the oak counterparts' whatever the appearance. The hidden 0.4.0 aliases are
  * registered by {@code migration/LegacyContent} with the same properties.
  */
@@ -45,6 +48,8 @@ public final class ModBlocks {
             () -> new ArchedDoorBlock(doorProperties(), BlockSetType.OAK, ModBlockEntities::roundDoor));
     /** The 26 windows by design, in creative order (each plain piece, then its crossed variant). */
     private static final Map<WindowDesign, RegistryObject<WindowPaneBlock>> WINDOWS = registerWindows();
+    /** The static 2 x 2 archways (0.12.0), ordinary then keyhole. */
+    private static final Map<ArchwayDesign, RegistryObject<ArchwayBlock>> ARCHWAYS = registerArchways();
     public static final RegistryObject<RoundTrimBlock> ROUND_TRIM = BLOCKS.register("round_trim",
             () -> new RoundTrimBlock(trimProperties(), ModBlockEntities::roundTrim));
 
@@ -57,6 +62,14 @@ public final class ModBlocks {
             out.put(design, BLOCKS.register(design.id(), () -> design.profile().oriented()
                     ? new OrientedWindowBlock(windowProperties(), design, ModBlockEntities::roundWindow)
                     : new RoundWindowBlock(windowProperties(), design.pattern(), ModBlockEntities::roundWindow)));
+        }
+        return Collections.unmodifiableMap(out);
+    }
+
+    private static Map<ArchwayDesign, RegistryObject<ArchwayBlock>> registerArchways() {
+        Map<ArchwayDesign, RegistryObject<ArchwayBlock>> out = new LinkedHashMap<>();
+        for (ArchwayDesign design : ArchwayDesign.values()) {
+            out.put(design, BLOCKS.register(design.id(), () -> new ArchwayBlock(archwayProperties(), design, ModBlockEntities::archway)));
         }
         return Collections.unmodifiableMap(out);
     }
@@ -107,15 +120,26 @@ public final class ModBlocks {
         return windows().stream().filter(OrientedWindowBlock.class::isInstance).map(OrientedWindowBlock.class::cast).toList();
     }
 
+    /** The archway block with {@code design}. */
+    public static ArchwayBlock archway(ArchwayDesign design) {
+        return ARCHWAYS.get(design).get();
+    }
+
+    /** The canonical archways, ordinary then keyhole. */
+    public static List<ArchwayBlock> archways() {
+        return ARCHWAYS.values().stream().map(RegistryObject::get).toList();
+    }
+
     public static RoundTrimBlock roundTrim() {
         return ROUND_TRIM.get();
     }
 
-    /** The 29 canonical blocks in creative order: the two doors, the 26 windows, trim. */
+    /** The 31 canonical blocks in creative order: the two doors, the 26 windows, the two archways, trim. */
     public static List<Block> canonical() {
         List<Block> out = new ArrayList<>();
         out.addAll(doors());
         out.addAll(windows());
+        out.addAll(archways());
         out.add(roundTrim());
         return List.copyOf(out);
     }
@@ -137,6 +161,21 @@ public final class ModBlocks {
                 .sound(BlockSetType.OAK.soundType())
                 .noOcclusion()
                 .ignitedByLava()
+                .isValidSpawn((state, level, pos, type) -> false)
+                .isRedstoneConductor((state, level, pos) -> false)
+                .isSuffocating((state, level, pos) -> false)
+                .isViewBlocking((state, level, pos) -> false);
+    }
+
+    /**
+     * A static archway (0.12.0): oak planks' hardness, sound, tool and map colour; its jambs and crown
+     * collide, but it never occludes (light and neighbours show through the passage), carries no
+     * redstone, and a multi-cell assembly cannot be pushed.
+     */
+    public static BlockBehaviour.Properties archwayProperties() {
+        return BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)
+                .noOcclusion()
+                .pushReaction(PushReaction.BLOCK)
                 .isValidSpawn((state, level, pos, type) -> false)
                 .isRedstoneConductor((state, level, pos) -> false)
                 .isSuffocating((state, level, pos) -> false)

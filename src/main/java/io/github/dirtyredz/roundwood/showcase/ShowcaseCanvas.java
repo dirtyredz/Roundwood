@@ -1,6 +1,10 @@
 package io.github.dirtyredz.roundwood.showcase;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
+import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
+import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPlacement;
+import io.github.dirtyredz.roundwood.block.archway.trim.ArchwayTrimActions;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;
@@ -117,6 +121,27 @@ public final class ShowcaseCanvas {
             problem(face + " door trim not fitted at " + pos(r, 0, f).toShortString());
         }
         return fitted;
+    }
+
+    /**
+     * Places an archway (0.12.0) in {@code appearance} through {@link ArchwayPlacement#placeAt}, its
+     * lower-left cell at ({@code r}, 0, {@code f}), facing away from the builder like the doors, then
+     * fits its face trims the way a Universal Trim does.
+     */
+    public boolean archway(ArchwayBlock block, Appearance appearance, FaceTrims trims, int r, int f) {
+        ArchwayLayout.Assembly assembly = new ArchwayLayout.Assembly(frame.pos(r, 0, f), frame.forward(), block.design());
+        if (!ArchwayPlacement.placeAt(level, block, assembly, appearance)) {
+            problem("archway not placed at " + assembly.anchor().toShortString());
+            return false;
+        }
+        for (AttachmentFace face : AttachmentFace.values()) {
+            trims.get(face).ifPresent(look -> {
+                if (!ArchwayTrimActions.install(level, assembly.anchor(), face, look)) {
+                    problem(face + " archway trim not fitted at " + assembly.anchor().toShortString());
+                }
+            });
+        }
+        return true;
     }
 
     /**

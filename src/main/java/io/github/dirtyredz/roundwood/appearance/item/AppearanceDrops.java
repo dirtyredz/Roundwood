@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.appearance.item;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -21,6 +22,19 @@ public final class AppearanceDrops {
     public static List<ItemStack> decorate(List<ItemStack> drops, AppearanceFamily family, Appearance appearance) {
         for (ItemStack stack : drops) {
             if (stack.getItem() instanceof AppearanceBlockItem item && item.appearanceFamily() == family && !item.isAlias()) {
+                AppearanceStacks.write(stack, appearance);
+            }
+        }
+        return drops;
+    }
+
+    /**
+     * {@code drops}, with every {@code item} carrying {@code appearance} (0.12.0: an archway is a trim
+     * family object whose loot also holds its face trims, which keep their own looks).
+     */
+    public static List<ItemStack> decorate(List<ItemStack> drops, Item item, Appearance appearance) {
+        for (ItemStack stack : drops) {
+            if (stack.is(item)) {
                 AppearanceStacks.write(stack, appearance);
             }
         }

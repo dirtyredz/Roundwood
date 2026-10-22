@@ -18,9 +18,9 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Gameplay tags cover the canonical blocks and the hidden 0.4.0 aliases (an unconverted alias still
  * behaves like a door for villagers and pathing, and mines with an axe); Roundwood's family tags
- * name only the canonical blocks (the doors: round and arched; the windows: all 26). Doors join the
- * vanilla door tags; windows are deliberately
- * not glass panes and trims are not doors. Every family mines with an axe whatever its look.
+ * name only the canonical blocks (the doors: round and arched; the windows: all 26; the archways,
+ * 0.12.0: both designs). Doors join the vanilla door tags; windows are deliberately
+ * not glass panes, and trims and archways are not doors. Every family mines with an axe whatever its look.
  */
 public class RoundwoodBlockTagsProvider extends BlockTagsProvider {
     public RoundwoodBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup,
@@ -32,6 +32,7 @@ public class RoundwoodBlockTagsProvider extends BlockTagsProvider {
     protected void addTags(HolderLookup.Provider provider) {
         tag(ModTags.ROUND_DOORS).add(ModBlocks.doors().toArray(Block[]::new));
         tag(ModTags.ROUND_WINDOWS).add(ModBlocks.windows().toArray(Block[]::new));
+        tag(ModTags.ARCHWAYS).add(ModBlocks.archways().toArray(Block[]::new));
         tag(ModTags.ROUND_TRIMS).add(ModBlocks.roundTrim());
         List<Block> doors = new ArrayList<>(ModBlocks.doors());
         doors.addAll(LegacyContent.doors());

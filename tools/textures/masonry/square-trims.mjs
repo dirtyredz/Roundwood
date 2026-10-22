@@ -5,7 +5,7 @@
 // 4 texels wide; the open centre is never drawn and is filled with mortar. Straight courses follow
 // the band: the top and bottom runs are one course of 8-texel bricks across the full width (staggered
 // against each other), the sides one soldier course between them, so no radial joint ever shows.
-import { brickColour, jointCoverage, withMortar } from './window-trims.mjs';
+import { brickColour, jointCoverage, withMortar } from '../window-trims.mjs';
 
 /** The square frame's face: 16 model pixels at two texels each. */
 export const SQUARE_FACE_SIZE = 32;
