@@ -46,7 +46,7 @@ class WindowHitRegionsTest {
     void theSillLiesInsideTheOpeningAndOverTheBeamEnds() {
         WindowDesign cross = new WindowDesign(WindowProfile.ARCH_LEFT, WindowPattern.CROSS);
         assertEquals(Region.SILL, WindowHitRegions.classify(cross, 8, 0.5, true, true), "a beam end under the sill is sill");
-        assertEquals(Region.FRAME, WindowHitRegions.classify(cross, 8, 2.5, true, true), "above the sill the beam is frame");
+        assertEquals(Region.BEAM, WindowHitRegions.classify(cross, 8, 2.5, true, true), "above the sill the beam is frame");
         assertEquals(Region.TRIM, WindowHitRegions.classify(cross, 0.5, 0.5, true, true), "the band beside the sill stays trim");
         assertEquals(Region.GLASS, WindowHitRegions.classify(cross, 5, 0.5, true, false), "no sill on this face: glass");
         assertEquals(Region.GLASS, WindowHitRegions.classify(WindowDesign.plain(WindowProfile.ARCH_BOTTOM_LEFT), 5, 15.5, true, true),
@@ -57,10 +57,10 @@ class WindowHitRegionsTest {
     void beamBoundariesAreHalfPixels() {
         WindowDesign cross = new WindowDesign(WindowProfile.ROUND, WindowPattern.CROSS);
         assertEquals(Region.GLASS, WindowHitRegions.classify(cross, 7.49, 5, false));
-        assertEquals(Region.FRAME, WindowHitRegions.classify(cross, 7.5, 5, false));
-        assertEquals(Region.FRAME, WindowHitRegions.classify(cross, 8.49, 5, false));
+        assertEquals(Region.BEAM, WindowHitRegions.classify(cross, 7.5, 5, false));
+        assertEquals(Region.BEAM, WindowHitRegions.classify(cross, 8.49, 5, false));
         assertEquals(Region.GLASS, WindowHitRegions.classify(cross, 8.5, 5, false));
-        assertEquals(Region.FRAME, WindowHitRegions.classify(cross, 5, 7.5, true), "a beam is never trim");
+        assertEquals(Region.BEAM, WindowHitRegions.classify(cross, 5, 7.5, true), "a beam is never trim");
     }
 
     @Test
@@ -138,7 +138,7 @@ class WindowHitRegionsTest {
         }
         boolean beam = design.pattern() == WindowPattern.CROSS && opening && (hu == 15 || hu == 16 || hv == 15 || hv == 16);
         if (beam) {
-            return Region.FRAME;
+            return Region.BEAM;
         }
         return opening ? Region.GLASS : Region.FRAME;
     }

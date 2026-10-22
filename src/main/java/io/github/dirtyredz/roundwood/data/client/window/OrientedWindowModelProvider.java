@@ -10,6 +10,7 @@ import net.minecraft.data.PackOutput;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.MultiPartBlockStateBuilder;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 
 /**
  * The oriented windows' models and multipart blockstates (both arches and both bottom corners, plain
@@ -33,14 +34,19 @@ public class OrientedWindowModelProvider extends BlockStateProvider {
             for (WindowPose canonical : WindowPaneModelWriter.canonicalPoses(block.profile())) {
                 WindowPaneModelWriter.writeModels(models(), block.design(), canonical);
             }
-            MultiPartBlockStateBuilder states = getMultipartBuilder(block);
+            panes(this, block, block.design());
+        }
+    }
+
+    public static void panes(BlockStateProvider provider, OrientedWindowBlock block,
+                             WindowDesign design) {
+            MultiPartBlockStateBuilder states = provider.getMultipartBuilder(block);
             for (WindowOrientation orientation : WindowOrientation.values()) {
                 for (WindowDepth depth : WindowDepth.values()) {
-                    WindowPaneModelWriter.addParts(states, block.design(), orientation.pose(depth),
+                    WindowPaneModelWriter.addParts(states, design, orientation.pose(depth),
                             part -> part.condition(OrientedWindowBlock.ORIENTATION, orientation)
                                     .condition(OrientedWindowBlock.DEPTH, depth));
                 }
             }
-        }
     }
 }

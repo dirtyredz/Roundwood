@@ -1,6 +1,5 @@
 package io.github.dirtyredz.roundwood.client.window.trim;
 
-import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
@@ -15,23 +14,19 @@ import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.FaceUv;
 import io.github.dirtyredz.roundwood.geometry.Surface;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockElementFace;
-import net.minecraft.client.renderer.block.model.BlockFaceUV;
-import net.minecraft.client.renderer.block.model.FaceBakery;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import io.github.dirtyredz.roundwood.client.render.SurfaceQuadBaker;
 
 /**
  * Baked models of one face's window trim in one look (0.8.0), for {@link WindowTrimRenderer}: the
@@ -43,8 +38,6 @@ import java.util.Map;
  * pose, side and look; cleared with every appearance cache on reload.
  */
 public final class WindowTrimWorldModels {
-    private static final ResourceLocation NAME = ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, "window_trim");
-    private static final FaceBakery BAKERY = new FaceBakery();
 
     private record Key(TrimSlot slot, WindowProfile profile, WindowPose pose, Direction side, TrimLooks.Look look) {
     }
@@ -66,7 +59,7 @@ public final class WindowTrimWorldModels {
         for (Surface surface : WindowTrimSurfaces.surfaces(key.slot(), key.profile(), key.pose(), key.side())) {
             boolean outward = surface.texture().equals(WindowTrimGeometry.FACE);
             TextureAtlasSprite sprite = outward ? face : edge;
-            BakedQuad quad = bake(surface.backing(), surface.face(), sprite);
+            BakedQuad quad = SurfaceQuadBaker.bake(surface.backing(), surface.face(), sprite);
             if (outward && key.look().whole()) {
                 boolean front = surface.face() == key.pose().front();
                 quad = ModelRetexturing.retexture(quad, sprite,
@@ -82,11 +75,5 @@ public final class WindowTrimWorldModels {
                 ItemOverrides.EMPTY);
     }
 
-    private static BakedQuad bake(Box box, Direction side, TextureAtlasSprite sprite) {
-        BlockElementFace element = new BlockElementFace(null, -1, "", new BlockFaceUV(FaceUv.tiled(box, side), 0));
-        return BAKERY.bakeQuad(
-                new Vector3f((float) box.minX(), (float) box.minY(), (float) box.minZ()),
-                new Vector3f((float) box.maxX(), (float) box.maxY(), (float) box.maxZ()),
-                element, sprite, side, BlockModelRotation.X0_Y0, null, true, NAME);
-    }
+
 }

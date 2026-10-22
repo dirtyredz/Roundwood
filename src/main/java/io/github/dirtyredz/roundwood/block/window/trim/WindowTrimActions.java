@@ -70,7 +70,7 @@ public final class WindowTrimActions {
     private static Optional<TrimHost> host(Level level, BlockPos pos, TrimSlot slot) {
         if (!(level.getBlockEntity(pos) instanceof RoundWindowBlockEntity window)
                 || !(window.getBlockState().getBlock() instanceof WindowPaneBlock block)
-                || !WindowTrimGeometry.supports(slot, block.profile())) {
+                || !(slot == TrimSlot.CROSS_BEAMS || WindowTrimGeometry.supports(slot, block.profile()))) {
             return Optional.empty();
         }
         return Optional.of(host(level, pos, window, slot));

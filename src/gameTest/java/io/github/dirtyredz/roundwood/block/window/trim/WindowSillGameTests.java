@@ -117,7 +117,7 @@ public final class WindowSillGameTests {
                 for (WindowPose pose : POSES) {
                     WindowDesign design = new WindowDesign(profile, pattern);
                     helper.setBlock(AT, Blocks.AIR); // a new window, not the last one restated (its entity would keep its attachments)
-                    helper.setBlock(AT, window(design, pose));
+                    io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, pose);
                     entity(helper).setGlass(Optional.of(DyeColor.LIGHT_BLUE));
                     String what = design.id() + " " + pose;
                     Direction positive = Direction.fromAxisAndDirection(pose.normal(), Direction.AxisDirection.POSITIVE);
@@ -170,7 +170,7 @@ public final class WindowSillGameTests {
             if (design.profile().takesSill()) {
                 continue;
             }
-            helper.setBlock(AT, window(design, SOUTH));
+            io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, SOUTH);
             ItemStack sill = sills(BRICKS, 1);
             AppearanceFixtures.use(helper, player, sill, ItemStack.EMPTY, WindowRays.face(helper, player, AT, 8, 8, Direction.SOUTH), false);
             check(sill.getCount() == 1 && !entity(helper).trims(TrimSlot.SILL).any() && !WindowPaneBlock.trimmed(helper.getBlockState(AT)),
@@ -183,7 +183,7 @@ public final class WindowSillGameTests {
 
     /** Two trims and two sills: the window and four attachments drop, each in its own look; creative drops nothing. */
     @GameTest(template = TEMPLATE)
-    public static void twoTrimsAndTwoSillsDropFiveItems(GameTestHelper helper) {
+    public static void twoTrimsTwoSillsAndBeamsDropSixItems(GameTestHelper helper) {
         ServerPlayer player = player(helper, "sill_drop", GameType.SURVIVAL, Direction.NORTH);
         Appearance frame = AppearanceFixtures.oakPainted(DyeColor.BROWN);
         Appearance trimFront = AppearanceFixtures.oakPainted(DyeColor.PURPLE);
@@ -191,7 +191,7 @@ public final class WindowSillGameTests {
         Appearance sillFront = AppearanceFixtures.oakPainted(DyeColor.ORANGE);
         Appearance sillBack = AppearanceFixtures.oakPainted(DyeColor.GRAY);
         WindowDesign design = new WindowDesign(WindowProfile.ARCH_RIGHT, WindowPattern.CROSS);
-        helper.setBlock(AT, window(design, SOUTH));
+        io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, SOUTH);
         entity(helper).setAppearance(frame);
         BlockPos abs = helper.absolutePos(AT);
         check(WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.PERIMETER, AttachmentFace.FRONT, trimFront)
@@ -199,19 +199,20 @@ public final class WindowSillGameTests {
                 && WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.SILL, AttachmentFace.FRONT, sillFront)
                 && WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.SILL, AttachmentFace.BACK, sillBack), "installs");
         ItemStack pick = AppearanceFixtures.pick(helper, abs);
-        check(pick.is(ModItems.window(design)) && AppearanceStacks.read(pick).equals(frame) && !pick.getOrCreateTag().contains("WindowSillTrim"),
+        check(pick.is(ModItems.window(WindowDesign.plain(design.profile()))) && AppearanceStacks.read(pick).equals(frame) && !pick.getOrCreateTag().contains("WindowSillTrim"),
                 "pick-block gives the pane only: " + pick);
         clearDrops(helper);
         player.gameMode.destroyBlock(abs);
-        check(dropped(helper, ModItems.window(design), frame) == 1, "window drop");
+        check(dropped(helper, ModItems.window(WindowDesign.plain(design.profile())), frame) == 1, "window drop");
         check(dropped(helper, ModItems.ROUND_TRIM.get(), trimFront) == 1 && dropped(helper, ModItems.ROUND_TRIM.get(), trimBack) == 1,
                 "trim drops");
         check(dropped(helper, ModItems.ARCH_SILL_TRIM.get(), sillFront) == 1 && dropped(helper, ModItems.ARCH_SILL_TRIM.get(), sillBack) == 1,
                 "sill drops");
+        check(dropped(helper, ModItems.CROSS_BEAMS.get(), Appearance.DEFAULT) == 1, "whole pane beam drop");
         check(dropped(helper, ModItems.ARCH_SILL_TRIM.get()) == 2 && dropped(helper, ModItems.ROUND_TRIM.get()) == 2, "extra drops");
         clearDrops(helper);
         ServerPlayer creative = player(helper, "sill_drop_creative", GameType.CREATIVE, Direction.NORTH);
-        helper.setBlock(AT, window(design, SOUTH));
+        io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, SOUTH);
         WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.SILL, AttachmentFace.FRONT, sillFront);
         creative.gameMode.destroyBlock(abs);
         check(dropped(helper, ModItems.ARCH_SILL_TRIM.get()) == 0, "creative break dropped a sill");

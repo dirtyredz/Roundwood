@@ -16,6 +16,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.event.level.LevelEvent;
+import io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion;
 
 /**
  * Finds content to migrate in loaded chunks and migrates it, never during the load itself (0.8.0,
@@ -96,14 +97,19 @@ public final class ChunkMigrations {
                 return;
             }
         }
+        WindowCrossConversion.convert(level, pos);
         DoorTrimConversion.convert(level, pos);
     }
 
     private static boolean candidate(BlockState state) {
-        return LegacyChunkMigration.isLegacy(state) || state.is(ModBlocks.roundTrim()) || state.is(ModBlocks.roundDoor());
+        return CrossWindowCompatibility.isRetired(state) || LegacyChunkMigration.isLegacy(state) || state.is(ModBlocks.roundTrim()) || state.is(ModBlocks.roundDoor());
     }
 
     private static void enqueue(LevelAccessor level, LevelChunk chunk, BlockPos pos, BlockState state) {
+        if (CrossWindowCompatibility.isRetired(state)) {
+            QUEUE.add(level, pos, pos);
+            return;
+        }
         if (LegacyChunkMigration.isLegacy(state)) {
             QUEUE.add(level, pos, LegacyChunkMigration.key(pos, state));
             return;

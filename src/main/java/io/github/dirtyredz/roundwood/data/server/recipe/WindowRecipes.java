@@ -43,11 +43,6 @@ public final class WindowRecipes {
         window(writer, unlock, WindowProfile.ARCH_RIGHT, WindowPattern.PLAIN, "round_window_arch", "PPP", " G ", " P ");
         window(writer, unlock, WindowProfile.BOTTOM_LEFT, WindowPattern.PLAIN, "round_window_bottom", "P ", "PG", "PP");
         window(writer, unlock, WindowProfile.BOTTOM_RIGHT, WindowPattern.PLAIN, "round_window_bottom", " P ", " G ", "PPP");
-        window(writer, unlock, WindowProfile.ROUND, WindowPattern.CROSS, "round_window_cross", "SPS", "PGP", "SPS");
-        window(writer, unlock, WindowProfile.ARCH_LEFT, WindowPattern.CROSS, "round_window_arch_cross", "PPS", "PGS", "P  ");
-        window(writer, unlock, WindowProfile.ARCH_RIGHT, WindowPattern.CROSS, "round_window_arch_cross", "PPP", "SGS", " P ");
-        window(writer, unlock, WindowProfile.BOTTOM_LEFT, WindowPattern.CROSS, "round_window_bottom_cross", "P  ", "PGS", "PPS");
-        window(writer, unlock, WindowProfile.BOTTOM_RIGHT, WindowPattern.CROSS, "round_window_bottom_cross", " P ", "SGS", "PPP");
         // 0.10.0
         window(writer, unlock, WindowProfile.ARCH_BOTTOM_LEFT, WindowPattern.PLAIN, "round_window_arch_bottom", "PP", "PG", "PP");
         window(writer, unlock, WindowProfile.ARCH_BOTTOM_RIGHT, WindowPattern.PLAIN, "round_window_arch_bottom", "PPP", " G ", "PPP");
@@ -57,14 +52,6 @@ public final class WindowRecipes {
         window(writer, unlock, WindowProfile.EDGE_LEFT, WindowPattern.PLAIN, "round_window_edge", "P ", "PG", "P ");
         window(writer, unlock, WindowProfile.EDGE_BOTTOM, WindowPattern.PLAIN, "round_window_edge", " G ", "PPP");
         window(writer, unlock, WindowProfile.EDGE_RIGHT, WindowPattern.PLAIN, "round_window_edge", "GP", " P", " P");
-        window(writer, unlock, WindowProfile.ARCH_BOTTOM_LEFT, WindowPattern.CROSS, "round_window_arch_bottom_cross", "PP ", "PGS", "PPS");
-        window(writer, unlock, WindowProfile.ARCH_BOTTOM_RIGHT, WindowPattern.CROSS, "round_window_arch_bottom_cross", "PPP", "SGS", "PPP");
-        window(writer, unlock, WindowProfile.TOP_LEFT, WindowPattern.CROSS, "round_window_top_cross", "PPP", "PGS", "PS ");
-        window(writer, unlock, WindowProfile.TOP_RIGHT, WindowPattern.CROSS, "round_window_top_cross", "PPP", "SGS", "  P");
-        window(writer, unlock, WindowProfile.EDGE_TOP, WindowPattern.CROSS, "round_window_edge_cross", "PPP", "SGS");
-        window(writer, unlock, WindowProfile.EDGE_LEFT, WindowPattern.CROSS, "round_window_edge_cross", "PS", "PG", "PS");
-        window(writer, unlock, WindowProfile.EDGE_BOTTOM, WindowPattern.CROSS, "round_window_edge_cross", "SGS", "PPP");
-        window(writer, unlock, WindowProfile.EDGE_RIGHT, WindowPattern.CROSS, "round_window_edge_cross", "GP", "SP", "SP");
     }
 
     private static void window(Consumer<FinishedRecipe> writer, InventoryChangeTrigger.TriggerInstance unlock,

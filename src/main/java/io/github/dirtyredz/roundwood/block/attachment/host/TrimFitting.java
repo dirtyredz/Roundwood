@@ -44,11 +44,11 @@ public final class TrimFitting {
             return InteractionResult.SUCCESS;
         }
         Optional<TrimHost> found = host.get();
-        if (found.isEmpty() || !found.get().editable() || found.get().trims().has(face)) {
+        if (found.isEmpty() || !found.get().editable() || found.get().trims().has(found.get().slot().address(face))) {
             return InteractionResult.CONSUME;
         }
         Appearance look = AppearanceStacks.read(stack);
-        if (!found.get().store(found.get().trims().with(face, look))) {
+        if (!found.get().store(found.get().trims().with(found.get().slot().address(face), look))) {
             return InteractionResult.CONSUME;
         }
         if (!player.getAbilities().instabuild) {
@@ -67,8 +67,8 @@ public final class TrimFitting {
         if (found.isEmpty() || !found.get().editable()) {
             return InteractionResult.CONSUME;
         }
-        Optional<Appearance> look = found.get().trims().get(face);
-        if (look.isEmpty() || !found.get().store(found.get().trims().without(face))) {
+        Optional<Appearance> look = found.get().trims().get(found.get().slot().address(face));
+        if (look.isEmpty() || !found.get().store(found.get().trims().without(found.get().slot().address(face)))) {
             return InteractionResult.CONSUME;
         }
         if (!player.getAbilities().instabuild) {
@@ -84,12 +84,12 @@ public final class TrimFitting {
 
     /** Fits {@code look} on an empty {@code face} without a player (showcase, fixtures, migration). */
     public static boolean install(TrimHost host, AttachmentFace face, Appearance look) {
-        return host.editable() && !host.trims().has(face) && host.store(host.trims().with(face, look));
+        return host.editable() && !host.trims().has(host.slot().address(face)) && host.store(host.trims().with(host.slot().address(face), look));
     }
 
     /** Replaces an installed face's look, keeping the other face; false when that face has none. */
     public static boolean restyle(TrimHost host, AttachmentFace face, Appearance look) {
-        return host.editable() && host.trims().has(face) && host.store(host.trims().with(face, look));
+        return host.editable() && host.trims().has(host.slot().address(face)) && host.store(host.trims().with(host.slot().address(face), look));
     }
 
     /** One face as a restyling target: empty while that face has no trim or the host is not editable. */
@@ -97,7 +97,7 @@ public final class TrimFitting {
         return new AppearanceActions.Target() {
             @Override
             public Optional<Appearance> current() {
-                return host.editable() ? host.trims().get(face) : Optional.empty();
+                return host.editable() ? host.trims().get(host.slot().address(face)) : Optional.empty();
             }
 
             @Override

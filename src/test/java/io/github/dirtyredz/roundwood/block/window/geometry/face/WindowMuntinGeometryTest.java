@@ -55,7 +55,7 @@ class WindowMuntinGeometryTest {
                     double x = (hu + 0.5) / 2;
                     double y = (hv + 0.5) / 2;
                     for (double z : new double[] {7.25, 8.0, 8.75}) {
-                        assertEquals(WindowPaneGeometry.FRAME, textureAt(panel, x, y, z), profile + " beam at " + x + "," + y + "," + z);
+                        assertEquals(WindowPaneGeometry.BEAM, textureAt(panel, x, y, z), profile + " beam at " + x + "," + y + "," + z);
                     }
                 }
             }

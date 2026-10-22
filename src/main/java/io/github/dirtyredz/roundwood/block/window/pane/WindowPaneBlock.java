@@ -52,6 +52,9 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
+import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
+import io.github.dirtyredz.roundwood.migration.conversion.LegacyCells;
+import io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion;
 
 /**
  * What every single-cell window shares (the round window, the arches and the bottom corners, plain or
@@ -186,6 +189,10 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         BlockEntity entity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
         RoundWindowBlockEntity window = entity instanceof RoundWindowBlockEntity found ? found : null;
+        if (CrossWindowCompatibility.isRetired(state)) {
+            return super.getDrops(state, builder).isEmpty() ? List.of()
+                    : List.of(CrossWindowCompatibility.stack(this, window));
+        }
         Appearance appearance = window != null ? window.appearance() : defaultAppearance();
         List<ItemStack> drops = AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.WINDOW, appearance);
         if (window != null) {
@@ -210,6 +217,11 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
     @SuppressWarnings("deprecation")
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         super.tick(state, level, pos, random);
+        if (CrossWindowCompatibility.isRetired(state)) {
+            if (WindowCrossConversion.convert(level, pos)
+                    == LegacyCells.Result.DEFERRED) level.scheduleTick(pos, this, 20);
+            return;
+        }
         WindowAttachmentState.reconcile(level, pos);
     }
 
@@ -236,7 +248,7 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
     /** Outline and rays: the pane, its junction and the in-cell part of each fitted trim and sill. */
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return WindowShapes.selection(design, pose(state), connections(state),
+        return WindowShapes.selection(WindowPaneState.design(state, WindowPaneState.entity(level, pos)), pose(state), connections(state),
                 attachedSides(state, level, pos, TrimSlot.PERIMETER), attachedSides(state, level, pos, TrimSlot.SILL));
     }
 
@@ -245,22 +257,13 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
      * the entity when it is there (nothing while the {@code trimmed} summary says none).
      */
     public Set<Direction> attachedSides(BlockState state, BlockGetter level, BlockPos pos, TrimSlot slot) {
-        if (!trimmed(state) || !(level.getBlockEntity(pos) instanceof RoundWindowBlockEntity window)) {
-            return Set.of();
-        }
-        Set<Direction> sides = EnumSet.noneOf(Direction.class);
-        for (AttachmentFace face : AttachmentFace.values()) {
-            if (window.trims(slot).has(face)) {
-                sides.add(WindowFaceIdentity.side(pose(state), faceReversed(state), face));
-            }
-        }
-        return sides;
+        return WindowPaneState.attachedSides(state, level, pos, slot);
     }
 
     /** The trim is decorative: only the pane and its junction collide. */
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return WindowShapes.collision(design, pose(state), connections(state));
+        return WindowShapes.collision(WindowPaneState.design(state, WindowPaneState.entity(level, pos)), pose(state), connections(state));
     }
 
     /**

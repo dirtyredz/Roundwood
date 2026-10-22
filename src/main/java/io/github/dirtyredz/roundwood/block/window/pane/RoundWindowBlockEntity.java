@@ -10,6 +10,7 @@ import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntit
 import io.github.dirtyredz.roundwood.block.attachment.storage.FaceTrimStore;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassNbt;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowSillNbt;
+import io.github.dirtyredz.roundwood.block.window.trim.WindowBeamNbt;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimNbt;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -26,21 +27,10 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Every window carries one of these (never ticking) for four independent things: the frame's
- * appearance (top-level {@code RoundwoodAppearance}), the perimeter face trims (0.8.0,
- * {@link WindowTrimNbt}: a FRONT and a BACK slot, each absent or present with its own look), the arch
- * sills (0.10.0, {@link WindowSillNbt}, the same two faces in their own store) and the glass colour
- * ({@link WindowGlassNbt}). Frame and glass stay chunk-baked: the entity hands them to the model as
- * one {@link WindowAppearanceData} snapshot, refreshed whenever a packet or update tag is loaded.
- * Trims and sills are drawn by a block-entity renderer, since they may project beyond the cell.
- * Persistence and synchronisation are the shared anchor's ({@link AppearanceAnchorBlockEntity}): the
- * update tag always carries both attachment payloads, so removals reach clients, and a packet without
- * a tag clears everything.
- *
- * <p>The {@code trimmed} blockstate is only a summary of "any attachment present" (either slot, either
- * face); it is consulted when reading 0.7.0 data, which is why the perimeter payload is always written,
- * empty included. Callers keep it in step after a successful write ({@code trim/WindowAttachmentState});
- * a loaded summary that disagrees is corrected by a scheduled block tick, never from the decoder.
+ * Shared-anchor window contents: frame, tint, perimeter faces, sill faces and whole-pane beams.
+ * WindowTrim always saves an explicit empty payload, so a beam-only summary cannot invent legacy
+ * oak trims. Unknown stores retain disk custody independently. Client model data is an immutable
+ * level-thread snapshot; load/state/packet changes refresh neighbouring panes as well.
  */
 public class RoundWindowBlockEntity extends AppearanceAnchorBlockEntity implements AppearanceActions.Target, TrimAttachmentSource {
     /** How far a projecting trim reaches past the cell, in blocks. */
@@ -48,20 +38,24 @@ public class RoundWindowBlockEntity extends AppearanceAnchorBlockEntity implemen
 
     @Nullable
     private DyeColor glass;
+    private volatile ModelData renderData = ModelData.EMPTY;
+    private boolean renderAvailable;
+
+    boolean renderAvailable() { return renderAvailable && !isRemoved(); }
 
     public RoundWindowBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state, AppearanceFamily.WINDOW,
-                Map.of(TrimSlot.PERIMETER, WindowTrimNbt.FORMAT, TrimSlot.SILL, WindowSillNbt.FORMAT));
+                Map.of(TrimSlot.PERIMETER, WindowTrimNbt.FORMAT, TrimSlot.SILL, WindowSillNbt.FORMAT, TrimSlot.CROSS_BEAMS, WindowBeamNbt.FORMAT));
     }
 
-    /** True when either slot has anything fitted on either face (the {@code trimmed} summary's meaning). */
+    /** True when any declared slot has an attachment (the {@code trimmed} summary's meaning). */
     public boolean anyAttachment() {
-        return trims(TrimSlot.PERIMETER).any() || trims(TrimSlot.SILL).any();
+        return trims(TrimSlot.PERIMETER).any() || trims(TrimSlot.SILL).any() || trims(TrimSlot.CROSS_BEAMS).any();
     }
 
-    /** True when neither slot holds an unknown payload, so the {@code trimmed} summary may be reconciled. */
+    /** True when no slot holds an unknown payload, so the {@code trimmed} summary may be reconciled. */
     public boolean attachmentsEditable() {
-        return trimsEditable(TrimSlot.PERIMETER) && trimsEditable(TrimSlot.SILL);
+        return trimsEditable(TrimSlot.PERIMETER) && trimsEditable(TrimSlot.SILL) && trimsEditable(TrimSlot.CROSS_BEAMS);
     }
 
     public Optional<DyeColor> glass() {
@@ -119,24 +113,55 @@ public class RoundWindowBlockEntity extends AppearanceAnchorBlockEntity implemen
     @Override
     public void onLoad() {
         super.onLoad();
+        renderAvailable = true;
+        if (level != null && level.isClientSide) WindowPaneState.refreshAround(level, worldPosition);
         if (level != null && !level.isClientSide && attachmentsEditable()
                 && WindowPaneBlock.trimmed(getBlockState()) != anyAttachment()) {
             level.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
         }
     }
 
+    @Override
+    public void onChunkUnloaded() {
+        super.onChunkUnloaded();
+        renderAvailable = false;
+        if (level != null) WindowPaneState.refreshAround(level, worldPosition);
+    }
+
+    @Override
+    public void setRemoved() {
+        super.setRemoved();
+        renderAvailable = false;
+        if (level != null) WindowPaneState.refreshAround(level, worldPosition);
+    }
+
     /** Client: the loaded look is handed to the chunk model and the section redrawn. */
     @Override
     protected void afterClientUpdate() {
         if (level != null && level.isClientSide) {
-            requestModelDataUpdate();
-            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL_IMMEDIATE);
+            WindowPaneState.refreshAround(level, worldPosition);
         }
     }
 
     @Override
+    public void setBlockState(BlockState state) {
+        super.setBlockState(state);
+        if (level != null && level.isClientSide) WindowPaneState.refreshAround(level, worldPosition);
+    }
+
+    /** Level-thread snapshot publication, including neighbours across render-section boundaries. */
+    void refreshRenderData() {
+        if (level == null || !(getBlockState().getBlock() instanceof WindowPaneBlock)) return;
+        renderData = ModelData.builder().with(WindowAppearanceData.PROPERTY,
+                new WindowAppearanceData(appearance(), glass(), WindowPaneState.beams(getBlockState(), this),
+                        WindowPaneState.neighbours(level, worldPosition))).build();
+        requestModelDataUpdate();
+        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL_IMMEDIATE);
+    }
+
+    @Override
     public ModelData getModelData() {
-        return ModelData.builder().with(WindowAppearanceData.PROPERTY, new WindowAppearanceData(appearance(), glass())).build();
+        return renderData;
     }
 
     /** The cell plus the one pixel a trim may stand proud of it on any side. */

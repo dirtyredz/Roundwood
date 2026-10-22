@@ -2,7 +2,7 @@
   "multipart": [
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross",
+        "model": "roundwood:block/round_window_arch_bottom_right",
         "y": 180
       },
       "when": {
@@ -14,7 +14,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_south",
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_south",
         "y": 180
       },
       "when": {
@@ -26,7 +26,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_north",
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_north",
         "y": 180
       },
       "when": {
@@ -38,7 +38,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_both",
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_both",
         "y": 180
       },
       "when": {
@@ -50,7 +50,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_front",
+        "model": "roundwood:block/round_window_arch_bottom_right_front",
         "y": 180
       },
       "when": {
@@ -60,7 +60,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_back",
+        "model": "roundwood:block/round_window_arch_bottom_right_back",
         "y": 180
       },
       "when": {
@@ -70,7 +70,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross",
+        "model": "roundwood:block/round_window_arch_bottom_right",
         "y": 270
       },
       "when": {
@@ -82,7 +82,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_south",
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_south",
         "y": 270
       },
       "when": {
@@ -94,7 +94,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_north",
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_north",
         "y": 270
       },
       "when": {
@@ -106,7 +106,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_both",
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_both",
         "y": 270
       },
       "when": {
@@ -118,7 +118,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_back",
+        "model": "roundwood:block/round_window_arch_bottom_right_back",
         "y": 270
       },
       "when": {
@@ -128,7 +128,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_front",
+        "model": "roundwood:block/round_window_arch_bottom_right_front",
         "y": 270
       },
       "when": {
@@ -138,7 +138,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross"
+        "model": "roundwood:block/round_window_arch_bottom_right"
       },
       "when": {
         "depth": "center",
@@ -149,7 +149,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_north"
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_north"
       },
       "when": {
         "depth": "center",
@@ -160,7 +160,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_south"
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_south"
       },
       "when": {
         "depth": "center",
@@ -171,7 +171,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_both"
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_both"
       },
       "when": {
         "depth": "center",
@@ -182,7 +182,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_back"
+        "model": "roundwood:block/round_window_arch_bottom_right_back"
       },
       "when": {
         "depth": "negative",
@@ -191,7 +191,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_front"
+        "model": "roundwood:block/round_window_arch_bottom_right_front"
       },
       "when": {
         "depth": "positive",
@@ -200,7 +200,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross",
+        "model": "roundwood:block/round_window_arch_bottom_right",
         "y": 90
       },
       "when": {
@@ -212,7 +212,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_north",
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_north",
         "y": 90
       },
       "when": {
@@ -224,7 +224,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_south",
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_south",
         "y": 90
       },
       "when": {
@@ -236,7 +236,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_arms_both",
+        "model": "roundwood:block/round_window_arch_bottom_right_arms_both",
         "y": 90
       },
       "when": {
@@ -248,7 +248,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_front",
+        "model": "roundwood:block/round_window_arch_bottom_right_front",
         "y": 90
       },
       "when": {
@@ -258,7 +258,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_back",
+        "model": "roundwood:block/round_window_arch_bottom_right_back",
         "y": 90
       },
       "when": {
@@ -268,7 +268,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_level"
+        "model": "roundwood:block/round_window_arch_bottom_right_up_level"
       },
       "when": {
         "depth": "center",
@@ -277,7 +277,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_floor"
+        "model": "roundwood:block/round_window_arch_bottom_right_up_floor"
       },
       "when": {
         "depth": "negative",
@@ -286,7 +286,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_ceiling"
+        "model": "roundwood:block/round_window_arch_bottom_right_up_ceiling"
       },
       "when": {
         "depth": "positive",
@@ -295,7 +295,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_level",
+        "model": "roundwood:block/round_window_arch_bottom_right_up_level",
         "y": 90
       },
       "when": {
@@ -305,7 +305,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_floor",
+        "model": "roundwood:block/round_window_arch_bottom_right_up_floor",
         "y": 90
       },
       "when": {
@@ -315,7 +315,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_ceiling",
+        "model": "roundwood:block/round_window_arch_bottom_right_up_ceiling",
         "y": 90
       },
       "when": {
@@ -325,7 +325,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_level",
+        "model": "roundwood:block/round_window_arch_bottom_right_up_level",
         "y": 180
       },
       "when": {
@@ -335,7 +335,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_floor",
+        "model": "roundwood:block/round_window_arch_bottom_right_up_floor",
         "y": 180
       },
       "when": {
@@ -345,7 +345,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_ceiling",
+        "model": "roundwood:block/round_window_arch_bottom_right_up_ceiling",
         "y": 180
       },
       "when": {
@@ -355,7 +355,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_level",
+        "model": "roundwood:block/round_window_arch_bottom_right_up_level",
         "y": 270
       },
       "when": {
@@ -365,7 +365,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_floor",
+        "model": "roundwood:block/round_window_arch_bottom_right_up_floor",
         "y": 270
       },
       "when": {
@@ -375,7 +375,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_up_ceiling",
+        "model": "roundwood:block/round_window_arch_bottom_right_up_ceiling",
         "y": 270
       },
       "when": {
@@ -385,7 +385,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_level"
+        "model": "roundwood:block/round_window_arch_bottom_right_down_level"
       },
       "when": {
         "depth": "center",
@@ -394,7 +394,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_floor"
+        "model": "roundwood:block/round_window_arch_bottom_right_down_floor"
       },
       "when": {
         "depth": "negative",
@@ -403,7 +403,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_ceiling"
+        "model": "roundwood:block/round_window_arch_bottom_right_down_ceiling"
       },
       "when": {
         "depth": "positive",
@@ -412,7 +412,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_level",
+        "model": "roundwood:block/round_window_arch_bottom_right_down_level",
         "y": 90
       },
       "when": {
@@ -422,7 +422,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_floor",
+        "model": "roundwood:block/round_window_arch_bottom_right_down_floor",
         "y": 90
       },
       "when": {
@@ -432,7 +432,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_ceiling",
+        "model": "roundwood:block/round_window_arch_bottom_right_down_ceiling",
         "y": 90
       },
       "when": {
@@ -442,7 +442,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_level",
+        "model": "roundwood:block/round_window_arch_bottom_right_down_level",
         "y": 180
       },
       "when": {
@@ -452,7 +452,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_floor",
+        "model": "roundwood:block/round_window_arch_bottom_right_down_floor",
         "y": 180
       },
       "when": {
@@ -462,7 +462,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_ceiling",
+        "model": "roundwood:block/round_window_arch_bottom_right_down_ceiling",
         "y": 180
       },
       "when": {
@@ -472,7 +472,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_level",
+        "model": "roundwood:block/round_window_arch_bottom_right_down_level",
         "y": 270
       },
       "when": {
@@ -482,7 +482,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_floor",
+        "model": "roundwood:block/round_window_arch_bottom_right_down_floor",
         "y": 270
       },
       "when": {
@@ -492,7 +492,7 @@
     },
     {
       "apply": {
-        "model": "roundwood:block/round_window_arch_bottom_right_cross_down_ceiling",
+        "model": "roundwood:block/round_window_arch_bottom_right_down_ceiling",
         "y": 270
       },
       "when": {

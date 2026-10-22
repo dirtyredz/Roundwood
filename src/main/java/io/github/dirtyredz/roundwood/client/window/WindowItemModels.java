@@ -13,7 +13,7 @@ import java.util.function.UnaryOperator;
  * every other appearance cache on a model bake.
  */
 final class WindowItemModels<M> {
-    private record Key(Object source, ResourceLocation wood, ResourceLocation glass) {
+    private record Key(Object source, ResourceLocation wood, ResourceLocation glass, ResourceLocation beams) {
     }
 
     private final AppearanceModelCache<Key, M> cache;
@@ -24,7 +24,12 @@ final class WindowItemModels<M> {
 
     /** The model {@code build} makes from {@code source} for {@code wood} and {@code glass}, built once per triple. */
     M get(M source, ResourceLocation wood, ResourceLocation glass, UnaryOperator<M> build) {
-        return cache.get(new Key(source, wood, glass), key -> build.apply(source));
+        return get(source, wood, glass, null, build);
+    }
+
+    /** Null beams selects the unchanged plain path; retired icons include their independent beam sprite. */
+    M get(M source, ResourceLocation wood, ResourceLocation glass, ResourceLocation beams, UnaryOperator<M> build) {
+        return cache.get(new Key(source, wood, glass, beams), key -> build.apply(source));
     }
 
     int size() {

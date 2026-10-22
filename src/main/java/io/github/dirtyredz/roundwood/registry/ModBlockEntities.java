@@ -18,6 +18,7 @@ import net.minecraftforge.registries.RegistryObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
 
 /**
  * The anchors: the doors' (id {@code round_door}, unchanged since 0.2.0 so saved camouflage loads; it also
@@ -80,6 +81,7 @@ public final class ModBlockEntities {
     private static List<WindowPaneBlock> windows() {
         List<WindowPaneBlock> out = new ArrayList<>();
         out.addAll(ModBlocks.windows());
+        out.addAll(CrossWindowCompatibility.blocks());
         out.addAll(LegacyContent.windows());
         return out;
     }

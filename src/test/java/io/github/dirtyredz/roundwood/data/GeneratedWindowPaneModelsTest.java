@@ -73,7 +73,7 @@ class GeneratedWindowPaneModelsTest {
                             continue;
                         }
                         check(parts, Map.of("position", position.getSerializedName(), "axis", axis.getSerializedName()),
-                                design, position.pose(axis));
+                                WindowDesign.plain(design.profile()), position.pose(axis));
                     }
                 }
                 continue;
@@ -81,7 +81,7 @@ class GeneratedWindowPaneModelsTest {
             for (WindowOrientation orientation : WindowOrientation.values()) {
                 for (WindowDepth depth : WindowDepth.values()) {
                     check(parts, Map.of("orientation", orientation.getSerializedName(), "depth", depth.getSerializedName()),
-                            design, orientation.pose(depth));
+                            WindowDesign.plain(design.profile()), orientation.pose(depth));
                 }
             }
         }
@@ -177,7 +177,7 @@ class GeneratedWindowPaneModelsTest {
             assertEquals(ModelExpectations.GLASS, model.texture("#glass"), id);
             checked++;
         }
-        assertEquals(302, checked, "window block models");
+        assertEquals(151, checked, "window block models");
     }
 
     /**
@@ -193,7 +193,7 @@ class GeneratedWindowPaneModelsTest {
             ModelExpectations.assertDisplay(item, design.id(), new double[] {8, 8, 8});
             for (int hu = 0; hu < 32; hu++) {
                 for (int hv = 0; hv < 32; hv++) {
-                    boolean glass = expectedGlass(design, hu, hv);
+                    boolean glass = expectedGlass(WindowDesign.plain(design.profile()), hu, hv);
                     String front = frontTexture(item, (hu + 0.5) / 2, (hv + 0.5) / 2);
                     assertEquals(glass ? ModelExpectations.GLASS : ModelExpectations.OAK_PLANKS, front,
                             design.id() + " at half-pixel " + hu + "," + hv);

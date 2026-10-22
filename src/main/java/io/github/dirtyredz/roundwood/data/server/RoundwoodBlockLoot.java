@@ -16,6 +16,8 @@ import net.minecraft.world.level.storage.loot.LootTable;
 
 import java.util.Set;
 import java.util.stream.Stream;
+import io.github.dirtyredz.roundwood.block.window.trim.WindowBeamNbt;
+import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
 
 /**
  * Every part drops its family's canonical item (explosion rules apply); the block puts the broken
@@ -46,6 +48,7 @@ public class RoundwoodBlockLoot extends BlockLootSubProvider {
         ModBlocks.windows().forEach(window -> add(window, window(window.asItem(), window.profile().takesSill())));
         ModBlocks.archways().forEach(archway -> add(archway,
                 withFaces(createSingleItemTable(archway.asItem()), TrimSlot.PERIMETER, ArchwayTrimNbt.TAG)));
+        CrossWindowCompatibility.blocks().forEach(block -> dropOther(block, ModItems.window(block.design())));
         LegacyContent.doors().forEach(block -> add(block, door(ModItems.ROUND_DOOR.get())));
         LegacyContent.windows().forEach(block -> add(block, window(ModItems.ROUND_WINDOW.get(), false)));
         LegacyContent.trims().forEach(block -> dropOther(block, ModItems.ROUND_TRIM.get()));
@@ -54,7 +57,8 @@ public class RoundwoodBlockLoot extends BlockLootSubProvider {
     /** The window's item, plus a Universal Trim per trimmed face and, on an upper arch, an Arch Sill per silled face. */
     private LootTable.Builder window(Item pane, boolean sills) {
         LootTable.Builder table = withFaces(createSingleItemTable(pane), TrimSlot.PERIMETER, WindowTrimNbt.TAG);
-        return sills ? withFaces(table, TrimSlot.SILL, WindowSillNbt.TAG) : table;
+        if (sills) table = withFaces(table, TrimSlot.SILL, WindowSillNbt.TAG);
+        return withFaces(table, TrimSlot.CROSS_BEAMS, WindowBeamNbt.TAG);
     }
 
     /** The door's item, plus a Universal Trim per trimmed face. */

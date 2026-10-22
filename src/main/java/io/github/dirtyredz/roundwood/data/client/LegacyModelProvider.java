@@ -14,6 +14,9 @@ import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
+import io.github.dirtyredz.roundwood.block.window.pane.OrientedWindowBlock;
+import io.github.dirtyredz.roundwood.data.client.window.OrientedWindowModelProvider;
+import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
 
 /**
  * Compatibility resources for the 49 hidden 0.4.0 aliases, kept apart from the canonical providers:
@@ -44,6 +47,12 @@ public class LegacyModelProvider extends BlockStateProvider {
         for (Block block : LegacyContent.windows()) {
             WindowModelProvider.panes(this, block, round);
             item(block, round.id());
+        }
+        for (var block : CrossWindowCompatibility.blocks()) {
+            var plain = WindowDesign.plain(block.profile());
+            if (block instanceof OrientedWindowBlock oriented) {
+                OrientedWindowModelProvider.panes(this, oriented, plain);
+            } else WindowModelProvider.panes(this, block, plain);
         }
         ModelFile trim = existing("block/" + TrimModelNames.TRIM_ID);
         for (Block block : LegacyContent.trims()) {

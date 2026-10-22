@@ -53,7 +53,7 @@ public class WindowTrimRenderer implements BlockEntityRenderer<RoundWindowBlockE
         boolean reversed = WindowPaneBlock.faceReversed(state);
         BlockPos pos = entity.getBlockPos();
         VertexConsumer consumer = buffers.getBuffer(RenderType.solid());
-        for (TrimSlot slot : TrimSlot.values()) {
+        for (TrimSlot slot : java.util.List.of(TrimSlot.PERIMETER, TrimSlot.SILL)) {
             FaceTrims trims = entity.trims(slot);
             for (AttachmentFace face : AttachmentFace.values()) {
                 Optional<Appearance> look = trims.get(face);

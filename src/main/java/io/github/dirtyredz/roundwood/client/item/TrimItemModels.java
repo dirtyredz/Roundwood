@@ -31,6 +31,7 @@ public final class TrimItemModels {
     }
 
     public static TrimLooks.Look look(TrimSlot slot, Appearance appearance) {
+        if (slot == TrimSlot.CROSS_BEAMS) return TrimLooks.beams(appearance);
         return TrimLooks.of(appearance, slot == TrimSlot.SILL ? MasonryStyles::sillFace : MasonryStyles::squareFace);
     }
 

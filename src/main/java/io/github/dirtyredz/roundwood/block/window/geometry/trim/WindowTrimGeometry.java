@@ -65,12 +65,12 @@ public final class WindowTrimGeometry {
 
     /** True when pixel (u, v) of {@code profile}'s face is under the attachment in {@code slot}. */
     public static boolean covers(TrimSlot slot, WindowProfile profile, int u, int v) {
-        return slot == TrimSlot.SILL ? WindowSillGeometry.inSill(profile, u, v) : inBand(profile, u, v);
+        return slot == TrimSlot.SILL ? WindowSillGeometry.inSill(profile, u, v) : slot == TrimSlot.PERIMETER && inBand(profile, u, v);
     }
 
     /** True when {@code profile} can carry anything in {@code slot}. */
     public static boolean supports(TrimSlot slot, WindowProfile profile) {
-        return slot == TrimSlot.PERIMETER || profile.takesSill();
+        return slot == TrimSlot.PERIMETER || slot == TrimSlot.SILL && profile.takesSill();
     }
 
     /** Pixel (cu, v) of the upper 32 x 16 arch face lies in the 32/28 ring around the arch circle. */

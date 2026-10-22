@@ -26,33 +26,38 @@ import java.util.Optional;
  * colour. Sections build from these and the showcase checks read the same list back from the world.
  */
 public record ShowcaseWindow(WindowDesign design, WindowPose pose, int r, int y, int f, Appearance pane,
-                             FaceTrims trims, FaceTrims sills, Optional<DyeColor> glass) {
+                             FaceTrims trims, FaceTrims sills, Optional<DyeColor> glass, Optional<Appearance> beams) {
     public static ShowcaseWindow of(WindowDesign design, WindowPose pose, int r, int y, int f, Appearance pane) {
-        return new ShowcaseWindow(design, pose, r, y, f, pane, FaceTrims.NONE, FaceTrims.NONE, Optional.empty());
+        return new ShowcaseWindow(WindowDesign.plain(design.profile()), pose, r, y, f, pane, FaceTrims.NONE, FaceTrims.NONE, Optional.empty(),
+                design.pattern() == WindowPattern.CROSS ? Optional.of(pane) : Optional.empty());
     }
 
     /** The same look on both faces. */
     public ShowcaseWindow trimmed(Appearance look) {
-        return new ShowcaseWindow(design, pose, r, y, f, pane, FaceTrims.both(look), sills, glass);
+        return new ShowcaseWindow(design, pose, r, y, f, pane, FaceTrims.both(look), sills, glass, beams);
     }
 
     /** {@code look} added on one face. */
     public ShowcaseWindow trimmed(AttachmentFace face, Appearance look) {
-        return new ShowcaseWindow(design, pose, r, y, f, pane, trims.with(face, look), sills, glass);
+        return new ShowcaseWindow(design, pose, r, y, f, pane, trims.with(face, look), sills, glass, beams);
     }
 
     /** An arch sill in {@code look} added on one face (upper arches only). */
     public ShowcaseWindow silled(AttachmentFace face, Appearance look) {
-        return new ShowcaseWindow(design, pose, r, y, f, pane, trims, sills.with(face, look), glass);
+        return new ShowcaseWindow(design, pose, r, y, f, pane, trims, sills.with(face, look), glass, beams);
     }
 
     public ShowcaseWindow glass(DyeColor color) {
-        return new ShowcaseWindow(design, pose, r, y, f, pane, trims, sills, Optional.of(color));
+        return new ShowcaseWindow(design, pose, r, y, f, pane, trims, sills, Optional.of(color), beams);
+    }
+
+    public ShowcaseWindow beams(Appearance look) {
+        return new ShowcaseWindow(design, pose, r, y, f, pane, trims, sills, glass, Optional.of(look));
     }
 
     /** True when anything is fitted (the window's {@code trimmed} summary). */
     public boolean attached() {
-        return trims.any() || sills.any();
+        return trims.any() || sills.any() || beams.isPresent();
     }
 
     /** The block state drawing {@link #pose} (connections are left to the neighbours). */

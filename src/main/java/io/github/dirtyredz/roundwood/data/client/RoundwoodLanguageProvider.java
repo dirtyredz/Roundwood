@@ -38,6 +38,8 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add(ModBlocks.archway(ArchwayDesign.KEYHOLE), "Keyhole Archway");
         add(ModBlocks.roundTrim(), "Universal Trim");
         add(ModItems.ARCH_SILL_TRIM.get(), "Arch Sill");
+        add(ModItems.CROSS_BEAMS.get(), "Cross Beams");
+        add("tooltip.roundwood.cross_beams", "Fits across one window pane; aim at a beam to restyle it or remove it with shears");
         add(LegacyContent.windowTrim(), "Window Trim");
         for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
             add("block." + Roundwood.MOD_ID + "." + entry.id(), title(entry.id()));
@@ -54,9 +56,10 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("tooltip.roundwood.preview_note", "Crafting gives oak; restyle it in the world");
         add("message.roundwood.aim_at_leaf", "Aim at the door leaf to restyle or paint it");
         add("message.roundwood.masonry_unpaintable", "Masonry trims cannot be painted");
-        add("message.roundwood.masonry_trim_only", "Masonry restyles a trim; aim at the trim");
+        add("message.roundwood.masonry_trim_only", "Aim at a trim or cross beam to apply masonry");
         add("tooltip.roundwood.arch_sill_trim",
                 "Fits under the clicked face of an upper window arch; restyle with planks, masonry or dye, remove with shears");
+        add("message.roundwood.beams_window_only", "Cross Beams fit only a window pane");
         add("message.roundwood.sill_upper_arch_only", "An arch sill fits only an upper window arch");
     }
 

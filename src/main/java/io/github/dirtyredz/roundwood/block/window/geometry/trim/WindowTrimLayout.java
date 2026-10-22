@@ -23,6 +23,7 @@ public enum WindowTrimLayout {
     ROUND, ARCH, CIRCLE, FRAME, EDGE, SILL;
 
     public static WindowTrimLayout of(TrimSlot slot, WindowProfile profile) {
+        if (slot == TrimSlot.CROSS_BEAMS) throw new IllegalArgumentException("Beams have no face-trim layout");
         if (slot == TrimSlot.SILL) {
             return SILL;
         }

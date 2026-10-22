@@ -63,6 +63,8 @@ public final class WindowGlassGameTests {
         ServerPlayer player = player(helper, "glass_regions", GameType.SURVIVAL, Direction.NORTH);
         WindowDesign cross = new WindowDesign(WindowProfile.ROUND, WindowPattern.CROSS);
         helper.setBlock(AT, WindowTrimGameTests.window(cross, SOUTH).setValue(BlockStateProperties.WATERLOGGED, true));
+        io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions.install(helper.getLevel(), helper.absolutePos(AT),
+                io.github.dirtyredz.roundwood.block.attachment.TrimSlot.CROSS_BEAMS, io.github.dirtyredz.roundwood.block.attachment.AttachmentFace.FRONT, Appearance.DEFAULT);
         ItemStack red = new ItemStack(Items.RED_DYE, 3);
         AppearanceFixtures.use(helper, player, red, ItemStack.EMPTY, WindowRays.face(helper, player, AT, 5.5, 5.5, Direction.SOUTH), false);
         check(entity(helper).glass().equals(Optional.of(DyeColor.RED)) && red.getCount() == 2, "glass: " + entity(helper).glass());
@@ -71,7 +73,9 @@ public final class WindowGlassGameTests {
         check(red.getCount() == 2, "the same colour again was paid for");
         ItemStack blue = new ItemStack(Items.BLUE_DYE, 2);
         AppearanceFixtures.use(helper, player, blue, ItemStack.EMPTY, WindowRays.face(helper, player, AT, 8.25, 5.5, Direction.SOUTH), false);
-        check(entity(helper).appearance().equals(AppearanceFixtures.oakPainted(DyeColor.BLUE)) && entity(helper).glass().equals(Optional.of(DyeColor.RED)),
+        check(entity(helper).trims(io.github.dirtyredz.roundwood.block.attachment.TrimSlot.CROSS_BEAMS)
+                .get(io.github.dirtyredz.roundwood.block.attachment.AttachmentFace.FRONT).equals(Optional.of(AppearanceFixtures.oakPainted(DyeColor.BLUE)))
+                && entity(helper).appearance().equals(Appearance.DEFAULT) && entity(helper).glass().equals(Optional.of(DyeColor.RED)),
                 "dye on a beam: frame " + entity(helper).appearance() + ", glass " + entity(helper).glass());
         ItemStack green = new ItemStack(Items.GREEN_DYE, 1);
         AppearanceFixtures.use(helper, player, green, ItemStack.EMPTY, WindowRays.face(helper, player, AT, 1.5, 1.5, Direction.SOUTH), false);

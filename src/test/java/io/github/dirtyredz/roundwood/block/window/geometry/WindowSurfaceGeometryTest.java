@@ -120,9 +120,9 @@ class WindowSurfaceGeometryTest {
             if (design.pattern().name().equals("CROSS")) {
                 // the vertical beam's two sides face east and west at x 7.5 and 8.5
                 assertTrue(surfaces.stream().anyMatch(s -> s.face() == Direction.WEST && s.backing().minX() == 7.5
-                        && s.texture().equals(WindowPaneGeometry.FRAME)), design.id() + ": beam side missing");
+                        && s.texture().equals(WindowPaneGeometry.BEAM)), design.id() + ": beam side missing");
                 assertTrue(surfaces.stream().anyMatch(s -> s.face() == Direction.EAST && s.backing().maxX() == 8.5
-                        && s.texture().equals(WindowPaneGeometry.FRAME)), design.id() + ": beam side missing");
+                        && s.texture().equals(WindowPaneGeometry.BEAM)), design.id() + ": beam side missing");
             }
         }
     }

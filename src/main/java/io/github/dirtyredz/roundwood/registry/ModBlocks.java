@@ -9,6 +9,9 @@ import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.OrientedWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
+import io.github.dirtyredz.roundwood.migration.block.RetiredRoundWindowBlock;
+import io.github.dirtyredz.roundwood.migration.block.RetiredOrientedWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
@@ -30,13 +33,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The 31 canonical blocks: the round door and (0.11.0) the arched door, 26 windows (the round window;
- * the upper arches and bottom corners that complete a 2 x 2 arched-top window; since 0.10.0 the lower arches that close it into
- * a circle, the top corners and the four single-edge pieces; each plain and with cross beams), the
- * ordinary and keyhole archways (0.12.0) and the round trim, whose look comes from their appearance
- * (block entity), not from the block.
- * Their behaviour is the oak counterparts' whatever the appearance. The hidden 0.4.0 aliases are
- * registered by {@code migration/LegacyContent} with the same properties.
+ * The 18 canonical blocks and 13 retained crossed windows. Canonical window lists expose only
+ * plain profiles; CrossWindowCompatibility owns retired discovery and hidden-content aggregation.
  */
 public final class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Roundwood.MOD_ID);
@@ -59,7 +57,10 @@ public final class ModBlocks {
     private static Map<WindowDesign, RegistryObject<WindowPaneBlock>> registerWindows() {
         Map<WindowDesign, RegistryObject<WindowPaneBlock>> out = new LinkedHashMap<>();
         for (WindowDesign design : WindowDesign.all()) {
-            out.put(design, BLOCKS.register(design.id(), () -> design.profile().oriented()
+            out.put(design, BLOCKS.register(design.id(), () -> design.pattern() == WindowPattern.CROSS
+                    ? (design.profile().oriented() ? new RetiredOrientedWindowBlock(windowProperties(), design, ModBlockEntities::roundWindow)
+                        : new RetiredRoundWindowBlock(windowProperties(), ModBlockEntities::roundWindow))
+                    : design.profile().oriented()
                     ? new OrientedWindowBlock(windowProperties(), design, ModBlockEntities::roundWindow)
                     : new RoundWindowBlock(windowProperties(), design.pattern(), ModBlockEntities::roundWindow)));
         }
@@ -112,7 +113,7 @@ public final class ModBlocks {
 
     /** All 26 canonical windows, in creative order. */
     public static List<WindowPaneBlock> windows() {
-        return WINDOWS.values().stream().map(RegistryObject::get).toList();
+        return WINDOWS.entrySet().stream().filter(e -> e.getKey().pattern() == WindowPattern.PLAIN).map(e -> e.getValue().get()).toList();
     }
 
     /** The 24 oriented windows (every piece but the round window, plain and crossed). */
@@ -134,7 +135,7 @@ public final class ModBlocks {
         return ROUND_TRIM.get();
     }
 
-    /** The 31 canonical blocks in creative order: the two doors, the 26 windows, the two archways, trim. */
+    /** The 18 canonical blocks in creative order: two doors, 13 profiles, two archways, trim. */
     public static List<Block> canonical() {
         List<Block> out = new ArrayList<>();
         out.addAll(doors());

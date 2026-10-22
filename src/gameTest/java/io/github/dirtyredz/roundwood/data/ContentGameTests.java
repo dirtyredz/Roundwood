@@ -67,12 +67,20 @@ public final class ContentGameTests {
     public static void canonicalEntriesAndFortyNineHiddenAliasesAreRegistered(GameTestHelper helper) {
         long blocks = ForgeRegistries.BLOCKS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         long items = ForgeRegistries.ITEMS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(blocks == 80, "expected 31 + 49 blocks, found " + blocks);
-        check(items == 82, "expected 31 + the arch sill + 49 + the window trim items, found " + items);
+        check(blocks == 80, "expected 18 + 13 + 49 blocks, found " + blocks);
+        check(items == 83, "expected 18 + two attachments + 13 + 49 + the window trim items, found " + items);
         for (String id : CANONICAL_BLOCKS) {
             check(ForgeRegistries.BLOCKS.containsKey(id(id)) && ForgeRegistries.ITEMS.containsKey(id(id)), "missing " + id);
             check(ForgeRegistries.BLOCKS.getValue(id(id)).asItem() == ForgeRegistries.ITEMS.getValue(id(id)), id + ": item mapping");
         }
+        for (String plain : CANONICAL_BLOCKS.stream().filter(id -> id.startsWith("round_window")).toList()) {
+            Item retired = ForgeRegistries.ITEMS.getValue(id(plain + "_cross"));
+            Block block = ForgeRegistries.BLOCKS.getValue(id(plain + "_cross"));
+            check(retired instanceof io.github.dirtyredz.roundwood.migration.item.RetiredCrossWindowItem
+                    && block.asItem() == retired && !ModItems.all().contains(retired) && LegacyContent.items().contains(retired), "retired registration/visibility " + plain);
+        }
+        check(ModItems.CROSS_BEAMS.get() instanceof io.github.dirtyredz.roundwood.block.attachment.item.StyledAttachmentItem
+                && TrimAttachmentItem.slotOf(new ItemStack(ModItems.CROSS_BEAMS.get())).equals(Optional.of(TrimSlot.CROSS_BEAMS)), "cross beams attachment item");
         Item sill = ForgeRegistries.ITEMS.getValue(id("arch_sill_trim"));
         check(sill == ModItems.ARCH_SILL_TRIM.get() && !ForgeRegistries.BLOCKS.containsKey(id("arch_sill_trim"))
                 && sill instanceof ArchSillTrimItem && !(sill instanceof net.minecraft.world.item.BlockItem)
@@ -118,6 +126,7 @@ public final class ContentGameTests {
         }
         List<Block> windows = new java.util.ArrayList<>(ModBlocks.windows());
         windows.addAll(LegacyContent.windows());
+        windows.addAll(io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility.blocks());
         check(windows.size() == 41, "expected 26 + 15 window blocks, found " + windows.size());
         for (Block window : windows) {
             check(ModBlockEntities.roundWindow().isValid(window.defaultBlockState()), window + " cannot carry the window entity");
@@ -174,6 +183,10 @@ public final class ContentGameTests {
                     archway + " archway tags (never a door)");
         }
         for (Block alias : LegacyContent.blocks()) {
+            if (io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility.isRetired(alias.defaultBlockState())) {
+                check(alias.defaultBlockState().is(ModTags.ROUND_WINDOWS) && new ItemStack(alias).is(ModTags.ROUND_WINDOW_ITEMS), "retired window lost gameplay tags");
+                continue;
+            }
             check(!alias.defaultBlockState().is(ModTags.ROUND_DOORS) && !alias.defaultBlockState().is(ModTags.ROUND_WINDOWS)
                     && !alias.defaultBlockState().is(ModTags.ROUND_TRIMS), alias + ": family tags name only the canonical blocks");
         }
@@ -204,8 +217,10 @@ public final class ContentGameTests {
                 "a painting recipe is still loaded");
         long count = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
                 .filter(r -> r.getId().getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(count == 32, "expected 32 roundwood crafting recipes, loaded " + count);
+        check(count == 20, "expected 20 roundwood crafting recipes, loaded " + count);
         ItemStack k = new ItemStack(Items.STICK);
+        var ladder = find(level, grid(k, e, k, k, k, k, k, e, k)).orElseThrow();
+        check(ladder.assemble(grid(k, e, k, k, k, k, k, e, k), level.registryAccess()).is(Items.LADDER), "beams collided with the vanilla ladder");
         check(find(level, grid(e, o, e, s, k, w, e, o, e)).map(r -> !r.getId().getNamespace().equals(Roundwood.MOD_ID)).orElse(true),
                 "the 0.8.0 window trim recipe is still loaded");
         helper.succeed();
@@ -220,11 +235,6 @@ public final class ContentGameTests {
         ServerLevel level = helper.getLevel();
         expectShape(level, ModItems.window(design(WindowProfile.BOTTOM_LEFT, WindowPattern.PLAIN)), "P ", "PG", "PP");
         expectShape(level, ModItems.window(design(WindowProfile.BOTTOM_RIGHT, WindowPattern.PLAIN)), " P ", " G ", "PPP");
-        expectShape(level, ModItems.window(design(WindowProfile.ROUND, WindowPattern.CROSS)), "SPS", "PGP", "SPS");
-        expectShape(level, ModItems.window(design(WindowProfile.ARCH_LEFT, WindowPattern.CROSS)), "PPS", "PGS", "P  ");
-        expectShape(level, ModItems.window(design(WindowProfile.ARCH_RIGHT, WindowPattern.CROSS)), "PPP", "SGS", " P ");
-        expectShape(level, ModItems.window(design(WindowProfile.BOTTOM_LEFT, WindowPattern.CROSS)), "P  ", "PGS", "PPS");
-        expectShape(level, ModItems.window(design(WindowProfile.BOTTOM_RIGHT, WindowPattern.CROSS)), " P ", "SGS", "PPP");
         helper.succeed();
     }
 
@@ -240,16 +250,9 @@ public final class ContentGameTests {
         expectShape(level, ModItems.window(design(WindowProfile.EDGE_LEFT, WindowPattern.PLAIN)), "P ", "PG", "P ");
         expectShape(level, ModItems.window(design(WindowProfile.EDGE_BOTTOM, WindowPattern.PLAIN)), " G ", "PPP");
         expectShape(level, ModItems.window(design(WindowProfile.EDGE_RIGHT, WindowPattern.PLAIN)), "GP", " P", " P");
-        expectShape(level, ModItems.window(design(WindowProfile.ARCH_BOTTOM_LEFT, WindowPattern.CROSS)), "PP ", "PGS", "PPS");
-        expectShape(level, ModItems.window(design(WindowProfile.ARCH_BOTTOM_RIGHT, WindowPattern.CROSS)), "PPP", "SGS", "PPP");
-        expectShape(level, ModItems.window(design(WindowProfile.TOP_LEFT, WindowPattern.CROSS)), "PPP", "PGS", "PS ");
-        expectShape(level, ModItems.window(design(WindowProfile.TOP_RIGHT, WindowPattern.CROSS)), "PPP", "SGS", "  P");
-        expectShape(level, ModItems.window(design(WindowProfile.EDGE_TOP, WindowPattern.CROSS)), "PPP", "SGS");
-        expectShape(level, ModItems.window(design(WindowProfile.EDGE_LEFT, WindowPattern.CROSS)), "PS", "PG", "PS");
-        expectShape(level, ModItems.window(design(WindowProfile.EDGE_BOTTOM, WindowPattern.CROSS)), "SGS", "PPP");
-        expectShape(level, ModItems.window(design(WindowProfile.EDGE_RIGHT, WindowPattern.CROSS)), "GP", "SP", "SP");
         expectShape(level, ModItems.ARCH_SILL_TRIM.get(), "PPP", "S S");
         expectShape(level, ModItems.ARCHED_DOOR.get(), " P ", "PNP", "PPP");
+        expectShape(level, ModItems.CROSS_BEAMS.get(), " S ", "SSS", " S ");
         // 0.12.0
         expectShape(level, ModItems.archway(ArchwayDesign.ORDINARY), "PPP", "P P", "P P");
         expectShape(level, ModItems.archway(ArchwayDesign.KEYHOLE), "SPS", "P P", "P P");
@@ -333,23 +336,21 @@ public final class ContentGameTests {
         List<ItemStack> shown = List.copyOf(tab.getDisplayItems());
         List<String> expected = new java.util.ArrayList<>(CANONICAL_BLOCKS);
         expected.add("arch_sill_trim");
+        expected.add("cross_beams");
         check(shown.stream().map(stack -> ForgeRegistries.ITEMS.getKey(stack.getItem()).getPath()).toList().equals(expected),
-                "tab is not the two doors, the 26 windows (each plain then crossed), the two archways, Universal Trim, Arch Sill: " + shown);
+                "tab is not the two doors, 13 plain windows, two archways, Universal Trim, Arch Sill and Cross Beams: " + shown);
         check(shown.stream().noneMatch(ItemStack::hasTag), "tab entries carry an appearance: " + shown);
         check(AppearanceStacks.read(shown.get(0)).equals(Appearance.DEFAULT), "the tab's door is not oak");
         helper.succeed();
     }
 
-    /** The 31 canonical blocks in creative order, written out. */
+    /** The 18 canonical blocks in creative order, written out. */
     private static final List<String> CANONICAL_BLOCKS = List.of("round_door", "arched_door",
-            "round_window", "round_window_cross", "round_window_arch_left", "round_window_arch_left_cross",
-            "round_window_arch_right", "round_window_arch_right_cross", "round_window_bottom_left", "round_window_bottom_left_cross",
-            "round_window_bottom_right", "round_window_bottom_right_cross",
-            "round_window_arch_bottom_left", "round_window_arch_bottom_left_cross", "round_window_arch_bottom_right",
-            "round_window_arch_bottom_right_cross", "round_window_top_left", "round_window_top_left_cross", "round_window_top_right",
-            "round_window_top_right_cross", "round_window_edge_top", "round_window_edge_top_cross", "round_window_edge_left",
-            "round_window_edge_left_cross", "round_window_edge_bottom", "round_window_edge_bottom_cross", "round_window_edge_right",
-            "round_window_edge_right_cross", "archway", "keyhole_archway", "round_trim");
+            "round_window", "round_window_arch_left", "round_window_arch_right", "round_window_bottom_left", "round_window_bottom_right", "round_window_arch_bottom_left", "round_window_arch_bottom_right",
+            "round_window_top_left", "round_window_top_right",
+            "round_window_edge_top", "round_window_edge_left",
+            "round_window_edge_bottom", "round_window_edge_right",
+            "archway", "keyhole_archway", "round_trim");
 
     /** The canonical block of a family's 0.4.0 aliases (written out, not read from list positions). */
     private static Block canonicalBlock(io.github.dirtyredz.roundwood.appearance.AppearanceFamily family) {

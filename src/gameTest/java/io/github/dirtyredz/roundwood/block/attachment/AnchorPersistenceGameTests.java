@@ -171,13 +171,13 @@ public final class AnchorPersistenceGameTests {
         assertKeys("default window saved", window.saveWithoutMetadata(), WindowTrimNbt.TAG);
         check(window.saveWithoutMetadata().getCompound(WindowTrimNbt.TAG).getInt("Version") == 2
                 && !window.saveWithoutMetadata().getCompound(WindowTrimNbt.TAG).contains("Front"), "empty perimeter payload v2");
-        assertKeys("default window update", window.getUpdateTag(), WindowTrimNbt.TAG, WindowSillNbt.TAG);
+        assertKeys("default window update", window.getUpdateTag(), WindowTrimNbt.TAG, WindowSillNbt.TAG, "WindowCrossBeams");
         check(WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.SILL, AttachmentFace.FRONT, BRICK), "sill");
         assertKeys("sill window saved", window.saveWithoutMetadata(), WindowTrimNbt.TAG, WindowSillNbt.TAG);
         window.setAppearance(BLUE);
         window.setGlass(Optional.of(DyeColor.RED));
         assertKeys("styled window saved", window.saveWithoutMetadata(), AppearanceNbt.TAG, WindowGlassNbt.TAG, WindowTrimNbt.TAG, WindowSillNbt.TAG);
-        assertKeys("styled window update", window.getUpdateTag(), AppearanceNbt.TAG, WindowGlassNbt.TAG, WindowTrimNbt.TAG, WindowSillNbt.TAG);
+        assertKeys("styled window update", window.getUpdateTag(), AppearanceNbt.TAG, WindowGlassNbt.TAG, WindowTrimNbt.TAG, WindowSillNbt.TAG, "WindowCrossBeams");
         helper.setBlock(WINDOW_AT, Blocks.AIR);
         helper.succeed();
     }

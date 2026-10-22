@@ -4,6 +4,10 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayItem;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.attachment.item.ArchSillTrimItem;
+import io.github.dirtyredz.roundwood.block.attachment.item.StyledAttachmentItem;
+import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
+import io.github.dirtyredz.roundwood.migration.item.RetiredCrossWindowItem;
 import io.github.dirtyredz.roundwood.block.attachment.item.UniversalTrimItem;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorItem;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowItem;
@@ -21,13 +25,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The 32 advertised items, in creative-tab order: the round door and (0.11.0) the arched door, the
- * 26 windows (each plain piece followed by
- * its crossed variant), the ordinary and keyhole archways (0.12.0), the Universal Trim ({@code round_trim}, 0.9.0: the one perimeter attachment
- * for windows and doors; it keeps its block association with the compatibility frame) and the Arch
- * Sill ({@code arch_sill_trim}, 0.10.0: an item only, the upper arches' sill attachment). Their
- * appearance travels in the stack. The hidden compatibility items (the 0.4.0 aliases and the 0.8.0
- * {@code window_trim}) are registered by {@code migration/LegacyContent}.
+ * Twenty advertised items: two doors, thirteen plain profiles, two archways and three attachments.
+ * The window map also retains the thirteen hidden crossed items. Frozen aliases and window_trim
+ * remain registered by LegacyContent. Looks travel in stack data.
  */
 public final class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Roundwood.MOD_ID);
@@ -46,13 +46,18 @@ public final class ModItems {
     public static final RegistryObject<ArchSillTrimItem> ARCH_SILL_TRIM = ITEMS.register(ArchSillTrimItem.ID,
             () -> new ArchSillTrimItem(new Item.Properties()));
 
+    public static final RegistryObject<StyledAttachmentItem> CROSS_BEAMS = ITEMS.register("cross_beams",
+            () -> new StyledAttachmentItem(TrimSlot.CROSS_BEAMS, new Item.Properties()));
+
     private ModItems() {
     }
 
     private static Map<WindowDesign, RegistryObject<RoundWindowItem>> registerWindows() {
         Map<WindowDesign, RegistryObject<RoundWindowItem>> out = new LinkedHashMap<>();
         for (WindowDesign design : WindowDesign.all()) {
-            out.put(design, ITEMS.register(design.id(), () -> new RoundWindowItem(ModBlocks.window(design), new Item.Properties())));
+            out.put(design, ITEMS.register(design.id(), () -> design.pattern() == WindowPattern.CROSS
+                    ? new RetiredCrossWindowItem(design, new Item.Properties())
+                    : new RoundWindowItem(ModBlocks.window(design), new Item.Properties())));
         }
         return Collections.unmodifiableMap(out);
     }
@@ -82,7 +87,7 @@ public final class ModItems {
 
     /** The 26 window items, in creative order. */
     public static List<Item> windows() {
-        return WINDOWS.values().stream().map(RegistryObject::get).map(Item.class::cast).toList();
+        return WINDOWS.entrySet().stream().filter(e -> e.getKey().pattern() == WindowPattern.PLAIN).map(e -> (Item) e.getValue().get()).toList();
     }
 
     /** The advertised items in creative order: the two doors, the 26 windows, the two archways, the Universal Trim, the Arch Sill. */
@@ -94,6 +99,7 @@ public final class ModItems {
         out.addAll(archways());
         out.add(ROUND_TRIM.get());
         out.add(ARCH_SILL_TRIM.get());
+        out.add(CROSS_BEAMS.get());
         return List.copyOf(out);
     }
 }

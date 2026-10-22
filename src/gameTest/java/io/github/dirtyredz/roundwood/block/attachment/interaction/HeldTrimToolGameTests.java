@@ -81,6 +81,19 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class HeldTrimToolGameTests {
+    @GameTest(template = TEMPLATE)
+    public static void crossBeamsAreRefusedByDoorsAndArchways(GameTestHelper helper) {
+        Scene door = door(helper, "beam_door", false);
+        var stack = new ItemStack(ModItems.CROSS_BEAMS.get());
+        door.hold(stack, ItemStack.EMPTY);
+        check(!door.claims(MAIN) && door.use(MAIN) == InteractionResult.FAIL, "door accepted beams");
+        check(stack.getCount() == 1 && !door.trims.get().any(), "door fitted or charged beams");
+        Scene archway = archway(helper, "beam_arch", false);
+        archway.hold(stack, ItemStack.EMPTY);
+        check(archway.claims(MAIN) && archway.use(MAIN).consumesAction(), "archway did not claim refusal");
+        check(stack.getCount() == 1 && !archway.trims.get().any(), "archway fitted or charged beams");
+        helper.succeed();
+    }
     private static final BlockPos ANCHOR = new BlockPos(3, 1, 3);
     private static final BlockPos AT = new BlockPos(4, 2, 4);
     private static final WindowPose SOUTH = WindowPose.upright(Direction.SOUTH, WindowDepth.CENTER);

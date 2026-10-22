@@ -7,6 +7,8 @@ import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
+import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 
 /**
  * One host's face trims in one {@link TrimSlot}, and custody of a saved payload this build does not
@@ -44,17 +46,25 @@ public final class FaceTrimStore {
      * @param saveEmpty write an explicit empty payload when no face is trimmed (windows: it overrides
      *                  a stale 0.7.0 summary); otherwise empty is omitted (doors)
      */
-    public record Format(String tag, int version, boolean saveEmpty) {
+    public record Format(String tag, int version, boolean saveEmpty, TrimSlot.Scope scope) {
+        public Format(String tag, int version, boolean saveEmpty) {
+            this(tag, version, saveEmpty, TrimSlot.Scope.FACE);
+        }
+
+        public boolean accepts(FaceTrims trims) {
+            return scope != TrimSlot.Scope.WHOLE_HOST || (!trims.has(AttachmentFace.BACK)
+                    && trims.front().map(AppearanceFamily.TRIM::accepts).orElse(true));
+        }
     }
 
     /** What was read: the faces, and a payload of an unknown version to keep (null when understood). */
-    public record Read(FaceTrims trims, @Nullable CompoundTag unknown) {
+    public record Read(FaceTrims trims, @Nullable Tag unknown) {
     }
 
     private final Format format;
     private FaceTrims trims = FaceTrims.NONE;
     @Nullable
-    private CompoundTag unknown;
+    private Tag unknown;
 
     public FaceTrimStore(Format format) {
         this.format = format;
@@ -62,6 +72,11 @@ public final class FaceTrimStore {
 
     /** Reads {@code format}'s payload from {@code parent}. */
     public static Read read(Format format, @Nullable CompoundTag parent, Legacy legacy) {
+        Tag raw = parent == null ? null : parent.get(format.tag());
+        if (format.scope() == TrimSlot.Scope.WHOLE_HOST && raw != null
+                && (!(raw instanceof CompoundTag compound) || !FaceTrimsNbt.validSingleton(compound, format.version()))) {
+            return new Read(FaceTrims.NONE, raw.copy());
+        }
         CompoundTag payload = parent != null && parent.contains(format.tag(), Tag.TAG_COMPOUND) ? parent.getCompound(format.tag()) : null;
         Optional<Integer> version = payload == null ? Optional.empty() : FaceTrimsNbt.version(payload);
         if (payload != null && version.isPresent() && version.get() == format.version()) {
@@ -76,6 +91,9 @@ public final class FaceTrimStore {
 
     /** Writes {@code trims} as {@code format}'s current payload into {@code parent} (always, empty included). */
     public static void write(Format format, CompoundTag parent, FaceTrims trims) {
+        if (!format.accepts(trims)) {
+            throw new IllegalArgumentException("A whole-host attachment cannot contain Back");
+        }
         parent.put(format.tag(), FaceTrimsNbt.encode(trims, format.version()));
     }
 
@@ -95,7 +113,7 @@ public final class FaceTrimStore {
 
     /** Replaces the faces; refused (false) while an unknown payload is held. The host saves and syncs. */
     public boolean set(FaceTrims next) {
-        if (!editable()) {
+        if (!editable() || !format.accepts(next)) {
             return false;
         }
         trims = next;

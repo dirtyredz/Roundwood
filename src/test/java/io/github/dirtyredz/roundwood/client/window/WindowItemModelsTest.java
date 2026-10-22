@@ -61,6 +61,20 @@ class WindowItemModelsTest {
     }
 
     @Test
+    void independentBeamsCacheSeparatelyFromThePlainItemAndEachOther() {
+        WindowItemModels<Object> cache = new WindowItemModels<>(16);
+        Object source = new Object();
+        List<Object> built = new ArrayList<>();
+        Object plain = cache.get(source, SPRUCE, CLEAR, s -> record(built, s));
+        Object spruce = cache.get(source, SPRUCE, CLEAR, SPRUCE, s -> record(built, s));
+        Object birch = cache.get(source, SPRUCE, CLEAR, BIRCH, s -> record(built, s));
+        assertNotSame(plain, spruce);
+        assertNotSame(spruce, birch);
+        assertSame(spruce, cache.get(source, SPRUCE, CLEAR, SPRUCE, s -> record(built, s)));
+        assertEquals(3, built.size());
+    }
+
+    @Test
     void sourcesAreNeverReplacedAndClearingRebuilds() {
         WindowItemModels<Object> cache = new WindowItemModels<>(16);
         Object source = new Object();

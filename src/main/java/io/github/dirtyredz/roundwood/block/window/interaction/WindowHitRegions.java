@@ -11,8 +11,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * What a point on a window's face is (0.8.0): the one classification every window click is routed
  * by. Face coordinates are pixels {@code (u, v)} as seen from the front ({@code 0..16}), read on the
- * existing rasters: the profile's opening, the cross beams (half pixels, {@code 7.5..8.5}, always
- * frame), the perimeter trim band and (0.10.0) the arch sill. An attachment wins only when the face
+ * existing rasters: the profile's opening, the cross beams (half pixels, {@code 7.5..8.5}, their own
+ * attachment), the perimeter trim band and (0.10.0) the arch sill. An attachment wins only when the face
  * being clicked carries it, so an empty face stays editable as frame and glass; the band lies on frame
  * wood and the sill inside the opening, so the two never compete.
  *
@@ -26,8 +26,10 @@ public final class WindowHitRegions {
         TRIM,
         /** The installed arch sill on the clicked face (0.10.0). */
         SILL,
-        /** Frame wood, beams included. */
+        /** The pane frame only. */
         FRAME,
+        /** The independent whole-pane Cross Beams attachment. */
+        BEAM,
         /** The glazing. */
         GLASS,
         /** A centred pane's connector arm (glass outside the slab). */
@@ -38,7 +40,7 @@ public final class WindowHitRegions {
         /** The attachment slot this region is, or null when it is no attachment. */
         @Nullable
         public TrimSlot slot() {
-            return this == TRIM ? TrimSlot.PERIMETER : this == SILL ? TrimSlot.SILL : null;
+            return this == TRIM ? TrimSlot.PERIMETER : this == SILL ? TrimSlot.SILL : this == BEAM ? TrimSlot.CROSS_BEAMS : null;
         }
     }
 
@@ -70,7 +72,7 @@ public final class WindowHitRegions {
             return Region.SILL;
         }
         if (WindowMuntinGeometry.isBeam(design, hu, hv)) {
-            return Region.FRAME;
+            return Region.BEAM;
         }
         return design.profile().inOpening(hu / 2, hv / 2) ? Region.GLASS : Region.FRAME;
     }

@@ -72,6 +72,8 @@ public class AttachmentItemModelProvider extends ItemModelProvider {
     protected void registerModels() {
         write(UniversalTrimItem.ID, frame());
         write(ArchSillTrimItem.ID, sill());
+        write("cross_beams", List.of(new Box(7.5, 0, Z1, 8.5, 16, Z1 + DEPTH),
+                new Box(0, 7.5, Z1, 7.5, 8.5, Z1 + DEPTH), new Box(8.5, 7.5, Z1, 16, 8.5, Z1 + DEPTH)));
         getBuilder(LegacyContent.WINDOW_TRIM_ID).parent(new ModelFile.UncheckedModelFile(modLoc("item/" + UniversalTrimItem.ID)));
     }
 
@@ -89,7 +91,8 @@ public class AttachmentItemModelProvider extends ItemModelProvider {
                 return AssemblyFaceUv.of(part, face, SIZE);
             }
         });
-        item.texture(FACE, TrimModelProvider.OAK_LOG).texture(EDGE, TrimModelProvider.OAK_LOG).texture("particle", TrimModelProvider.OAK_LOG);
+        String texture = id.equals("cross_beams") ? "minecraft:block/oak_planks" : TrimModelProvider.OAK_LOG;
+        item.texture(FACE, texture).texture(EDGE, texture).texture("particle", texture);
         ItemModelTransforms.block(item, CENTRE);
     }
 }

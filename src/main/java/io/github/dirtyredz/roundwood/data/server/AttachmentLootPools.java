@@ -33,7 +33,7 @@ final class AttachmentLootPools {
      */
     static List<LootPool.Builder> faces(TrimSlot slot, Item trimItem, String payload, UnaryOperator<LootPool.Builder> explosion) {
         List<LootPool.Builder> pools = new ArrayList<>();
-        for (AttachmentFace face : AttachmentFace.values()) {
+        for (AttachmentFace face : slot.addresses()) {
             pools.add(explosion.apply(LootPool.lootPool()
                     .setRolls(ConstantValue.exactly(1))
                     .when(TrimFaceCondition.hasTrim(slot, face))

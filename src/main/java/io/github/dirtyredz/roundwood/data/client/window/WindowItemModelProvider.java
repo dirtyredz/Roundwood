@@ -31,7 +31,7 @@ public class WindowItemModelProvider extends ItemModelProvider {
     protected void registerModels() {
         for (WindowDesign design : WindowDesign.all()) {
             ItemModelBuilder item = getBuilder(design.id())
-                    .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + design.id())));
+                    .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + WindowDesign.plain(design.profile()).id())));
             ItemModelTransforms.block(item, CENTRE);
         }
     }

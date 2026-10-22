@@ -322,7 +322,7 @@ public class WindowPaneGeometryTest {
 
         Voxels(List<Piece> pieces) {
             for (Piece piece : pieces) {
-                byte kind = (byte) (piece.texture().equals(WindowPaneGeometry.FRAME) ? 1 : 2);
+                byte kind = (byte) (piece.texture().equals(WindowPaneGeometry.GLASS) ? 2 : 1);
                 Box b = piece.box();
                 for (int x = (int) Math.round(b.minX() * 2); x < (int) Math.round(b.maxX() * 2); x++) {
                     for (int y = (int) Math.round(b.minY() * 2); y < (int) Math.round(b.maxY() * 2); y++) {

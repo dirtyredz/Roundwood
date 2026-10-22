@@ -83,8 +83,8 @@ public final class WindowCornerGameTests {
             hideEachOther(helper, br, ar, Direction.UP);
             // Independent pieces: breaking one leaves the others.
             helper.destroyBlock(bl);
-            check(helper.getBlockState(br).is(block(WindowProfile.BOTTOM_RIGHT, pattern))
-                    && helper.getBlockState(al).is(block(WindowProfile.ARCH_LEFT, pattern)), "breaking a corner removed a neighbour");
+            check(helper.getBlockState(br).is(block(WindowProfile.BOTTOM_RIGHT, WindowPattern.PLAIN))
+                    && helper.getBlockState(al).is(block(WindowProfile.ARCH_LEFT, WindowPattern.PLAIN)), "breaking a corner removed a neighbour");
             for (BlockPos pos : List.of(br, al, ar)) {
                 helper.setBlock(pos, Blocks.AIR);
             }
@@ -137,24 +137,27 @@ public final class WindowCornerGameTests {
         floor(helper);
         ServerPlayer player = player(helper, "corner_drop", GameType.SURVIVAL, Direction.NORTH);
         Appearance look = AppearanceFixtures.oakPainted(DyeColor.BROWN);
-        WindowPaneBlock left = block(WindowProfile.BOTTOM_LEFT, WindowPattern.CROSS);
+        WindowPaneBlock left = block(WindowProfile.BOTTOM_LEFT, WindowPattern.PLAIN);
         BlockPos at = new BlockPos(3, 1, 3);
         helper.setBlock(at, Blocks.WATER);
         WindowFixtures.place(player, styled(left, look), WindowFixtures.zone(helper, at.below(), Direction.UP, WindowTargetZones.Zone.CENTER));
         BlockState state = helper.getBlockState(at);
         check(state.is(left) && state.getValue(BlockStateProperties.WATERLOGGED), "corner not waterlogged: " + state);
         check(look.equals(windowLook(helper, helper.absolutePos(at))), "placed corner lost its look");
+        check(io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions.install(helper.getLevel(), helper.absolutePos(at),
+                io.github.dirtyredz.roundwood.block.attachment.TrimSlot.CROSS_BEAMS,
+                io.github.dirtyredz.roundwood.block.attachment.AttachmentFace.FRONT, look), "corner beams not installed");
         ItemStack pick = AppearanceFixtures.pick(helper, helper.absolutePos(at));
         check(pick.is(left.asItem()) && AppearanceStacks.read(pick).equals(look), "pick " + pick);
         BlockState before = helper.getBlockState(at);
         AppearanceFixtures.use(helper, player, new ItemStack(Items.SPRUCE_PLANKS), ItemStack.EMPTY,
-                WindowFixtures.hit(helper, at, Direction.SOUTH, 0.5, 0.5), true);
+                io.github.dirtyredz.roundwood.fixture.WindowRays.face(helper, player, at, 1.5, 8, Direction.SOUTH), true);
         check(AppearanceFixtures.SPRUCE.equals(windowLook(helper, helper.absolutePos(at))) && helper.getBlockState(at).equals(before),
                 "restyling a corner: " + helper.getBlockState(at));
         clearDrops(helper);
         player.gameMode.destroyBlock(helper.absolutePos(at));
         check(dropped(helper, left.asItem(), AppearanceFixtures.SPRUCE) == 1, "corner did not drop itself in its look");
-        check(dropped(helper, ModItems.window(WindowDesign.plain(WindowProfile.BOTTOM_LEFT))) == 0, "a crossed corner dropped a plain one");
+        check(dropped(helper, ModItems.CROSS_BEAMS.get(), look) == 1, "crossed corner lost its independent beams");
         check(helper.getLevel().getFluidState(helper.absolutePos(at)).isSource(), "water not left behind");
         helper.setBlock(at, Blocks.AIR);
         clearDrops(helper);

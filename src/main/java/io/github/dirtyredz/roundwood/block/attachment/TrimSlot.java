@@ -9,26 +9,40 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.Locale;
 
 /**
- * Which kind of attachment a face trim is (0.9.0). A host keeps one {@code storage/FaceTrimStore} per slot it
- * supports, each with its own FRONT/BACK pair, payload and loot pools, so two slots on one face are
- * fitted, restyled, removed and dropped independently. The slot also names the canonical item a
- * removed or dropped attachment comes back as.
- * <ul>
- *     <li>{@link #PERIMETER}: the Universal Trim around a window, door or archway face
- *     ({@code roundwood:round_trim}). Every host has it.</li>
- *     <li>{@link #SILL}: the arch sill across an upper arch's bottom edge (planned for 0.10.0, item
- *     {@code roundwood:arch_sill_trim}). No host stores it yet.</li>
- * </ul>
- * The serialized name is the loot condition's {@code slot} value; an omitted slot means perimeter.
+ * Attachment identity and scope, shared by storage, fitting and loot. Face slots address Front/Back;
+ * a whole-host slot normalizes both physical faces to one Front record.
  */
 public enum TrimSlot implements StringRepresentable {
     PERIMETER("round_trim"),
-    SILL("arch_sill_trim");
+    SILL("arch_sill_trim"),
+    CROSS_BEAMS("cross_beams", Scope.WHOLE_HOST);
+
+    public enum Scope { FACE, WHOLE_HOST }
 
     private final String itemId;
+    private final Scope scope;
 
     TrimSlot(String itemId) {
+        this(itemId, Scope.FACE);
+    }
+
+    TrimSlot(String itemId, Scope scope) {
         this.itemId = itemId;
+        this.scope = scope;
+    }
+
+    public Scope scope() {
+        return scope;
+    }
+
+    /** Both physical faces address the single whole-host record. */
+    public AttachmentFace address(AttachmentFace face) {
+        return scope == Scope.WHOLE_HOST ? AttachmentFace.FRONT : face;
+    }
+
+    public java.util.List<AttachmentFace> addresses() {
+        return scope == Scope.WHOLE_HOST ? java.util.List.of(AttachmentFace.FRONT)
+                : java.util.List.of(AttachmentFace.FRONT, AttachmentFace.BACK);
     }
 
     /** The registry path of the canonical item for this slot. */

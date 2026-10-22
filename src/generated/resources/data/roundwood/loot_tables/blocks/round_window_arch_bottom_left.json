@@ -79,6 +79,39 @@
         }
       ],
       "rolls": 1.0
+    },
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "roundwood:trim_face",
+          "face": "front",
+          "slot": "cross_beams"
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "WindowCrossBeams.Front.RoundwoodAppearance",
+                  "target": "RoundwoodAppearance"
+                }
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "roundwood:cross_beams"
+        }
+      ],
+      "rolls": 1.0
     }
   ],
   "random_sequence": "roundwood:blocks/round_window_arch_bottom_left"

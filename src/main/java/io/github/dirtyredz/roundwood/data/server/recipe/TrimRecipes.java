@@ -25,6 +25,9 @@ public final class TrimRecipes {
     }
 
     public static void build(Consumer<FinishedRecipe> writer, InventoryChangeTrigger.TriggerInstance unlock) {
+        ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModItems.CROSS_BEAMS.get())
+                .pattern(" S ").pattern("SSS").pattern(" S ").define('S', Items.STICK)
+                .unlockedBy("has_stick", InventoryChangeTrigger.TriggerInstance.hasItems(Items.STICK)).save(writer);
         ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, ModItems.ROUND_TRIM.get())
                 .pattern("P P").pattern("   ").pattern("P P")
                 .define('P', ItemTags.PLANKS)

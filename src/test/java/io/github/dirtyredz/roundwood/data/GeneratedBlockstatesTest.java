@@ -74,7 +74,7 @@ class GeneratedBlockstatesTest {
         Map<String, String> windows = new java.util.LinkedHashMap<>();
         ModelExpectations.aliasWindows().forEach(alias -> windows.put(alias, "round_window"));
         windows.put("round_window", "round_window");
-        windows.put("round_window_cross", "round_window_cross");
+        windows.put("round_window_cross", "round_window");
         assertEquals(17, windows.size());
         for (Map.Entry<String, String> window : windows.entrySet()) {
             String id = window.getKey();
@@ -117,7 +117,7 @@ class GeneratedBlockstatesTest {
                             values.put("orientation", orientation);
                             values.put("depth", depth);
                             values.putAll(flagValues(flags));
-                            assertEquals(expectedArch(piece, orientation, depth, mask),
+                            assertEquals(expectedArch(piece.replace("_cross", ""), orientation, depth, mask),
                                     applied(parts, values), piece + " " + values);
                         }
                     }

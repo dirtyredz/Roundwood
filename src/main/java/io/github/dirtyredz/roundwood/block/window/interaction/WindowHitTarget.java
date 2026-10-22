@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.block.window.interaction;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowFaceIdentity;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPaneGeometry;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
@@ -39,6 +40,12 @@ public record WindowHitTarget(AttachmentFace face, Direction side, WindowHitRegi
      */
     public static Optional<WindowHitTarget> of(BlockState state, BlockPos pos, Vec3 hit, Direction hitFace,
                                                @Nullable Vec3 viewer, FaceTrims trims, FaceTrims sills) {
+        return of(state, pos, hit, hitFace, viewer, trims, sills,
+                state.getBlock() instanceof WindowPaneBlock block ? block.design() : null);
+    }
+
+    public static Optional<WindowHitTarget> of(BlockState state, BlockPos pos, Vec3 hit, Direction hitFace,
+            @Nullable Vec3 viewer, FaceTrims trims, FaceTrims sills, WindowDesign design) {
         if (!(state.getBlock() instanceof WindowPaneBlock block)) {
             return Optional.empty();
         }
@@ -71,7 +78,7 @@ public record WindowHitTarget(AttachmentFace face, Direction side, WindowHitRegi
         if (along < slabMin || along > slabMax) {
             double[] band = WindowTrimGeometry.depth(pose, side);
             if ((trimmed || silled) && along >= band[0] && along <= band[1]) {
-                WindowHitRegions.Region region = WindowHitRegions.classify(block.design(), uv[0], uv[1], trimmed, silled);
+                WindowHitRegions.Region region = WindowHitRegions.classify(design, uv[0], uv[1], trimmed, silled);
                 if (region.slot() != null) {
                     return Optional.of(new WindowHitTarget(face, side, region));
                 }
@@ -80,6 +87,6 @@ public record WindowHitTarget(AttachmentFace face, Direction side, WindowHitRegi
                     : WindowHitRegions.Region.NONE;
             return Optional.of(new WindowHitTarget(face, side, outside));
         }
-        return Optional.of(new WindowHitTarget(face, side, WindowHitRegions.classify(block.design(), uv[0], uv[1], trimmed, silled)));
+        return Optional.of(new WindowHitTarget(face, side, WindowHitRegions.classify(design, uv[0], uv[1], trimmed, silled)));
     }
 }

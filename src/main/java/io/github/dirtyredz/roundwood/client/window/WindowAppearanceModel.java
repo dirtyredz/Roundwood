@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.client.window;
 
 import io.github.dirtyredz.roundwood.client.window.trim.WindowTrimRenderer;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowAppearanceData;
@@ -28,16 +29,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.UnaryOperator;
+import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneState;
+import io.github.dirtyredz.roundwood.block.window.trim.WindowBeamNbt;
+import io.github.dirtyredz.roundwood.client.material.TrimLooks;
+import io.github.dirtyredz.roundwood.migration.item.RetiredCrossWindowItem;
 
 /**
- * Wraps every window blockstate model (the ten windows and the 0.4.0 aliases) so the chunk-baked
- * window shows its block entity's looks ({@link WindowAppearanceData}): the frame and beams (the oak
- * planks of the generated model) take the frame's wood or paint, and the glazing (the clear glass)
- * takes the glass colour (0.8.0). Junction glass is glass too, so one colour covers the whole
- * window. Face trims are not part of this model: {@link WindowTrimRenderer} draws them. The
- * translucent render type, connections and waterlogging are the model's own. Results are cached per
- * state, side, render type, wood sprite and glass sprite (bounded, cleared on reload; safe for chunk
- * workers). Oak with clear glass is the baked model itself.
+ * Wraps canonical and compatibility window models. Plain panes retain generated geometry and
+ * frame/glass retexturing. Fitted panes compose independent beam geometry and use immutable
+ * neighbour coverage; face trims and sills remain with WindowTrimRenderer. All models are cached
+ * by geometry and materials and invalidated by the existing appearance-cache reload lifecycle.
  */
 public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
     private record Key(BlockState state, Direction side, RenderType renderType, ResourceLocation wood, ResourceLocation glass) {
@@ -62,6 +66,17 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource random, ModelData data,
                                     @Nullable RenderType renderType) {
+        WindowAppearanceData snapshot = data.get(WindowAppearanceData.PROPERTY);
+        if (state != null && state.getBlock() instanceof WindowPaneBlock pane
+                && (snapshot != null && snapshot.beams().isPresent() || pane.design().pattern() == WindowPattern.CROSS)) {
+            if (side != null) return List.of();
+            Appearance frame = snapshot == null ? AppearanceDefaults.of(pane) : snapshot.appearance();
+            Appearance beams = snapshot == null ? frame : snapshot.beams().orElse(frame);
+            var design = new WindowDesign(pane.profile(), WindowPattern.CROSS);
+            var geometry = new WindowPaneState.Snapshot(design, pane.pose(state), WindowPaneBlock.connections(state));
+            return WindowBeamModels.quads(geometry, wood(frame), snapshot == null ? GlassStyles.CLEAR : GlassStyles.glass(snapshot.glass()),
+                    beams, snapshot == null ? java.util.Map.of() : snapshot.neighbours());
+        }
         List<BakedQuad> quads = super.getQuads(state, side, random, data, renderType);
         if (state == null || !(state.getBlock() instanceof WindowPaneBlock)) {
             return quads;
@@ -83,8 +98,19 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
 
     /** A window item model ({@code oakItem}: that window piece's) for {@code stack}'s frame look and glass. */
     public static BakedModel item(BakedModel oakItem, ItemStack stack) {
-        ResourceLocation wood = wood(AppearanceStacks.read(stack));
-        ResourceLocation glass = GlassStyles.glass(WindowGlassStacks.read(stack));
+        boolean legacy = stack.getItem() instanceof RetiredCrossWindowItem;
+        Appearance appearance = legacy ? CrossWindowCompatibility.appearance(stack) : AppearanceStacks.read(stack);
+        ResourceLocation wood = wood(appearance);
+        ResourceLocation glass = GlassStyles.glass(legacy ? CrossWindowCompatibility.glass(stack) : WindowGlassStacks.read(stack));
+        if (stack.getItem() instanceof RetiredCrossWindowItem retired) {
+            var pane = (WindowPaneBlock) retired.getBlock();
+            var state = pane.defaultBlockState();
+            var geometry = new WindowPaneState.Snapshot(retired.design(), pane.pose(state), java.util.Set.of());
+            var fitted = WindowBeamNbt.read(stack.getTagElement("BlockEntityTag")).trims()
+                    .get(AttachmentFace.FRONT).orElse(appearance);
+            return ITEMS.get(oakItem, wood, glass, TrimLooks.beams(fitted).face(), source ->
+                    WindowBeamModels.item(source, WindowBeamModels.quads(geometry, wood, glass, fitted, java.util.Map.of()), DonorSprites.atlas(wood)));
+        }
         if (wood.equals(BuiltinWoodStyles.OAK_PLANKS) && glass.equals(GlassStyles.CLEAR)) {
             return oakItem;
         }

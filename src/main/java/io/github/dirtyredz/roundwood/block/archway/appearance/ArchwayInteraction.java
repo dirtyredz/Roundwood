@@ -36,7 +36,7 @@ import net.minecraft.world.phys.BlockHitResult;
 public final class ArchwayInteraction {
     /** What a click does. */
     public enum Action {
-        FIT_TRIM, REFUSE_SILL, REMOVE_TRIM, RESTYLE_TRIM, RESTYLE_ARCHWAY, PASS
+        FIT_TRIM, REFUSE_SILL, REFUSE_BEAMS, REMOVE_TRIM, RESTYLE_TRIM, RESTYLE_ARCHWAY, PASS
     }
 
     private ArchwayInteraction() {
@@ -48,6 +48,7 @@ public final class ArchwayInteraction {
         HeldTrimTool tool = HeldTrimTool.of(player, hand);
         return switch (decide(state, level, pos, tool, target)) {
             case FIT_TRIM -> ArchwayTrimActions.fit(level, pos, state, player, tool.stack(), target.face());
+            case REFUSE_BEAMS -> AppearanceActions.refuse(level, player, "message.roundwood.beams_window_only");
             case REFUSE_SILL -> AppearanceActions.refuse(level, player, "message.roundwood.sill_upper_arch_only");
             case REMOVE_TRIM -> ArchwayTrimActions.remove(level, pos, state, player, hand, tool.stack(), target.face());
             case RESTYLE_TRIM -> AppearanceActions.apply(level, player, tool.donor().orElseThrow(),
@@ -68,7 +69,11 @@ public final class ArchwayInteraction {
     public static Action decide(BlockState state, BlockGetter level, BlockPos pos, HeldTrimTool tool, ArchwayTrimTarget.Hit target) {
         boolean onFace = target.region() == ArchwayTrimTarget.Region.FACE;
         return switch (tool.kind()) {
-            case ATTACHMENT -> tool.attachment(TrimSlot.PERIMETER) ? Action.FIT_TRIM : Action.REFUSE_SILL;
+            case ATTACHMENT -> switch (tool.slot().orElseThrow()) {
+                case PERIMETER -> Action.FIT_TRIM;
+                case SILL -> Action.REFUSE_SILL;
+                case CROSS_BEAMS -> Action.REFUSE_BEAMS;
+            };
             case SHEARS -> onFace ? Action.REMOVE_TRIM : Action.PASS;
             case DONOR -> onFace && ArchwayBlockEntities.anchor(level, pos, state).map(anchor -> anchor.trims().has(target.face())).orElse(false)
                     ? Action.RESTYLE_TRIM : Action.RESTYLE_ARCHWAY;

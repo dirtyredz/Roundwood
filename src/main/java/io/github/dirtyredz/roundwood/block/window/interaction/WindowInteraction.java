@@ -8,6 +8,7 @@ import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.interaction.HeldTrimTool;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneState;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassActions;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
 import net.minecraft.core.BlockPos;
@@ -22,6 +23,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.Optional;
+import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
+import io.github.dirtyredz.roundwood.migration.conversion.LegacyCells;
+import io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion;
 
 /**
  * A window's right-click router (0.8.0): the clicked face and region ({@link WindowHitTarget}) and
@@ -45,11 +49,19 @@ public final class WindowInteraction {
         if (plan.isEmpty()) {
             return InteractionResult.PASS;
         }
+        if (!level.isClientSide && CrossWindowCompatibility.isRetired(state)) {
+            if (WindowCrossConversion.convert(level, pos)
+                    != LegacyCells.Result.CONVERTED) return InteractionResult.CONSUME;
+            return use(level.getBlockState(pos), level, pos, player, hand, hit);
+        }
         WindowHitTarget target = plan.get().target();
         ItemStack stack = player.getItemInHand(hand);
         return switch (plan.get().action()) {
             case PASS -> InteractionResult.PASS;
             case FIT_TRIM -> WindowTrimActions.fit(level, pos, player, stack, TrimSlot.PERIMETER, target.face());
+            case FIT_BEAMS -> WindowBeamFitPlan.of(level, pos, player, hand, hit)
+                    .map(fit -> WindowTrimActions.fit(level, pos, player, stack, TrimSlot.CROSS_BEAMS, fit.target().face()))
+                    .orElse(InteractionResult.CONSUME);
             case FIT_SILL -> WindowTrimActions.fit(level, pos, player, stack, TrimSlot.SILL, target.face());
             case RESTYLE_TRIM -> AppearanceGestures.donor(AppearanceFamily.TRIM, player, hand)
                     .map(gesture -> AppearanceActions.apply(level, player, gesture,
@@ -90,7 +102,7 @@ public final class WindowInteraction {
         FaceTrims trims = window != null ? window.trims() : FaceTrims.NONE;
         FaceTrims sills = window != null ? window.trims(TrimSlot.SILL) : FaceTrims.NONE;
         boolean takesSill = state.getBlock() instanceof WindowPaneBlock block && block.profile().takesSill();
-        return WindowHitTarget.of(state, pos, hit.getLocation(), hit.getDirection(), player.getEyePosition(), trims, sills)
+        return WindowHitTarget.of(state, pos, hit.getLocation(), hit.getDirection(), player.getEyePosition(), trims, sills, WindowPaneState.design(state, window))
                 .map(target -> new Plan(WindowUseRules.decide(item, target.region(), takesSill), target));
     }
 
@@ -100,7 +112,11 @@ public final class WindowInteraction {
      */
     public static WindowUseRules.Item item(HeldTrimTool tool) {
         return switch (tool.kind()) {
-            case ATTACHMENT -> tool.attachment(TrimSlot.SILL) ? WindowUseRules.Item.ARCH_SILL : WindowUseRules.Item.UNIVERSAL_TRIM;
+            case ATTACHMENT -> switch (tool.slot().orElseThrow()) {
+                case SILL -> WindowUseRules.Item.ARCH_SILL;
+                case PERIMETER -> WindowUseRules.Item.UNIVERSAL_TRIM;
+                case CROSS_BEAMS -> WindowUseRules.Item.CROSS_BEAMS;
+            };
             case SHEARS -> WindowUseRules.Item.SHEARS;
             case DONOR -> switch (tool.donor().orElseThrow().type()) {
                 case PAINT -> WindowUseRules.Item.DYE;

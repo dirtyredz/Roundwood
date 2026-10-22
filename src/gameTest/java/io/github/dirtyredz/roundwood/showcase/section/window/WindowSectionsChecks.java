@@ -182,6 +182,8 @@ public final class WindowSectionsChecks {
             check(entity.appearance().equals(window.pane()), where + ": pane shows " + entity.appearance().key());
             check(entity.trims().equals(window.trims()), where + ": trims show " + entity.trims());
             check(entity.trims(TrimSlot.SILL).equals(window.sills()), where + ": sills show " + entity.trims(TrimSlot.SILL));
+            check(entity.trims(TrimSlot.CROSS_BEAMS).get(io.github.dirtyredz.roundwood.block.attachment.AttachmentFace.FRONT).equals(window.beams()), where + ": independent beams");
+            check(block.design().pattern() == io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern.PLAIN, where + ": retired block in showcase");
             check(entity.glass().equals(window.glass()), where + ": glass shows " + entity.glass());
         }
     }

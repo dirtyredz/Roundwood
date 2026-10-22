@@ -30,22 +30,6 @@ public final class LegacyWindowConversion {
         if (!(state.getBlock() instanceof LegacyWindowBlock legacy)) {
             return LegacyCells.Result.NOT_LEGACY;
         }
-        RoundWindowBlock canonical = legacy.canonical();
-        RoundWindowBlockEntity old = level.getBlockEntity(pos) instanceof RoundWindowBlockEntity entity ? entity : null;
-        Appearance appearance = old != null ? old.appearance() : legacy.defaultAppearance();
-        FaceTrims trims = old != null ? old.trims() : FaceTrims.NONE;
-        Optional<DyeColor> glass = old != null ? old.glass() : Optional.empty();
-        BlockState next = LegacyCells.copyProperties(state, canonical.defaultBlockState());
-        if (!LegacyCells.replace(level, List.of(pos), Map.of(pos, next), canonical)) {
-            return LegacyCells.Result.DEFERRED;
-        }
-        if (level.getBlockEntity(pos) instanceof RoundWindowBlockEntity converted) {
-            converted.setAppearance(appearance);
-            converted.setGlass(glass);
-            if (trims.any()) {
-                WindowAttachmentState.store(level, pos, converted, TrimSlot.PERIMETER, trims);
-            }
-        }
-        return LegacyCells.Result.CONVERTED;
+        return WindowCellConversion.convert(level, pos, state, legacy.canonical(), false);
     }
 }

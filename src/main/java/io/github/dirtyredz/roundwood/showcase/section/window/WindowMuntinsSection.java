@@ -16,6 +16,7 @@ import net.minecraft.world.item.DyeColor;
 
 import java.util.ArrayList;
 import java.util.List;
+import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 
 /**
  * Cross beams (0.7.0): every crossed piece has its own cross through its middle. The crossed round
@@ -38,11 +39,13 @@ public final class WindowMuntinsSection implements ShowcaseSection {
         Appearance oak = Appearance.DEFAULT;
         WindowPose centred = WindowArchesSection.centred(forward);
         List<ShowcaseWindow> out = new ArrayList<>();
-        out.add(ShowcaseWindow.of(ROUND_CROSS, WindowPosition.CENTER.pose(across), 60, 0, ROW1_F, oak));
+        out.add(ShowcaseWindow.of(ROUND_CROSS, WindowPosition.CENTER.pose(across), 60, 0, ROW1_F, oak).beams(oak.painted(DyeColor.RED)).glass(DyeColor.LIGHT_BLUE));
         out.add(ShowcaseWindow.of(ROUND_CROSS, WindowPosition.flush(forward).pose(across), 62, 0, ROW1_F, oak));
         out.add(ShowcaseWindow.of(ROUND_CROSS, WindowPosition.DOWN.pose(across), 64, 0, ROW1_F, oak));
         out.add(ShowcaseWindow.of(WindowDesign.plain(WindowProfile.ROUND), WindowPosition.CENTER.pose(across), 66, 0, ROW1_F, oak));
-        out.add(ShowcaseWindow.of(new WindowDesign(WindowProfile.ARCH_LEFT, WindowPattern.CROSS), centred, 68, 0, ROW1_F, oak));
+        out.add(ShowcaseWindow.of(new WindowDesign(WindowProfile.ARCH_LEFT, WindowPattern.CROSS), centred, 68, 0, ROW1_F, oak)
+                .beams(Appearance.masonry(ResourceLocation.fromNamespaceAndPath("minecraft", "bricks")))
+                .silled(AttachmentFace.FRONT, oak).trimmed(oak.painted(DyeColor.WHITE)));
         out.add(ShowcaseWindow.of(new WindowDesign(WindowProfile.ARCH_RIGHT, WindowPattern.CROSS), centred, 69, 0, ROW1_F, oak));
         out.add(ShowcaseWindow.of(new WindowDesign(WindowProfile.BOTTOM_LEFT, WindowPattern.CROSS), centred, 71, 0, ROW1_F, oak));
         out.add(ShowcaseWindow.of(new WindowDesign(WindowProfile.BOTTOM_RIGHT, WindowPattern.CROSS), centred, 72, 0, ROW1_F, oak));
@@ -58,7 +61,7 @@ public final class WindowMuntinsSection implements ShowcaseSection {
 
     @Override
     public void build(ShowcaseCanvas canvas) {
-        canvas.sign(60, ROW1_F - 1, "Round window", "cross beams");
+        canvas.sign(60, ROW1_F - 1, "Oak frame", "red cross beams", "blue glazing");
         canvas.sign(62, ROW1_F - 1, "Cross beams", "flush far");
         canvas.sign(64, ROW1_F - 1, "Cross beams", "on the floor");
         canvas.sign(66, ROW1_F - 1, "Round window", "plain");

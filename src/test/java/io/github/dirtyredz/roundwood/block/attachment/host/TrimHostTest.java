@@ -20,6 +20,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TrimHostTest {
     private static final BlockPos ORIGIN = new BlockPos(4, 70, -2);
 
+    @Test
+    void wholePaneInstallationRestylingAndTargetsNormalizeBothSides() {
+        var store = new io.github.dirtyredz.roundwood.block.attachment.storage.FaceTrimStore(
+                io.github.dirtyredz.roundwood.block.window.trim.WindowBeamNbt.FORMAT);
+        var host = TrimHost.of(TrimSlot.CROSS_BEAMS, store::trims, store::editable, store::set, ORIGIN);
+        assertTrue(TrimFitting.install(host, AttachmentFace.BACK, Appearance.DEFAULT));
+        assertFalse(TrimFitting.install(host, AttachmentFace.FRONT, Appearance.DEFAULT));
+        assertEquals(1, store.trims().count());
+        var look = Appearance.DEFAULT.painted(net.minecraft.world.item.DyeColor.RED);
+        assertTrue(TrimFitting.restyle(host, AttachmentFace.BACK, look));
+        assertEquals(java.util.Optional.of(look), TrimFitting.target(host, AttachmentFace.FRONT, player -> true).current());
+        assertEquals(java.util.Optional.of(look), TrimFitting.target(host, AttachmentFace.BACK, player -> true).current());
+        assertFalse(store.trims().has(AttachmentFace.BACK));
+    }
+
     @BeforeAll
     static void bootstrap() {
         MinecraftBootstrap.ensure();

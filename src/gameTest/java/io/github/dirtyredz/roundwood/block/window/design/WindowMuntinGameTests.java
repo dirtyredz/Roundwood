@@ -45,7 +45,7 @@ public final class WindowMuntinGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void crossedItemsPlaceTheirOwnBlockWithThePlainTargeting(GameTestHelper helper) {
+    public static void plainPanesWithFittedBeamsKeepPlacementPickAndSeparateDrops(GameTestHelper helper) {
         floor(helper);
         ServerPlayer player = player(helper, "cross_place", GameType.SURVIVAL, Direction.NORTH);
         BlockPos at = new BlockPos(4, 1, 4);
@@ -58,10 +58,12 @@ public final class WindowMuntinGameTests {
             for (WindowTargetZones.Zone zone : new WindowTargetZones.Zone[] {WindowTargetZones.Zone.CENTER, WindowTargetZones.Zone.U_MIN}) {
                 var hit = WindowFixtures.zone(helper, at.below(), Direction.UP, zone);
                 BlockState plainPredicted = WindowFixtures.predict(player, new ItemStack(ModItems.window(plain)), hit);
-                ItemStack stack = styled(ModItems.window(design), look);
+                ItemStack stack = styled(ModItems.window(plain), look);
                 check(WindowFixtures.place(player, stack, hit).consumesAction(), design.id() + " not placed");
+                check(io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions.install(helper.getLevel(), helper.absolutePos(at),
+                        io.github.dirtyredz.roundwood.block.attachment.TrimSlot.CROSS_BEAMS, io.github.dirtyredz.roundwood.block.attachment.AttachmentFace.FRONT, look), "beams not fitted");
                 BlockState placed = helper.getBlockState(at);
-                check(placed.is(ModBlocks.window(design)), design.id() + ": placed " + placed);
+                check(placed.is(ModBlocks.window(plain)), design.id() + ": placed " + placed);
                 check(WindowFixtures.pose(placed).equals(WindowFixtures.pose(plainPredicted)), design.id() + " " + zone
                         + ": pose differs from the plain piece's " + placed);
                 check(look.equals(windowLook(helper, helper.absolutePos(at))), design.id() + ": look lost");
@@ -69,10 +71,10 @@ public final class WindowMuntinGameTests {
                     check(WindowPaneBlock.connections(placed).isEmpty(), design.id() + ": a flush crossed window connected " + placed);
                 }
                 ItemStack pick = AppearanceFixtures.pick(helper, helper.absolutePos(at));
-                check(pick.is(ModItems.window(design)) && AppearanceStacks.read(pick).equals(look), design.id() + ": pick " + pick);
+                check(pick.is(ModItems.window(plain)) && AppearanceStacks.read(pick).equals(look), design.id() + ": pick " + pick);
                 clearDrops(helper);
                 player.gameMode.destroyBlock(helper.absolutePos(at));
-                check(dropped(helper, ModItems.window(design), look) == 1 && dropped(helper, ModItems.window(plain)) == 0,
+                check(dropped(helper, ModItems.window(plain), look) == 1 && dropped(helper, ModItems.CROSS_BEAMS.get(), look) == 1,
                         design.id() + ": drop");
                 clearDrops(helper);
                 helper.setBlock(at, Blocks.AIR);

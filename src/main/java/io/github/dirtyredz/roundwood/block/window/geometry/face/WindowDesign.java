@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * What a window block's face is, fixed per registration: its {@link WindowProfile} (which pixels are
- * glazed) and its {@link WindowPattern} (plain or crossed by beams). The pair names the block
- * ({@code round_window_arch_left_cross}) and keys every geometry, shape and model cache.
+ * Runtime geometry value: profile plus effective beam pattern. Canonical products use plain profiles;
+ * the crossed IDs remain as hidden compatibility registrations. Both patterns still key shape caches.
  */
 public record WindowDesign(WindowProfile profile, WindowPattern pattern) {
-    /** The twenty-six designs in creative order: each plain piece followed by its crossed variant. */
+    /** The twenty-six runtime designs, also covering the retained compatibility identities. */
     public static List<WindowDesign> all() {
         List<WindowDesign> out = new ArrayList<>();
         for (WindowProfile profile : WindowProfile.values()) {

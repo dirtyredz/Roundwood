@@ -36,6 +36,7 @@ import java.util.List;
 public final class WindowPaneGeometry {
     public static final String FRAME = "frame";
     public static final String GLASS = "glass";
+    public static final String BEAM = "beam";
     /** Half-pixel cells across a face. */
     static final int HALF = 32;
     private static final Box ARM_NORTH = new Box(7, 0, 0, 9, 16, 7);
@@ -51,7 +52,7 @@ public final class WindowPaneGeometry {
         addHalfRects(pieces, (hu, hv) -> !design.profile().inOpening(hu / 2, hv / 2), pose,
                 depth.slabMin(), depth.slabMax(), FRAME);
         addHalfRects(pieces, (hu, hv) -> WindowMuntinGeometry.isBeam(design, hu, hv), pose,
-                depth.slabMin(), depth.slabMax(), FRAME);
+                depth.slabMin(), depth.slabMax(), BEAM);
         addHalfRects(pieces, design::glazed, pose,
                 depth.slabMin() + WindowDepth.GLASS_INSET, depth.slabMax() - WindowDepth.GLASS_INSET, GLASS);
         return List.copyOf(pieces);

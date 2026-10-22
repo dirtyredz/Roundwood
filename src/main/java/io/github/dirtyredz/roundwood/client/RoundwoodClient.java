@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Client-only wiring on the mod bus: the door, frame, window-trim and (0.12.0) archway renderers, the source models they draw (no
@@ -77,9 +79,10 @@ public final class RoundwoodClient {
     /** Windows read their appearance through model data; every family item resolves its stack's appearance. */
     @SubscribeEvent
     public static void wrapModels(ModelEvent.ModifyBakingResult event) {
-        Map<net.minecraft.resources.ResourceLocation, BakedModel> models = event.getModels();
+        Map<ResourceLocation, BakedModel> models = event.getModels();
         List<Block> windows = new ArrayList<>(LegacyContent.windows());
         windows.addAll(ModBlocks.windows());
+        windows.addAll(CrossWindowCompatibility.blocks());
         for (Block window : windows) {
             for (BlockState state : window.getStateDefinition().getPossibleStates()) {
                 ModelResourceLocation location = BlockModelShaper.stateToModelLocation(state);

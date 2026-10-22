@@ -24,6 +24,27 @@ public final class FaceTrimsNbt {
     private FaceTrimsNbt() {
     }
 
+    /** Strict whole-host encoding: future fields and malformed appearances remain in custody. */
+    public static boolean validSingleton(CompoundTag payload, int version) {
+        if (!payload.contains(VERSION_KEY, Tag.TAG_INT) || payload.getInt(VERSION_KEY) != version
+                || !java.util.Set.of(VERSION_KEY, "Front").containsAll(payload.getAllKeys())) {
+            return false;
+        }
+        if (!payload.contains("Front")) {
+            return true;
+        }
+        if (!payload.contains("Front", Tag.TAG_COMPOUND)) {
+            return false;
+        }
+        CompoundTag front = payload.getCompound("Front");
+        if (front.isEmpty()) {
+            return true;
+        }
+        return front.getAllKeys().equals(java.util.Set.of(AppearanceNbt.TAG))
+                && AppearanceNbt.read(front).filter(AppearanceFamily.TRIM::accepts)
+                .map(look -> AppearanceNbt.encode(look).equals(front.get(AppearanceNbt.TAG))).orElse(false);
+    }
+
     /** The payload compound for {@code trims} at {@code version}. */
     public static CompoundTag encode(FaceTrims trims, int version) {
         CompoundTag tag = new CompoundTag();

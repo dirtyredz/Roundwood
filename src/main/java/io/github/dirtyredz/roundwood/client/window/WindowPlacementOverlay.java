@@ -20,6 +20,9 @@ import net.minecraftforge.fml.common.Mod;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
+import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 
 /**
  * While a window item is held, draws the Hammer-style targeting grid on the aimed face (centre
@@ -55,6 +58,12 @@ public final class WindowPlacementOverlay {
             preview.proposal().ifPresent(proposal -> {
                 BlockPos pos = proposal.pos();
                 VoxelShape shape = proposal.state().getShape(minecraft.level, pos);
+                if (proposal.fittedShape() != null) {
+                    var block = (WindowPaneBlock) proposal.state().getBlock();
+                    var design = new WindowDesign(block.profile(), WindowPattern.CROSS);
+                    shape = proposal.fittedShape();
+                    WindowBeamPreview.draw(event, pos, design, block.pose(proposal.state()));
+                }
                 OutlineLines.edges(pose, lines, shape, pos.getX() - camera.x, pos.getY() - camera.y, pos.getZ() - camera.z,
                         PANE[0], PANE[1], PANE[2], PANE[3]);
             });

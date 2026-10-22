@@ -183,8 +183,12 @@ public final class ShowcaseCanvas {
         pane(window.pane(), window.r(), window.y(), window.f(), window.state(), false);
         BlockPos pos = frame.pos(window.r(), window.y(), window.f());
         for (TrimSlot slot : TrimSlot.values()) {
-            FaceTrims fitted = slot == TrimSlot.SILL ? window.sills() : window.trims();
-            for (AttachmentFace face : AttachmentFace.values()) {
+            FaceTrims fitted = switch (slot) {
+                case SILL -> window.sills();
+                case PERIMETER -> window.trims();
+                case CROSS_BEAMS -> window.beams().map(look -> FaceTrims.NONE.with(AttachmentFace.FRONT, look)).orElse(FaceTrims.NONE);
+            };
+            for (AttachmentFace face : slot.addresses()) {
                 fitted.get(face).ifPresent(look -> {
                     if (!WindowTrimActions.install(level, pos, slot, face, look)) {
                         problem(face + " " + slot.getSerializedName() + " not fitted at " + pos.toShortString());

@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 import java.util.concurrent.CompletableFuture;
+import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
 
 /**
  * Item tags name only the canonical items (the window trim is a trim item) (the hidden 0.4.0 alias items are never advertised).
@@ -28,7 +29,8 @@ public class RoundwoodItemTagsProvider extends ItemTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         tag(ModTags.ROUND_DOOR_ITEMS).add(ModItems.ROUND_DOOR.get(), ModItems.ARCHED_DOOR.get());
-        tag(ModTags.ROUND_WINDOW_ITEMS).add(ModItems.windows().toArray(Item[]::new));
+        tag(ModTags.ROUND_WINDOW_ITEMS).add(ModItems.windows().toArray(Item[]::new))
+                .add(CrossWindowCompatibility.items().toArray(Item[]::new));
         tag(ModTags.ARCHWAY_ITEMS).add(ModItems.archways().toArray(Item[]::new));
         tag(ModTags.ROUND_TRIM_ITEMS).add(ModItems.ROUND_TRIM.get(), LegacyContent.windowTrim());
         tag(ItemTags.DOORS).add(ModItems.ROUND_DOOR.get(), ModItems.ARCHED_DOOR.get());

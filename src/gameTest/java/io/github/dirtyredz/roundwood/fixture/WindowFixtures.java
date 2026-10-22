@@ -86,7 +86,24 @@ public final class WindowFixtures {
         if (!context.canPlace()) {
             return null;
         }
+        if (stack.getItem() instanceof io.github.dirtyredz.roundwood.migration.item.RetiredCrossWindowItem retired) {
+            return io.github.dirtyredz.roundwood.migration.item.CrossWindowPlacement.plan(retired, context).map(
+                    io.github.dirtyredz.roundwood.migration.item.CrossWindowPlacement.Plan::state).orElse(null);
+        }
         return ((BlockItem) stack.getItem()).getBlock().getStateForPlacement(context);
+    }
+
+    /** Canonical pane plus attachments, the same building path as the showcase. */
+    public static void setWindow(GameTestHelper helper, BlockPos pos,
+            io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign design, WindowPose pose) {
+        var sample = io.github.dirtyredz.roundwood.showcase.ShowcaseWindow.of(design, pose, 0, 0, 0,
+                io.github.dirtyredz.roundwood.appearance.Appearance.DEFAULT);
+        helper.setBlock(pos, sample.state());
+        if (sample.beams().isPresent()) {
+            DoorFixtures.check(io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions.install(helper.getLevel(), helper.absolutePos(pos),
+                    io.github.dirtyredz.roundwood.block.attachment.TrimSlot.CROSS_BEAMS, io.github.dirtyredz.roundwood.block.attachment.AttachmentFace.FRONT,
+                    sample.beams().get()), "fixture beams refused");
+        }
     }
 
     /** The pose of a window state. */

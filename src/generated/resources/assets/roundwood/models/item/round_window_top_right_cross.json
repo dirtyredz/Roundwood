@@ -1,5 +1,5 @@
 {
-  "parent": "roundwood:block/round_window_top_right_cross",
+  "parent": "roundwood:block/round_window_top_right",
   "display": {
     "firstperson_righthand": {
       "rotation": [

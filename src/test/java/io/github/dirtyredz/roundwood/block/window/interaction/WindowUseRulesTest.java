@@ -24,6 +24,7 @@ class WindowUseRulesTest {
             table.put(Item.UNIVERSAL_TRIM, row(Action.FIT_TRIM, Action.FIT_TRIM, Action.FIT_TRIM, Action.FIT_TRIM, Action.FIT_TRIM,
                     Action.PASS));
             table.put(Item.ARCH_SILL, row(sillFit, sillFit, sillFit, sillFit, sillFit, Action.PASS));
+            table.put(Item.CROSS_BEAMS, row(Action.FIT_BEAMS, Action.FIT_BEAMS, Action.FIT_BEAMS, Action.FIT_BEAMS, Action.FIT_BEAMS, Action.PASS));
             table.put(Item.PLANKS, row(Action.RESTYLE_TRIM, Action.RESTYLE_TRIM, Action.RESTYLE_FRAME, Action.RESTYLE_FRAME,
                     Action.RESTYLE_FRAME, Action.PASS));
             table.put(Item.DYE, row(Action.RESTYLE_TRIM, Action.RESTYLE_TRIM, Action.RESTYLE_FRAME, Action.TINT_GLASS,
@@ -44,6 +45,7 @@ class WindowUseRulesTest {
     private static Map<Region, Action> row(Action trim, Action sill, Action frame, Action glass, Action connector, Action none) {
         Map<Region, Action> row = new EnumMap<>(Region.class);
         row.put(Region.TRIM, trim);
+        row.put(Region.BEAM, trim);
         row.put(Region.SILL, sill);
         row.put(Region.FRAME, frame);
         row.put(Region.GLASS, glass);

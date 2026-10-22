@@ -19,6 +19,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import io.github.dirtyredz.roundwood.migration.item.CrossWindowPlacement;
+import io.github.dirtyredz.roundwood.migration.item.RetiredCrossWindowItem;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
  * What placing the held window would do at the crosshair, computed through the same path the server
@@ -42,7 +45,8 @@ public final class WindowPlacementPreview {
                           Optional<Proposal> proposal) {
     }
 
-    public record Proposal(BlockPos pos, BlockState state) {
+    public record Proposal(BlockPos pos, BlockState state, @Nullable VoxelShape fittedShape) {
+        public Proposal(BlockPos pos, BlockState state) { this(pos, state, null); }
     }
 
     /** The preview for {@code player} aiming at {@code hit}, or empty when no window is held or the hit is refused. */
@@ -80,6 +84,10 @@ public final class WindowPlacementPreview {
     }
 
     private static Optional<Proposal> proposal(Player player, Level level, BlockItem item, BlockPlaceContext context) {
+        if (item instanceof RetiredCrossWindowItem retired) {
+            return CrossWindowPlacement.plan(retired, context)
+                    .map(plan -> new Proposal(plan.pos(), plan.state(), plan.selection()));
+        }
         if (!context.canPlace()) {
             return Optional.empty();
         }
