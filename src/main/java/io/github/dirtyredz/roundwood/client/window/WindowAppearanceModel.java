@@ -1,10 +1,11 @@
 package io.github.dirtyredz.roundwood.client.window;
 
+import io.github.dirtyredz.roundwood.client.window.trim.WindowTrimRenderer;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
-import io.github.dirtyredz.roundwood.block.window.WindowAppearanceData;
-import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowAppearanceData;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassStacks;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.BuiltinWoodStyles;

@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.client.window;
 
 import io.github.dirtyredz.roundwood.block.door.selection.DoorHitResolver;
-import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPlacement;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowTargetZones;
 import net.minecraft.core.BlockPos;

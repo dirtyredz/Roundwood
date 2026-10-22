@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.block.window.geometry;
+package io.github.dirtyredz.roundwood.block.window.geometry.face;
 
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import org.junit.jupiter.api.Test;

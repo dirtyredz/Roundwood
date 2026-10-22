@@ -15,7 +15,7 @@ import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.trim.RoundTrimRenderer;
 import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
 import io.github.dirtyredz.roundwood.client.window.WindowAppearanceModel;
-import io.github.dirtyredz.roundwood.client.window.WindowTrimRenderer;
+import io.github.dirtyredz.roundwood.client.window.trim.WindowTrimRenderer;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;

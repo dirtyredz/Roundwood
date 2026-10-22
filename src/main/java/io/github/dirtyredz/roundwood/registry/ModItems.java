@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.registry;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.attachment.item.UniversalTrimItem;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorItem;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowItem;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowItem;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import net.minecraft.world.item.Item;

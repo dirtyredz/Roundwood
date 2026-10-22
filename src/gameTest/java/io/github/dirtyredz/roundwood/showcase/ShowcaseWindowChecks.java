@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.showcase;
 
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
-import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.section.WindowCornersSection;
 import io.github.dirtyredz.roundwood.showcase.section.WindowMuntinsSection;

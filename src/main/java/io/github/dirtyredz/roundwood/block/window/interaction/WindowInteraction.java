@@ -8,7 +8,7 @@ import io.github.dirtyredz.roundwood.appearance.material.PlankMaterials;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassActions;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
 import net.minecraft.core.BlockPos;

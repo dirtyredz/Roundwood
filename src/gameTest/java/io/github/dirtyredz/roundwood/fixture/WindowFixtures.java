@@ -1,6 +1,6 @@
 package io.github.dirtyredz.roundwood.fixture;
 
-import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowTargetZones;
 import net.minecraft.core.BlockPos;

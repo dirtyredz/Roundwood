@@ -1,7 +1,7 @@
 package io.github.dirtyredz.roundwood.data.client.window;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.window.OrientedWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowOrientation;

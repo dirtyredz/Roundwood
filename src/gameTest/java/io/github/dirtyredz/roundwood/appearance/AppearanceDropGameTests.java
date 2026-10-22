@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.appearance;
 
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
@@ -125,7 +126,7 @@ public final class AppearanceDropGameTests {
         BlockPos rel = new BlockPos(4, 1, 4);
         BlockPos abs = helper.absolutePos(rel);
         helper.setBlock(rel, ModBlocks.roundWindow().defaultBlockState());
-        ((io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity) helper.getLevel().getBlockEntity(abs)).setAppearance(look);
+        ((io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity) helper.getLevel().getBlockEntity(abs)).setAppearance(look);
         clearDrops(helper);
         ServerPlayer breaker = player(helper, "window_breaker", GameType.SURVIVAL, Direction.NORTH);
         check(breaker.gameMode.destroyBlock(abs), "window break refused");

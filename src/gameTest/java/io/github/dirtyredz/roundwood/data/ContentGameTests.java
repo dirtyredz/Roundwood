@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.data;
 
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
@@ -34,7 +35,7 @@ import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
-import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.block.attachment.item.UniversalTrimItem;
@@ -248,7 +249,7 @@ public final class ContentGameTests {
         windows.addAll(LegacyContent.windows());
         for (Block window : windows) {
             net.minecraft.world.level.block.state.BlockState state = window.defaultBlockState().setValue(WindowPaneBlock.TRIMMED, true);
-            io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity entity = new io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity(
+            io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity entity = new io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity(
                     io.github.dirtyredz.roundwood.registry.ModBlockEntities.roundWindow(), pos, state);
             entity.setTrims(io.github.dirtyredz.roundwood.block.attachment.FaceTrims.both(io.github.dirtyredz.roundwood.appearance.Appearance.DEFAULT));
             List<ItemStack> drops = Block.getDrops(state, helper.getLevel(), pos, entity);

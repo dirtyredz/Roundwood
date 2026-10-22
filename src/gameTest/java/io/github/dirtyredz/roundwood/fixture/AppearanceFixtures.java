@@ -7,7 +7,7 @@ import io.github.dirtyredz.roundwood.block.door.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;

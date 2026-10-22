@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.block.window;
+package io.github.dirtyredz.roundwood.block.window.pane;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;

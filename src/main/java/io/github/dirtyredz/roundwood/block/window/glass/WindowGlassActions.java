@@ -1,6 +1,6 @@
 package io.github.dirtyredz.roundwood.block.window.glass;
 
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;

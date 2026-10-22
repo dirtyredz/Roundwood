@@ -1,5 +1,7 @@
-package io.github.dirtyredz.roundwood.block.window.geometry;
+package io.github.dirtyredz.roundwood.block.window.geometry.face;
 
+import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
+import io.github.dirtyredz.roundwood.block.window.geometry.WindowPaneGeometry;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;

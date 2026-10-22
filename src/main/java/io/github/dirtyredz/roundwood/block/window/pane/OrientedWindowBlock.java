@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.block.window;
+package io.github.dirtyredz.roundwood.block.window.pane;
 
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;

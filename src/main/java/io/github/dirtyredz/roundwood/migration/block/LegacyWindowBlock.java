@@ -1,8 +1,8 @@
 package io.github.dirtyredz.roundwood.migration.block;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
 import io.github.dirtyredz.roundwood.migration.LegacyAppearances;
 import io.github.dirtyredz.roundwood.migration.LegacyChunkMigration;

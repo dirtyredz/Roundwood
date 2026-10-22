@@ -1,5 +1,8 @@
 package io.github.dirtyredz.roundwood.block.window;
 
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import com.mojang.serialization.Dynamic;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;

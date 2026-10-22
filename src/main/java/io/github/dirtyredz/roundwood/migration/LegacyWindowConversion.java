@@ -1,9 +1,9 @@
 package io.github.dirtyredz.roundwood.migration;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
 import net.minecraft.world.item.DyeColor;
 import io.github.dirtyredz.roundwood.migration.block.LegacyWindowBlock;

@@ -23,11 +23,11 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Every pose of every face: panels in place, junctions that bridge exactly what they must, no
  * overlaps, nothing outside the cell, and rotation/mirroring that move the real geometry.
  */
-class WindowPaneGeometryTest {
+public class WindowPaneGeometryTest {
     private static final double EPS = 1e-9;
 
     /** Every pose any block can be in: the round window's seven positions and all 36 arch poses. */
-    static List<WindowPose> allPoses() {
+    public static List<WindowPose> allPoses() {
         List<WindowPose> poses = new ArrayList<>();
         for (WindowPosition position : WindowPosition.values()) {
             poses.add(position.pose(Direction.Axis.X));

@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.window;
 
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;

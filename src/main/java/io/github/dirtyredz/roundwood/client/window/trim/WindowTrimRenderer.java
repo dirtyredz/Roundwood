@@ -1,12 +1,12 @@
-package io.github.dirtyredz.roundwood.client.window;
+package io.github.dirtyredz.roundwood.client.window.trim;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlockEntity;
-import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowFaceIdentity;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import net.minecraft.client.renderer.MultiBufferSource;

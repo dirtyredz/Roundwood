@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.migration;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.attachment.item.UniversalTrimItem;
 import io.github.dirtyredz.roundwood.block.door.RoundDoorItem;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowItem;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowItem;
 import io.github.dirtyredz.roundwood.migration.block.LegacyDoorBlock;
 import io.github.dirtyredz.roundwood.migration.block.LegacyTrimBlock;
 import io.github.dirtyredz.roundwood.migration.block.LegacyWindowBlock;

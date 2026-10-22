@@ -1,6 +1,6 @@
 package io.github.dirtyredz.roundwood.block.window.connection;
 
-import io.github.dirtyredz.roundwood.block.window.WindowPaneBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPaneGeometry;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import net.minecraft.core.BlockPos;

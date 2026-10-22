@@ -1,8 +1,8 @@
 package io.github.dirtyredz.roundwood.showcase;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.block.window.OrientedWindowBlock;
-import io.github.dirtyredz.roundwood.block.window.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.OrientedWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
