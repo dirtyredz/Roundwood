@@ -14,33 +14,33 @@ import net.minecraft.world.level.block.state.properties.SlabType;
  * cell, flush windows meeting vanilla panes, each other in a corner and a centred window (never any
  * glass bridge since 0.6.1: frames simply abut), beside stone and waterlogged, plus blocks to
  * practise targeting on (a full block, a slab, stairs, a two-high wall). Occupies
- * {@code r 50..61, f 0..17}. Directions in the constant names are the builder's: forward is away
+ * {@code r 1..13, f 7..18}. Directions in the constant names are the builder's: forward is away
  * from them, back towards them.
  */
 public final class WindowPositionsSection implements ShowcaseSection {
     /** Row of the seven positions; their signs stand one nearer. */
-    public static final int ROW_F = 2;
-    public static final int CENTRE_R = 50;
-    public static final int FORWARD_R = 52;
-    public static final int BACK_R = 54;
-    public static final int RIGHT_R = 56;
-    public static final int LEFT_R = 58;
-    public static final int CEILING_R = 60;
+    public static final int ROW_F = 8;
+    public static final int CENTRE_R = 2;
+    public static final int FORWARD_R = 4;
+    public static final int BACK_R = 6;
+    public static final int RIGHT_R = 8;
+    public static final int LEFT_R = 10;
+    public static final int CEILING_R = 12;
     /** The floor window sits in the ceiling window's column, two nearer the far end (never touching it). */
-    public static final int FLOOR_F = 4;
+    public static final int FLOOR_F = 10;
     /** Junction and neighbour demos. */
-    public static final int DEMO_F = 6;
-    public static final int PANE_R = 50;
-    public static final int CORNER_R = 53;
-    public static final int MIXED_R = 56;
-    public static final int SOLID_R = 59;
-    public static final int WATER_R = 61;
+    public static final int DEMO_F = 12;
+    public static final int PANE_R = 2;
+    public static final int CORNER_R = 5;
+    public static final int MIXED_R = 8;
+    public static final int SOLID_R = 11;
+    public static final int WATER_R = 13;
     /** Targeting practice. */
-    public static final int PRACTICE_F = 12;
-    public static final int STONE_R = 50;
-    public static final int SLAB_R = 53;
-    public static final int STAIRS_R = 56;
-    public static final int WALL_R = 59;
+    public static final int PRACTICE_F = 18;
+    public static final int STONE_R = 2;
+    public static final int SLAB_R = 5;
+    public static final int STAIRS_R = 8;
+    public static final int WALL_R = 11;
 
     @Override
     public String id() {

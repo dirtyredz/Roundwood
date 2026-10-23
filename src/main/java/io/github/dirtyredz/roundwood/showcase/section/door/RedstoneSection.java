@@ -8,10 +8,10 @@ import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 
-/** A lever on the floor beside a closed door: flip it and the door opens. Occupies {@code r 27..29, f 23..25}. */
+/** A lever on the floor beside a closed door: flip it and the door opens. Occupies {@code r 17..19, f 21..23}. */
 public final class RedstoneSection implements ShowcaseSection {
-    public static final int DOOR_R = 28;
-    public static final int DOOR_F = 24;
+    public static final int DOOR_R = 18;
+    public static final int DOOR_F = 22;
     /** The lever sits beside the door's left column. */
     public static final int LEVER_R = DOOR_R - 1;
 

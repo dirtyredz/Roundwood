@@ -8,8 +8,6 @@ import io.github.dirtyredz.roundwood.block.archway.trim.ArchwayTrimActions;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
 import io.github.dirtyredz.roundwood.block.window.pane.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
@@ -51,27 +49,18 @@ public final class ShowcaseCanvas {
     private final ServerLevel level;
     private final ShowcaseFrame frame;
     private final List<String> problems = new ArrayList<>();
-    private final List<Appearance> trimSamples;
+    private final List<Appearance> samples;
     private final Set<BlockPos> labelCells = new HashSet<>();
 
     ShowcaseCanvas(ServerLevel level, ShowcaseFrame frame) {
         this.level = level;
         this.frame = frame;
-        this.trimSamples = ShowcaseSamples.all();
+        this.samples = ShowcaseSamples.all();
     }
 
-    /** This build's bare wood samples ({@link ShowcaseSamples#woods}). */
-    public List<Appearance> woods() {
-        return ShowcaseSamples.woods(trimSamples);
-    }
-
-    /** This build's paint samples ({@link ShowcaseSamples#paints}). */
-    public List<Appearance> paints() {
-        return ShowcaseSamples.paints(trimSamples);
-    }
-
-    public List<Appearance> masonry() {
-        return ShowcaseSamples.masonry(trimSamples);
+    /** Every sample look of this build ({@link ShowcaseSamples#all}): woods, then paints, then masonry. */
+    public List<Appearance> samples() {
+        return samples;
     }
 
     public ServerLevel level() {
@@ -148,20 +137,6 @@ public final class ShowcaseCanvas {
             });
         }
         return true;
-    }
-
-    /**
-     * Places a legacy freestanding frame (0.8.0: compatibility content that only older saves hold) in
-     * {@code appearance} through {@link TrimPlacement#placeAt}, its lower-left quarter at ({@code r},
-     * 0, {@code f}), facing away from the builder like the doors.
-     */
-    public boolean trim(Appearance appearance, int r, int f) {
-        TrimLayout.Assembly assembly = new TrimLayout.Assembly(frame.pos(r, 0, f), frame.forward());
-        boolean placed = TrimPlacement.placeAt(level, ModBlocks.roundTrim(), assembly, appearance);
-        if (!placed) {
-            problem("frame not placed at " + assembly.anchor().toShortString());
-        }
-        return placed;
     }
 
     /** A centred round window across {@code axis} (see {@link #pane}). */

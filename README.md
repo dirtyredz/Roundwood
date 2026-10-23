@@ -288,27 +288,25 @@ the main hand is empty. Sneaking changes nothing.
 ## Showcase command
 
 `/roundwood showcase` (permission level 2: ops, or single-player with cheats) builds a labelled test
-layout on the ground ahead of you, centred on the way you face (78 x 8 x 82 blocks, starting three
-blocks ahead). It first clears that whole box to air and lays a stone floor, so use it on open
-ground; it refuses if the box would leave the build limits, the world border or loaded chunks, and
-never touches blocks outside it. The layout: every vanilla wood (and up to eight installed modded
-planks) as doors closed and open on both hinges and as one connected window row; camouflaged doors;
-window junction, stacked, waterlogged and stone-behind demos; a window positions section (centred and
-the six flush positions, connected junctions, a solid-neighbour example, waterlogging) and a window
-arches section (centred, flush, floor and ceiling pairs, single pieces, wood and paint examples);
-a window corners section (2 x 2 arched windows, centred and flush, corner singles), a cross-beam
-section (crossed pieces alone and in a grid) and a window trims section (every wood, paint and
-masonry trim on each piece, both faces, front only, back only and differently styled faces, centred
-and flush, plus a row of round windows flush against all six sides); since 0.10.0 full circles
-(plain, crossed, trimmed), arch sills in several looks beside trims, and rectangles of top corners
-and edges plus each edge alone; a lever-driven door; every
-paint on a door with a painted door trim, on a tinted-glass window and on a painted window; every
-wood and masonry door trim on a blue, a camouflaged oak and an open red door; and the legacy
-freestanding frames (older saves). Since 0.11.0 an arched door section (oak closed and open on both
-hinges, a lever-driven door, other woods and a paint, trims and camouflage) stands at r 40..49,
-f 0..7. Since 0.12.0 an archway section: a row of archways and a row of keyhole archways behind it
-(oak, spruce, dark oak, cherry, blue paint, the four masonry materials, a stone-brick front casing, and
-different front and back casings), at r 26..58, f 35..41, between the round doors and the corners.
+layout on the ground ahead of you, centred on the way you face (82 x 8 x 28 blocks, starting three
+blocks ahead; it used to be 78 x 8 x 82). It first clears that whole box to air and lays a stone
+floor, so use it on open ground; it refuses if the box would leave the build limits, the world border
+or loaded chunks, and never touches blocks outside it. The layout is one of each thing, not every
+combination. From the front row to the back:
+
+- **One of each placeable piece**, oak, default state: the thirteen windows, the round door, the arched
+  door (both closed) and the ordinary and keyhole archways, in a single row.
+- **One materials row:** the ordinary archway (the one piece that takes wood, paint and masonry) once in
+  every look: the eleven vanilla woods (and up to eight installed modded planks), the sixteen paints on
+  oak, and the four masonry materials.
+- **Window configurations**, built in oak only: the seven positions (centred, and flush on each side,
+  ceiling and floor) with connection and practice-block examples; arch pairs (centred, flush, floor,
+  ceiling) and single arch pieces; junction, stacked, waterlogged and stone-behind neighbours; 2 x 2
+  arched windows (centred, flush, floor, ceiling) and each bottom corner alone; a full circle; a 3 x 2
+  and a 2 x 3 window from top corners and edges, and each edge alone.
+- **Attachments**, one fitted example each: a Universal Trim (brick front, spruce back) on a round
+  window, an Arch Sill under an arched window, Cross Beams on a round window, stone-brick camouflage on
+  a round door, and a lever-driven round door (redstone).
 
 Every label sign stands beside the piece it names, never in front of it: on the walkway side, one column to the left of the piece's lower-left cell, turned to face you, so it reads from where you stand to look at the piece and does not cover it. The build reports a placement problem if a sign would replace, or be replaced by, another sample's block.
 

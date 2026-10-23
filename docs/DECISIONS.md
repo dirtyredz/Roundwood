@@ -2,6 +2,20 @@
 
 Newest first.
 
+## 2026-10-22 - The showcase is one of each, not every combination
+
+Owner feedback after seeing `/roundwood showcase` in game: it repeated every door state and every
+window configuration in every material. Now (82 x 8 x 28, was 78 x 8 x 82): one row of every placeable
+piece in oak (13 windows, both doors closed, both archways); one materials row on the ordinary archway
+(the only piece that takes wood, paint and masonry) with every look once; the window configurations
+as before but in oak only; one fitted example each of Universal Trim, Arch Sill, Cross Beams,
+camouflage and redstone. Dropped: the per-wood door matrix, open/closed and per-hinge pairs, the
+trim-by-material grid, the paints grid, the arched-door and archway matrices, and the legacy
+freestanding frame exhibit (not a placeable piece; the masonry looks show on the materials row). The
+width grew to 80 columns because the materials row must hold up to 39 looks two columns each. Each
+rectangle-owning section is checked by a free-area guard (`ShowcaseChecks.verifyOwnsOnly`); labels
+keep their one-column-left rule and `verifyLabels`.
+
 ## 2026-10-22 - Cross Beams is a whole-pane attachment (0.13.0)
 
 Supersedes the separate crossed products and frame-owned beam appearance from 0.7.0. Advertise

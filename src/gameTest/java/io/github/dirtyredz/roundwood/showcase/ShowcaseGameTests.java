@@ -5,8 +5,6 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.showcase.section.SectionChecks;
-import io.github.dirtyredz.roundwood.showcase.section.archway.ArchwaysChecks;
-import io.github.dirtyredz.roundwood.showcase.section.door.ArchedDoorsChecks;
 import io.github.dirtyredz.roundwood.showcase.section.door.DoorSectionsChecks;
 import io.github.dirtyredz.roundwood.showcase.section.window.WindowSectionsChecks;
 import net.minecraft.commands.CommandSourceStack;
@@ -30,7 +28,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 
 /**
- * The showcase builder in an 86 x 10 x 86 template filled with gold: everything it promises is
+ * The showcase builder in an 86 x 10 x 86 template (the bounds are 82 x 8 x 28) filled with gold: everything it promises is
  * present, complete and in the appearance its section names, and no gold outside its bounds was
  * touched (in each facing).
  */
@@ -112,36 +110,25 @@ public final class ShowcaseGameTests {
         int across = Math.min(bounds.getXSpan(), bounds.getZSpan());
         int along = Math.max(bounds.getXSpan(), bounds.getZSpan());
         check(across == ShowcaseFrame.WIDTH + 2 && along == ShowcaseFrame.DEPTH + 2 && bounds.getYSpan() == 8,
-                "bounds are not 78 x 8 x 82: " + bounds);
+                "bounds are not 82 x 8 x 28: " + bounds);
 
         ShowcaseFrame frame = ShowcaseFrame.at(feet, facing);
         verifyBounds(helper, bounds);
-        DoorSectionsChecks.verifyDoors(level, frame);
-        WindowSectionsChecks.verifyWoodWindowRow(level, frame);
         DoorSectionsChecks.verifyCamouflage(level, frame);
+        DoorSectionsChecks.verifyRedstone(level, frame);
         WindowSectionsChecks.verifyWindows(level, frame);
         WindowSectionsChecks.verifyWindowPositions(level, frame);
         WindowSectionsChecks.verifyWindowArches(level, frame);
         WindowSectionsChecks.verifyNewWindowSections(level, frame);
-        ArchedDoorsChecks.verify(level, frame);
-        ArchwaysChecks.verify(level, frame);
-        DoorSectionsChecks.verifyRedstone(level, frame);
-        DoorSectionsChecks.verifyTrims(level, frame);
-        SectionChecks.verifyArches(level, frame);
-        SectionChecks.verifyPaints(level, frame);
+        SectionChecks.verifyPieces(level, frame);
+        SectionChecks.verifyMaterials(level, frame);
         // Integrity checks run a tick later: everything must still be whole afterwards.
         helper.runAfterDelay(3, () -> {
-            DoorSectionsChecks.verifyTrims(level, frame);
-            SectionChecks.verifyArches(level, frame);
-            DoorSectionsChecks.verifyDoors(level, frame);
-            WindowSectionsChecks.verifyWoodWindowRow(level, frame);
-            SectionChecks.verifyPaints(level, frame);
             WindowSectionsChecks.verifyWindowPositions(level, frame);
             WindowSectionsChecks.verifyWindowArches(level, frame);
             WindowSectionsChecks.verifyNewWindowSections(level, frame);
-            ArchedDoorsChecks.verify(level, frame);
-            ArchwaysChecks.verify(level, frame);
-            ArchedDoorsChecks.verifyRedstone(level, frame);
+            SectionChecks.verifyPieces(level, frame);
+            SectionChecks.verifyMaterials(level, frame);
             clearSilently(helper);
             helper.succeed();
         });

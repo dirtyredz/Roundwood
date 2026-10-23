@@ -12,6 +12,7 @@ import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseFrame;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseWindow;
+import io.github.dirtyredz.roundwood.showcase.section.PiecesSection;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -24,31 +25,15 @@ import java.util.List;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.connects;
 import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.windowLook;
-import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.woods;
 
 /**
- * The window sections of the showcase read back from the world: the one-per-wood window row, the
+ * The window sections of the showcase read back from the world: the
  * junction and stacking demos, the position and arch sections, and the sections listed as
- * {@code ShowcaseWindow}s (corners, cross beams, trims, circles, sills, edges). Called right after
+ * {@code ShowcaseWindow}s (the pieces row, corners, cross beams, trims, circles, sills, edges). Called right after
  * building and again after the integrity ticks, for every facing the showcase test builds.
  */
 public final class WindowSectionsChecks {
     private WindowSectionsChecks() {
-    }
-
-    /** One round window per wood, in a row beside the doors, connected to its neighbours. */
-    public static void verifyWoodWindowRow(ServerLevel level, ShowcaseFrame frame) {
-        List<Appearance> woods = woods();
-        for (int i = 0; i < woods.size(); i++) {
-            Appearance wood = woods.get(i);
-            BlockPos windowPos = frame.pos(WindowsSection.ROW_R + i, 0, WindowsSection.ROW_F);
-            BlockState state = level.getBlockState(windowPos);
-            check(state.is(ModBlocks.roundWindow()), wood.key() + ": window missing from the row");
-            check(wood.equals(windowLook(level, windowPos)), wood.key() + ": window shows " + windowLook(level, windowPos));
-            check(state.getValue(RoundWindowBlock.AXIS) == frame.right().getAxis(), wood.key() + ": window axis");
-            check(connects(state, frame.right()) == (i < woods.size() - 1), wood.key() + ": right-hand connection");
-            check(connects(state, frame.right().getOpposite()) == (i > 0), wood.key() + ": left-hand connection");
-        }
     }
 
     public static void verifyWindows(ServerLevel level, ShowcaseFrame frame) {
@@ -124,11 +109,6 @@ public final class WindowSectionsChecks {
                 WindowArchesSection.centred(forward), Appearance.DEFAULT);
         expectArch(level, frame, ModBlocks.archRight(), WindowArchesSection.SINGLE_RIGHT_R, WindowArchesSection.SINGLES_F,
                 WindowArchesSection.centred(forward), Appearance.DEFAULT);
-        List<Appearance> looks = WindowArchesSection.looks();
-        for (int i = 0; i < looks.size(); i++) {
-            expectPair(level, frame, WindowArchesSection.LOOKS_R + WindowArchesSection.LOOKS_PITCH * i, WindowArchesSection.LOOKS_F,
-                    WindowArchesSection.centred(forward), looks.get(i));
-        }
         // Placement's own rule agrees with the showcase: a builder facing forward puts the left piece on their left.
         check(WindowArchesSection.centred(forward).right() == frame.right(), "centred pair's right is not the builder's right");
         check(WindowArchesSection.floor(forward).right() == frame.right(), "floor pair's right is not the builder's right");
@@ -157,6 +137,7 @@ public final class WindowSectionsChecks {
      * trims, sills and glass.
      */
     public static void verifyNewWindowSections(ServerLevel level, ShowcaseFrame frame) {
+        verify(level, frame, "pieces", PiecesSection.windows(frame));
         verify(level, frame, "corners", WindowCornersSection.windows(frame));
         verify(level, frame, "cross beams", WindowMuntinsSection.windows(frame));
         verify(level, frame, "trims", WindowTrimsSection.windows(frame));

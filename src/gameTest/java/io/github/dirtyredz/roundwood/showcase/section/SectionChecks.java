@@ -1,70 +1,105 @@
 package io.github.dirtyredz.roundwood.showcase.section;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
+import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
+import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
+import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCanvas;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseFrame;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseSamples;
+import io.github.dirtyredz.roundwood.showcase.ShowcaseWindow;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.doorLook;
 import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.masonry;
 import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.paints;
 import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.signSays;
-import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.trimLook;
-import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.windowLook;
+import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.verifyOwnsOnly;
+import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.woods;
 
 /**
- * The sections that belong to neither the door nor the window family, read back from the world: the
- * freestanding brick arches and the sixteen paints (door, trim, tinted glass and window each). Called
- * right after building and again after the integrity ticks, for every facing the showcase test builds.
+ * The two sections that belong to no single family, read back from the world: the row of one of each
+ * placeable piece and the row of every look on one archway. Each is checked complete (the right
+ * piece, look and sign) and its rectangle is checked to hold nothing else, which also proves it
+ * overlaps no other section. Called right after building and again after the integrity ticks, for
+ * every facing the showcase test builds. (The pieces' windows are read back with the other listed
+ * windows, in {@code WindowSectionsChecks}.)
  */
 public final class SectionChecks {
     private SectionChecks() {
     }
 
-    public static void verifyArches(ServerLevel level, ShowcaseFrame frame) {
-        List<Appearance> masonry = masonry();
-        check(masonry.size() == 4, "expected four masonry arches, have " + masonry.size());
-        for (int i = 0; i < masonry.size(); i++) {
-            TrimLayout.Assembly trim = new TrimLayout.Assembly(frame.pos(BrickArchesSection.r(i), 0, BrickArchesSection.F), frame.forward());
-            check(trim.complete(level, ModBlocks.roundTrim()), masonry.get(i).key() + ": freestanding arch missing");
-            check(masonry.get(i).equals(trimLook(level, trim.anchor())), masonry.get(i).key() + ": arch look");
-            check(level.getBlockEntity(frame.pos(ShowcaseCanvas.labelR(BrickArchesSection.r(i)), 0, BrickArchesSection.F)) instanceof SignBlockEntity,
-                    masonry.get(i).key() + ": arch label missing");
+    public static void verifyPieces(ServerLevel level, ShowcaseFrame frame) {
+        Set<BlockPos> owned = new HashSet<>();
+        List<ShowcaseWindow> windows = PiecesSection.windows(frame);
+        check(windows.size() == 13, "expected the thirteen windows, have " + windows.size());
+        check(windows.stream().map(w -> w.design().id()).distinct().count() == 13, "the pieces row repeats a window");
+        for (ShowcaseWindow window : windows) {
+            owned.add(frame.pos(window.r(), window.y(), window.f()));
+            owned.add(sign(level, frame, window.r(), PiecesSection.F - 1, "Window"));
         }
+        int f = PiecesSection.F;
+        DoorLayout.Assembly round = new DoorLayout.Assembly(frame.pos(PiecesSection.ROUND_DOOR_R, 0, f), frame.forward(), DoorHingeSide.LEFT,
+                DoorDesign.ROUND);
+        DoorLayout.Assembly arched = new DoorLayout.Assembly(frame.pos(PiecesSection.ARCHED_DOOR_R, 0, f), frame.forward(), DoorHingeSide.LEFT,
+                DoorDesign.ARCHED);
+        for (DoorLayout.Assembly door : List.of(round, arched)) {
+            boolean isRound = door == round;
+            String what = (isRound ? "round" : "arched") + " door";
+            check(door.complete(level, isRound ? ModBlocks.roundDoor() : ModBlocks.archedDoor()), what + ": missing or incomplete");
+            check(!level.getBlockState(door.anchor()).getValue(DoorBlock.OPEN), what + ": not closed");
+            check(level.getBlockEntity(door.anchor()) instanceof RoundDoorBlockEntity entity && entity.appearance().equals(Appearance.DEFAULT)
+                    && entity.trims().equals(FaceTrims.NONE) && entity.camouflage().isEmpty(), what + ": not oak and plain");
+            owned.addAll(door.positions());
+        }
+        owned.add(sign(level, frame, PiecesSection.ROUND_DOOR_R, f - 1, "Round door"));
+        owned.add(sign(level, frame, PiecesSection.ARCHED_DOOR_R, f - 1, "Arched door"));
+        owned.addAll(archway(level, frame, ArchwayDesign.ORDINARY, PiecesSection.ARCHWAY_R, f, Appearance.DEFAULT, "Archway"));
+        owned.addAll(archway(level, frame, ArchwayDesign.KEYHOLE, PiecesSection.KEYHOLE_R, f, Appearance.DEFAULT, "Keyhole archway"));
+        verifyOwnsOnly(level, frame, "pieces", 0, PiecesSection.R_MAX, 0, f, owned);
     }
 
-    public static void verifyPaints(ServerLevel level, ShowcaseFrame frame) {
-        List<Appearance> paints = paints();
-        check(paints.size() == 16, "expected all sixteen paints, have " + paints.size());
-        for (int i = 0; i < paints.size(); i++) {
-            Appearance paint = paints.get(i);
-            int r = PaintsSection.r(i);
-            int f = PaintsSection.f(i);
-            DoorLayout.Assembly door = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), DoorHingeSide.LEFT, DoorDesign.ROUND);
-            check(door.complete(level, ModBlocks.roundDoor()) && paint.equals(doorLook(level, door.anchor())), paint.key() + ": door");
-            check(level.getBlockEntity(door.anchor()) instanceof RoundDoorBlockEntity entity
-                    && entity.trims().equals(FaceTrims.NONE.with(AttachmentFace.FRONT, paint)), paint.key() + ": door trim");
-            BlockPos glass = frame.pos(r + PaintsSection.GLASS_OFFSET, 0, f);
-            check(level.getBlockEntity(glass) instanceof RoundWindowBlockEntity tinted && tinted.glass().equals(paint.paint())
-                    && tinted.appearance().equals(Appearance.DEFAULT), paint.key() + ": tinted glass");
-            BlockPos window = frame.pos(r + PaintsSection.WINDOW_OFFSET, 0, f);
-            check(level.getBlockState(window).is(ModBlocks.roundWindow()) && paint.equals(windowLook(level, window)), paint.key() + ": window");
-            check(signSays(level, frame.pos(ShowcaseCanvas.labelR(r), 0, f - 1), ShowcaseSamples.label(paint)), paint.key() + ": label sign missing");
+    /** Every sample look on one ordinary archway each, in the samples' order, two columns apart. */
+    public static void verifyMaterials(ServerLevel level, ShowcaseFrame frame) {
+        List<Appearance> looks = ShowcaseSamples.all();
+        check(woods().size() >= 11 && paints().size() == 16 && masonry().size() == 4, "expected 11+ woods, 16 paints, 4 masonry: " + looks.size());
+        check(MaterialsSection.r(looks.size() - 1) + 1 <= MaterialsSection.R_MAX, "the materials row outgrew its rectangle");
+        Set<BlockPos> owned = new HashSet<>();
+        for (int i = 0; i < looks.size(); i++) {
+            owned.addAll(archway(level, frame, ArchwayDesign.ORDINARY, MaterialsSection.r(i), MaterialsSection.F, looks.get(i),
+                    ShowcaseSamples.label(looks.get(i))));
         }
+        verifyOwnsOnly(level, frame, "materials", 0, MaterialsSection.R_MAX, MaterialsSection.F - 1, MaterialsSection.F, owned);
+    }
+
+    /** One archway read back (complete, design, look, no trims) plus its sign; returns the cells it and its sign own. */
+    private static Set<BlockPos> archway(ServerLevel level, ShowcaseFrame frame, ArchwayDesign design, int r, int f, Appearance look,
+                                         String label) {
+        String what = design + " archway (" + look.key() + ") r " + r;
+        ArchwayLayout.Assembly assembly = new ArchwayLayout.Assembly(frame.pos(r, 0, f), frame.forward(), design);
+        check(assembly.complete(level, ModBlocks.archway(design)), what + ": missing or incomplete");
+        check(level.getBlockEntity(assembly.anchor()) instanceof ArchwayBlockEntity entity && entity.appearance().equals(look)
+                && entity.trims().equals(FaceTrims.NONE), what + ": wrong look or trims");
+        Set<BlockPos> owned = new HashSet<>(assembly.positions());
+        owned.add(sign(level, frame, r, f - 1, label));
+        return owned;
+    }
+
+    private static BlockPos sign(ServerLevel level, ShowcaseFrame frame, int pieceR, int f, String first) {
+        BlockPos pos = frame.pos(ShowcaseCanvas.labelR(pieceR), 0, f);
+        check(signSays(level, pos, first), "label sign '" + first + "' missing at " + pos);
+        return pos;
     }
 }
