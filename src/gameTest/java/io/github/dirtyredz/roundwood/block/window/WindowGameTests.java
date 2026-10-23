@@ -1,40 +1,74 @@
 package io.github.dirtyredz.roundwood.block.window;
 
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.core.BlockPos;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.core.Direction;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.gametest.framework.GameTest;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.gametest.framework.GameTestHelper;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.server.level.ServerPlayer;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.item.ItemStack;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.item.Items;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.level.ClipContext;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.level.GameType;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.level.block.Blocks;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.level.block.CrossCollisionBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.level.block.Mirror;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.level.block.PipeBlock;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.level.block.Rotation;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.level.material.Fluids;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.phys.AABB;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.phys.BlockHitResult;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.phys.HitResult;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.phys.Vec3;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraftforge.gametest.GameTestHolder;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import java.util.function.Supplier;
 
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropped;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
+import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.useItemOn;
 
 /** Round windows: orientation, thin-panel collision, pane connections, rotation and water. */
@@ -120,51 +154,43 @@ public final class WindowGameTests {
         helper.succeed();
     }
 
+    /** 0.13.1: a window keeps no connection to a pane, wall or crossing window, in either placement order, and adds no glass. */
     @GameTest(template = TEMPLATE)
-    public static void reciprocalPaneConnectionsInBothPlacementOrders(GameTestHelper helper) {
+    public static void noNeighbourEverConnectsInEitherPlacementOrder(GameTestHelper helper) {
         floor(helper);
         String[] names = {"pane", "wall", "window"};
-        // A window joins across the plane only when its own plane crosses this one (placed facing east).
         Direction[] facings = {Direction.NORTH, Direction.NORTH, Direction.EAST};
         for (int i = 0; i < names.length; i++) {
             int x = 1 + 3 * i;
-            // (a) window first, then the neighbour on its north side, then one in plane (east).
             BlockPos a = new BlockPos(x, 1, 2);
             place(helper, "recip_a_" + names[i], Direction.NORTH, new ItemStack(window()), a);
-            check(!at(helper, a).getValue(CrossCollisionBlock.NORTH), names[i] + " a: connected to nothing");
             place(helper, "recip_a_n_" + names[i], facings[i], neighbourStacks()[i].get(), a.north());
-            check(at(helper, a).getValue(CrossCollisionBlock.NORTH), names[i] + " a: window did not connect north");
-            if (i != 1) {
-                check(at(helper, a.north()).getValue(CrossCollisionBlock.SOUTH), names[i] + " a: neighbour did not connect back");
-            }
             place(helper, "recip_a_e_" + names[i], Direction.NORTH, new ItemStack(Items.GLASS_PANE), a.east());
-            check(at(helper, a).getValue(CrossCollisionBlock.EAST), names[i] + " a: in-plane east did not connect");
-            // (b) neighbour first, then the window.
+            check(WindowPaneBlock.connections(at(helper, a)).isEmpty(), names[i] + " a: the window connected: " + at(helper, a));
             BlockPos b = new BlockPos(x, 1, 6);
             place(helper, "recip_b_n_" + names[i], facings[i], neighbourStacks()[i].get(), b.north());
             place(helper, "recip_b_" + names[i], Direction.NORTH, new ItemStack(window()), b);
-            check(at(helper, b).getValue(CrossCollisionBlock.NORTH), names[i] + " b: window did not connect north");
-            if (i != 1) {
-                check(at(helper, b.north()).getValue(CrossCollisionBlock.SOUTH), names[i] + " b: neighbour did not connect back");
-            }
             place(helper, "recip_b_e_" + names[i], Direction.NORTH, new ItemStack(Items.GLASS_PANE), b.east());
-            check(at(helper, b).getValue(CrossCollisionBlock.EAST), names[i] + " b: in-plane east did not connect");
+            check(WindowPaneBlock.connections(at(helper, b)).isEmpty(), names[i] + " b: the window connected: " + at(helper, b));
+            BlockPos abs = helper.absolutePos(a);
+            check(!collides(helper, abs, 0.45, 0.55, 0.05, 0.3) && !collides(helper, abs, 0.6, 0.95, 0.05, 0.3),
+                    names[i] + " a: glass reaches towards a neighbour");
         }
         helper.succeed();
     }
 
+    /** 0.13.1: a pane beside a window adds no arm to the window's own collision, across or in its plane. */
     @GameTest(template = TEMPLATE)
-    public static void perpendicularArmCollidesAndInPlaneAddsNothing(GameTestHelper helper) {
+    public static void aPaneBesideAWindowAddsNoGeometry(GameTestHelper helper) {
         floor(helper);
         BlockPos pos = new BlockPos(4, 1, 4);
         place(helper, "arm_w", Direction.NORTH, new ItemStack(window()), pos);
         place(helper, "arm_n", Direction.NORTH, new ItemStack(Items.GLASS_PANE), pos.north());
-        BlockPos abs = helper.absolutePos(pos);
-        check(collides(helper, abs, 0.45, 0.55, 0.05, 0.3), "north arm should collide");
-        check(!collides(helper, abs, 0.45, 0.55, 0.7, 0.95), "no south neighbour, yet the south arm collides");
         place(helper, "arm_e", Direction.NORTH, new ItemStack(Items.GLASS_PANE), pos.east());
-        check(at(helper, pos).getValue(CrossCollisionBlock.EAST), "east pane did not connect");
+        BlockPos abs = helper.absolutePos(pos);
+        check(!collides(helper, abs, 0.45, 0.55, 0.05, 0.3), "a north arm collides");
         check(!collides(helper, abs, 0.6, 0.95, 0.05, 0.3), "an in-plane connection added geometry");
+        check(WindowPaneBlock.connections(at(helper, pos)).isEmpty(), "the window connected: " + at(helper, pos));
         helper.succeed();
     }
 
@@ -206,30 +232,23 @@ public final class WindowGameTests {
         helper.succeed();
     }
 
-    /** Across the plane, panes, bars and crossing windows connect; a parallel window in front does not. */
+    /** 0.13.1: across the plane, panes, bars and crossing windows no longer connect either. */
     @GameTest(template = TEMPLATE)
-    public static void paneNeighboursAcrossThePlaneStillConnect(GameTestHelper helper) {
+    public static void paneNeighboursAcrossThePlaneNoLongerConnect(GameTestHelper helper) {
         floor(helper);
         BlockPos pane = new BlockPos(1, 1, 4);
         place(helper, "across_pane_w", Direction.NORTH, new ItemStack(window()), pane);
         place(helper, "across_pane_n", Direction.NORTH, new ItemStack(Items.GLASS_PANE), pane.north());
-        check(at(helper, pane).getValue(CrossCollisionBlock.NORTH), "a vanilla pane across the plane did not connect");
         BlockPos bars = new BlockPos(3, 1, 4);
         place(helper, "across_bars_w", Direction.NORTH, new ItemStack(window()), bars);
         place(helper, "across_bars_s", Direction.NORTH, new ItemStack(Items.IRON_BARS), bars.south());
-        check(at(helper, bars).getValue(CrossCollisionBlock.SOUTH), "iron bars across the plane did not connect");
-        // A window whose plane crosses this one (axis z) meets it edge-on: a junction.
         BlockPos crossing = new BlockPos(5, 1, 4);
         place(helper, "across_cross_w", Direction.NORTH, new ItemStack(window()), crossing);
         place(helper, "across_cross_n", Direction.EAST, new ItemStack(window()), crossing.north());
         check(at(helper, crossing.north()).getValue(RoundWindowBlock.AXIS) == Direction.Axis.Z, "setup: crossing window axis");
-        check(at(helper, crossing).getValue(CrossCollisionBlock.NORTH), "a crossing window did not connect");
-        // A parallel window directly in front is face to face, not a junction.
-        BlockPos parallel = new BlockPos(7, 1, 4);
-        place(helper, "across_par_w", Direction.NORTH, new ItemStack(window()), parallel);
-        place(helper, "across_par_n", Direction.NORTH, new ItemStack(window()), parallel.north());
-        check(!at(helper, parallel).getValue(CrossCollisionBlock.NORTH), "a parallel window in front made an arm");
-        check(!at(helper, parallel.north()).getValue(CrossCollisionBlock.SOUTH), "the parallel window grew an arm back");
+        for (BlockPos pos : new BlockPos[] {pane, bars, crossing, crossing.north()}) {
+            check(WindowPaneBlock.connections(at(helper, pos)).isEmpty(), "a window connected at " + pos + ": " + at(helper, pos));
+        }
         helper.succeed();
     }
 
@@ -238,34 +257,16 @@ public final class WindowGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void removingANeighbourDisconnects(GameTestHelper helper) {
-        floor(helper);
-        BlockPos pos = new BlockPos(4, 1, 4);
-        place(helper, "rm_w", Direction.NORTH, new ItemStack(window()), pos);
-        place(helper, "rm_n", Direction.NORTH, new ItemStack(Items.GLASS_PANE), pos.north());
-        BlockPos abs = helper.absolutePos(pos);
-        check(at(helper, pos).getValue(CrossCollisionBlock.NORTH) && collides(helper, abs, 0.45, 0.55, 0.05, 0.3), "setup: north arm missing");
-        helper.setBlock(pos.north(), Blocks.AIR);
-        check(!at(helper, pos).getValue(CrossCollisionBlock.NORTH), "window still connected north after removal");
-        check(!collides(helper, abs, 0.45, 0.55, 0.05, 0.3), "arm region still collides after removal");
-        helper.succeed();
-    }
-
-    @GameTest(template = TEMPLATE)
-    public static void rotationAndMirrorTurnConnectionsAndAxis(GameTestHelper helper) {
+    public static void rotationAndMirrorTurnTheAxis(GameTestHelper helper) {
         floor(helper);
         BlockPos pos = new BlockPos(4, 1, 4);
         place(helper, "rot_w", Direction.NORTH, new ItemStack(window()), pos);
         place(helper, "rot_n", Direction.NORTH, new ItemStack(Items.GLASS_PANE), pos.north());
         BlockState state = at(helper, pos);
-        check(state.getValue(CrossCollisionBlock.NORTH) && state.getValue(RoundWindowBlock.AXIS) == Direction.Axis.X, "setup: " + state);
+        check(state.getValue(RoundWindowBlock.AXIS) == Direction.Axis.X, "setup: " + state);
         BlockState rotated = state.rotate(Rotation.CLOCKWISE_90);
         check(rotated.getValue(RoundWindowBlock.AXIS) == Direction.Axis.Z, "rotation did not turn the axis: " + rotated);
-        check(rotated.getValue(CrossCollisionBlock.EAST) && !rotated.getValue(CrossCollisionBlock.NORTH),
-                "rotation did not turn the connection: " + rotated);
         BlockState mirrored = state.mirror(Mirror.LEFT_RIGHT);
-        check(mirrored.getValue(CrossCollisionBlock.SOUTH) && !mirrored.getValue(CrossCollisionBlock.NORTH),
-                "mirror did not swap north and south: " + mirrored);
         check(mirrored.getValue(RoundWindowBlock.AXIS) == Direction.Axis.X, "mirror changed the axis: " + mirrored);
         helper.succeed();
     }

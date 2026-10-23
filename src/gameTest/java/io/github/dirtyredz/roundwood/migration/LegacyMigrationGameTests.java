@@ -145,7 +145,6 @@ public final class LegacyMigrationGameTests {
             check(birchState.is(ModBlocks.roundWindow()) && blueState.is(ModBlocks.roundWindow()), "windows not converted");
             check(birchState.getValue(BlockStateProperties.WATERLOGGED) && helper.getLevel().getFluidState(birch).is(Fluids.WATER),
                     "the wet window lost its water");
-            check(birchState.getValue(RoundWindowBlock.EAST) && blueState.getValue(RoundWindowBlock.WEST), "window connections lost");
             check(birchState.getValue(RoundWindowBlock.POSITION) == WindowPosition.CENTER
                     && blueState.getValue(RoundWindowBlock.POSITION) == WindowPosition.CENTER, "converted windows are not centred");
             check(((RoundWindowBlockEntity) helper.getLevel().getBlockEntity(birch)).appearance().equals(planks("birch")), "birch window look");

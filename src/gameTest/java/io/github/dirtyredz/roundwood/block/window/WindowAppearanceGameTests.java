@@ -174,19 +174,17 @@ public final class WindowAppearanceGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void restylingOneOfTwoWindowsKeepsThemConnected(GameTestHelper helper) {
+    public static void restylingOneOfTwoWindowsLeavesTheOtherAlone(GameTestHelper helper) {
         floor(helper);
         BlockPos left = place(helper, "pair_a", new BlockPos(3, 1, 4));
         BlockPos right = place(helper, "pair_b", new BlockPos(4, 1, 4));
-        check(state(helper, left).getValue(CrossCollisionBlock.EAST) && state(helper, right).getValue(CrossCollisionBlock.WEST),
-                "the side-by-side windows did not connect");
         BlockState leftBefore = state(helper, left);
         BlockState rightBefore = state(helper, right);
         ServerPlayer player = player(helper, "pair", GameType.SURVIVAL, Direction.NORTH);
         use(helper, player, new ItemStack(Items.BIRCH_PLANKS, 2), ItemStack.EMPTY, front(helper, left), true);
         expect(helper, left, BIRCH, "left");
         expect(helper, right, Appearance.DEFAULT, "right");
-        check(state(helper, left) == leftBefore && state(helper, right) == rightBefore, "the connections changed");
+        check(state(helper, left) == leftBefore && state(helper, right) == rightBefore, "the neighbouring states changed");
         helper.succeed();
     }
 
