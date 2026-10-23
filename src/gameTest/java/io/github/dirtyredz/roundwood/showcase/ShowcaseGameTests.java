@@ -109,7 +109,7 @@ public final class ShowcaseGameTests {
         BoundingBox bounds = result.bounds();
         int across = Math.min(bounds.getXSpan(), bounds.getZSpan());
         int along = Math.max(bounds.getXSpan(), bounds.getZSpan());
-        check(across == ShowcaseFrame.WIDTH + 2 && along == ShowcaseFrame.DEPTH + 2 && bounds.getYSpan() == 8,
+        check(across == ShowcaseFrame.DEPTH + 2 && along == ShowcaseFrame.WIDTH + 2 && bounds.getYSpan() == 8,
                 "bounds are not 82 x 8 x 28: " + bounds);
 
         ShowcaseFrame frame = ShowcaseFrame.at(feet, facing);
