@@ -206,9 +206,10 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   minus the opening, `ArchedProfile(2, 30, 16)` for the ordinary archway and, for the keyhole,
   `KeyholeGeometry` (the same crown above y 16; below it the edges move in linearly by 4 px over 8 px,
   then x 6..26 to the floor; pixel centres decide). `ArchwayGeometry` rasterises it once, extruded the
-  full block (z 0..16). Collision, target and outline are the same per-cell piece (`ArchwayShapes`),
-  so players and rays pass through the passage; the item model, the world models and the preview are
-  built from the same mask.
+  full block (z 0..16). The target and outline are the drawn frame in each cell (`ArchwayShapes.shape`),
+  so rays pass through the passage; since 0.13.1 the collision is smaller (`ArchwayShapes.collision`,
+  `ArchwayGeometry.collisionCell`: the lower row's jambs only, nothing of the crown), so players and
+  tall mobs walk through. The item model, the world models and the preview are built from the whole mask.
 - **Placement.** `ArchwayPlacementPlan.of(block, context)` (or `at(...)` for the showcase) is the one
   read-only decision: anchor = clicked or replaceable cell, facing = the placer's horizontal
   direction, right column = facing's clockwise side, four cells checked for bounds, border, loaded,
@@ -282,7 +283,7 @@ aliases. It stores frame appearance, glass tint and three independent attachment
 
 **Pose and identity.** Round panes retain axis plus position (center or six flush sides); oriented
 panes retain twelve orientations and three depths. Both reduce to `WindowPose(front, top, depth)`.
-Every pane retains horizontal connections, waterlogged, trimmed and face_reversed. No beam property
+Every pane retains the four (always off, since 0.13.1) horizontal connection properties, waterlogged, trimmed and face_reversed. No beam property
 is added. `WindowDesign(profile, pattern)` is a geometry/cache value: `WindowPaneState` derives CROSS
 when beams are installed, or while a retired crossed block awaits conversion. Registrations and
 advertised items use plain profiles. `WindowFaceIdentity` maps physical sides to stored face trims;
@@ -294,15 +295,16 @@ The round opening is diameter 12. Arch quarters form the 32/28 ring; lower arche
 ones. Corners have a two-pixel jamb and sill/head; edges have one two-pixel border. Every piece is
 independent. `WindowMuntinGeometry` clips a one-pixel cross at u/v 7.5..8.5 to each opening, at full
 slab depth. `WindowPaneGeometry` marks its pieces BEAM separately from FRAME and GLASS, removing
-glazing and connector reach beneath beams. `WindowSurfaceGeometry` emits only exposed surfaces
+glazing beneath beams. `WindowSurfaceGeometry` emits only exposed surfaces
 from the complete composition: opaque reveals remain against glass, glass never draws internally.
 `WindowShapes` shares those volumes for collision and combines the in-cell trim/sill bands for
 selection. Face attachments are decorative and never add collision.
 
-**Connections and placement.** Only centered upright panes grow connector glass across their plane,
-toward vanilla panes, bars, walls or a centered crossing pane. No solid-block connections or
-vertical links; flush, floor and ceiling panes keep no connections. Fitting beams never changes
-these rules. `WindowTargetZones` and `WindowPlacement` remain the Hammer-style placement authority:
+**Connections and placement.** No pane connects (0.13.1): the geometry is the panel and its slab, so
+no glass reaches a neighbour at a corner or junction; `WindowPaneBlock` writes the four connection
+properties off on placement and on every neighbour update (the 0.5.0 centred arm, and before it the
+0.6.0 posts, are gone). A vanilla pane beside a window still draws its own arm. Fitting beams never
+changes these rules. `WindowTargetZones` and `WindowPlacement` remain the Hammer-style placement authority:
 center square gives upright/centered, edge trapezoids give the flush pane, with the chosen face/top.
 `WindowPlacementPreview` uses the same placement context; the overlay draws the target grid and
 result outline. Hidden crossed items instead share `CrossWindowPlacement.Plan`, including the
@@ -586,8 +588,8 @@ tile, so no face samples outside its sprite. A `FaceStyle` can hide buried faces
 another texture variable (a frame's sides) or explicit UVs: door panels and whole-ring frames use
 `AssemblyFaceUv`, which spreads one image across the whole 32 x 32 front and back. Door: two leaf
 templates, two oak leaves (`round_door_leaf_<hinge>`), one empty world model and a single `""`
-variant. Window: pane-only visible-surface models per design, pose and arm combination (trims are
-not in them; see Window), in one-model-per-state blockstates; 151 plain window block models (180 block
+variant. Window: pane-only visible-surface models per design and pose (trims are
+not in them; see Window; no connection selects a model), in one-model-per-state blockstates; 112 plain window block models (141 block
 models in all), 26 window item models. Textures:
 `window_glass_clear`, `window_glass_<dye>` (sixteen), `trim_radial_thin_<m>`,
 `window_trim_round_<m>`, `window_trim_arch_<m>`, `universal_trim_<m>` (0.9.0); `window_trim_face`

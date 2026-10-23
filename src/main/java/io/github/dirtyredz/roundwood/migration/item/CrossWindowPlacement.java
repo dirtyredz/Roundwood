@@ -41,7 +41,7 @@ public final class CrossWindowPlacement {
             var window = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), pos, state);
             window.load(contents.copy());
             var design = new WindowDesign(pane.profile(), WindowPattern.CROSS);
-            return WindowShapes.selection(design, pane.pose(state), WindowPaneBlock.connections(state),
+            return WindowShapes.selection(design, pane.pose(state),
                     sides(window, TrimSlot.PERIMETER), sides(window, TrimSlot.SILL));
         }
 

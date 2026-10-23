@@ -28,7 +28,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 
 /**
- * The showcase builder in an 86 x 10 x 86 template (the bounds are 82 x 8 x 28) filled with gold: everything it promises is
+ * The showcase builder in a 92 x 10 x 92 template (the bounds are 90 x 8 x 28) filled with gold: everything it promises is
  * present, complete and in the appearance its section names, and no gold outside its bounds was
  * touched (in each facing).
  */
@@ -36,7 +36,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 @PrefixGameTestTemplate(false)
 public final class ShowcaseGameTests {
     private static final String TEMPLATE = "showcase";
-    private static final int SIZE = 86;
+    private static final int SIZE = 92;
     private static final int HEIGHT = 10;
 
     private ShowcaseGameTests() {
@@ -110,7 +110,7 @@ public final class ShowcaseGameTests {
         int across = Math.min(bounds.getXSpan(), bounds.getZSpan());
         int along = Math.max(bounds.getXSpan(), bounds.getZSpan());
         check(across == ShowcaseFrame.DEPTH + 2 && along == ShowcaseFrame.WIDTH + 2 && bounds.getYSpan() == 8,
-                "bounds are not 82 x 8 x 28: " + bounds);
+                "bounds are not 90 x 8 x 28: " + bounds);
 
         ShowcaseFrame frame = ShowcaseFrame.at(feet, facing);
         verifyBounds(helper, bounds);
@@ -122,6 +122,7 @@ public final class ShowcaseGameTests {
         WindowSectionsChecks.verifyNewWindowSections(level, frame);
         SectionChecks.verifyPieces(level, frame);
         SectionChecks.verifyMaterials(level, frame);
+        SpacingChecks.verifySpacing(level, frame);
         // Integrity checks run a tick later: everything must still be whole afterwards.
         helper.runAfterDelay(3, () -> {
             WindowSectionsChecks.verifyWindowPositions(level, frame);

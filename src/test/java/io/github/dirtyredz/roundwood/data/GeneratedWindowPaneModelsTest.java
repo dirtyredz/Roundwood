@@ -88,8 +88,9 @@ class GeneratedWindowPaneModelsTest {
     }
 
     private static void check(JsonArray parts, Map<String, String> pose, WindowDesign design, WindowPose windowPose) {
-        // Connections the geometry ignores must not change the model; each distinct (model, geometry) pair is checked once.
-        Set<String> seen = new HashSet<>();
+        // No connection selects a model (0.13.1: a window grows no connecting glass): all sixteen sets draw the one
+        // model, whose surfaces are checked once, against the geometry.
+        Set<String> first = null;
         for (int mask = 0; mask < 16; mask++) {
             Map<String, String> values = new HashMap<>(pose);
             values.putAll(GeneratedBlockstatesTest.flagValues("false,false"));
@@ -112,13 +113,13 @@ class GeneratedWindowPaneModelsTest {
                     fail(what + ": flags " + flags + " change the applied models");
                 }
             }
-            Set<Direction> effective = EnumSet.noneOf(Direction.class);
-            connected.stream().filter(WindowPaneGeometry.neededSides(windowPose)::contains).forEach(effective::add);
-            if (!seen.add(applied + " " + effective)) {
+            if (first != null) {
+                assertEquals(first, applied, what + ": a connection changed the model");
                 continue;
             }
+            first = applied;
             Cells geometry = new Cells();
-            for (Piece piece : WindowPaneGeometry.pieces(design, windowPose, connected)) {
+            for (Piece piece : WindowPaneGeometry.panel(design, windowPose)) {
                 geometry.fill(piece.box(), piece.texture().equals(WindowPaneGeometry.GLASS) ? GLASS : SOLID);
             }
             Set<Long> drawn = new HashSet<>();
@@ -177,7 +178,7 @@ class GeneratedWindowPaneModelsTest {
             assertEquals(ModelExpectations.GLASS, model.texture("#glass"), id);
             checked++;
         }
-        assertEquals(151, checked, "window block models");
+        assertEquals(112, checked, "window block models");
     }
 
     /**

@@ -52,7 +52,7 @@ public final class WindowBeamModels {
     }
 
     public static List<Surface> surfaces(WindowPaneState.Snapshot pane) {
-        return WindowSurfaceGeometry.surfaces(WindowPaneGeometry.pieces(pane.design(), pane.pose(), pane.connections()), Set.of(WindowPaneGeometry.GLASS));
+        return WindowSurfaceGeometry.surfaces(WindowPaneGeometry.panel(pane.design(), pane.pose()), Set.of(WindowPaneGeometry.GLASS));
     }
 
     public static List<BakedQuad> quads(WindowPaneState.Snapshot pane, ResourceLocation frame, ResourceLocation glass,

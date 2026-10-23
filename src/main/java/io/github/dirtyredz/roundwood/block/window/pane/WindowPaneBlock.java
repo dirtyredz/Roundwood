@@ -6,7 +6,6 @@ import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceUseTarget;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceDrops;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
-import io.github.dirtyredz.roundwood.block.window.connection.WindowConnections;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowShapes;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
@@ -62,11 +61,14 @@ import io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion;
  * class glass panes use in 1.20.1), so panes, bars, walls and windows connect to it and it to them,
  * and waterlogging, buckets, fluid ticks and water left behind are inherited. Each subclass is an
  * adapter for one blockstate encoding of a {@link WindowPose}; everything else reads the pose:
- * placement from the targeted zone ({@link WindowPlacement}), connections ({@link WindowConnections}),
- * shapes and culling ({@link WindowShapes}), models (datagen). The design (profile and pattern) is
+ * placement from the targeted zone ({@link WindowPlacement}), shapes and culling ({@link WindowShapes}), models (datagen). The design (profile and pattern) is
  * fixed per registration. The frame's appearance, the glass colour and the two face trims (0.8.0)
  * live on a {@link RoundWindowBlockEntity}; the trims are drawn by its renderer and may project one
  * pixel past the cell. Clicks route through {@link WindowInteraction}.
+ *
+ * <p>A window never connects (0.13.1, dk-a970707d): the four inherited connection properties are kept
+ * so the blockstate stays what saves and aliases know, but every state is written with them off, so
+ * no window grows a connecting glass pane at a corner or junction; neighbours abut frame to frame.
  */
 public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlock, AppearanceDefaults, AppearanceUseTarget {
     /**
@@ -110,10 +112,10 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
     /** How a state of this block sits in its cell. */
     public abstract WindowPose pose(BlockState state);
 
-    /** {@code state} placed as {@code request} says (connections are judged afterwards). */
+    /** {@code state} placed as {@code request} says. */
     protected abstract BlockState placed(BlockState state, WindowPlacement.Request request);
 
-    /** The horizontal sides a state is connected on. */
+    /** The horizontal sides a state is connected on: none, for any state this block writes. */
     public static Set<Direction> connections(BlockState state) {
         Set<Direction> sides = EnumSet.noneOf(Direction.class);
         for (Direction side : Direction.Plane.HORIZONTAL) {
@@ -225,30 +227,35 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
         WindowAttachmentState.reconcile(level, pos);
     }
 
-    /**
-     * Vanilla pane connections and waterlogging, the pose from the targeted zone, then every side
-     * re-judged for that pose ({@link WindowConnections}). A placed window has no trims.
-     */
+    /** Vanilla waterlogging and the pose from the targeted zone, never a connection. A placed window has no trims. */
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState state = super.getStateForPlacement(context);
         if (state == null) {
             return null;
         }
-        return WindowConnections.filterAll(placed(state, WindowPlacement.of(context)), context.getLevel(), context.getClickedPos());
+        return withoutConnections(placed(state, WindowPlacement.of(context)));
     }
 
-    /** Vanilla pane updates (water ticks included), then the side re-judged for this pose. */
+    /** Vanilla pane updates (water ticks included), then the connection the update may have set, cleared. */
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
                                   BlockPos pos, BlockPos neighborPos) {
-        return WindowConnections.filter(super.updateShape(state, direction, neighbor, level, pos, neighborPos), direction, neighbor);
+        return withoutConnections(super.updateShape(state, direction, neighbor, level, pos, neighborPos));
     }
 
-    /** Outline and rays: the pane, its junction and the in-cell part of each fitted trim and sill. */
+    /** {@code state} with the four pane connections off. */
+    public static BlockState withoutConnections(BlockState state) {
+        for (Direction side : Direction.Plane.HORIZONTAL) {
+            state = state.setValue(PipeBlock.PROPERTY_BY_DIRECTION.get(side), false);
+        }
+        return state;
+    }
+
+    /** Outline and rays: the pane and the in-cell part of each fitted trim and sill. */
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return WindowShapes.selection(WindowPaneState.design(state, WindowPaneState.entity(level, pos)), pose(state), connections(state),
+        return WindowShapes.selection(WindowPaneState.design(state, WindowPaneState.entity(level, pos)), pose(state),
                 attachedSides(state, level, pos, TrimSlot.PERIMETER), attachedSides(state, level, pos, TrimSlot.SILL));
     }
 
@@ -260,22 +267,22 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
         return WindowPaneState.attachedSides(state, level, pos, slot);
     }
 
-    /** The trim is decorative: only the pane and its junction collide. */
+    /** The trim is decorative: only the pane collides. */
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return WindowShapes.collision(WindowPaneState.design(state, WindowPaneState.entity(level, pos)), pose(state), connections(state));
+        return WindowShapes.collision(WindowPaneState.design(state, WindowPaneState.entity(level, pos)), pose(state));
     }
 
     /**
      * A face on the cell boundary is hidden only when the neighbouring window's geometry covers
-     * everything this one draws there (not because the blocks or their connections match, as vanilla
+     * everything this one draws there (not because the blocks match, as vanilla
      * panes assume). Other neighbours never hide a window face.
      */
     @Override
     public boolean skipRendering(BlockState state, BlockState adjacent, Direction direction) {
         if (adjacent.getBlock() instanceof WindowPaneBlock other) {
-            return WindowShapes.hides(other.design(), other.pose(adjacent), connections(adjacent),
-                    design, pose(state), connections(state), direction);
+            return WindowShapes.hides(other.design(), other.pose(adjacent),
+                    design, pose(state), direction);
         }
         return false;
     }

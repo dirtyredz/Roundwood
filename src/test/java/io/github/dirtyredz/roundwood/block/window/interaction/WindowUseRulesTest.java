@@ -21,18 +21,18 @@ class WindowUseRulesTest {
         for (boolean takesSill : new boolean[] {true, false}) {
             Action sillFit = takesSill ? Action.FIT_SILL : Action.REFUSE_SILL;
             Map<Item, Map<Region, Action>> table = new EnumMap<>(Item.class);
-            table.put(Item.UNIVERSAL_TRIM, row(Action.FIT_TRIM, Action.FIT_TRIM, Action.FIT_TRIM, Action.FIT_TRIM, Action.FIT_TRIM,
+            table.put(Item.UNIVERSAL_TRIM, row(Action.FIT_TRIM, Action.FIT_TRIM, Action.FIT_TRIM, Action.FIT_TRIM,
                     Action.PASS));
-            table.put(Item.ARCH_SILL, row(sillFit, sillFit, sillFit, sillFit, sillFit, Action.PASS));
-            table.put(Item.CROSS_BEAMS, row(Action.FIT_BEAMS, Action.FIT_BEAMS, Action.FIT_BEAMS, Action.FIT_BEAMS, Action.FIT_BEAMS, Action.PASS));
+            table.put(Item.ARCH_SILL, row(sillFit, sillFit, sillFit, sillFit, Action.PASS));
+            table.put(Item.CROSS_BEAMS, row(Action.FIT_BEAMS, Action.FIT_BEAMS, Action.FIT_BEAMS, Action.FIT_BEAMS, Action.PASS));
             table.put(Item.PLANKS, row(Action.RESTYLE_TRIM, Action.RESTYLE_TRIM, Action.RESTYLE_FRAME, Action.RESTYLE_FRAME,
-                    Action.RESTYLE_FRAME, Action.PASS));
+                    Action.PASS));
             table.put(Item.DYE, row(Action.RESTYLE_TRIM, Action.RESTYLE_TRIM, Action.RESTYLE_FRAME, Action.TINT_GLASS,
-                    Action.TINT_GLASS, Action.PASS));
+                    Action.PASS));
             table.put(Item.MASONRY, row(Action.RESTYLE_TRIM, Action.RESTYLE_TRIM, Action.REFUSE_MASONRY, Action.REFUSE_MASONRY,
-                    Action.REFUSE_MASONRY, Action.REFUSE_MASONRY));
-            table.put(Item.SHEARS, row(Action.REMOVE_TRIM, Action.REMOVE_TRIM, Action.PASS, Action.PASS, Action.PASS, Action.PASS));
-            table.put(Item.OTHER, row(Action.PASS, Action.PASS, Action.PASS, Action.PASS, Action.PASS, Action.PASS));
+                    Action.REFUSE_MASONRY));
+            table.put(Item.SHEARS, row(Action.REMOVE_TRIM, Action.REMOVE_TRIM, Action.PASS, Action.PASS, Action.PASS));
+            table.put(Item.OTHER, row(Action.PASS, Action.PASS, Action.PASS, Action.PASS, Action.PASS));
             for (Item item : Item.values()) {
                 for (Region region : Region.values()) {
                     assertEquals(table.get(item).get(region), WindowUseRules.decide(item, region, takesSill),
@@ -42,14 +42,13 @@ class WindowUseRulesTest {
         }
     }
 
-    private static Map<Region, Action> row(Action trim, Action sill, Action frame, Action glass, Action connector, Action none) {
+    private static Map<Region, Action> row(Action trim, Action sill, Action frame, Action glass, Action none) {
         Map<Region, Action> row = new EnumMap<>(Region.class);
         row.put(Region.TRIM, trim);
         row.put(Region.BEAM, trim);
         row.put(Region.SILL, sill);
         row.put(Region.FRAME, frame);
         row.put(Region.GLASS, glass);
-        row.put(Region.CONNECTOR_GLASS, connector);
         row.put(Region.NONE, none);
         return row;
     }

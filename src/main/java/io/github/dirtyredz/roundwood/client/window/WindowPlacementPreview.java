@@ -26,8 +26,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 /**
  * What placing the held window would do at the crosshair, computed through the same path the server
  * takes: a {@link BlockPlaceContext} for the held stack and the (door-resolved) hit, vanilla's
- * destination, {@link WindowPlacement} and the block's own {@code getStateForPlacement} (pose and
- * connections). The pane is only proposed when the local checks vanilla placement makes would pass
+ * destination, {@link WindowPlacement} and the block's own {@code getStateForPlacement} (pose;
+ * no connections). The pane is only proposed when the local checks vanilla placement makes would pass
  * (replaceable destination, a state, survival, no entity in the way); nothing here calls a block's
  * or item's use, so whatever an interactive block does with the click is not predicted.
  */

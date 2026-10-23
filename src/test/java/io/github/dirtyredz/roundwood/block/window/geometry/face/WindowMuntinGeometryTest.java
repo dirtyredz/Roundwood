@@ -68,25 +68,6 @@ class WindowMuntinGeometryTest {
         }
     }
 
-    /** A centred crossed round window's arms reach on to its glass on both sides of the vertical beam, never into it. */
-    @Test
-    void armReachRespectsTheBeams() {
-        WindowDesign cross = new WindowDesign(WindowProfile.ROUND, WindowPattern.CROSS);
-        List<Piece> arm = WindowPaneGeometry.arm(cross, CENTRED, Direction.NORTH);
-        boolean left = false;
-        boolean right = false;
-        for (Piece piece : arm) {
-            Box box = piece.box();
-            if (box.maxZ() > 7) {
-                assertTrue(box.maxX() <= 7.5 || box.minX() >= 8.5, "reach into the beam: " + box);
-                left |= box.minX() == 7 && box.maxX() == 7.5;
-                right |= box.minX() == 8.5 && box.maxX() == 9;
-            }
-        }
-        assertTrue(left && right, "the reach should fill the recess either side of the beam");
-        assertEquals(Set.of(), Set.copyOf(WindowPaneGeometry.arm(cross, CENTRED, Direction.EAST)));
-    }
-
     private static String textureAt(List<Piece> pieces, double x, double y, double z) {
         for (Piece piece : pieces) {
             if (piece.box().containsStrictly(x, y, z)) {

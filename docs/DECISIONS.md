@@ -2,6 +2,55 @@
 
 Newest first.
 
+## 2026-10-23 - Windows never draw a junction pane (0.13.1, owner ruling dk-a970707d)
+
+Owner trial of 0.13.0 (screenshot 3): where a window met a neighbour at a corner or junction a thin
+glass pane bridged them. Supersedes the centred-pane arm of 0.5.0 and "Positioned windows never grow
+glass bridges" below (which already removed it for flush, floor and ceiling panes). No window grows
+glass beyond its own slab, whatever it touches: `WindowPaneGeometry` has the panel and the slab and
+nothing else (`junction`, `arm`, `neededSides`, `bridges` and the arm reach are gone),
+`WindowShapes` and the chunk and beam models no longer take a connection set, the hit classifier has no
+connector-glass region, and `WindowConnections` is deleted. The four inherited pane connection
+properties stay on the blockstate so saves, aliases and conversions keep their shape, but
+`WindowPaneBlock` writes them off on placement and on every neighbour update. The `_arms_*` models
+are not generated (39 files, 112 plain window block models now, was 151), and each pose has one model.
+Guards: `WindowPaneGeometryTest.noGlassEverLiesOutsideAWindowsOwnSlabAndProfile` (every design and
+pose), `GeneratedWindowModelsTest.centredWindowModelsStayInsideTheirSlab`, the exact-model blockstate
+tests (no connection selects a model) and `WindowJunctionSweepGameTests` (no window keeps a connection or
+a shape outside its slab beside panes, bars, walls and windows, in every pose). A vanilla pane next to a
+window still draws its own arm to it: that is vanilla's geometry on the pane's side. Rejected: keeping
+the arm for panes and bars only (the owner asked for none), hiding it client-side (the shape and the
+model would disagree).
+
+## 2026-10-23 - Archway collision is the lower jambs only (0.13.1, owner feedback dk-73098f88)
+
+Archways were hard to walk through: the crown left a 1.875-block opening, a 1.95-block mob (villager,
+zombie) could not pass it and a player stepping off the middle clipped the arc. Collision is now the
+lower row's frame only (the straight jambs and the keyhole's shoulders, `ArchwayGeometry.collisionCell`);
+the crown does not collide. The drawn frame, the models and the preview are unchanged, and the target
+and outline stay the whole frame (`ArchwayShapes.shape`), so aiming at the crown still works and the
+selection follows what is drawn. This ends the 0.12.0 rule "collision = target = outline" for
+archways. Guards: `ArchwayGeometryTest.theCollisionLeavesThePassageClearForAMobAndKeepsTheJambs` and
+`ArchwayWalkGameTests` (a fake player and a villager walk through both designs at three offsets, both
+ways, with real `Entity.move` collision). Rejected: thinner jambs (the passage is already 1.25 to
+1.75 blocks wide), a crown that collides only near the shoulders (a tall mob still clips it).
+
+## 2026-10-23 - Showcase spacing and the materials wall (0.13.1, owner feedback dk-4350cd9e, dk-6797f21d)
+
+Supersedes the layout details of "The showcase is one of each" below. Pieces and signs were still too
+tight (signs one column left of pieces two columns apart). Now every sample stands `GAP` = 4 clear blocks
+from the next, in a row and between rows (`ShowcaseSpacing`, one pitch rule the sections add up), and
+its sign stands in the piece's own row two columns to its left, so the walkway in front is clear. The
+layout is 90 x 8 x 28 (was 82 x 8 x 28): the pieces row, the materials wall, then three rows of window
+configurations and attachments. `SpacingChecks` proves the gap on the built world, in all four facings:
+it groups the blocks closer than the gap, and the groups must equal the standing signs plus the wall,
+each sign nearest to exactly one group and two clear blocks from any other group and sign. The 0.13.0
+materials row (one ordinary archway per look, 39 archways) is replaced by a wall of the actual
+restyling sources: planks of every wood and the four masonry blocks as blocks, each with a wall sign,
+and one barrel with a stack of each of the sixteen dyes (a dye is an item, so it cannot be a block;
+one barrel rather than sixteen). Rejected: item frames (entities that survive a rebuild and drop on
+clearing), one sign per category (the owner wants each source labelled).
+
 ## 2026-10-22 - The showcase is one of each, not every combination
 
 Owner feedback after seeing `/roundwood showcase` in game: it repeated every door state and every
@@ -381,7 +430,7 @@ door and round trims now use the thin face (`client/material/MasonryStyles`, ext
 no migration: the look is data and gets the thinner mortar automatically. Rejected: editing the old
 textures in place (their bytes are pinned).
 
-## 2026-10-21 - Positioned windows never grow glass bridges (0.6.1, owner ruling; supersedes "Fixed central junctions")
+## 2026-10-21 - Positioned windows never grow glass bridges (0.6.1, owner ruling; supersedes "Fixed central junctions"; centred panes lost theirs too in 0.13.1, above)
 
 Owner trial of 0.6.0: two flush windows meeting in an L grew a glass post, stems and arms filling
 the corner. Only a centred upright pane (the 0.5.0 window, round or arch) still bridges: an arm

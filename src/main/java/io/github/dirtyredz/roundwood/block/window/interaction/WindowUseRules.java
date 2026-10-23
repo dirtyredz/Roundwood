@@ -46,7 +46,7 @@ public final class WindowUseRules {
             return item == Item.MASONRY ? Action.REFUSE_MASONRY : Action.PASS;
         }
         boolean attachment = region.slot() != null;
-        boolean glass = region == WindowHitRegions.Region.GLASS || region == WindowHitRegions.Region.CONNECTOR_GLASS;
+        boolean glass = region == WindowHitRegions.Region.GLASS;
         return switch (item) {
             case UNIVERSAL_TRIM -> Action.FIT_TRIM;
             case ARCH_SILL -> takesSill ? Action.FIT_SILL : Action.REFUSE_SILL;

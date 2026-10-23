@@ -72,8 +72,8 @@ class GeneratedResourceManifestTest {
             block.add("round_trim_whole_" + part);
         }
         item.addAll(ALIASES);
-        assertEquals(151, windowBlockModels().size());
-        assertEquals(29 + 151, block.size()); // 22 before 0.11.0, the arched door adds 5; 0.12.0 the two archways
+        assertEquals(112, windowBlockModels().size());
+        assertEquals(29 + 112, block.size()); // 22 before 0.11.0, the arched door adds 5; 0.12.0 the two archways
         assertEquals(85, item.size()); // 63 of 0.9.0, 16 new windows, arch_sill_trim; 0.11.0 the arched door and its template; 0.12.0 the two archways
         // Exact sets: no per-finish models remain; the 49 old ids are only item-model aliases.
         assertEquals(block, names(assets("models/block")));
@@ -86,7 +86,7 @@ class GeneratedResourceManifestTest {
         assertEquals(crafted, names(data("recipes")));
         assertEquals(crafted, names(data("advancements/recipes")));
         assertEquals(80, allJson(assets("blockstates")).size());
-        assertEquals(29 + 151, allJson(assets("models/block")).size());
+        assertEquals(29 + 112, allJson(assets("models/block")).size());
         assertEquals(85, allJson(assets("models/item")).size());
         assertEquals(20, allJson(data("recipes")).size());
         assertEquals(80, allJson(data("loot_tables/blocks")).size());

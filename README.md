@@ -91,6 +91,10 @@ full-block-deep frame with an open passage: no leaf, glass, swing, camouflage or
   crown.
 - *Keyhole Archway*: the same crown, but below the spring line each jamb steps in four pixels over
   eight (one pixel every two rows), leaving a 20-pixel (1.25 blocks) lower passage.
+- Walking through (0.13.1): only the lower jambs collide, and the crown never does, so the opening is
+  clear to the full two blocks for a player and for tall mobs such as villagers and zombies (the 0.12.0
+  crown left 1.875 blocks, which a 1.95-block mob could not pass). The frame is drawn exactly as
+  before, and the crown is still targeted and outlined where you aim.
 - Placement: an ordinary click; the cell you target (or the replaceable cell you click) becomes the
   **lower-left** cell seen from where you stand, and the archway extends one block to your right and
   one up, facing you (four facings, always upright, no hinge). All four cells must be empty or
@@ -115,9 +119,9 @@ full-block-deep frame with an open passage: no leaf, glass, swing, camouflage or
 
 **Round window** (single block). A thin square wooden pane with round tinted glass in the middle.
 It can stand upright and centred, or flush against any side of its cell (four walls, floor,
-ceiling). Centred, it connects like a glass pane, with a short glass arm across its plane where it
-meets a pane, bars, wall or crossing window (never towards a solid block); flush, floor and ceiling
-windows grow no glass, so where they meet each other their frames simply abut. Waterloggable; drops
+ceiling). A window never connects (0.13.1): where it meets a pane, bars, a wall, another window or a
+corner, no glass bridge is drawn and its frames simply abut (the 0.5.0 glass arm across a centred
+window's plane is gone; a vanilla pane beside a window still draws its own arm). Waterloggable; drops
 itself with its frame look and its glass tint. The glass is clear unless you dye it (much more
 transparent since 0.7.0, with the same diagonal glints) and shows no horizontal seam lines. See
 "Placing windows".
@@ -221,9 +225,9 @@ the main hand is empty. Sneaking changes nothing.
 - **To move a placed window, break it and place it again**; its look survives in the item (a fitted
   trim comes back as a Universal Trim, and a glass tint survives in the item). Windows saved by 0.5.0 or 0.6.x load unchanged and
   untrimmed, with their position, connections, water and look as they were.
-- Junctions: only a centred window grows glass, an arm across its plane towards a pane, bars, a
-  wall or a centred window crossing it. Flush, floor and ceiling windows never connect, so two of
-  them meeting at a corner or edge just meet frame to frame. Panes never link up or down.
+- No junctions (0.13.1): no window grows glass towards a neighbour, centred or not, so two windows
+  meeting at a corner or edge, or a window beside a pane, bars or a wall, just meet frame to frame.
+  Planks, dye and the attachments act on a window exactly as before.
 
 ## Restyling
 
@@ -238,7 +242,7 @@ the main hand is empty. Sneaking changes nothing.
 | Window face | Cross Beams | Fits one whole-pane cross; occupied fits are free | 1 Cross Beams |
 | Fitted beam | Planks, dye or masonry | Restyles beams only; masonry refuses dye | 1 donor |
 | Fitted beam | Shears | Removes and returns one styled Cross Beams item; one wear | none |
-| Window glass (including the glass arms) | Dye | The whole window's glass tinted that dye (another dye replaces the tint) | 1 dye |
+| Window glass | Dye | The whole window's glass tinted that dye (another dye replaces the tint) | 1 dye |
 | Window trim band (the ring under a trim) | Planks | That wood for that face's trim (paint removed) | 1 plank |
 | Window trim band | Bricks, stone bricks, deepslate bricks or mud bricks | Brickwork for that face's trim | 1 block |
 | Window trim band | Dye | Painted trim (refused on brickwork, free) | 1 dye |
@@ -288,27 +292,30 @@ the main hand is empty. Sneaking changes nothing.
 ## Showcase command
 
 `/roundwood showcase` (permission level 2: ops, or single-player with cheats) builds a labelled test
-layout on the ground ahead of you, centred on the way you face (82 x 8 x 28 blocks, starting three
-blocks ahead; it used to be 78 x 8 x 82). It first clears that whole box to air and lays a stone
+layout on the ground ahead of you, centred on the way you face (90 x 8 x 28 blocks, starting three
+blocks ahead; it was 82 x 8 x 28 in 0.13.0, with the samples two columns apart). It first clears that whole box to air and lays a stone
 floor, so use it on open ground; it refuses if the box would leave the build limits, the world border
 or loaded chunks, and never touches blocks outside it. The layout is one of each thing, not every
 combination. From the front row to the back:
 
 - **One of each placeable piece**, oak, default state: the thirteen windows, the round door, the arched
   door (both closed) and the ordinary and keyhole archways, in a single row.
-- **One materials row:** the ordinary archway (the one piece that takes wood, paint and masonry) once in
-  every look: the eleven vanilla woods (and up to eight installed modded planks), the sixteen paints on
-  oak, and the four masonry materials.
+- **The materials wall** (0.13.1; it was a row of one archway per look): the actual restyling source
+  blocks, each with a wall sign on its front face, for you to take and use. The bottom row is the planks
+  of the eleven vanilla woods (and up to eight installed modded planks); the row above is the four
+  masonry blocks, then a barrel holding a stack of each of the sixteen dyes (paint is a dye on any
+  look).
 - **Window configurations**, built in oak only: the seven positions (centred, and flush on each side,
-  ceiling and floor) with connection and practice-block examples; arch pairs (centred, flush, floor,
-  ceiling) and single arch pieces; junction, stacked, waterlogged and stone-behind neighbours; 2 x 2
+  ceiling and floor) with neighbour and practice-block examples; arch pairs (centred, flush, floor,
+  ceiling) and single arch pieces; stacked, waterlogged and stone-behind neighbours; 2 x 2
   arched windows (centred, flush, floor, ceiling) and each bottom corner alone; a full circle; a 3 x 2
-  and a 2 x 3 window from top corners and edges, and each edge alone.
+  and a 2 x 3 window from top corners and edges, and each edge alone. (The junction demo is gone with
+  the junction pane.)
 - **Attachments**, one fitted example each: a Universal Trim (brick front, spruce back) on a round
   window, an Arch Sill under an arched window, Cross Beams on a round window, stone-brick camouflage on
   a round door, and a lever-driven round door (redstone).
 
-Every label sign stands beside the piece it names, never in front of it: on the walkway side, one column to the left of the piece's lower-left cell, turned to face you, so it reads from where you stand to look at the piece and does not cover it. The build reports a placement problem if a sign would replace, or be replaced by, another sample's block.
+Every sample stands four clear blocks from the next (along the row and between rows), so you can walk between them. Every label sign stands beside the piece it names, never in front of it: in the piece's own row, two columns to the left of its lower-left cell, turned to face you, so it reads from where you stand to look at the piece and does not cover it, and it is two clear blocks from any other sample or sign. The build reports a placement problem if a sign would replace, or be replaced by, another sample's block.
 
 ## Recipes
 
@@ -411,6 +418,15 @@ windows, tinted window glass, Door Trim attached to doors, plain-click gestures)
 0.9.0 to 0.12.0 are built and tested headless (unit tests and server GameTests) and await one owner
 trial together. Use a copy of a world saved in 0.8.0, run `/roundwood showcase` on open ground, and
 check in game (the client-side retexturing and rendering have no automated test):
+
+*0.13.1, owner feedback fixes*
+- [ ] `/roundwood showcase`: pieces and signs are well apart, each sign beside its piece and readable
+  on its own; the materials wall holds every plank, the four masonry blocks and the dye barrel, and the
+  blocks can be taken and used on a look.
+- [ ] No glass pane bridges windows meeting at a corner or junction (the owner's screenshot 3), and
+  plain windows look otherwise unchanged.
+- [ ] Both archways are comfortable to walk through, a villager and a zombie included, while the frame
+  looks as before and the crown is still outlined.
 
 *0.13.0, Cross Beams*
 - [ ] Fit preview equals the result on all 13 profiles and placement families, from either side.

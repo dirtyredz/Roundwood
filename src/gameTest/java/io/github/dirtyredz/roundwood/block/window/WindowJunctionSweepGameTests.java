@@ -6,7 +6,6 @@ import io.github.dirtyredz.roundwood.block.window.pane.OrientedWindowBlock;
 import com.mojang.logging.LogUtils;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
-import io.github.dirtyredz.roundwood.block.window.geometry.WindowPaneGeometry;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowOrientation;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
@@ -29,7 +28,6 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,12 +38,12 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 
 /**
- * Every way windows meet each other and vanilla panes (0.6.1 owner ruling): a positioned window
- * (flush, floor or ceiling, round or arch) keeps no connection and its shape is its slab, whoever
- * its neighbours are; a centred window keeps the 0.5.0 arms only towards panes, bars, walls and
- * centred windows crossing it. Each scenario is settled by the real neighbour-update path, then the
- * final states are logged ({@code ROUNDWOOD_SWEEP|scenario|dx,dz|state}) so the preview sheet renders
- * exactly what the game computed.
+ * Every way windows meet each other and vanilla panes: no window of any pose keeps a connection and
+ * its collision and outline are its slab, whoever its neighbours are (0.6.1 owner ruling for the
+ * positioned ones; 0.13.1, dk-a970707d, for the centred ones, which lost the 0.5.0 arm that bridged
+ * towards panes, bars, walls and crossing windows). This is the guard that no connection produces
+ * glass outside a window's own profile. Each scenario is settled by the real neighbour-update path,
+ * then the final states are logged ({@code ROUNDWOOD_SWEEP|scenario|dx,dz|state}).
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -55,8 +53,8 @@ public final class WindowJunctionSweepGameTests {
     private WindowJunctionSweepGameTests() {
     }
 
-    /** One block of a scenario at (dx, dz) from its slot, and, for a centred window, the sides it must keep. */
-    private record Cell(int dx, int dz, BlockState state, Set<Direction> expected) {
+    /** One block of a scenario at (dx, dz) from its slot. */
+    private record Cell(int dx, int dz, BlockState state) {
     }
 
     private record Scenario(String name, List<Cell> cells) {
@@ -70,10 +68,8 @@ public final class WindowJunctionSweepGameTests {
             this.name = name;
         }
 
-        Builder at(int dx, int dz, BlockState state, Direction... expected) {
-            Set<Direction> sides = EnumSet.noneOf(Direction.class);
-            sides.addAll(List.of(expected));
-            cells.add(new Cell(dx, dz, state, sides));
+        Builder at(int dx, int dz, BlockState state) {
+            cells.add(new Cell(dx, dz, state));
             return this;
         }
 
@@ -122,19 +118,19 @@ public final class WindowJunctionSweepGameTests {
                 scenario("flush pane front back").at(0, 0, flush(Direction.NORTH)).at(0, 1, pane()).at(0, -1, pane()).done(),
                 scenario("flush bars").at(0, 0, flush(Direction.NORTH)).at(1, 0, Blocks.IRON_BARS.defaultBlockState()).done(),
                 scenario("ceiling floor pane").at(0, 0, flush(Direction.UP)).at(1, 0, pane()).at(2, 0, flush(Direction.DOWN)).done(),
-                // Centred beside flush: the centred window's in-plane side follows vanilla (no geometry).
-                scenario("flush beside centred").at(0, 0, flush(Direction.NORTH))
-                        .at(1, 0, centred(Direction.Axis.X), Direction.WEST).done(),
-                // Across a centred window's plane: a flush window is not a junction, a pane is.
+                // Centred beside flush, across a centred window's plane (the owner's 0.13.1 screenshot: the arm
+                // that bridged to a neighbour at a corner or junction is gone), and in rows.
+                scenario("flush beside centred").at(0, 0, flush(Direction.NORTH)).at(1, 0, centred(Direction.Axis.X)).done(),
                 scenario("centred across flush").at(0, 0, centred(Direction.Axis.X)).at(0, 1, flush(Direction.NORTH)).done(),
-                scenario("centred across pane").at(0, 0, centred(Direction.Axis.X), Direction.SOUTH).at(0, 1, pane()).done(),
-                scenario("centred T").at(0, 0, centred(Direction.Axis.X), Direction.SOUTH)
-                        .at(0, 1, centred(Direction.Axis.Z), Direction.NORTH).done(),
-                scenario("centred row").at(0, 0, centred(Direction.Axis.X), Direction.EAST)
-                        .at(1, 0, centred(Direction.Axis.X), Direction.EAST, Direction.WEST)
-                        .at(2, 0, centred(Direction.Axis.X), Direction.WEST).done(),
-                scenario("arch pair pane").at(0, 0, arch(ModBlocks.archLeft(), centredSouth), Direction.EAST, Direction.SOUTH)
-                        .at(1, 0, arch(ModBlocks.archRight(), centredSouth), Direction.WEST).at(0, 1, pane()).done(),
+                scenario("centred across pane").at(0, 0, centred(Direction.Axis.X)).at(0, 1, pane()).done(),
+                scenario("centred T").at(0, 0, centred(Direction.Axis.X)).at(0, 1, centred(Direction.Axis.Z)).done(),
+                scenario("centred L").at(0, 0, centred(Direction.Axis.X)).at(1, 0, centred(Direction.Axis.Z)).done(),
+                scenario("centred row").at(0, 0, centred(Direction.Axis.X)).at(1, 0, centred(Direction.Axis.X))
+                        .at(2, 0, centred(Direction.Axis.X)).done(),
+                scenario("centred beside bars and wall").at(0, 0, centred(Direction.Axis.X))
+                        .at(0, 1, Blocks.IRON_BARS.defaultBlockState()).at(1, 0, Blocks.COBBLESTONE_WALL.defaultBlockState()).done(),
+                scenario("arch pair pane").at(0, 0, arch(ModBlocks.archLeft(), centredSouth))
+                        .at(1, 0, arch(ModBlocks.archRight(), centredSouth)).at(0, 1, pane()).done(),
                 scenario("arch flush L").at(0, 0, arch(ModBlocks.archLeft(), flushNorth))
                         .at(1, 0, arch(ModBlocks.archRight(), flushWest)).done(),
                 scenario("arch flush pair pane").at(0, 0, arch(ModBlocks.archLeft(), flushNorth))
@@ -199,32 +195,19 @@ public final class WindowJunctionSweepGameTests {
                 Cell cell = entry.getValue();
                 LOGGER.info("ROUNDWOOD_SWEEP|{}|{},{}|{}", scenario.name(), cell.dx(), cell.dz(), state);
                 if (state.getBlock() instanceof WindowPaneBlock window) {
-                    verify(scenario.name() + " " + cell.dx() + "," + cell.dz(), level, entry.getKey(), state, window, cell.expected());
+                    verify(scenario.name() + " " + cell.dx() + "," + cell.dz(), level, entry.getKey(), state, window);
                 }
             }
         }
         helper.succeed();
     }
 
-    private static void verify(String where, ServerLevel level, BlockPos pos, BlockState state, WindowPaneBlock window,
-                               Set<Direction> expected) {
+    private static void verify(String where, ServerLevel level, BlockPos pos, BlockState state, WindowPaneBlock window) {
         WindowPose pose = window.pose(state);
         Set<Direction> connected = WindowPaneBlock.connections(state);
-        VoxelShape shape = state.getShape(level, pos);
-        if (!WindowPaneGeometry.bridges(pose)) {
-            check(connected.isEmpty(), where + ": a positioned window kept connections " + connected);
-            check(onlyInside(shape, List.of(pose.slab())), where + ": a positioned window's shape leaves its slab");
-            return;
-        }
-        // In-plane connections are vanilla's and add nothing; only the sides across the plane are judged here.
-        Set<Direction> across = EnumSet.noneOf(Direction.class);
-        connected.stream().filter(side -> side.getAxis() == pose.normal()).forEach(across::add);
-        Set<Direction> want = EnumSet.noneOf(Direction.class);
-        expected.stream().filter(side -> side.getAxis() == pose.normal()).forEach(want::add);
-        check(across.equals(want), where + ": across-plane connections " + across + ", expected " + want);
-        List<Box> allowed = new ArrayList<>(List.of(pose.slab()));
-        want.forEach(side -> allowed.add(WindowPaneGeometry.armBox(side)));
-        check(onlyInside(shape, allowed), where + ": glass outside the slab and its arms");
+        check(connected.isEmpty(), where + ": a window kept connections " + connected);
+        check(onlyInside(state.getShape(level, pos), List.of(pose.slab())), where + ": the outline leaves the slab");
+        check(onlyInside(state.getCollisionShape(level, pos), List.of(pose.slab())), where + ": the collision leaves the slab");
     }
 
     private static boolean onlyInside(VoxelShape shape, List<Box> allowed) {

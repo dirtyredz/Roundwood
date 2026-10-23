@@ -25,8 +25,7 @@ public final class WindowPaneState {
     private WindowPaneState() { }
 
     /** No world or entity references: safe to hand to a chunk worker. */
-    public record Snapshot(WindowDesign design, WindowPose pose, Set<Direction> connections) {
-        public Snapshot { connections = Set.copyOf(connections); }
+    public record Snapshot(WindowDesign design, WindowPose pose) {
     }
 
     public static Optional<Appearance> beams(BlockState state, RoundWindowBlockEntity window) {
@@ -45,7 +44,7 @@ public final class WindowPaneState {
             RoundWindowBlockEntity window = entity(level, adjacent);
             if (state.getBlock() instanceof WindowPaneBlock block && window != null && window.renderAvailable()
                     && window.trimsEditable(TrimSlot.CROSS_BEAMS)) {
-                out.put(side, new Snapshot(design(state, window), block.pose(state), WindowPaneBlock.connections(state)));
+                out.put(side, new Snapshot(design(state, window), block.pose(state)));
             }
         }
         return Map.copyOf(out);

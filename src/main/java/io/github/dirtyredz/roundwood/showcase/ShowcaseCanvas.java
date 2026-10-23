@@ -25,7 +25,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.BarrelBlock;
 import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.WallSignBlock;
+import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
@@ -43,9 +47,6 @@ import java.util.Set;
  * shared sample appearances, and a list of anything that failed.
  */
 public final class ShowcaseCanvas {
-    /** Columns (to the builder's right) from a piece's lower-left cell to its label: one to the left. */
-    public static final int LABEL_OFFSET = -1;
-
     private final ServerLevel level;
     private final ShowcaseFrame frame;
     private final List<String> problems = new ArrayList<>();
@@ -199,18 +200,20 @@ public final class ShowcaseCanvas {
     }
 
     /**
-     * The column a label stands in for a piece whose lower-left cell is in column {@code pieceR}: one
-     * column to the builder's left, so the sign sits beside the piece rather than in front of it.
+     * The column a label stands in for a piece whose lower-left cell is in column {@code pieceR}:
+     * {@link ShowcaseSpacing#LABEL_OFFSET} columns to the builder's left, so the sign sits beside the
+     * piece, with a free block between them, rather than in front of it.
      */
     public static int labelR(int pieceR) {
-        return pieceR + LABEL_OFFSET;
+        return pieceR + ShowcaseSpacing.LABEL_OFFSET;
     }
 
     /**
-     * Labels the piece whose lower-left cell is in column {@code pieceR}: a standing sign on the floor
-     * at {@link #labelR} in row {@code f} (the walkway row in front of the piece), turned to face the
-     * builder so it reads from where they stand to look at the piece without covering it. A cell that
-     * is not free, or a sign a later section overwrites, is a build problem ({@link #verifyLabels}).
+     * Labels the piece whose lower-left cell is in column {@code pieceR} and row {@code f}: a standing
+     * sign on the floor at {@link #labelR} in the piece's own row (0.13.1: beside it, so the walkway in
+     * front stays clear), turned to face the builder so it reads from where they stand to look at the
+     * piece without covering it. A cell that is not free, or a sign a later section overwrites, is a
+     * build problem ({@link #verifyLabels}).
      */
     public void sign(int pieceR, int f, String... lines) {
         int rotation = Math.floorMod(Math.round(frame.forward().getOpposite().toYRot() / 22.5F), 16);
@@ -230,6 +233,43 @@ public final class ShowcaseCanvas {
             sign.setWaxed(true);
         } else {
             problem("sign not placed at " + pos.toShortString());
+        }
+    }
+
+    /**
+     * Hangs a wall sign on the front (builder-facing) face of the block at ({@code r}, {@code y},
+     * {@code f}), one row nearer, reading {@code lines}. The block must already stand there.
+     */
+    public void wallSign(int r, int y, int f, String... lines) {
+        BlockPos pos = frame.pos(r, y, f - 1);
+        if (!level.getBlockState(pos).isAir()) {
+            problem("wall sign would replace " + level.getBlockState(pos) + " at " + pos.toShortString());
+        }
+        labelCells.add(pos);
+        level.setBlock(pos, Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, frame.forward().getOpposite()),
+                Block.UPDATE_ALL);
+        if (level.getBlockEntity(pos) instanceof SignBlockEntity sign) {
+            SignText text = new SignText();
+            for (int i = 0; i < lines.length && i < 4; i++) {
+                text = text.setMessage(i, Component.literal(lines[i]));
+            }
+            sign.setText(text, true);
+            sign.setWaxed(true);
+        } else {
+            problem("wall sign not placed at " + pos.toShortString());
+        }
+    }
+
+    /** A barrel at ({@code r}, {@code y}, {@code f}) holding {@code stacks} from slot 0 (a source the player may take from). */
+    public void barrel(int r, int y, int f, List<ItemStack> stacks) {
+        BlockPos pos = frame.pos(r, y, f);
+        level.setBlock(pos, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, frame.forward().getOpposite()), Block.UPDATE_ALL);
+        if (level.getBlockEntity(pos) instanceof BarrelBlockEntity barrel && stacks.size() <= barrel.getContainerSize()) {
+            for (int i = 0; i < stacks.size(); i++) {
+                barrel.setItem(i, stacks.get(i));
+            }
+        } else {
+            problem("barrel not stocked at " + pos.toShortString());
         }
     }
 

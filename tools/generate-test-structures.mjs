@@ -30,7 +30,7 @@ import { windowCross0120 } from './structures/window-cross-v0120.mjs';
 const empty = (size) => file(size, [{ name: 'minecraft:air' }], []);
 
 mkdirSync(outDir, { recursive: true });
-for (const [name, size] of Object.entries({ empty: [9, 6, 9], strip: [17, 5, 4], showcase: [86, 10, 86] })) {
+for (const [name, size] of Object.entries({ empty: [9, 6, 9], strip: [17, 5, 4], showcase: [92, 10, 92] })) {
   writeFileSync(join(outDir, `${name}.nbt`), empty(size));
   console.log(`wrote ${name}.nbt ${size.join('x')}`);
 }

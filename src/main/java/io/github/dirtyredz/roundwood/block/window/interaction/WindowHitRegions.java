@@ -32,8 +32,6 @@ public final class WindowHitRegions {
         BEAM,
         /** The glazing. */
         GLASS,
-        /** A centred pane's connector arm (glass outside the slab). */
-        CONNECTOR_GLASS,
         /** Nothing a window action applies to. */
         NONE;
 

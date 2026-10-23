@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/** The generated round window models: square wooden face, visible round glazing, glass arms, no seams. */
+/** The generated round window models: square wooden face, visible round glazing, no connecting glass, no seams. */
 class GeneratedWindowModelsTest {
     private static final String GLASS = ModelExpectations.GLASS;
     /** Both glazing textures: a check that must also catch a model left on the 0.6 glass. */
@@ -85,8 +85,7 @@ class GeneratedWindowModelsTest {
         BufferedImage glass = ImageIO.read(TEXTURES.resolve("window_glass_clear.png").toFile());
         assertNotNull(glass, GLASS + " is missing");
         int scale = glass.getWidth() / 16;
-        for (String id : List.of("roundwood:block/round_window", "roundwood:block/round_window_arms_both",
-                "roundwood:block/round_window_arch_left_arms_north")) {
+        for (String id : List.of("roundwood:block/round_window", "roundwood:block/round_window_arch_left")) {
             assertEquals("minecraft:translucent", renderType(id), id + ": glazing needs the translucent render type");
             Resolved model = resolve(id);
             int glassFaces = 0;
@@ -171,27 +170,20 @@ class GeneratedWindowModelsTest {
         return ref.equals("#glass") || GLASS_TEXTURES.contains(String.valueOf(model.texture(ref)));
     }
 
-    /** A centred window connected across its plane reaches the cell edge with vanilla-pane glass (x 7..9). */
+    /**
+     * The junction guard for the models (0.13.1, dk-a970707d): a centred window's model has nothing
+     * outside its own slab (z 7..9 for the south-facing canonical pose), so no connection can show glass
+     * towards a neighbour, and no `_arms_` model is generated.
+     */
     @Test
-    void connectedCentredWindowsReachTheCellEdgeWithGlass() {
-        Resolved both = resolve("roundwood:block/round_window_arms_both");
-        boolean north = false;
-        boolean south = false;
-        for (JsonObject element : elements(both)) {
-            double[] from = vec(element, "from");
-            double[] to = vec(element, "to");
-            JsonObject faces = element.getAsJsonObject("faces");
-            if (faces.has("north") && from[2] == 0) {
-                assertEquals("#glass", faces.getAsJsonObject("north").get("texture").getAsString());
-                assertEquals("north", faces.getAsJsonObject("north").get("cullface").getAsString());
-                assertTrue(from[0] >= 7 && to[0] <= 9, "arm outside x 7..9");
-                north = true;
-            }
-            if (faces.has("south") && to[2] == 16) {
-                assertTrue(from[0] >= 7 && to[0] <= 9, "arm outside x 7..9");
-                south = true;
+    void centredWindowModelsStayInsideTheirSlab() {
+        for (String id : List.of("roundwood:block/round_window", "roundwood:block/round_window_arch_left",
+                "roundwood:block/round_window_bottom_right", "roundwood:block/round_window_edge_top")) {
+            for (JsonObject element : elements(resolve(id))) {
+                double[] from = vec(element, "from");
+                double[] to = vec(element, "to");
+                assertTrue(from[2] >= 7 && to[2] <= 9, id + ": an element leaves the slab (z " + from[2] + ".." + to[2] + ")");
             }
         }
-        assertTrue(north && south, "the arms do not reach both cell edges");
     }
 }

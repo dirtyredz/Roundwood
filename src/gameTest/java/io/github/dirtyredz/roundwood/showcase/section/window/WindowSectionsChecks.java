@@ -28,7 +28,7 @@ import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.windowLook;
 
 /**
  * The window sections of the showcase read back from the world: the
- * junction and stacking demos, the position and arch sections, and the sections listed as
+ * stacking and neighbour demos, the position and arch sections, and the sections listed as
  * {@code ShowcaseWindow}s (the pieces row, corners, cross beams, trims, circles, sills, edges). Called right after
  * building and again after the integrity ticks, for every facing the showcase test builds.
  */
@@ -39,10 +39,6 @@ public final class WindowSectionsChecks {
     public static void verifyWindows(ServerLevel level, ShowcaseFrame frame) {
         Direction right = frame.right();
         RoundWindowBlock oak = ModBlocks.roundWindow();
-        BlockState middle = level.getBlockState(frame.pos(WindowsSection.JUNCTION_R + 1, 0, WindowsSection.DEMO_F));
-        check(middle.is(oak) && connects(middle, frame.forward()), "junction window does not connect to the glass pane");
-        check(level.getBlockState(frame.pos(WindowsSection.JUNCTION_R + 1, 0, WindowsSection.DEMO_F + 1)).is(Blocks.GLASS_PANE),
-                "glass pane missing from the junction");
         BlockState lower = level.getBlockState(frame.pos(WindowsSection.STACK_R, 0, WindowsSection.DEMO_F));
         BlockState upper = level.getBlockState(frame.pos(WindowsSection.STACK_R, 1, WindowsSection.DEMO_F));
         check(lower.is(oak) && upper.is(oak) && lower.getValue(RoundWindowBlock.AXIS) == right.getAxis()
@@ -52,10 +48,11 @@ public final class WindowSectionsChecks {
         BlockState solid = level.getBlockState(frame.pos(WindowsSection.SOLID_R, 0, WindowsSection.DEMO_F));
         check(solid.is(oak) && level.getBlockState(frame.pos(WindowsSection.SOLID_R, 0, WindowsSection.DEMO_F + 1)).is(Blocks.STONE),
                 "stone-behind window demo missing");
-        check(!connects(solid, frame.forward()), "a window grew an arm towards the stone behind it");
+        check(WindowPaneBlock.connections(solid).isEmpty() && WindowPaneBlock.connections(lower).isEmpty(),
+                "a window kept a connection");
     }
 
-    /** The round window in each position, the junction demos and the practice blocks, in this facing's world directions. */
+    /** The round window in each position, the neighbour demos and the practice blocks, in this facing's world directions. */
     public static void verifyWindowPositions(ServerLevel level, ShowcaseFrame frame) {
         Direction forward = frame.forward();
         Direction right = frame.right();
@@ -68,8 +65,8 @@ public final class WindowSectionsChecks {
         expectPosition(level, frame, WindowPositionsSection.RIGHT_R, f, WindowPosition.flush(right));
         expectPosition(level, frame, WindowPositionsSection.LEFT_R, f, WindowPosition.flush(right.getOpposite()));
         expectPosition(level, frame, WindowPositionsSection.CEILING_R, f, WindowPosition.UP);
-        expectPosition(level, frame, WindowPositionsSection.CEILING_R, WindowPositionsSection.FLOOR_F, WindowPosition.DOWN);
-        int d = WindowPositionsSection.DEMO_F;
+        expectPosition(level, frame, WindowPositionsSection.FLOOR_R, f, WindowPosition.DOWN);
+        int d = f;
         BlockState pane = expectPosition(level, frame, WindowPositionsSection.PANE_R, d, WindowPosition.flush(forward));
         check(WindowPaneBlock.connections(pane).isEmpty(), "flush window bridged to the glass pane on its right: " + pane);
         BlockState corner = expectPosition(level, frame, WindowPositionsSection.CORNER_R, d, WindowPosition.flush(forward));
@@ -83,7 +80,7 @@ public final class WindowSectionsChecks {
         check(!connects(solid, right) && !connects(solid, forward), "stone made a flush window grow glass: " + solid);
         BlockState wet = expectPosition(level, frame, WindowPositionsSection.WATER_R, d, WindowPosition.flush(forward));
         check(wet.getValue(BlockStateProperties.WATERLOGGED), "flush window not waterlogged");
-        int p = WindowPositionsSection.PRACTICE_F;
+        int p = f;
         check(level.getBlockState(frame.pos(WindowPositionsSection.SLAB_R, 0, p)).is(Blocks.OAK_SLAB)
                 && level.getBlockState(frame.pos(WindowPositionsSection.STAIRS_R, 0, p)).is(Blocks.OAK_STAIRS)
                 && level.getBlockState(frame.pos(WindowPositionsSection.WALL_R, 1, p)).is(Blocks.STONE_BRICKS), "practice blocks missing");

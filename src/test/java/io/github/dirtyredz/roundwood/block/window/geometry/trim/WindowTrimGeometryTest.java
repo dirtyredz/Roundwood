@@ -127,11 +127,11 @@ class WindowTrimGeometryTest {
     void theTrimNeverCollidesAndIsTargetedOnlyInTheCell() {
         for (WindowDesign design : WindowDesign.all()) {
             for (WindowPose pose : WindowPaneGeometryTest.allPoses()) {
-                List<Box> collision = WindowPaneGeometry.boxes(design, pose, Set.of());
+                List<Box> collision = WindowPaneGeometry.boxes(pose);
                 assertEquals(List.of(pose.slab()), collision, design.id() + " " + pose);
-                assertEquals(collision, WindowShapes.selectionBoxes(design, pose, Set.of(), Set.of(), Set.of()));
+                assertEquals(collision, WindowShapes.selectionBoxes(design, pose, Set.of(), Set.of()));
                 for (Direction side : sides(pose)) {
-                    List<Box> selection = WindowShapes.selectionBoxes(design, pose, Set.of(), Set.of(side), Set.of());
+                    List<Box> selection = WindowShapes.selectionBoxes(design, pose, Set.of(side), Set.of());
                     boolean inCell = range(WindowTrimGeometry.pieces(design.profile(), pose, side).get(0).box(), pose.normal())[0] >= 0
                             && range(WindowTrimGeometry.pieces(design.profile(), pose, side).get(0).box(), pose.normal())[1] <= 16;
                     if (inCell != (selection.size() > collision.size())) {

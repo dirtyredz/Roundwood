@@ -16,22 +16,12 @@ class WindowBeamCullingTest {
     void beamEndsRemainAgainstPlainGlazingAndDisappearAgainstFittedBeams() {
         var pose = WindowPose.upright(Direction.SOUTH, WindowDepth.CENTER);
         var end = new Surface(new Box(15.5, 7.5, 7, 16, 8.5, 9), Direction.EAST, WindowPaneGeometry.BEAM);
-        var plain = new WindowPaneState.Snapshot(WindowDesign.plain(WindowProfile.EDGE_TOP), pose, Set.of());
-        var fitted = new WindowPaneState.Snapshot(new WindowDesign(WindowProfile.EDGE_TOP, WindowPattern.CROSS), pose, Set.of());
+        var plain = new WindowPaneState.Snapshot(WindowDesign.plain(WindowProfile.EDGE_TOP), pose);
+        var fitted = new WindowPaneState.Snapshot(new WindowDesign(WindowProfile.EDGE_TOP, WindowPattern.CROSS), pose);
         assertTrue(WindowBeamCulling.visible(end, Map.of()));
         assertTrue(WindowBeamCulling.visible(end, Map.of(Direction.EAST, plain)));
         assertFalse(WindowBeamCulling.visible(end, Map.of(Direction.EAST, fitted)));
         assertTrue(WindowBeamCulling.visible(end, Map.of(Direction.EAST,
-                new WindowPaneState.Snapshot(fitted.design(), WindowPose.upright(Direction.SOUTH, WindowDepth.NEGATIVE), Set.of()))));
-    }
-
-    @Test
-    void snapshotsOwnTheirInputs() {
-        var connections = java.util.EnumSet.of(Direction.NORTH);
-        var pane = new WindowPaneState.Snapshot(WindowDesign.plain(WindowProfile.ROUND),
-                WindowPose.upright(Direction.SOUTH, WindowDepth.CENTER), connections);
-        connections.clear();
-        assertEquals(Set.of(Direction.NORTH), pane.connections());
-        assertThrows(UnsupportedOperationException.class, () -> pane.connections().clear());
+                new WindowPaneState.Snapshot(fitted.design(), WindowPose.upright(Direction.SOUTH, WindowDepth.NEGATIVE)))));
     }
 }

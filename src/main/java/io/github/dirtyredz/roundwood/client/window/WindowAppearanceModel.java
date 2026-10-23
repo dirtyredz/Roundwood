@@ -73,7 +73,7 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
             Appearance frame = snapshot == null ? AppearanceDefaults.of(pane) : snapshot.appearance();
             Appearance beams = snapshot == null ? frame : snapshot.beams().orElse(frame);
             var design = new WindowDesign(pane.profile(), WindowPattern.CROSS);
-            var geometry = new WindowPaneState.Snapshot(design, pane.pose(state), WindowPaneBlock.connections(state));
+            var geometry = new WindowPaneState.Snapshot(design, pane.pose(state));
             return WindowBeamModels.quads(geometry, wood(frame), snapshot == null ? GlassStyles.CLEAR : GlassStyles.glass(snapshot.glass()),
                     beams, snapshot == null ? java.util.Map.of() : snapshot.neighbours());
         }
@@ -105,7 +105,7 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
         if (stack.getItem() instanceof RetiredCrossWindowItem retired) {
             var pane = (WindowPaneBlock) retired.getBlock();
             var state = pane.defaultBlockState();
-            var geometry = new WindowPaneState.Snapshot(retired.design(), pane.pose(state), java.util.Set.of());
+            var geometry = new WindowPaneState.Snapshot(retired.design(), pane.pose(state));
             var fitted = WindowBeamNbt.read(stack.getTagElement("BlockEntityTag")).trims()
                     .get(AttachmentFace.FRONT).orElse(appearance);
             return ITEMS.get(oakItem, wood, glass, TrimLooks.beams(fitted).face(), source ->

@@ -37,7 +37,7 @@ class WindowBeamModelsTest {
     void composedSurfacesHaveIndependentMaterialsAndBoundedUvs() {
         for (var profile : WindowProfile.values()) {
             var pane = new WindowPaneState.Snapshot(new WindowDesign(profile, WindowPattern.CROSS),
-                    WindowPose.upright(Direction.SOUTH, WindowDepth.CENTER), Set.of(Direction.NORTH, Direction.SOUTH));
+                    WindowPose.upright(Direction.SOUTH, WindowDepth.CENTER));
             var surfaces = WindowBeamModels.surfaces(pane);
             assertEquals(Set.of("frame", "beam", "glass"), surfaces.stream().map(s -> s.texture()).collect(java.util.stream.Collectors.toSet()));
             for (var surface : surfaces) {

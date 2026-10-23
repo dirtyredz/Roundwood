@@ -117,9 +117,6 @@ final class GeneratedFiles {
                 }
             }
             out.addAll(stems);
-            for (String arms : List.of("north", "south", "both")) {
-                out.add(design + "_arms_" + arms);
-            }
         }
         return out;
     }

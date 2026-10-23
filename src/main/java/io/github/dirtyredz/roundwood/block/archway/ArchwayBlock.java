@@ -60,7 +60,8 @@ import java.util.function.Supplier;
  * (lower-left) cell carries the {@link ArchwayBlockEntity} holding the archway's look (a trim
  * appearance: wood, paint or one of the four masonry materials) and its two face trims, and the client
  * draws all four cells from it (the world model itself is empty). Each cell's shape is the frame in
- * that cell only ({@link ArchwayShapes}): it collides, and the passage lets players and rays through.
+ * that cell only ({@link ArchwayShapes}): rays hit the whole frame, and what collides is the lower jambs
+ * alone (0.13.1), so the passage is open to players and mobs.
  * The callbacks hand off to the archway's assembly, appearance and trim services; placement only
  * ever happens whole, through {@link ArchwayItem}.
  */
@@ -157,11 +158,11 @@ public class ArchwayBlock extends Block implements EntityBlock, AppearanceDefaul
         return ArchwayShapes.shape(design, state.getValue(FACING), state.getValue(PART));
     }
 
-    /** The jambs and crown collide; the passage is open. */
+    /** The lower jambs collide; the crown is drawn and targeted but never collides, and the passage is open. */
     @Override
     @SuppressWarnings("deprecation")
     public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return getShape(state, level, pos, context);
+        return ArchwayShapes.collision(design, state.getValue(FACING), state.getValue(PART));
     }
 
     /** Archways are placed only whole ({@link ArchwayItem}); there is no single-cell placement. */

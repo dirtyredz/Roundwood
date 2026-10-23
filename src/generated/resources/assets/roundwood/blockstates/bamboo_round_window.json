@@ -6,42 +6,7 @@
       },
       "when": {
         "axis": "x",
-        "north": "false",
-        "position": "center",
-        "south": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arms_north"
-      },
-      "when": {
-        "axis": "x",
-        "north": "true",
-        "position": "center",
-        "south": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arms_south"
-      },
-      "when": {
-        "axis": "x",
-        "north": "false",
-        "position": "center",
-        "south": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arms_both"
-      },
-      "when": {
-        "axis": "x",
-        "north": "true",
-        "position": "center",
-        "south": "true"
+        "position": "center"
       }
     },
     {
@@ -51,45 +16,7 @@
       },
       "when": {
         "axis": "z",
-        "east": "false",
-        "position": "center",
-        "west": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arms_north",
-        "y": 90
-      },
-      "when": {
-        "axis": "z",
-        "east": "true",
-        "position": "center",
-        "west": "false"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arms_south",
-        "y": 90
-      },
-      "when": {
-        "axis": "z",
-        "east": "false",
-        "position": "center",
-        "west": "true"
-      }
-    },
-    {
-      "apply": {
-        "model": "roundwood:block/round_window_arms_both",
-        "y": 90
-      },
-      "when": {
-        "axis": "z",
-        "east": "true",
-        "position": "center",
-        "west": "true"
+        "position": "center"
       }
     },
     {

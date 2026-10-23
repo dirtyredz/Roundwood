@@ -5,7 +5,6 @@ import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowFaceIdentity;
-import io.github.dirtyredz.roundwood.block.window.geometry.WindowPaneGeometry;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimGeometry;
 import net.minecraft.core.BlockPos;
@@ -24,7 +23,7 @@ import java.util.Optional;
  * <p>The side is the hit's position along the normal against the slab's middle; the hit point is
  * first nudged into the surface it hit. An exact tie (a thin edge of the slab) goes to the viewer's
  * side, and to FRONT when there is no viewer. A point outside the slab is a trim band or an arch sill
- * (when it lies in one installed on that side), connector glass on a centred pane's arms, or nothing.
+ * (when it lies in one installed on that side), or nothing.
  */
 public record WindowHitTarget(AttachmentFace face, Direction side, WindowHitRegions.Region region) {
     private static final double NUDGE = 1e-4;
@@ -83,9 +82,7 @@ public record WindowHitTarget(AttachmentFace face, Direction side, WindowHitRegi
                     return Optional.of(new WindowHitTarget(face, side, region));
                 }
             }
-            WindowHitRegions.Region outside = WindowPaneGeometry.bridges(pose) ? WindowHitRegions.Region.CONNECTOR_GLASS
-                    : WindowHitRegions.Region.NONE;
-            return Optional.of(new WindowHitTarget(face, side, outside));
+            return Optional.of(new WindowHitTarget(face, side, WindowHitRegions.Region.NONE));
         }
         return Optional.of(new WindowHitTarget(face, side, WindowHitRegions.classify(design, uv[0], uv[1], trimmed, silled)));
     }

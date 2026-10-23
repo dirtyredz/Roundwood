@@ -31,18 +31,18 @@
 
 - **Interactive targets take the click before placement.** Aiming a window item at a door, chest or
   lever uses that block first; the overlay still shows the zone, so it is not a promise.
-- **Flush and floor/ceiling windows never connect** (0.6.1). Their slab does not reach the middle
-  of the cell edge where vanilla panes meet, and they grow no glass to get there, so all four
-  connection properties stay false. A vanilla pane beside one still connects (vanilla links to any
-  pane-family block) and ends at the cell edge, short of the flush slab. Only centred upright
-  windows grow arms, across their plane; there are no up/down links.
+- **No window connects** (0.13.1; flush and floor/ceiling windows since 0.6.1). The geometry is the
+  slab and nothing else, so all four connection properties stay false (`WindowPaneBlock` clears them on
+  placement and every neighbour update). A vanilla pane beside one still connects (vanilla links to any
+  pane-family block) and draws its own arm to the cell edge, short of the window. Never reintroduce
+  geometry that depends on a neighbour: `WindowPaneGeometry` takes no connection set on purpose.
 - **0.5.0 windows load centred.** `position` defaults to center when absent, so saved windows keep
   their axis, connections, water and look. Aliases inherit the property.
 - **Planks and dye on a window change the frame; dye on glass tints.** Planks and frame paint leave
-  the glass alone; dye aimed at the glass or a connector arm tints the whole window's glass. Aim
+  the glass alone; dye aimed at the glass tints the whole window's glass. Aim
   decides (trim band, frame or beam, glass), and no gesture needs sneaking.
-- **Every window blockstate applies one complete model** (pane-only visible surfaces, with a model
-  per centred arm combination; there are no `_trimmed` models, trims are drawn by a block-entity
+- **Every window blockstate applies one complete model** (pane-only visible surfaces, one model
+  per pose; there are no `_arms_*` or `_trimmed` models, trims are drawn by a block-entity
   renderer). After any pose or geometry change rerun
   `runData`; `GeneratedWindowPaneModelsTest` compares every state's model with the block geometry
   and fails on a stale file.

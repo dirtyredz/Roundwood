@@ -118,7 +118,7 @@ class WindowTrimSurfacesTest {
     void paneAndTrimsNeverOverlay() {
         for (WindowDesign design : WindowDesign.all()) {
             for (WindowPose pose : WindowPaneGeometryTest.allPoses()) {
-                List<Surface> all = new ArrayList<>(WindowSurfaceGeometry.surfaces(WindowPaneGeometry.pieces(design, pose, Set.of()),
+                List<Surface> all = new ArrayList<>(WindowSurfaceGeometry.surfaces(WindowPaneGeometry.panel(design, pose),
                         Set.of(WindowPaneGeometry.GLASS)));
                 for (Direction side : WindowTrimGeometryTest.sides(pose)) {
                     all.addAll(WindowTrimSurfaces.surfaces(design.profile(), pose, side));

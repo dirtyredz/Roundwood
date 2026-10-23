@@ -12,9 +12,10 @@ import java.util.Map;
 
 /**
  * An archway's frame as boxes (0.12.0): the design's frame pixels ({@link ArchwayDesign#inFrame})
- * merged into rectangles and extruded the full block deep. Collision, target and selection shapes
+ * merged into rectangles and extruded the full block deep. The target and selection shapes
  * ({@link ArchwayShapes}), the item model and the rendered models all derive from the same mask, so
- * what is drawn, hit and walked into agree. Assembly coordinates (x 0..32, y 0..32, facing north) or,
+ * what is drawn and hit agree; what is walked into is the lower jambs of it alone
+ * ({@link #collisionCell}, 0.13.1). Assembly coordinates (x 0..32, y 0..32, facing north) or,
  * per cell, that cell's own coordinates. Plain Java.
  */
 public final class ArchwayGeometry {
@@ -51,6 +52,17 @@ public final class ArchwayGeometry {
     public static Box footprint(Direction facing) {
         return new Box(0, 0, ArchwayDesign.BACK, 2 * Box.BLOCK, 2 * Box.BLOCK, ArchwayDesign.FRONT)
                 .rotateY(VoxelShapeFactory.quarterTurns(facing));
+    }
+
+    /**
+     * What collides in the cell at ({@code column}, {@code row}) (0.13.1, dk-73098f88): the straight
+     * jambs below the spring line, which is the lower row's frame, and nothing of the crown in the upper
+     * row. The 1.875-block crown left no headroom for a 1.95-block mob and little for a player stepping
+     * off the middle, so the opening is open to the full two blocks while the drawn frame, the target and
+     * the outline stay whole ({@link #cell}). In that cell's own coordinates (0..16).
+     */
+    public static List<Box> collisionCell(ArchwayDesign design, int column, int row) {
+        return row == 0 ? cell(design, column, row) : List.of();
     }
 
     /** The frame inside the cell at ({@code column}, {@code row}), in that cell's own coordinates (0..16). */

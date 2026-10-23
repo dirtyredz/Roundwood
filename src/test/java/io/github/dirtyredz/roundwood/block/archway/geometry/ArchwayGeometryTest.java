@@ -155,6 +155,39 @@ class ArchwayGeometryTest {
         }
     }
 
+    /**
+     * The collision is the lower jambs only (0.13.1, dk-73098f88): a 0.6 x 1.95 mob (a zombie or villager,
+     * the tallest common walker) stands anywhere in the middle half of the passage with room to spare,
+     * and the crown never collides, while the drawn frame, the target and the outline stay whole.
+     */
+    @Test
+    void theCollisionLeavesThePassageClearForAMobAndKeepsTheJambs() {
+        double mobHalf = 0.3 * 16;
+        double mobHeight = 1.95 * 16;
+        for (ArchwayDesign design : ArchwayDesign.values()) {
+            int jambBoxes = 0;
+            for (int column = 0; column < 2; column++) {
+                for (int row = 0; row < 2; row++) {
+                    List<Box> collision = ArchwayGeometry.collisionCell(design, column, row);
+                    if (row == 1) {
+                        assertTrue(collision.isEmpty(), design + ": the crown cell collides");
+                    }
+                    List<Box> drawn = ArchwayGeometry.cell(design, column, row);
+                    for (Box box : collision) {
+                        assertTrue(drawn.contains(box), design + ": collision " + box + " is not drawn frame");
+                        assertTrue(box.maxY() <= 16, design + ": collision above the spring line: " + box);
+                        double x = 16 * column + (box.minX() + box.maxX()) / 2;
+                        boolean overlaps = box.minX() + 16 * column < 16 + mobHalf && box.maxX() + 16 * column > 16 - mobHalf
+                                && box.minY() + 16 * row < mobHeight;
+                        assertFalse(overlaps, design + ": the collision blocks a mob in the passage at " + box + " x " + x);
+                    }
+                    jambBoxes += row == 0 ? collision.size() : 0;
+                }
+            }
+            assertTrue(jambBoxes > 0, design + ": the jambs do not collide");
+        }
+    }
+
     @Test
     void thePlacedOutlineAndFootprintTurnWithTheFacing() {
         for (Direction facing : List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST)) {

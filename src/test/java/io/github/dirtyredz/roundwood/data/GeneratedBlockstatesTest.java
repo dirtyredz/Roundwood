@@ -67,7 +67,8 @@ class GeneratedBlockstatesTest {
 
     /**
      * Round windows (both designs and every alias, which draw the plain round window): every position,
-     * axis, connection set and trimmed or face_reversed flag (neither selects a model), checked through the multipart's own conditions.
+     * axis, connection set and trimmed or face_reversed flag (none of them selects a model: a window grows no
+     * connecting glass since 0.13.1), checked through the multipart's own conditions.
      */
     @Test
     void roundWindowBlockstatesCoverEveryPositionAxisAndConnection() {
@@ -135,8 +136,7 @@ class GeneratedBlockstatesTest {
         Set<String> out = new TreeSet<>();
         if (position.equals("center")) {
             int turns = axis.equals("x") ? 0 : 1;
-            List<String> across = axis.equals("x") ? List.of("north", "south") : List.of("east", "west");
-            out.add("roundwood:block/" + design + arms(across, turns, mask) + "@" + 90 * turns);
+            out.add("roundwood:block/" + design + "@" + 90 * turns);
             return out;
         }
         if (position.equals("up") || position.equals("down")) {
@@ -148,21 +148,6 @@ class GeneratedBlockstatesTest {
         return out;
     }
 
-    /**
-     * The arm suffix of a centred model: the connected sides of {@code across} (world), named in the
-     * canonical frame (turned back by {@code turns}), {@code _arms_both} for two, nothing for none.
-     */
-    private static String arms(List<String> across, int turns, int mask) {
-        List<String> on = across.stream().filter(side -> connected(mask, side)).toList();
-        if (on.isEmpty()) {
-            return "";
-        }
-        if (on.size() == 2) {
-            return "_arms_both";
-        }
-        return "_arms_" + SIDES.get(Math.floorMod(SIDES.indexOf(on.get(0)) - turns, 4));
-    }
-
     /** What an arch state should draw: its canonical model family (upright facing south or top north) turned. */
     private static Set<String> expectedArch(String piece, String orientation, String depth, int mask) {
         Set<String> out = new TreeSet<>();
@@ -170,9 +155,7 @@ class GeneratedBlockstatesTest {
             int turns = List.of("south", "west", "north", "east").indexOf(orientation);
             Map<String, String> flush = Map.of("north", "z", "south", "z", "east", "x", "west", "x");
             if (depth.equals("center")) {
-                // across the plane: the two sides on the normal's axis
-                List<String> across = SIDES.stream().filter(side -> flush.get(side).equals(flush.get(orientation))).toList();
-                out.add("roundwood:block/" + piece + arms(across, turns, mask) + "@" + 90 * turns);
+                out.add("roundwood:block/" + piece + "@" + 90 * turns);
                 return out;
             }
             // The slab lies against the negative or positive world side of the normal's axis.
@@ -194,7 +177,7 @@ class GeneratedBlockstatesTest {
         return out;
     }
 
-    /** A positioned pose draws its core only, whatever is connected (0.6.1: no glass bridges). */
+    /** Every pose draws its one model, whatever is connected (no glass bridges, 0.6.1 and 0.13.1). */
     private static void posed(Set<String> out, String stem, int turns) {
         out.add("roundwood:block/" + stem + "@" + 90 * turns);
     }

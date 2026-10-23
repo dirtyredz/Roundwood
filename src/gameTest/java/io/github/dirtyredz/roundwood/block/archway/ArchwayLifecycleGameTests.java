@@ -174,7 +174,7 @@ public final class ArchwayLifecycleGameTests {
         helper.succeed();
     }
 
-    /** The passage is open to a player-sized box; the jambs and crown collide; the cells never occlude. */
+    /** The passage is open to a player-sized box; the jambs collide; the crown is drawn and targeted but never collides; the cells never occlude. */
     @GameTest(template = TEMPLATE)
     public static void playersWalkThroughThePassageNotTheJambs(GameTestHelper helper) {
         floor(helper);
@@ -187,7 +187,10 @@ public final class ArchwayLifecycleGameTests {
                 AABB jamb = new AABB(point(archway, 0.02, 0.2, 0.2), point(archway, 0.1, 0.8, 0.8));
                 check(!helper.getLevel().noCollision(jamb), what + ": the left jamb does not collide");
                 AABB crown = new AABB(point(archway, 0.95, 1.9, 0.2), point(archway, 1.05, 1.98, 0.8));
-                check(!helper.getLevel().noCollision(crown), what + ": the crown does not collide");
+                check(helper.getLevel().noCollision(crown), what + ": the crown collides");
+                BlockPos crownCell = archway.pos(ArchwayPart.UPPER_LEFT);
+                check(!helper.getLevel().getBlockState(crownCell).getShape(helper.getLevel(), crownCell).isEmpty(),
+                        what + ": the crown is no longer drawn and targeted");
                 for (BlockPos cell : archway.positions()) {
                     BlockState state = helper.getLevel().getBlockState(cell);
                     check(!state.canOcclude(), what + ": a cell occludes");

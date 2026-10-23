@@ -90,8 +90,8 @@ class WindowSillGeometryTest {
             WindowDesign design = WindowDesign.plain(profile);
             for (WindowPose pose : WindowPaneGeometryTest.allPoses()) {
                 for (Direction side : sides(pose)) {
-                    List<Box> plain = WindowShapes.selectionBoxes(design, pose, Set.of(), Set.of(), Set.of());
-                    List<Box> silled = WindowShapes.selectionBoxes(design, pose, Set.of(), Set.of(), Set.of(side));
+                    List<Box> plain = WindowShapes.selectionBoxes(design, pose, Set.of(), Set.of());
+                    List<Box> silled = WindowShapes.selectionBoxes(design, pose, Set.of(), Set.of(side));
                     double[] n = WindowTrimGeometry.depth(pose, side);
                     boolean inCell = n[0] >= 0 && n[1] <= 16;
                     if (inCell != (silled.size() > plain.size())) {
@@ -103,8 +103,8 @@ class WindowSillGeometryTest {
         }
         WindowDesign round = WindowDesign.plain(WindowProfile.ROUND);
         WindowPose pose = WindowPaneGeometryTest.allPoses().get(0);
-        assertEquals(WindowShapes.selectionBoxes(round, pose, Set.of(), Set.of(), Set.of()),
-                WindowShapes.selectionBoxes(round, pose, Set.of(), Set.of(), Set.of(sides(pose))), "a round window has no sill to target");
+        assertEquals(WindowShapes.selectionBoxes(round, pose, Set.of(), Set.of()),
+                WindowShapes.selectionBoxes(round, pose, Set.of(), Set.of(sides(pose))), "a round window has no sill to target");
     }
 
     private static Direction[] sides(WindowPose pose) {

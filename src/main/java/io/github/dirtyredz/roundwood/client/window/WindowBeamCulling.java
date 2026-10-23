@@ -23,7 +23,7 @@ public final class WindowBeamCulling {
         BitSet boundary = WindowPaneGeometry.boundary(List.of(surface.backing()), surface.face());
         if (boundary.isEmpty()) return true;
         BitSet covered = BOUNDARIES.get(new Coverage(neighbour, surface.face().getOpposite(), surface.texture().equals(WindowPaneGeometry.GLASS)), key -> {
-            var pieces = WindowPaneGeometry.pieces(key.pane().design(), key.pane().pose(), key.pane().connections()).stream()
+            var pieces = WindowPaneGeometry.panel(key.pane().design(), key.pane().pose()).stream()
                     .filter(piece -> key.glass() || !piece.texture().equals(WindowPaneGeometry.GLASS)).map(Piece::box).toList();
             return WindowPaneGeometry.boundary(pieces, key.side());
         });
