@@ -4,7 +4,6 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
-import io.github.dirtyredz.roundwood.registry.ModLootConditions;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -25,9 +24,11 @@ import java.util.Set;
  * slot other than the perimeter (an omitted slot is the perimeter, so 0.8.0 tables keep their meaning).
  */
 public record TrimFaceCondition(AttachmentFace face, TrimSlot slot) implements LootItemCondition {
+    public static final LootItemConditionType TYPE = new LootItemConditionType(new Serializer());
+
     @Override
     public LootItemConditionType getType() {
-        return ModLootConditions.TRIM_FACE.get();
+        return TYPE;
     }
 
     @Override

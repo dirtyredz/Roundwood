@@ -13,7 +13,7 @@ public final class ModLootConditions {
             DeferredRegister.create(Registries.LOOT_CONDITION_TYPE, Roundwood.MOD_ID);
 
     public static final RegistryObject<LootItemConditionType> TRIM_FACE = CONDITIONS.register("trim_face",
-            () -> new LootItemConditionType(new TrimFaceCondition.Serializer()));
+            () -> TrimFaceCondition.TYPE);
 
     private ModLootConditions() {
     }

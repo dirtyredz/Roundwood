@@ -102,6 +102,9 @@ the anchor persistence and the attachment services.
 
 ## Loot ownership
 
+`TrimFaceCondition` owns its type and serializer; `ModLootConditions` registers that same type
+under `roundwood:trim_face`. The condition has no dependency on the registry adapter.
+
 Every part's loot table is `dropSelf` with the explosion condition. Exactly one item drops because
 of ordering, not counting: the removal that started it (player break, explosion, support loss via
 `updateShape`, integrity cleanup) evaluates its own loot; `onRemove` of that part clears the
