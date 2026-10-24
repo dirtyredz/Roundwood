@@ -79,7 +79,7 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 - `src/main/java/io/github/dirtyredz/roundwood/client/trim/` — the frame renderer, appearance quarter models (also used by the door trim), source model names
 - `src/main/java/io/github/dirtyredz/roundwood/client/window/` — the appearance-aware window blockstate/item model (frame, glass and beams; WindowBeamModels composition and WindowBeamCulling snapshot coverage), the directly typed item-model cache, WindowBeamPreview and the placement preview/overlay
 - `src/main/java/io/github/dirtyredz/roundwood/client/window/trim/` — the trim and sill block-entity renderer, its cached world models and the attachment look per slot and profile
-- `src/main/java/io/github/dirtyredz/roundwood/client/render/` — SurfaceQuadBaker shared by fitted beams and face trims; line drawing shared by the highlights and placement previews; baked pixel-mask slab models in a trim look (`PixelSlabModels`, 0.12.0: the arched door casing and the archways)
+- `src/main/java/io/github/dirtyredz/roundwood/client/render/` — SurfaceQuadBaker and GeneralQuadModels shared by fitted beams, face trims and camouflage; PlacementHighlights and AssemblyCellRenderer share preview and per-cell render mechanics; line drawing shared by the highlights and placement previews; baked pixel-mask slab models in a trim look (`PixelSlabModels`, 0.12.0: the arched door casing and the archways)
 - `src/main/java/io/github/dirtyredz/roundwood/client/item/` — NBT-aware item model overrides, `FamilyItemModels` (typed binding of each item kind to its wrapper), the attachment icons (Universal Trim, Arch Sill) per look
 - `src/main/java/io/github/dirtyredz/roundwood/client/material/` — donor sprites and colours, built-in wood and paint artwork bindings, masonry faces (thin mortar), the shared trim look resolver, quad retexturing and raw vertex maths, bounded model caches
 - `src/main/java/io/github/dirtyredz/roundwood/client/camouflage/` — static corner renderer, cached corner models
@@ -266,3 +266,5 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-2ce8b225 done: `tools/textures/mortar.mjs` owns polar and brick shading; positions and shading options are named records, shared by historical and thin radial art.
 
 - dk-d1d87975 done: `appearance/AppearanceAnchor`, typed `AssemblyPlacementPlan<P,A>`, per-family `AssemblyAnchors.Lookup` constants and typed item binding replace forwarding facades; window wrapping lives with its model.
+
+- dk-ea090069 done: `PlacementHighlights` owns held-hand precedence and the live-client event guard; `AssemblyCellRenderer` owns per-cell tessellation and balanced poses.

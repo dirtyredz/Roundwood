@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.window;
 
+import io.github.dirtyredz.roundwood.client.render.PlacementHighlights;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorHitResolver;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPlacement;
@@ -51,7 +52,7 @@ public final class WindowPlacementPreview {
 
     /** The preview for {@code player} aiming at {@code hit}, or empty when no window is held or the hit is refused. */
     public static Optional<Preview> of(Player player, Level level, BlockHitResult hit) {
-        InteractionHand hand = windowHand(player);
+        InteractionHand hand = PlacementHighlights.held(player, WindowPlacementPreview::isWindow);
         if (hand == null) {
             return Optional.empty();
         }
@@ -65,18 +66,6 @@ public final class WindowPlacementPreview {
         WindowPlacement.Request request = WindowPlacement.of(context);
         return Optional.of(new Preview(request.clicked(), request.face(), context.getClickLocation(), request.zone(),
                 proposal(player, level, item, context)));
-    }
-
-    /** The main hand's window, else the offhand's when the main hand is empty; null when neither holds one. */
-    @Nullable
-    static InteractionHand windowHand(Player player) {
-        if (isWindow(player.getMainHandItem())) {
-            return InteractionHand.MAIN_HAND;
-        }
-        if (player.getMainHandItem().isEmpty() && isWindow(player.getOffhandItem())) {
-            return InteractionHand.OFF_HAND;
-        }
-        return null;
     }
 
     private static boolean isWindow(ItemStack stack) {

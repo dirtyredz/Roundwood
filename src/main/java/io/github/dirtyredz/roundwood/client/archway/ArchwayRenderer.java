@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.archway;
 
+import io.github.dirtyredz.roundwood.client.render.AssemblyCellRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
@@ -11,16 +12,13 @@ import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.client.material.TrimLooks;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
 
 import java.util.Optional;
 
@@ -32,11 +30,10 @@ import java.util.Optional;
  * so (like the door and frame) the vanilla mining crack does not show on archways.
  */
 public class ArchwayRenderer implements BlockEntityRenderer<ArchwayBlockEntity> {
-    private final ModelBlockRenderer renderer;
-    private final RandomSource random = RandomSource.create();
+    private final AssemblyCellRenderer renderer;
 
     public ArchwayRenderer(BlockEntityRendererProvider.Context context) {
-        this.renderer = context.getBlockRenderDispatcher().getModelRenderer();
+        this.renderer = new AssemblyCellRenderer(context.getBlockRenderDispatcher().getModelRenderer(), RandomSource.create());
     }
 
     @Override
@@ -74,11 +71,7 @@ public class ArchwayRenderer implements BlockEntityRenderer<ArchwayBlockEntity> 
         BlockPos cell = assembly.pos(part);
         BlockState state = level.getBlockState(cell);
         BlockPos anchor = assembly.anchor();
-        pose.pushPose();
-        pose.translate(cell.getX() - anchor.getX(), cell.getY() - anchor.getY(), cell.getZ() - anchor.getZ());
-        renderer.tesselateBlock(level, model, state, cell, pose, consumer, false, random, state.getSeed(cell),
-                OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.solid());
-        pose.popPose();
+        renderer.draw(level, anchor, cell, model, state, pose, consumer, false);
     }
 
     /** The archway spans up to four chunk sections; draw it whenever its bounds are in view. */

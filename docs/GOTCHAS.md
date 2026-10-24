@@ -143,6 +143,10 @@
 - **The open projection is outlined but refused.** Clicking, mining or picking the projected half
   of an open leaf does nothing (the client cancels it). A ray that crosses a door cell before the
   projection can also stop a click on a block that sits inside the projection.
+- **Per-cell rendering has distinct seed and cull policies.** The compatibility frame culls;
+  camouflage, archways and door casings do not. A projected door ring uses the door cell
+  for its seed, the projected cell for lighting, and a separate depth shift. Preserve these inputs
+  to `AssemblyCellRenderer`; the shared draw operation must not erase them.
 - **Camouflage copies looks only.** Donor sounds, hardness, light, redstone, gravity, connected
   textures and overlays (grass side tint layer) do not transfer; one sprite per face.
 - **Mirrored structure copies start without camouflage**: mirroring moves the old anchor's NBT onto a

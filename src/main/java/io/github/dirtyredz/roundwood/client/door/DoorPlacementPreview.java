@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.door;
 
+import io.github.dirtyredz.roundwood.client.render.PlacementHighlights;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.assembly.placement.AssemblyPlacementPlan;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -11,7 +12,6 @@ import io.github.dirtyredz.roundwood.block.door.selection.DoorHitResolver;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorPlacementOutline;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorSwingOutline;
 import io.github.dirtyredz.roundwood.client.render.OutlineLines;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -25,7 +25,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderHighlightEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +50,7 @@ public final class DoorPlacementPreview {
 
     /** The plan for {@code player} aiming at {@code hit}, or empty when no door is held, the hit is refused or nothing would be placed. */
     public static Optional<AssemblyPlacementPlan<DoorLayout.Part, DoorLayout.Assembly>> of(Player player, Level level, BlockHitResult hit) {
-        InteractionHand hand = doorHand(player);
+        InteractionHand hand = PlacementHighlights.held(player, stack -> stack.getItem() instanceof RoundDoorItem);
         if (hand == null) {
             return Optional.empty();
         }
@@ -66,11 +65,7 @@ public final class DoorPlacementPreview {
 
     @SubscribeEvent(receiveCanceled = true)
     public static void onBlockHighlight(RenderHighlightEvent.Block event) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || minecraft.player == null) {
-            return;
-        }
-        of(minecraft.player, minecraft.level, event.getTarget()).ifPresent(plan -> {
+        PlacementHighlights.draw(event, DoorPlacementPreview::of, (minecraft, plan) -> {
             Vec3 camera = event.getCamera().getPosition();
             BlockPos anchor = plan.assembly().anchor();
             Vec3 origin = new Vec3(anchor.getX() - camera.x, anchor.getY() - camera.y, anchor.getZ() - camera.z);
@@ -80,18 +75,6 @@ public final class DoorPlacementPreview {
             draw(pose, lines, origin, DoorPlacementOutline.silhouette(plan.assembly(), plan.anchorState().getValue(net.minecraft.world.level.block.DoorBlock.OPEN)), LEAF);
             draw(pose, lines, origin, List.of(DoorPlacementOutline.hingeAxis(plan.assembly())), HINGE);
         });
-    }
-
-    /** The main hand's door, else the offhand's when the main hand is empty; null when neither holds one. */
-    @Nullable
-    static InteractionHand doorHand(Player player) {
-        if (player.getMainHandItem().getItem() instanceof RoundDoorItem) {
-            return InteractionHand.MAIN_HAND;
-        }
-        if (player.getMainHandItem().isEmpty() && player.getOffhandItem().getItem() instanceof RoundDoorItem) {
-            return InteractionHand.OFF_HAND;
-        }
-        return null;
     }
 
     /** Edges in pixels relative to the anchor cell, drawn from the camera-relative {@code origin}. */

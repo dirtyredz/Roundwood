@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.trim;
 
+import io.github.dirtyredz.roundwood.client.render.AssemblyCellRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
@@ -9,15 +10,12 @@ import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
 import io.github.dirtyredz.roundwood.client.material.TrimLooks;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
 
 /**
  * Draws a whole frame from its anchor quarter: each quarter's cached model in the frame's
@@ -27,11 +25,10 @@ import net.minecraftforge.client.model.data.ModelData;
  * so like the door the vanilla mining crack does not show on frames.
  */
 public class RoundTrimRenderer implements BlockEntityRenderer<RoundTrimBlockEntity> {
-    private final ModelBlockRenderer renderer;
-    private final RandomSource random = RandomSource.create();
+    private final AssemblyCellRenderer renderer;
 
     public RoundTrimRenderer(BlockEntityRendererProvider.Context context) {
-        this.renderer = context.getBlockRenderDispatcher().getModelRenderer();
+        this.renderer = new AssemblyCellRenderer(context.getBlockRenderDispatcher().getModelRenderer(), RandomSource.create());
     }
 
     @Override
@@ -53,11 +50,8 @@ public class RoundTrimRenderer implements BlockEntityRenderer<RoundTrimBlockEnti
         for (TrimPart part : TrimPart.values()) {
             BlockPos cell = assembly.pos(part);
             BlockState state = level.getBlockState(cell);
-            pose.pushPose();
-            pose.translate(cell.getX() - anchor.getX(), cell.getY() - anchor.getY(), cell.getZ() - anchor.getZ());
-            renderer.tesselateBlock(level, TrimAppearanceModels.quarter(look, assembly.facing(), part), state, cell, pose,
-                    consumer, true, random, state.getSeed(cell), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.solid());
-            pose.popPose();
+            renderer.draw(level, anchor, cell, TrimAppearanceModels.quarter(look, assembly.facing(), part), state,
+                    pose, consumer, true);
         }
     }
 

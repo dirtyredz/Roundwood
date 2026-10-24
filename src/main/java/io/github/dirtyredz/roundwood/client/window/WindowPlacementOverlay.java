@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.window;
 
+import io.github.dirtyredz.roundwood.client.render.PlacementHighlights;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.Roundwood;
@@ -46,11 +47,7 @@ public final class WindowPlacementOverlay {
 
     @SubscribeEvent(receiveCanceled = true)
     public static void onBlockHighlight(RenderHighlightEvent.Block event) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || minecraft.player == null) {
-            return;
-        }
-        WindowPlacementPreview.of(minecraft.player, minecraft.level, event.getTarget()).ifPresent(preview -> {
+        PlacementHighlights.draw(event, WindowPlacementPreview::of, (minecraft, preview) -> {
             Vec3 camera = event.getCamera().getPosition();
             PoseStack pose = event.getPoseStack();
             VertexConsumer lines = event.getMultiBufferSource().getBuffer(RenderType.lines());

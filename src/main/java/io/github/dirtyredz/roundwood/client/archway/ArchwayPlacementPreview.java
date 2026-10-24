@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.archway;
 
+import io.github.dirtyredz.roundwood.client.render.PlacementHighlights;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPart;
 import io.github.dirtyredz.roundwood.block.assembly.placement.AssemblyPlacementPlan;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -12,7 +13,6 @@ import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayGeometry;
 import io.github.dirtyredz.roundwood.client.render.OutlineLines;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -27,7 +27,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderHighlightEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,7 +50,7 @@ public final class ArchwayPlacementPreview {
 
     /** The plan for {@code player} aiming at {@code hit}, or empty when no archway is held or nothing would be placed. */
     public static Optional<AssemblyPlacementPlan<ArchwayPart, ArchwayLayout.Assembly>> of(Player player, Level level, BlockHitResult hit) {
-        InteractionHand hand = archwayHand(player);
+        InteractionHand hand = PlacementHighlights.held(player, stack -> stack.getItem() instanceof ArchwayItem);
         if (hand == null) {
             return Optional.empty();
         }
@@ -61,11 +60,7 @@ public final class ArchwayPlacementPreview {
 
     @SubscribeEvent(receiveCanceled = true)
     public static void onBlockHighlight(RenderHighlightEvent.Block event) {
-        Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.level == null || minecraft.player == null) {
-            return;
-        }
-        of(minecraft.player, minecraft.level, event.getTarget()).ifPresent(plan -> {
+        PlacementHighlights.draw(event, ArchwayPlacementPreview::of, (minecraft, plan) -> {
             ArchwayLayout.Assembly assembly = plan.assembly();
             Vec3 camera = event.getCamera().getPosition();
             BlockPos anchor = assembly.anchor();
@@ -77,18 +72,6 @@ public final class ArchwayPlacementPreview {
             draw(pose, lines, List.of(ArchwayGeometry.footprint(assembly.facing())), x, y, z, CELLS);
             draw(pose, lines, ArchwayGeometry.placed(assembly.design(), assembly.facing()), x, y, z, FRAME);
         });
-    }
-
-    /** The main hand's archway, else the offhand's when the main hand is empty; null when neither holds one. */
-    @Nullable
-    static InteractionHand archwayHand(Player player) {
-        if (player.getMainHandItem().getItem() instanceof ArchwayItem) {
-            return InteractionHand.MAIN_HAND;
-        }
-        if (player.getMainHandItem().isEmpty() && player.getOffhandItem().getItem() instanceof ArchwayItem) {
-            return InteractionHand.OFF_HAND;
-        }
-        return null;
     }
 
     /** The outline of {@code boxes} (pixels relative to the anchor cell), merged into one shape so inner seams vanish. */

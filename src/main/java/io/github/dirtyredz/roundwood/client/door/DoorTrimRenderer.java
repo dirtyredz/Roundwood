@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.door;
 
+import io.github.dirtyredz.roundwood.client.render.AssemblyCellRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
@@ -8,20 +9,17 @@ import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
-import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimGeometry;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
 import io.github.dirtyredz.roundwood.client.material.TrimLooks;
 import io.github.dirtyredz.roundwood.client.trim.TrimAppearanceModels;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
 
 import java.util.Optional;
 
@@ -39,11 +37,10 @@ import java.util.Optional;
  * quarters, so its rings look exactly as before.
  */
 public final class DoorTrimRenderer {
-    private final ModelBlockRenderer renderer;
-    private final RandomSource random = RandomSource.create();
+    private final AssemblyCellRenderer renderer;
 
     public DoorTrimRenderer(ModelBlockRenderer renderer) {
-        this.renderer = renderer;
+        this.renderer = new AssemblyCellRenderer(renderer, RandomSource.create());
     }
 
     public void render(RoundDoorBlockEntity anchor, DoorLayout.Assembly assembly, Level level, PoseStack pose,
@@ -70,13 +67,9 @@ public final class DoorTrimRenderer {
                 BlockPos door = assembly.pos(doorPart(part));
                 BlockPos cell = face == AttachmentFace.FRONT ? door.relative(front) : door;
                 BlockState state = level.getBlockState(door);
-                pose.pushPose();
-                pose.translate(cell.getX() - assembly.anchor().getX() + front.getStepX() * shift,
-                        cell.getY() - assembly.anchor().getY(),
-                        cell.getZ() - assembly.anchor().getZ() + front.getStepZ() * shift);
-                renderer.tesselateBlock(level, TrimAppearanceModels.quarter(painted, assembly.facing(), part), state, cell, pose,
-                        consumer, false, random, state.getSeed(door), OverlayTexture.NO_OVERLAY, ModelData.EMPTY, RenderType.solid());
-                pose.popPose();
+                renderer.draw(level, assembly.anchor(), cell, TrimAppearanceModels.quarter(painted, assembly.facing(), part),
+                        state, pose, consumer, false, state.getSeed(door),
+                        new net.minecraft.world.phys.Vec3(front.getStepX() * shift, 0, front.getStepZ() * shift));
             }
         }
     }
@@ -93,13 +86,8 @@ public final class DoorTrimRenderer {
             for (DoorLayout.Part part : assembly.parts()) {
                 BlockPos cell = assembly.pos(part);
                 BlockState state = level.getBlockState(cell);
-                pose.pushPose();
-                pose.translate(cell.getX() - assembly.anchor().getX(), cell.getY() - assembly.anchor().getY(),
-                        cell.getZ() - assembly.anchor().getZ());
-                renderer.tesselateBlock(level, DoorTrimModels.casing(assembly.design(), face, part, assembly.facing(), painted),
-                        state, cell, pose, consumer, false, random, state.getSeed(cell), OverlayTexture.NO_OVERLAY,
-                        ModelData.EMPTY, RenderType.solid());
-                pose.popPose();
+                renderer.draw(level, assembly.anchor(), cell,
+                        DoorTrimModels.casing(assembly.design(), face, part, assembly.facing(), painted), state, pose, consumer, false);
             }
         }
     }
