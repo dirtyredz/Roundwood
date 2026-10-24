@@ -1,6 +1,9 @@
 package io.github.dirtyredz.roundwood.migration.block;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.migration.conversion.LegacyCells;
+import io.github.dirtyredz.roundwood.migration.conversion.LegacyDoorConversion;
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.migration.LegacyAppearances;
@@ -22,7 +25,7 @@ import java.util.function.Supplier;
  * ordinary integrity cleanup. Picks and drops are already the canonical door.
  */
 @Deprecated
-public class LegacyDoorBlock extends RoundDoorBlock {
+public class LegacyDoorBlock extends RoundDoorBlock implements LegacyAlias {
     private final LegacyAppearances.Entry entry;
     private final Supplier<RoundDoorBlock> canonical;
 
@@ -33,6 +36,17 @@ public class LegacyDoorBlock extends RoundDoorBlock {
         this.canonical = canonical;
     }
 
+    @Override
+    public BlockPos migrationKey(BlockPos pos, BlockState state) {
+        return DoorLayout.of(pos, state).anchor();
+    }
+
+    @Override
+    public LegacyCells.Result convert(ServerLevel level, BlockPos pos, BlockState state) {
+        return LegacyDoorConversion.convert(level, pos, state);
+    }
+
+    @Override
     public RoundDoorBlock canonical() {
         return canonical.get();
     }

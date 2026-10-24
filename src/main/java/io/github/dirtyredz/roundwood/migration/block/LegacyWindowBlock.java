@@ -1,6 +1,8 @@
 package io.github.dirtyredz.roundwood.migration.block;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.migration.conversion.LegacyCells;
+import io.github.dirtyredz.roundwood.migration.conversion.LegacyWindowConversion;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
@@ -21,7 +23,7 @@ import java.util.function.Supplier;
  * until converted, one tick after it appears or soon after its chunk loads.
  */
 @Deprecated
-public class LegacyWindowBlock extends RoundWindowBlock {
+public class LegacyWindowBlock extends RoundWindowBlock implements LegacyAlias {
     private static final int CONVERT_DELAY = 1;
 
     private final LegacyAppearances.Entry entry;
@@ -34,6 +36,17 @@ public class LegacyWindowBlock extends RoundWindowBlock {
         this.canonical = canonical;
     }
 
+    @Override
+    public BlockPos migrationKey(BlockPos pos, BlockState state) {
+        return pos.immutable();
+    }
+
+    @Override
+    public LegacyCells.Result convert(ServerLevel level, BlockPos pos, BlockState state) {
+        return LegacyWindowConversion.convert(level, pos, state);
+    }
+
+    @Override
     public RoundWindowBlock canonical() {
         return canonical.get();
     }

@@ -258,7 +258,7 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-7fd38157 client tidy-ups; partly done (`client/item/FamilyItemModels` replaced the `wrapModels` ladder); left: `QuadVertices`, the door item tint, the camouflage LRU, `WindowItemModels`
 - dk-7abe21de done: `VoxelShapeFactory.turn` owns signed Direction quarter turns for model rotation and camouflage; the old datagen copy was already removed.
 - dk-75a60754 dependency direction (block -> client import, registry <-> migration cycle, trim item on frame concepts)
-- dk-4cf186bd `LegacyAlias` contract
+- dk-4cf186bd done: `migration/block/LegacyAlias` supplies canonical block, historical appearance, conversion and queue identity; family conversions retain their distinct custody rules.
 - dk-1d129342 done: `DoorFixtures.placeOakDoor` owns the repeated player/place/assert sequence; callers keep floor setup and player identity. The generated-resource test split was already complete.
 - dk-d402bd77 done: family adapters remain explicit; three appearance families and different pick/drop ownership do not justify a wiring abstraction (DECISIONS.md).
 - dk-87f3ad8f TrimFaceCondition <-> ModLootConditions registry cycle

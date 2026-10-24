@@ -1,6 +1,9 @@
 package io.github.dirtyredz.roundwood.migration.block;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.migration.conversion.LegacyCells;
+import io.github.dirtyredz.roundwood.migration.conversion.LegacyTrimConversion;
+import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.migration.LegacyAppearances;
@@ -19,7 +22,7 @@ import java.util.function.Supplier;
  * converted. Its scheduled tick tries the conversion before the ordinary integrity cleanup.
  */
 @Deprecated
-public class LegacyTrimBlock extends RoundTrimBlock {
+public class LegacyTrimBlock extends RoundTrimBlock implements LegacyAlias {
     private final LegacyAppearances.Entry entry;
     private final Supplier<RoundTrimBlock> canonical;
 
@@ -30,6 +33,17 @@ public class LegacyTrimBlock extends RoundTrimBlock {
         this.canonical = canonical;
     }
 
+    @Override
+    public BlockPos migrationKey(BlockPos pos, BlockState state) {
+        return TrimLayout.of(pos, state).anchor();
+    }
+
+    @Override
+    public LegacyCells.Result convert(ServerLevel level, BlockPos pos, BlockState state) {
+        return LegacyTrimConversion.convert(level, pos, state);
+    }
+
+    @Override
     public RoundTrimBlock canonical() {
         return canonical.get();
     }

@@ -2,6 +2,14 @@
 
 Newest first.
 
+## 2026-10-24 - Share alias dispatch, retain conversion custody (dk-4cf186bd)
+
+The three frozen aliases implement LegacyAlias, so discovery, conversion dispatch and queue identity
+have one contract. Conversion transactions stay family-specific: doors withdraw and restore a paid
+camouflage refund, frames have no camouflage, and windows already use WindowCellConversion to preserve
+full disk payloads and unknown fields. Forcing those into another generic transaction would widen a
+pure dispatch refactor and risk custody. LegacyCells remains the shared cell-write mechanism.
+
 ## 2026-10-24 - Keep family block adapters explicit (dk-d402bd77)
 
 There are still three appearance families: DOOR, WINDOW and TRIM. Archways add a fourth block

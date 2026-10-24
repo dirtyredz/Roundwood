@@ -1,18 +1,10 @@
 package io.github.dirtyredz.roundwood.migration;
 
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.migration.block.LegacyDoorBlock;
-import io.github.dirtyredz.roundwood.migration.block.LegacyTrimBlock;
-import io.github.dirtyredz.roundwood.migration.block.LegacyWindowBlock;
 import io.github.dirtyredz.roundwood.migration.conversion.DoorTrimConversion;
 import io.github.dirtyredz.roundwood.migration.conversion.LegacyCells;
-import io.github.dirtyredz.roundwood.migration.conversion.LegacyDoorConversion;
-import io.github.dirtyredz.roundwood.migration.conversion.LegacyTrimConversion;
-import io.github.dirtyredz.roundwood.migration.conversion.LegacyWindowConversion;
+import io.github.dirtyredz.roundwood.migration.block.LegacyAlias;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -28,8 +20,7 @@ public final class LegacyChunkMigration {
 
     /** True for any hidden 0.4.0 alias block. */
     public static boolean isLegacy(BlockState state) {
-        Block block = state.getBlock();
-        return block instanceof LegacyDoorBlock || block instanceof LegacyTrimBlock || block instanceof LegacyWindowBlock;
+        return state.getBlock() instanceof LegacyAlias;
     }
 
     /**
@@ -46,27 +37,12 @@ public final class LegacyChunkMigration {
     }
 
     static LegacyCells.Result convert(ServerLevel level, BlockPos pos, BlockState state) {
-        Block block = state.getBlock();
-        if (block instanceof LegacyDoorBlock) {
-            return LegacyDoorConversion.convert(level, pos, state);
-        }
-        if (block instanceof LegacyTrimBlock) {
-            return LegacyTrimConversion.convert(level, pos, state);
-        }
-        if (block instanceof LegacyWindowBlock) {
-            return LegacyWindowConversion.convert(level, pos, state);
-        }
-        return LegacyCells.Result.NOT_LEGACY;
+        return state.getBlock() instanceof LegacyAlias alias
+                ? alias.convert(level, pos, state) : LegacyCells.Result.NOT_LEGACY;
     }
 
     /** One entry per object: the anchor for doors and trims, the cell itself for windows. */
     static BlockPos key(BlockPos pos, BlockState state) {
-        if (state.getBlock() instanceof LegacyDoorBlock) {
-            return DoorLayout.of(pos, state).anchor();
-        }
-        if (state.getBlock() instanceof LegacyTrimBlock) {
-            return TrimLayout.of(pos, state).anchor();
-        }
-        return pos.immutable();
+        return state.getBlock() instanceof LegacyAlias alias ? alias.migrationKey(pos, state) : pos.immutable();
     }
 }
