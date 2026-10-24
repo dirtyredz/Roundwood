@@ -4,12 +4,12 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
+import io.github.dirtyredz.roundwood.fixture.VillagerPassage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
 import net.minecraft.world.entity.npc.Villager;
@@ -155,20 +155,9 @@ public final class TrimNavigationGameTests {
         helper.succeed();
     }
 
-    /** A corridor (x 3..4, walls at x 2 and 5) along z, as the door suite builds it, with a lintel row at z = 4. */
-    private static void corridor(GameTestHelper helper) {
-        floor(helper);
-        for (int z = 0; z < 9; z++) {
-            for (int y = 1; y <= 3; y++) {
-                helper.setBlock(new BlockPos(2, y, z), Blocks.STONE);
-                helper.setBlock(new BlockPos(5, y, z), Blocks.STONE);
-            }
-        }
-    }
-
     @GameTest(template = TEMPLATE, timeoutTicks = 600)
     public static void villagerWalksNorthToSouthThroughADoorWithAFittedFrame(GameTestHelper helper) {
-        corridor(helper);
+        VillagerPassage.corridor(helper);
         helper.setBlock(new BlockPos(3, 3, 4), Blocks.STONE);
         helper.setBlock(new BlockPos(4, 3, 4), Blocks.STONE);
         DoorLayout.Assembly door = doorWithFrame(helper, "walk_fitted_south");
@@ -178,7 +167,7 @@ public final class TrimNavigationGameTests {
 
     @GameTest(template = TEMPLATE, timeoutTicks = 600)
     public static void villagerWalksSouthToNorthThroughADoorWithAFittedFrame(GameTestHelper helper) {
-        corridor(helper);
+        VillagerPassage.corridor(helper);
         helper.setBlock(new BlockPos(3, 3, 4), Blocks.STONE);
         helper.setBlock(new BlockPos(4, 3, 4), Blocks.STONE);
         DoorLayout.Assembly door = doorWithFrame(helper, "walk_fitted_north");
@@ -188,7 +177,7 @@ public final class TrimNavigationGameTests {
 
     @GameTest(template = TEMPLATE, timeoutTicks = 600)
     public static void villagerWalksThroughAFreestandingBrickFrame(GameTestHelper helper) {
-        corridor(helper);
+        VillagerPassage.corridor(helper);
         ServerPlayer player = player(helper, "walk_freestanding", GameType.SURVIVAL, Direction.NORTH);
         check(placeFreestanding(helper, player, brickStack(), ANCHOR).consumesAction(), "frame placement failed");
         assertTrim(helper, trimAssembly(helper, ANCHOR, Direction.NORTH), oakTrim());
@@ -202,7 +191,7 @@ public final class TrimNavigationGameTests {
 
     /** Sends a villager from {@code start} to {@code target}; with a door, also requires that it opened. */
     private static void walkThrough(GameTestHelper helper, DoorLayout.Assembly door, BlockPos start, BlockPos target, boolean needsOpen) {
-        Villager villager = helper.spawn(EntityType.VILLAGER, start);
+        Villager villager = VillagerPassage.spawn(helper, start, target);
         BlockPos absoluteTarget = helper.absolutePos(target);
         AtomicBoolean sawOpen = new AtomicBoolean();
         helper.onEachTick(() -> {
@@ -213,12 +202,15 @@ public final class TrimNavigationGameTests {
                 sawOpen.set(true);
             }
         });
-        // Villager walks are known to be intermittent: same budget as the door suite.
         helper.succeedWhen(() -> {
             check(arrived(helper, villager, target), "villager has not reached the far side: at " + rel(helper, villager.blockPosition())
                     + ", path " + (villager.getNavigation().getPath() == null ? "none" : villager.getNavigation().getPath().getTarget() + " done=" + villager.getNavigation().getPath().isDone())
-                    + ", door open " + (door != null && helper.getLevel().getBlockState(door.anchor()).getValue(DoorBlock.OPEN)));
+                    + ", door open " + (door != null && helper.getLevel().getBlockState(door.anchor()).getValue(DoorBlock.OPEN))
+                    + ", expected " + absoluteTarget + ", walk target "
+                    + villager.getBrain().getMemory(MemoryModuleType.WALK_TARGET).map(w -> w.getTarget().currentBlockPosition())
+                    + ", activities " + villager.getBrain().getActiveActivities());
             check(!needsOpen || sawOpen.get(), "the door never opened");
+            villager.discard();
         });
     }
 

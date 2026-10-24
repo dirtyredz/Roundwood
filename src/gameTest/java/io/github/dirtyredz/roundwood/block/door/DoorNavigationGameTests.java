@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.block.door;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
+import io.github.dirtyredz.roundwood.fixture.VillagerPassage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -35,7 +36,6 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.anchorEntity;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assembly;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
@@ -60,13 +60,7 @@ public final class DoorNavigationGameTests {
 
     /** The corridor has walls on both sides, so only the explicit click point chooses the hinge. */
     private static DoorLayout.Assembly corridor(GameTestHelper helper, String name, DoorHingeSide hinge) {
-        floor(helper);
-        for (int z = 0; z < 9; z++) {
-            for (int y = 1; y <= 3; y++) {
-                helper.setBlock(new BlockPos(2, y, z), Blocks.STONE);
-                helper.setBlock(new BlockPos(5, y, z), Blocks.STONE);
-            }
-        }
+        VillagerPassage.corridor(helper);
         helper.setBlock(new BlockPos(3, 3, 4), Blocks.STONE);
         helper.setBlock(new BlockPos(4, 3, 4), Blocks.STONE);
         ServerPlayer player = player(helper, name, GameType.SURVIVAL, Direction.NORTH);
@@ -111,7 +105,7 @@ public final class DoorNavigationGameTests {
         if (camouflaged) {
             anchorEntity(helper, assembly).setCamouflage(CamouflageData.free(Blocks.STONE.defaultBlockState()));
         }
-        Villager villager = helper.spawn(EntityType.VILLAGER, start);
+        Villager villager = VillagerPassage.spawn(helper, start, target);
         BlockPos absoluteTarget = helper.absolutePos(target);
         AtomicBoolean sawOpen = new AtomicBoolean();
         helper.onEachTick(() -> {
@@ -129,8 +123,13 @@ public final class DoorNavigationGameTests {
         // Closing behind itself depends on vanilla's door-memory timing (vanilla villagers also leave
         // wooden doors open sometimes); the close path itself is pinned by vanillaCloseBehaviourClosesAllFour.
         helper.succeedWhen(() -> {
-            check(arrived(helper, villager, target), "villager has not reached the far side");
+            check(arrived(helper, villager, target), "villager has not reached the far side: at " + villager.blockPosition()
+                    + ", expected " + absoluteTarget + ", walk target "
+                    + villager.getBrain().getMemory(MemoryModuleType.WALK_TARGET).map(w -> w.getTarget().currentBlockPosition())
+                    + ", path " + (villager.getNavigation().getPath() == null ? "none" : villager.getNavigation().getPath().getTarget())
+                    + ", activities " + villager.getBrain().getActiveActivities());
             check(sawOpen.get(), "the door never opened");
+            villager.discard();
         });
     }
 

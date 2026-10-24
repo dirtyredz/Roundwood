@@ -7,6 +7,10 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
 - **Headless only.** Never run `runClient`. Verification is `node tools/generate-textures.mjs`, `runData`, `test build`,
   `runGameTestServer`, `git diff --check`, and `..\..\tools\sync-mod-files.ps1 -Check` from the
   workspace. The owner checks visuals and client behaviour in game.
+- **Focused villager repeats:** `./gradlew --offline runGameTestServer -PnavigationRepeats=20`
+  compiles only navigation tests, fixtures and environment checks, with 20 independent required
+  copies of each of the seven walks (no retries or timeout changes). Omit the property for the
+  normal suite and fast gate; Gradle recompiles the complete GameTest source set.
 - **Generated resources are source.** Change a provider, run `./gradlew runData`, commit the
   regenerated `src/generated/resources/` with the code. Never hand-edit generated JSON.
 - **Separate authorities, no catalogue.** Content is 18 canonical blocks and 20 advertised items in

@@ -28,6 +28,15 @@ sourceSets {
     }
 }
 
+// Focused navigation stress runs compile only their fixtures and tests. No retries: every copy
+// is a separate required test with the original 600-tick budget.
+def navigationRepeats = providers.gradleProperty('navigationRepeats').map { it.toInteger() }.orElse(1).get()
+if (project.hasProperty('navigationRepeats')) {
+    if (navigationRepeats < 1 || navigationRepeats > 100) throw new GradleException('navigationRepeats must be 1..100')
+    sourceSets.gameTest.java.include '**/fixture/**', '**/DoorNavigationGameTests.java',
+            '**/TrimNavigationGameTests.java', '**/environment/**'
+}
+
 configurations {
     gameTestImplementation.extendsFrom implementation
     gameTestCompileOnly.extendsFrom compileOnly
@@ -69,6 +78,7 @@ minecraft {
         }
 
         gameTestServer {
+            property 'roundwood.navigationRepeats', navigationRepeats.toString()
             workingDirectory project.file('run/gametest')
             property 'forge.enabledGameTestNamespaces', mod_id
             mods {

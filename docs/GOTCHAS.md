@@ -261,6 +261,14 @@
 - **Vanilla villagers sometimes leave doors open.** `InteractWithDoor` forgets a door it has moved
   too far past. The walking GameTests assert opening and passage; the close path is tested by
   calling `InteractWithDoor.closeDoorsThatIHaveOpenedOrPassedThrough` directly.
+- **Villager passage tests need closed corridor ends and an initial destination.** An idle brain
+  can choose its own walk target before an `onEachTick` callback supplies one. In an open-ended
+  corridor it can leave the raised floor, get stuck outside, or go around the door; a z-only
+  arrival check then even reports passage without an opening. `fixture/VillagerPassage` encloses
+  the plot and sets `WALK_TARGET` at spawn, keeping normal brain/pathfinding/door behavior.
+  Successful walkers are discarded. The flat-world reproduction failed 8/140 walks, including
+  a frame-only walk, without any nested-mutation warnings; the bounded, directed fixture passed
+  all 140 walks with the same 600-tick budget (`dk-dae6be18`).
 - **Sprites only span UV 0..16.** Default UVs come from element coordinates, so any element beyond
   one block samples neighbouring atlas sprites. `GeometryModelWriter` splits at tile boundaries;
   never add elements to a model by another path. Forge's model builder omits a `uv` equal to the
