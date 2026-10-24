@@ -4,6 +4,7 @@ import net.minecraft.client.renderer.FaceInfo;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
+import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -67,7 +68,7 @@ public final class ModelRetexturing {
 
     /** {@code quad} turned clockwise (seen from above) by {@code turns} quarter turns about the block centre. */
     public static BakedQuad rotateY(BakedQuad quad, int turns) {
-        Direction direction = turn(quad.getDirection(), turns);
+        Direction direction = VoxelShapeFactory.turn(quad.getDirection(), turns);
         int[] vertices = rewind(rotateVerticesY(quad.getVertices(), turns), direction);
         return new BakedQuad(vertices, quad.getTintIndex(), direction, quad.getSprite(), quad.isShade(),
                 quad.hasAmbientOcclusion());
@@ -109,17 +110,6 @@ public final class ModelRetexturing {
             out[i] = Float.floatToRawIntBits(x);
             out[i + 2] = Float.floatToRawIntBits(z);
             out[i + NORMAL] = (normal & 0xFF00FF00) | (nx & 0xFF) | ((nz & 0xFF) << 16);
-        }
-        return out;
-    }
-
-    /** {@code side} turned like {@link #rotateVerticesY} (vertical sides stay). */
-    public static Direction turn(Direction side, int turns) {
-        Direction out = side;
-        if (out.getAxis().isHorizontal()) {
-            for (int i = 0; i < Math.floorMod(turns, 4); i++) {
-                out = out.getClockWise();
-            }
         }
         return out;
     }

@@ -68,7 +68,7 @@ public final class CamouflageModels {
         List<BakedQuad> quads = new ArrayList<>();
         for (CamouflageGeometry.Face face : CamouflageGeometry.exposedFaces(key.design(), key.part().column.index(), key.part().row())) {
             Box box = face.box().rotateY(turns);
-            Direction side = turn(direction(face.side()), turns);
+            Direction side = VoxelShapeFactory.turn(direction(face.side()), turns);
             DonorSprites.FaceMaterial material = DonorSprites.face(key.donor(), side);
             BlockElementFace element = new BlockElementFace(null, material.tintIndex(), "", new BlockFaceUV(FaceUv.of(box, side), 0));
             quads.add(BAKERY.bakeQuad(
@@ -95,14 +95,4 @@ public final class CamouflageModels {
         };
     }
 
-    /** The same clockwise quarter turns {@link Box#rotateY} applies to geometry. */
-    private static Direction turn(Direction side, int turns) {
-        Direction out = side;
-        if (out.getAxis().isHorizontal()) {
-            for (int i = 0; i < turns; i++) {
-                out = out.getClockWise();
-            }
-        }
-        return out;
-    }
 }

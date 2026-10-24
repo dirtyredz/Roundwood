@@ -45,7 +45,7 @@ public final class TrimAppearanceModels {
             int turns = VoxelShapeFactory.quarterTurns(facing);
             UnaryOperator<BakedQuad> paint = painter(look);
             return ModelRetexturing.map(source, quad -> ModelRetexturing.rotateY(paint.apply(quad), turns),
-                    side -> ModelRetexturing.turn(side, turns));
+                    side -> VoxelShapeFactory.turn(side, turns));
         });
     }
 

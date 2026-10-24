@@ -93,7 +93,7 @@ public final class PixelSlabModels {
             boolean planar = surface.face().getAxis() == Direction.Axis.Z;
             TextureAtlasSprite sprite = planar ? faceSprite : edgeSprite;
             Box box = inPlace ? surface.backing().translate(originX, originY, 0) : surface.backing().rotateY(turns);
-            Direction side = ModelRetexturing.turn(surface.face(), turns);
+            Direction side = VoxelShapeFactory.turn(surface.face(), turns);
             BakedQuad quad = bake(box, side, sprite);
             if (planar && look.whole()) {
                 boolean seenFromFront = surface.face() == Direction.SOUTH;

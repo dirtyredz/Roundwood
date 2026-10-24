@@ -255,7 +255,7 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-7279982a done: GameTest `block/door/` and `block/window/` grouped, tree diagram in Layout, one-file folders declared
 - dk-0dc49165 done in 0.11.0 (door sections grouped, family checks beside the sections, `ShowcaseSamples`)
 - dk-7fd38157 client tidy-ups; partly done (`client/item/FamilyItemModels` replaced the `wrapModels` ladder); left: `QuadVertices`, the door item tint, the camouflage LRU, `WindowItemModels`
-- dk-7abe21de Direction quarter-turn helper copied three times
+- dk-7abe21de done: `VoxelShapeFactory.turn` owns signed Direction quarter turns for model rotation and camouflage; the old datagen copy was already removed.
 - dk-75a60754 dependency direction (block -> client import, registry <-> migration cycle, trim item on frame concepts)
 - dk-4cf186bd `LegacyAlias` contract
 - dk-1d129342 partly done: generated checks split into GeneratedResourceManifestTest, GeneratedResourceReferencesTest, GeneratedContentResourcesTest and GeneratedFiles; door-fixture duplication remains

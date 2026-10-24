@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.material;
 
+import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.client.renderer.FaceInfo;
 import net.minecraft.core.Direction;
 import org.junit.jupiter.api.Test;
@@ -159,26 +160,26 @@ class ModelRetexturingTest {
 
     @Test
     void horizontalDirectionsTurnClockwiseAndVerticalOnesStay() {
-        assertEquals(Direction.EAST, ModelRetexturing.turn(Direction.NORTH, 1));
-        assertEquals(Direction.SOUTH, ModelRetexturing.turn(Direction.EAST, 1));
-        assertEquals(Direction.WEST, ModelRetexturing.turn(Direction.SOUTH, 1));
-        assertEquals(Direction.NORTH, ModelRetexturing.turn(Direction.WEST, 1));
-        assertEquals(Direction.SOUTH, ModelRetexturing.turn(Direction.NORTH, 2));
-        assertEquals(Direction.NORTH, ModelRetexturing.turn(Direction.NORTH, 4));
+        assertEquals(Direction.EAST, VoxelShapeFactory.turn(Direction.NORTH, 1));
+        assertEquals(Direction.SOUTH, VoxelShapeFactory.turn(Direction.EAST, 1));
+        assertEquals(Direction.WEST, VoxelShapeFactory.turn(Direction.SOUTH, 1));
+        assertEquals(Direction.NORTH, VoxelShapeFactory.turn(Direction.WEST, 1));
+        assertEquals(Direction.SOUTH, VoxelShapeFactory.turn(Direction.NORTH, 2));
+        assertEquals(Direction.NORTH, VoxelShapeFactory.turn(Direction.NORTH, 4));
         for (int turns = -5; turns <= 9; turns++) {
-            assertEquals(Direction.UP, ModelRetexturing.turn(Direction.UP, turns));
-            assertEquals(Direction.DOWN, ModelRetexturing.turn(Direction.DOWN, turns));
+            assertEquals(Direction.UP, VoxelShapeFactory.turn(Direction.UP, turns));
+            assertEquals(Direction.DOWN, VoxelShapeFactory.turn(Direction.DOWN, turns));
         }
     }
 
     @Test
     void negativeAndLargeTurnsUseFloorMod() {
-        assertEquals(Direction.WEST, ModelRetexturing.turn(Direction.NORTH, -1));
-        assertEquals(Direction.SOUTH, ModelRetexturing.turn(Direction.NORTH, -2));
-        assertEquals(Direction.EAST, ModelRetexturing.turn(Direction.NORTH, -3));
-        assertEquals(Direction.EAST, ModelRetexturing.turn(Direction.NORTH, 5));
-        assertEquals(Direction.EAST, ModelRetexturing.turn(Direction.NORTH, 401));
-        assertEquals(Direction.NORTH, ModelRetexturing.turn(Direction.NORTH, -400));
+        assertEquals(Direction.WEST, VoxelShapeFactory.turn(Direction.NORTH, -1));
+        assertEquals(Direction.SOUTH, VoxelShapeFactory.turn(Direction.NORTH, -2));
+        assertEquals(Direction.EAST, VoxelShapeFactory.turn(Direction.NORTH, -3));
+        assertEquals(Direction.EAST, VoxelShapeFactory.turn(Direction.NORTH, 5));
+        assertEquals(Direction.EAST, VoxelShapeFactory.turn(Direction.NORTH, 401));
+        assertEquals(Direction.NORTH, VoxelShapeFactory.turn(Direction.NORTH, -400));
     }
 
     @Test
@@ -187,7 +188,7 @@ class ModelRetexturingTest {
             for (int turns = -4; turns <= 8; turns++) {
                 int[] vertex = quad(new float[][] {{0.5f, 0.5f, 0.5f}}, new float[][] {{0, 0}},
                         pack(side.getStepX(), 0, side.getStepZ()));
-                Direction turned = ModelRetexturing.turn(side, turns);
+                Direction turned = VoxelShapeFactory.turn(side, turns);
                 int[] normal = unpack(ModelRetexturing.rotateVerticesY(vertex, turns)[7]);
                 assertArrayEquals(new int[] {turned.getStepX(), 0, turned.getStepZ()}, normal, side + " x" + turns);
             }

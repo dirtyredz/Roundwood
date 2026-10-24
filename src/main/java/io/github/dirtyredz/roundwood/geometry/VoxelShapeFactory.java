@@ -36,6 +36,17 @@ public final class VoxelShapeFactory {
         };
     }
 
+    /** {@code side} turned like {@link Box#rotateY} (vertical sides stay). */
+    public static Direction turn(Direction side, int turns) {
+        Direction out = side;
+        if (out.getAxis().isHorizontal()) {
+            for (int i = 0; i < Math.floorMod(turns, 4); i++) {
+                out = out.getClockWise();
+            }
+        }
+        return out;
+    }
+
     public static List<Box> rotate(Collection<Box> boxes, int quarterTurns) {
         return boxes.stream().map(box -> box.rotateY(quarterTurns)).toList();
     }
