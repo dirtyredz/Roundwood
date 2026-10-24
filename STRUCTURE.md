@@ -261,3 +261,5 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-1d129342 partly done: generated checks split into GeneratedResourceManifestTest, GeneratedResourceReferencesTest, GeneratedContentResourcesTest and GeneratedFiles; door-fixture duplication remains
 - dk-d402bd77 done: family adapters remain explicit; three appearance families and different pick/drop ownership do not justify a wiring abstraction (DECISIONS.md).
 - dk-87f3ad8f TrimFaceCondition <-> ModLootConditions registry cycle
+
+- dk-2ce8b225 done: `tools/textures/mortar.mjs` owns polar and brick shading; positions and shading options are named records, shared by historical and thin radial art.

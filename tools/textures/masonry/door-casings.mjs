@@ -1,7 +1,7 @@
 // 0.11.0 door casing artwork: the arched door casing's 64x64 masonry face, thin mortar, two texels
 // per model pixel like the window trims. The casing (16 x 32 model pixels, straight jambs under a
 // semicircular crown) lives in the left 32 texel columns; the right half is a copy. New files only.
-import { brickColour, jointCoverage, polar, withMortar } from './mortar.mjs';
+import { brickColour, jointCoverage, polar, withMortar } from '../mortar.mjs';
 
 /** The casing face: a 32 x 32 model pixel area at two texels each. */
 export const DOOR_CASING_FACE_SIZE = 64;
@@ -20,7 +20,7 @@ export function archedCasingFace(palette, seed) {
       const xl = x % 32;
       if (y < SPRING) {
         const { index, across, radius, width } = polar(xl, y, 16, 16, CROWN_BRICKS);
-        const colour = brickColour(palette, index, across, radius, 15.5, 12.5, x, y, seed);
+        const colour = brickColour(palette, { index: index, across: across, radius: radius }, { outerArris: 15.5, innerArris: 12.5, x, y, seed });
         const coverage = jointCoverage(Math.min(across, 1 - across) * width * radius);
         px.push(withMortar(colour, palette, coverage, x, y, seed));
         continue;
@@ -28,7 +28,7 @@ export function archedCasingFace(palette, seed) {
       const coverage = JAMB_JOINTS.includes(y) ? 1 : 0;
       const index = 200 + Math.floor((y - SPRING) / 7) * 2 + (xl < 16 ? 0 : 1);
       const across = ((y - SPRING) % 7) / 7;
-      const colour = brickColour(palette, index, across, 30, 99, 0, x, y, seed);
+      const colour = brickColour(palette, { index: index, across: across, radius: 30 }, { outerArris: 99, innerArris: 0, x, y, seed });
       px.push(withMortar(colour, palette, coverage, x, y, seed));
     }
   }

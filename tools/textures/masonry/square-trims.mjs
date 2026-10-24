@@ -5,7 +5,7 @@
 // 4 texels wide; the open centre is never drawn and is filled with mortar. Straight courses follow
 // the band: the top and bottom runs are one course of 8-texel bricks across the full width (staggered
 // against each other), the sides one soldier course between them, so no radial joint ever shows.
-import { brickColour, jointCoverage, nearest, withMortar } from './mortar.mjs';
+import { brickColour, jointCoverage, nearest, withMortar } from '../mortar.mjs';
 
 /** The square frame's face: 16 model pixels at two texels each. */
 export const SQUARE_FACE_SIZE = 32;
@@ -52,7 +52,7 @@ export function squareFrameFace(palette, seed) {
   for (let y = 0; y < SQUARE_FACE_SIZE; y++) {
     for (let x = 0; x < SQUARE_FACE_SIZE; x++) {
       const { run, coverage, index, across } = squareJoint(x, y);
-      const colour = brickColour(palette, runs[run] + index, across, 30, 99, 0, x, y, seed);
+      const colour = brickColour(palette, { index: runs[run] + index, across: across, radius: 30 }, { outerArris: 99, innerArris: 0, x, y, seed });
       px.push(withMortar(colour, palette, coverage, x, y, seed));
     }
   }

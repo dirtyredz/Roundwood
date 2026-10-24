@@ -4,7 +4,7 @@
 // half the old 0.85) is the same physical width on every trim. Joints are drawn with partial coverage
 // (a texel is mixed towards the mortar by how much of it the joint line covers), so a joint narrower
 // than one texel stays a continuous line instead of breaking into dots.
-import { hash, mix, shade } from '../noise.mjs';
+import { hash, mix, shade } from './noise.mjs';
 
 /** Half the width of a thin mortar joint, in texels (0.85 before 0.7.0). */
 export const THIN_HALF_WIDTH = 0.425;
@@ -41,7 +41,7 @@ export function radialMortar(x, y, size, bricks) {
   return jointCoverage(Math.min(across, 1 - across) * width * radius);
 }
 
-export function brickColour(palette, index, across, radius, outerArris, innerArris, x, y, seed) {
+export function brickColour(palette, { index, across, radius }, { outerArris, innerArris, x, y, seed }) {
   const { brick, dark, light } = palette;
   let colour = shade(brick, 0.9 + hash(index, 0, seed) * 0.2);
   if (across < 0.22) colour = mix(colour, light, 0.35);

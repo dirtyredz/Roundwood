@@ -3,7 +3,7 @@
 // change. The mortar primitives live in masonry/mortar.mjs, the arched face in masonry/arch-window.mjs.
 import { hash, mix } from './noise.mjs';
 import { RADIAL_SIZE } from './radial-bricks.mjs';
-import { brickColour, polar, radialMortar, withMortar } from './masonry/mortar.mjs';
+import { brickColour, polar, radialMortar, withMortar } from './mortar.mjs';
 
 /** The round window trim's face: 16 model pixels at two texels each. */
 export const ROUND_FACE_SIZE = 32;
@@ -17,7 +17,7 @@ export function thinRadialFace(palette, seed, size = RADIAL_SIZE, bricks = 24) {
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       const { index, across, radius } = polar(x, y, size / 2, size / 2, bricks);
-      const colour = brickColour(palette, index, across, radius, (61 / 2) * k, (57 / 2) * k, x, y, seed);
+      const colour = brickColour(palette, { index: index, across: across, radius: radius }, { outerArris: (61 / 2) * k, innerArris: (57 / 2) * k, x, y, seed });
       px.push(withMortar(colour, palette, radialMortar(x, y, size, bricks), x, y, seed));
     }
   }

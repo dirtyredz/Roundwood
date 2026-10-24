@@ -9,7 +9,7 @@
 //     each shoulder course is one corbel stone, and the wide courses alternate a split pair with one
 //     long stone (a running bond), so the transition reads as deliberate stonework.
 // The face is mirror-symmetric about the centre line. New files only.
-import { brickColour, jointCoverage, polar, withMortar } from './mortar.mjs';
+import { brickColour, jointCoverage, polar, withMortar } from '../mortar.mjs';
 
 /** The archway face: the 32 x 32 model pixel assembly at two texels each. */
 export const ARCHWAY_FACE_SIZE = 64;
@@ -32,7 +32,7 @@ const INNER_ARRIS = 29;
 /** The crown's texel: radial voussoirs with thin joints. */
 function crown(palette, x, y, seed) {
   const { index, across, radius, width } = polar(x, y, CENTRE, CENTRE, VOUSSOIRS, Math.PI);
-  const colour = brickColour(palette, index, across, radius, OUTER_ARRIS, INNER_ARRIS, x, y, seed);
+  const colour = brickColour(palette, { index: index, across: across, radius: radius }, { outerArris: OUTER_ARRIS, innerArris: INNER_ARRIS, x, y, seed });
   return withMortar(colour, palette, jointCoverage(Math.min(across, 1 - across) * width * radius), x, y, seed);
 }
 
@@ -54,7 +54,7 @@ function jamb(palette, x, y, seed, keyhole) {
   }
   const bedJoint = row === 0 ? 1 : 0;
   const index = 300 + course * 4 + side * 2 + stone;
-  const colour = brickColour(palette, index, row / COURSE, 30, 99, 0, x, y, seed);
+  const colour = brickColour(palette, { index: index, across: row / COURSE, radius: 30 }, { outerArris: 99, innerArris: 0, x, y, seed });
   return withMortar(colour, palette, Math.max(bedJoint, headJoint), x, y, seed);
 }
 

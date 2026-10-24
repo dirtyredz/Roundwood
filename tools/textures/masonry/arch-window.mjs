@@ -1,5 +1,5 @@
 // The arched window trim's 64x64 face (also the base of the top-corner and lower-arch faces).
-import { brickColour, polar, radialMortar, withMortar } from './mortar.mjs';
+import { brickColour, polar, radialMortar, withMortar } from '../mortar.mjs';
 
 /** The arched window's face: the 32 x 32 assembly at two texels per pixel. */
 export const ARCH_FACE_SIZE = 64;
@@ -28,14 +28,14 @@ export function archWindowFace(palette, seed) {
       const course = courseMortar(x, y);
       if (course === null) {
         const { index, across, radius } = polar(x, y, ARCH_FACE_SIZE / 2, ARCH_FACE_SIZE / 2, 24);
-        const colour = brickColour(palette, index, across, radius, 61 / 2, 57 / 2, x, y, seed);
+        const colour = brickColour(palette, { index: index, across: across, radius: radius }, { outerArris: 61 / 2, innerArris: 57 / 2, x, y, seed });
         px.push(withMortar(colour, palette, radialMortar(x, y, ARCH_FACE_SIZE, 24), x, y, seed));
         continue;
       }
       const sill = y >= ARCH_FACE_SIZE - 4;
       const index = sill ? 100 + Math.floor((x + 9) / 9) : 200 + Math.floor((y - 32) / 7) * 2 + (x < 32 ? 0 : 1);
       const across = sill ? ((x + 9) % 9) / 9 : ((y - 32) % 7) / 7;
-      const colour = brickColour(palette, index, across, 30, 99, 0, x, y, seed);
+      const colour = brickColour(palette, { index: index, across: across, radius: 30 }, { outerArris: 99, innerArris: 0, x, y, seed });
       px.push(withMortar(colour, palette, course, x, y, seed));
     }
   }

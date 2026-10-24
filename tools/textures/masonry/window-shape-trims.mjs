@@ -3,7 +3,7 @@
 // pixel, like the other window trims. New files only; the lower arches need no new art (they use the
 // door ring's full radial face, trim_radial_thin_*, whose upper half is the arched window face's).
 import { ARCH_FACE_SIZE, archWindowFace } from './arch-window.mjs';
-import { brickColour, jointCoverage, nearest, withMortar } from './mortar.mjs';
+import { brickColour, jointCoverage, nearest, withMortar } from '../mortar.mjs';
 
 /** A single-edge piece's face: its own 16 model pixels at two texels each. */
 export const SINGLE_FACE_SIZE = 32;
@@ -51,7 +51,7 @@ export function singleEdgeFace(palette, seed) {
       const start = Math.max(0, ...joints.filter((j) => j <= along));
       const end = Math.min(SINGLE_FACE_SIZE, ...joints.filter((j) => j > along));
       const coverage = horizontal || vertical ? jointCoverage(nearest(joints, along)) : 1;
-      const colour = brickColour(palette, run + start, (along - start) / (end - start), 30, 99, 0, x, y, seed);
+      const colour = brickColour(palette, { index: run + start, across: (along - start) / (end - start), radius: 30 }, { outerArris: 99, innerArris: 0, x, y, seed });
       px.push(withMortar(colour, palette, coverage, x, y, seed));
     }
   }
@@ -74,7 +74,7 @@ export function sillFace(palette, seed) {
       const index = Math.floor(along / BRICK);
       const across = (along % BRICK) / BRICK;
       const joint = Math.min(along % BRICK, BRICK - (along % BRICK));
-      const colour = brickColour(palette, 500 + course * 16 + index, across, 30, 99, 0, x, y, seed);
+      const colour = brickColour(palette, { index: 500 + course * 16 + index, across: across, radius: 30 }, { outerArris: 99, innerArris: 0, x, y, seed });
       px.push(withMortar(colour, palette, jointCoverage(joint), x, y, seed));
     }
   }
