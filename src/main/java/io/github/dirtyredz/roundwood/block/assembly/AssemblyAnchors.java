@@ -15,8 +15,8 @@ import java.util.function.Predicate;
 
 /**
  * Finding an assembly's anchor entity from any of its parts, for every family. The anchor cell must be
- * loaded (never loaded on demand), hold a block of the same family ({@link Family#member}) and
- * reconstruct the same layout ({@link Family#layout}) as the part asked from: anchor identity, which
+ * loaded (never loaded on demand), hold a block of the same family ({@link Lookup#member}) and
+ * reconstruct the same layout ({@link Lookup#layout}) as the part asked from: anchor identity, which
  * deliberately lets a canonical block and its 0.4.0 alias share one assembly, unlike exact part
  * membership ({@link Assembly#isPart}). For loot, the anchor as found in the world, else the entity
  * captured with the broken part (when it was the anchor's), as permissive as before.
@@ -28,14 +28,22 @@ public final class AssemblyAnchors {
      * @param member true for a state of this family's block class (canonical or alias)
      * @param layout the assembly a member part at a position belongs to
      */
-    public record Family<A extends Assembly<?>>(Predicate<BlockState> member, BiFunction<BlockPos, BlockState, A> layout) {
+    public record Lookup<A extends Assembly<?>, E extends BlockEntity>(Predicate<BlockState> member,
+            BiFunction<BlockPos, BlockState, A> layout, Class<E> type) {
+        public Optional<E> anchor(BlockGetter level, BlockPos pos, BlockState state) {
+            return AssemblyAnchors.anchor(level, pos, state, this, type);
+        }
+
+        public Optional<E> forLoot(LootParams.Builder builder, BlockState state) {
+            return AssemblyAnchors.forLoot(builder, state, this, type);
+        }
     }
 
     private AssemblyAnchors() {
     }
 
     /** The anchor entity of the assembly the part {@code state} at {@code pos} belongs to, if it is there. */
-    public static <E extends BlockEntity> Optional<E> anchor(BlockGetter level, BlockPos pos, BlockState state, Family<?> family,
+    private static <E extends BlockEntity> Optional<E> anchor(BlockGetter level, BlockPos pos, BlockState state, Lookup<?, ?> family,
                                                              Class<E> type) {
         if (!family.member().test(state)) {
             return Optional.empty();
@@ -54,7 +62,7 @@ public final class AssemblyAnchors {
     }
 
     /** For loot from any part: the anchor as found in the world, else the captured entity if it is the right type. */
-    public static <E extends BlockEntity> Optional<E> forLoot(LootParams.Builder builder, BlockState state, Family<?> family,
+    private static <E extends BlockEntity> Optional<E> forLoot(LootParams.Builder builder, BlockState state, Lookup<?, ?> family,
                                                               Class<E> type) {
         Vec3 origin = builder.getOptionalParameter(LootContextParams.ORIGIN);
         if (origin != null && family.member().test(state)) {

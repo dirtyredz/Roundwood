@@ -19,14 +19,10 @@ import io.github.dirtyredz.roundwood.client.window.WindowAppearanceModel;
 import io.github.dirtyredz.roundwood.client.window.trim.WindowTrimRenderer;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
-import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModItems;
-import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -36,11 +32,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -80,18 +74,7 @@ public final class RoundwoodClient {
     @SubscribeEvent
     public static void wrapModels(ModelEvent.ModifyBakingResult event) {
         Map<ResourceLocation, BakedModel> models = event.getModels();
-        List<Block> windows = new ArrayList<>(LegacyContent.windows());
-        windows.addAll(ModBlocks.windows());
-        windows.addAll(CrossWindowCompatibility.blocks());
-        for (Block window : windows) {
-            for (BlockState state : window.getStateDefinition().getPossibleStates()) {
-                ModelResourceLocation location = BlockModelShaper.stateToModelLocation(state);
-                BakedModel model = models.get(location);
-                if (model != null) {
-                    models.put(location, new WindowAppearanceModel(model));
-                }
-            }
-        }
+        WindowAppearanceModel.wrapBlocks(models);
         for (Item item : Stream.concat(ModItems.all().stream(), LegacyContent.items().stream()).toList()) {
             ModelResourceLocation location = new ModelResourceLocation(ForgeRegistries.ITEMS.getKey(item), "inventory");
             BakedModel model = models.get(location);

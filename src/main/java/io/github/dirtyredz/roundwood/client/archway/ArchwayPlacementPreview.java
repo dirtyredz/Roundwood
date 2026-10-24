@@ -1,11 +1,13 @@
 package io.github.dirtyredz.roundwood.client.archway;
 
+import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPart;
+import io.github.dirtyredz.roundwood.block.assembly.placement.AssemblyPlacementPlan;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayItem;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPlacementPlan;
+import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPlacement;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayGeometry;
 import io.github.dirtyredz.roundwood.client.render.OutlineLines;
 import io.github.dirtyredz.roundwood.geometry.Box;
@@ -33,7 +35,7 @@ import java.util.Optional;
 /**
  * While an archway item is held (0.12.0), draws where using it would put the archway: the frame as it
  * will stand (its outline shows the actual opening, ordinary or keyhole) and the four cells it will
- * own. The placement is the server's own decision ({@link ArchwayPlacementPlan#of}, from a
+ * own. The placement is the server's own decision ({@link ArchwayPlacement#of}, from a
  * {@link BlockPlaceContext} for the held stack and the aimed hit); when it would place nothing,
  * nothing is drawn. Sneaking changes nothing. Like the door and window previews, nothing here calls a
  * block's or item's use. Receives cancelled highlight events and never changes their cancellation.
@@ -48,13 +50,13 @@ public final class ArchwayPlacementPreview {
     }
 
     /** The plan for {@code player} aiming at {@code hit}, or empty when no archway is held or nothing would be placed. */
-    public static Optional<ArchwayPlacementPlan> of(Player player, Level level, BlockHitResult hit) {
+    public static Optional<AssemblyPlacementPlan<ArchwayPart, ArchwayLayout.Assembly>> of(Player player, Level level, BlockHitResult hit) {
         InteractionHand hand = archwayHand(player);
         if (hand == null) {
             return Optional.empty();
         }
         ItemStack stack = player.getItemInHand(hand);
-        return ArchwayPlacementPlan.of(((ArchwayItem) stack.getItem()).archway(), new BlockPlaceContext(player, hand, stack, hit));
+        return ArchwayPlacement.of(((ArchwayItem) stack.getItem()).archway(), new BlockPlaceContext(player, hand, stack, hit));
     }
 
     @SubscribeEvent(receiveCanceled = true)

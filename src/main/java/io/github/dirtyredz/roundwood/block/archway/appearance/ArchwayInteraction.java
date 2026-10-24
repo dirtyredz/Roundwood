@@ -2,10 +2,8 @@ package io.github.dirtyredz.roundwood.block.archway.appearance;
 
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayBlockEntities;
 import io.github.dirtyredz.roundwood.block.archway.trim.ArchwayTrimActions;
 import io.github.dirtyredz.roundwood.block.archway.trim.ArchwayTrimTarget;
-import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.interaction.HeldTrimTool;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -75,7 +73,7 @@ public final class ArchwayInteraction {
                 case CROSS_BEAMS -> Action.REFUSE_BEAMS;
             };
             case SHEARS -> onFace ? Action.REMOVE_TRIM : Action.PASS;
-            case DONOR -> onFace && ArchwayBlockEntities.anchor(level, pos, state).map(anchor -> anchor.trims().has(target.face())).orElse(false)
+            case DONOR -> onFace && ArchwayAppearance.ANCHORS.anchor(level, pos, state).map(anchor -> anchor.trims().has(target.face())).orElse(false)
                     ? Action.RESTYLE_TRIM : Action.RESTYLE_ARCHWAY;
             case OTHER -> Action.PASS;
         };

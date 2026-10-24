@@ -24,19 +24,19 @@ import java.util.Optional;
  */
 public final class TrimAppearance {
     /** Any frame block, canonical or alias; the layout from a quarter's own state. */
-    private static final AssemblyAnchors.Family<TrimLayout.Assembly> FAMILY =
-            new AssemblyAnchors.Family<>(state -> state.getBlock() instanceof RoundTrimBlock, TrimLayout::of);
+    public static final AssemblyAnchors.Lookup<TrimLayout.Assembly, RoundTrimBlockEntity> ANCHORS =
+            new AssemblyAnchors.Lookup<>(state -> state.getBlock() instanceof RoundTrimBlock, TrimLayout::of, RoundTrimBlockEntity.class);
 
     private TrimAppearance() {
     }
 
     public static Appearance of(BlockGetter level, BlockPos pos, BlockState state) {
-        return AssemblyAnchors.anchor(level, pos, state, FAMILY, RoundTrimBlockEntity.class).map(RoundTrimBlockEntity::appearance)
+        return ANCHORS.anchor(level, pos, state).map(RoundTrimBlockEntity::appearance)
                 .orElseGet(() -> AppearanceDefaults.of(state.getBlock()));
     }
 
     public static Appearance forDrops(LootParams.Builder builder, BlockState state) {
-        return AssemblyAnchors.forLoot(builder, state, FAMILY, RoundTrimBlockEntity.class).map(RoundTrimBlockEntity::appearance)
+        return ANCHORS.forLoot(builder, state).map(RoundTrimBlockEntity::appearance)
                 .orElseGet(() -> AppearanceDefaults.of(state.getBlock()));
     }
 

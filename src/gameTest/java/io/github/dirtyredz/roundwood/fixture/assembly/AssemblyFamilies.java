@@ -6,7 +6,6 @@ import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
 import io.github.dirtyredz.roundwood.block.archway.appearance.ArchwayAppearance;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayBlockEntities;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPart;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPlacement;
@@ -15,7 +14,6 @@ import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.appearance.DoorAppearance;
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorBlockEntities;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
@@ -423,7 +421,7 @@ public final class AssemblyFamilies {
 
         @Override
         public Optional<Appearance> anchorLook(BlockGetter level, BlockPos pos, BlockState state) {
-            return DoorBlockEntities.anchor(level, pos, state).map(RoundDoorBlockEntity::appearance);
+            return DoorAppearance.ANCHORS.anchor(level, pos, state).map(RoundDoorBlockEntity::appearance);
         }
 
         @Override
@@ -530,7 +528,7 @@ public final class AssemblyFamilies {
 
         @Override
         public Optional<Appearance> anchorLook(BlockGetter level, BlockPos pos, BlockState state) {
-            return ArchwayBlockEntities.anchor(level, pos, state).map(ArchwayBlockEntity::appearance);
+            return ArchwayAppearance.ANCHORS.anchor(level, pos, state).map(ArchwayBlockEntity::appearance);
         }
 
         @Override

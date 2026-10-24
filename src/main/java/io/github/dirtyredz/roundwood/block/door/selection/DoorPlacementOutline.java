@@ -13,7 +13,7 @@ import java.util.List;
  * (its silhouette, the same edges the swinging highlight uses), the cells it will own, and the hinge
  * it will turn on. Pixels relative to the anchor cell's origin, turned for the facing: the frame
  * {@link DoorSwingOutline#forCell} gives for the anchor. Read from the placement plan's assembly
- * ({@code assembly/DoorPlacementPlan}), never decided here. Plain Java.
+ * ({@code assembly/DoorPlacement}), never decided here. Plain Java.
  */
 public final class DoorPlacementOutline {
     private DoorPlacementOutline() {

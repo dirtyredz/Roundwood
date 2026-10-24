@@ -1,10 +1,11 @@
 package io.github.dirtyredz.roundwood.block.door.placement;
 
+import io.github.dirtyredz.roundwood.block.assembly.placement.AssemblyPlacementPlan;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacementPlan;
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.fixture.PlacementCanceller;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
@@ -189,7 +190,7 @@ public final class ArchedDoorPlacementGameTests {
                     ItemStack stack = new ItemStack(door.asItem());
                     BlockHitResult hit = floorHit(helper, player, hinge);
                     player.setItemInHand(InteractionHand.MAIN_HAND, stack);
-                    Optional<DoorPlacementPlan> plan = DoorPlacementPlan.of(door,
+                    Optional<AssemblyPlacementPlan<DoorLayout.Part, DoorLayout.Assembly>> plan = DoorPlacement.of(door,
                             new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND, hit)));
                     check(plan.isPresent(), name + ": no plan for a free spot");
                     check(stack.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit)).consumesAction(), name + ": placement failed");
@@ -214,7 +215,7 @@ public final class ArchedDoorPlacementGameTests {
         ServerPlayer player = player(helper, "plan_refused", GameType.SURVIVAL, Direction.NORTH);
         BlockHitResult hit = floorHit(helper, player, DoorHingeSide.LEFT);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(arched().asItem()));
-        check(DoorPlacementPlan.of(arched(), new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND, hit))).isEmpty(),
+        check(DoorPlacement.of(arched(), new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND, hit))).isEmpty(),
                 "a plan for a blocked spot");
         helper.succeed();
     }

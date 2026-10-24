@@ -6,14 +6,12 @@ import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPart;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPlacement;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPlacementPlan;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacementPlan;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
@@ -226,9 +224,9 @@ public final class AssemblyPlacementGameTests {
                     ServerPlayer player = player(helper, "plan_" + design + "_" + hinge + "_" + powered, GameType.SURVIVAL, Direction.NORTH);
                     ItemStack stack = new ItemStack(doorBlock(design).asItem());
                     UseOnContext context = doorClick(helper, player, stack, hinge);
-                    Optional<DoorPlacementPlan> plan = DoorPlacementPlan.of(doorBlock(design), new BlockPlaceContext(context));
+                    Optional<AssemblyPlacementPlan<DoorLayout.Part, DoorLayout.Assembly>> plan = DoorPlacement.of(doorBlock(design), new BlockPlaceContext(context));
                     check(plan.isPresent(), what + ": no plan");
-                    check(plan.get().open() == powered, what + ": planned open " + plan.get().open());
+                    check(plan.get().anchorState().getValue(net.minecraft.world.level.block.DoorBlock.OPEN) == powered, what + ": planned open " + plan.get().anchorState().getValue(net.minecraft.world.level.block.DoorBlock.OPEN));
                     check(stack.useOn(context).consumesAction(), what + ": placement failed");
                     for (DoorLayout.Part part : plan.get().assembly().parts()) {
                         check(helper.getLevel().getBlockState(plan.get().assembly().pos(part)).equals(plan.get().states().get(part)),
@@ -239,7 +237,7 @@ public final class AssemblyPlacementGameTests {
                 }
             }
             DoorLayout.Assembly door = door(helper, design);
-            Optional<DoorPlacementPlan> at = DoorPlacementPlan.at(helper.getLevel(), doorBlock(design), door, true);
+            Optional<AssemblyPlacementPlan<DoorLayout.Part, DoorLayout.Assembly>> at = DoorPlacement.at(helper.getLevel(), doorBlock(design), door, true);
             check(at.isPresent(), design + ": no player-less plan");
             check(DoorPlacement.placeAt(helper.getLevel(), doorBlock(design), door, true), design + ": player-less placement failed");
             for (DoorLayout.Part part : door.parts()) {
@@ -250,7 +248,7 @@ public final class AssemblyPlacementGameTests {
         }
         for (ArchwayDesign design : ArchwayDesign.values()) {
             ArchwayLayout.Assembly archway = ArchwayFixtures.assembly(helper, ANCHOR, Direction.NORTH, design);
-            Optional<ArchwayPlacementPlan> at = ArchwayPlacementPlan.at(helper.getLevel(), ArchwayFixtures.block(design), archway);
+            Optional<AssemblyPlacementPlan<ArchwayPart, ArchwayLayout.Assembly>> at = ArchwayPlacement.at(helper.getLevel(), ArchwayFixtures.block(design), archway);
             check(at.isPresent(), design + ": no player-less plan");
             check(ArchwayPlacement.placeAt(helper.getLevel(), ArchwayFixtures.block(design), archway, LOOK),
                     design + ": player-less placement failed");
@@ -272,7 +270,7 @@ public final class AssemblyPlacementGameTests {
         floor(helper);
         ServerLevel level = helper.getLevel();
         ArchwayLayout.Assembly archway = ArchwayFixtures.assembly(helper, ANCHOR, Direction.NORTH, ArchwayDesign.ORDINARY);
-        ArchwayPlacementPlan plan = ArchwayPlacementPlan.at(level, ArchwayFixtures.block(ArchwayDesign.ORDINARY), archway).orElseThrow();
+        var plan = ArchwayPlacement.at(level, ArchwayFixtures.block(ArchwayDesign.ORDINARY), archway).orElseThrow();
         BlockPos signed = archway.pos(ArchwayPart.LOWER_RIGHT); // on the floor, so the sign stands
         BlockPos taken = archway.pos(ArchwayPart.UPPER_RIGHT);
         level.setBlock(signed, Blocks.OAK_SIGN.defaultBlockState(), Block.UPDATE_CLIENTS);
@@ -284,7 +282,7 @@ public final class AssemblyPlacementGameTests {
                 Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE));
         DoorFixtures.clearDrops(helper);
 
-        check(!AssemblyInstallation.install(level, plan.shared(), LOOK, ArchwayBlockEntity.class), "a refused write reported success");
+        check(!AssemblyInstallation.install(level, plan, LOOK, ArchwayBlockEntity.class), "a refused write reported success");
         check(level.getBlockState(archway.pos(ArchwayPart.LOWER_LEFT)).isAir(), "the anchor was not put back");
         check(level.getBlockState(archway.pos(ArchwayPart.UPPER_LEFT)).isAir(), "the upper left cell was not put back");
         check(level.getBlockState(signed).is(Blocks.OAK_SIGN), "the sign was not put back: " + level.getBlockState(signed));
@@ -306,24 +304,24 @@ public final class AssemblyPlacementGameTests {
         floor(helper);
         ServerLevel level = helper.getLevel();
         ArchwayLayout.Assembly archway = ArchwayFixtures.assembly(helper, ANCHOR, Direction.NORTH, ArchwayDesign.KEYHOLE);
-        ArchwayPlacementPlan plan = ArchwayPlacementPlan.at(level, ArchwayFixtures.block(ArchwayDesign.KEYHOLE), archway).orElseThrow();
+        var plan = ArchwayPlacement.at(level, ArchwayFixtures.block(ArchwayDesign.KEYHOLE), archway).orElseThrow();
 
         boolean[] installed = {true};
-        nested(level, BATCH_DEPTH, () -> installed[0] = AssemblyInstallation.install(level, plan.shared(), LOOK,
+        nested(level, BATCH_DEPTH, () -> installed[0] = AssemblyInstallation.install(level, plan, LOOK,
                 ArchwayBlockEntity.class));
         check(!installed[0], "installed past the batch depth");
         assertAir(helper, archway.positions(), "batch depth");
 
         level.restoringBlockSnapshots = true;
         try {
-            installed[0] = AssemblyInstallation.install(level, plan.shared(), LOOK, ArchwayBlockEntity.class);
+            installed[0] = AssemblyInstallation.install(level, plan, LOOK, ArchwayBlockEntity.class);
         } finally {
             level.restoringBlockSnapshots = false;
         }
         check(!installed[0], "installed during a snapshot restore");
         assertAir(helper, archway.positions(), "snapshot restore");
 
-        check(!AssemblyInstallation.install(level, plan.shared(), LOOK, RoundTrimBlockEntity.class), "installed without its anchor entity");
+        check(!AssemblyInstallation.install(level, plan, LOOK, RoundTrimBlockEntity.class), "installed without its anchor entity");
         assertAir(helper, archway.positions(), "missing anchor");
         helper.succeed();
     }
@@ -334,7 +332,7 @@ public final class AssemblyPlacementGameTests {
         floor(helper);
         ServerLevel level = helper.getLevel();
         ArchwayLayout.Assembly archway = ArchwayFixtures.assembly(helper, ANCHOR, Direction.NORTH, ArchwayDesign.ORDINARY);
-        ArchwayPlacementPlan plan = ArchwayPlacementPlan.at(level, ArchwayFixtures.block(ArchwayDesign.ORDINARY), archway).orElseThrow();
+        var plan = ArchwayPlacement.at(level, ArchwayFixtures.block(ArchwayDesign.ORDINARY), archway).orElseThrow();
         BlockSnapshot outer = BlockSnapshot.create(level.dimension(), level, helper.absolutePos(new BlockPos(7, 1, 7)));
         level.captureBlockSnapshots = true;
         level.capturedBlockSnapshots.add(outer);
@@ -342,7 +340,7 @@ public final class AssemblyPlacementGameTests {
         List<BlockSnapshot> after;
         boolean stillCapturing;
         try {
-            installed = AssemblyInstallation.install(level, plan.shared(), LOOK, RoundTrimBlockEntity.class);
+            installed = AssemblyInstallation.install(level, plan, LOOK, RoundTrimBlockEntity.class);
         } finally {
             stillCapturing = level.captureBlockSnapshots;
             after = List.copyOf(level.capturedBlockSnapshots);
@@ -379,7 +377,6 @@ public final class AssemblyPlacementGameTests {
         }
         helper.succeed();
     }
-
 
     /** Runs {@code inner} inside {@code depth} nested mutation batches over a cell no test uses. */
     private static void nested(ServerLevel level, int depth, Runnable inner) {

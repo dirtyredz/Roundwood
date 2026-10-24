@@ -11,7 +11,6 @@ import io.github.dirtyredz.roundwood.block.assembly.AssemblyIntegrity;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyRemoval;
 import io.github.dirtyredz.roundwood.block.door.appearance.DoorAppearance;
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorBlockEntities;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorStateController;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageDrops;
@@ -175,7 +174,7 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
     @SuppressWarnings("deprecation")
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         Appearance appearance = DoorAppearance.forDrops(builder, state);
-        DoorBlockEntities.forLoot(builder, state).ifPresent(anchor -> builder.withParameter(LootContextParams.BLOCK_ENTITY, anchor));
+        DoorAppearance.ANCHORS.forLoot(builder, state).ifPresent(anchor -> builder.withParameter(LootContextParams.BLOCK_ENTITY, anchor));
         return AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.DOOR, appearance);
     }
 

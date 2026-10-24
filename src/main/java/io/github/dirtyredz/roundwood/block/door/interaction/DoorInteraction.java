@@ -9,7 +9,6 @@ import io.github.dirtyredz.roundwood.block.attachment.interaction.HeldTrimTool;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.appearance.DoorAppearance;
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorBlockEntities;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorStateController;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageInteraction;
@@ -121,7 +120,7 @@ public final class DoorInteraction {
         if (tool.is(HeldTrimTool.Kind.SHEARS)) {
             return RingAction.REMOVE;
         }
-        boolean installed = DoorBlockEntities.anchor(level, pos, state).map(anchor -> anchor.trims().has(face.get())).orElse(false);
+        boolean installed = DoorAppearance.ANCHORS.anchor(level, pos, state).map(anchor -> anchor.trims().has(face.get())).orElse(false);
         return installed ? RingAction.RESTYLE : RingAction.NONE;
     }
 
@@ -138,6 +137,6 @@ public final class DoorInteraction {
         if (!assembly.loaded(level) || !assembly.complete(level, block)) {
             return Optional.empty();
         }
-        return DoorBlockEntities.anchor(level, pos, state);
+        return DoorAppearance.ANCHORS.anchor(level, pos, state);
     }
 }

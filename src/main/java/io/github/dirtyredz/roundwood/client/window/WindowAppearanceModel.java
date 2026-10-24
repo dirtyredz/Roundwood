@@ -1,5 +1,12 @@
 package io.github.dirtyredz.roundwood.client.window;
 
+import io.github.dirtyredz.roundwood.registry.ModBlocks;
+import io.github.dirtyredz.roundwood.migration.LegacyContent;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.world.level.block.Block;
+import java.util.Map;
+import java.util.ArrayList;
 import io.github.dirtyredz.roundwood.client.window.trim.WindowTrimRenderer;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
@@ -44,6 +51,22 @@ import io.github.dirtyredz.roundwood.migration.item.RetiredCrossWindowItem;
  * by geometry and materials and invalidated by the existing appearance-cache reload lifecycle.
  */
 public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
+    /** Wrap each canonical, alias and retired window blockstate model once at bake time. */
+    public static void wrapBlocks(Map<ResourceLocation, BakedModel> models) {
+        List<Block> windows = new ArrayList<>(LegacyContent.windows());
+        windows.addAll(ModBlocks.windows());
+        windows.addAll(CrossWindowCompatibility.blocks());
+        for (Block window : windows) {
+            for (BlockState state : window.getStateDefinition().getPossibleStates()) {
+                ModelResourceLocation location = BlockModelShaper.stateToModelLocation(state);
+                BakedModel model = models.get(location);
+                if (model != null) {
+                    models.put(location, new WindowAppearanceModel(model));
+                }
+            }
+        }
+    }
+
     private record Key(BlockState state, Direction side, RenderType renderType, ResourceLocation wood, ResourceLocation glass) {
     }
 

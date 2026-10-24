@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.block.assembly.placement;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.assembly.Assembly;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
-import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
+import io.github.dirtyredz.roundwood.appearance.AppearanceAnchor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
@@ -37,8 +37,8 @@ public final class AssemblyInstallation {
     }
 
     /** Installs {@code plan} with {@code appearance} on its anchor entity of {@code anchorType}; false (nothing changed) when refused. */
-    public static <P> boolean install(Level level, AssemblyPlacementPlan<P> plan, Appearance appearance,
-                                      Class<? extends AppearanceAnchorBlockEntity> anchorType) {
+    public static <P> boolean install(Level level, AssemblyPlacementPlan<P, ? extends Assembly<P>> plan, Appearance appearance,
+                                      Class<? extends AppearanceAnchor> anchorType) {
         if (level.restoringBlockSnapshots) {
             return false;
         }
@@ -69,8 +69,8 @@ public final class AssemblyInstallation {
     }
 
     private static boolean installAppearance(Level level, BlockPos anchor, Appearance appearance,
-                                             Class<? extends AppearanceAnchorBlockEntity> anchorType) {
-        if (level.getBlockEntity(anchor) instanceof AppearanceAnchorBlockEntity entity && anchorType.isInstance(entity)) {
+                                             Class<? extends AppearanceAnchor> anchorType) {
+        if (level.getBlockEntity(anchor) instanceof AppearanceAnchor entity && anchorType.isInstance(entity)) {
             entity.setAppearance(appearance);
             return true;
         }

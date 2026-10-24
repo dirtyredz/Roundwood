@@ -1,7 +1,8 @@
 package io.github.dirtyredz.roundwood.block.assembly.placement;
 
+import io.github.dirtyredz.roundwood.block.assembly.Assembly;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
-import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
+import io.github.dirtyredz.roundwood.appearance.AppearanceAnchor;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,8 +31,8 @@ public final class AssemblyPlacement {
     private AssemblyPlacement() {
     }
 
-    public static <P> InteractionResult place(BlockPlaceContext context, Optional<AssemblyPlacementPlan<P>> plan,
-                                              Class<? extends AppearanceAnchorBlockEntity> anchorType) {
+    public static <P, A extends Assembly<P>> InteractionResult place(BlockPlaceContext context, Optional<AssemblyPlacementPlan<P, A>> plan,
+                                              Class<? extends AppearanceAnchor> anchorType) {
         if (plan.isEmpty()) {
             return InteractionResult.FAIL;
         }

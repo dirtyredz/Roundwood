@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.block.attachment;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.appearance.AppearanceAnchor;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
@@ -38,7 +39,7 @@ import java.util.Map;
  *     the default and every store explicitly empty (never a legacy reading).</li>
  * </ul>
  */
-public abstract class AppearanceAnchorBlockEntity extends BlockEntity {
+public abstract class AppearanceAnchorBlockEntity extends BlockEntity implements AppearanceAnchor {
     private final AppearanceFamily family;
     private final Map<TrimSlot, FaceTrimStore> stores;
     /** Null: the block's default. */

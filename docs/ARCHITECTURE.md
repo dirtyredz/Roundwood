@@ -74,13 +74,14 @@ the anchor persistence and the attachment services.
 - **Anchors** (`AssemblyAnchors`): from any part, the loaded anchor cell holding the same family class
   whose reconstructed layout equals the part's. That is anchor identity, which lets canonical and alias
   cells share an anchor, unlike exact membership. Loot falls back to the captured entity of the right
-  type. `DoorBlockEntities`, `ArchwayBlockEntities` and `TrimAppearance` are typed facades.
+  type. Each family appearance adapter exposes one typed `AssemblyAnchors.Lookup<A,E>` constant;
+  no per-family forwarding class remains.
   `AssemblyAppearanceTarget` is the whole-assembly restyling target: loaded, complete,
   typed anchor, permission over every cell, announced at the clicked cell.
 - **Placement** (`placement/`). `AssemblyPlacementPlan` is the read-only skeleton: every cell in
   the world and dry first; then replaceable in the click's context with `mayInteract` and
   `mayUseItemAt` at every cell, or plainly replaceable without a player; then the family's per-part
-  policy. `DoorPlacementPlan` and `ArchwayPlacementPlan` stay typed facades (hinge, power, design,
+  policy. `DoorPlacement` and `ArchwayPlacement` build the typed `AssemblyPlacementPlan<P,A>` directly (hinge, power, design,
   obstruction against their own collision); the frame uses the skeleton with survival only and no
   entity check. `AssemblyInstallation` writes the plan (`UPDATE_ALL`, in part order, inside one
   batch), then the look on the anchor; success means all of it happened. A refused write or batch, a
@@ -90,6 +91,10 @@ the anchor persistence and the attachment services.
   refused. `AssemblyPlacement` adds the player's effects only on success: criterion, sound,
   `BLOCK_PLACE`, one item (none in creative), `CONSUME`. Forge's cancellation of the multi-place
   event is unchanged.
+Assembly placement and restyling depend only on `appearance/AppearanceAnchor` (`appearance` and
+`setAppearance`), not attachment persistence. Family placement policy and entry points share one class;
+there is no copied state map or reconstructed plan.
+
 - **Anchor persistence** (`block/attachment/AppearanceAnchorBlockEntity`). The door, archway,
   window and frame entities extend it and declare their appearance family and per-slot store formats
   in the constructor (the frame declares none, so it is never a trim host). It owns the look,
@@ -182,7 +187,7 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   `RoundDoorBlock` adds only `column` (the 0.4.0 aliases and the 0.7.0 frame migration recognise
   exactly this class) and `ArchedDoorBlock` fixes the design. Both anchor on `RoundDoorBlockEntity`
   (type id `round_door`), so appearance family DOOR, camouflage, trim storage and lifecycle are shared.
-- **One placement plan.** `assembly/DoorPlacementPlan` (a typed facade over the shared skeleton) is the immutable, read-only decision (`of(block,
+- **One placement plan.** `assembly/DoorPlacement` (a typed facade over the shared skeleton) is the immutable, read-only decision (`of(block,
   context)` for players, `at(level, block, assembly, open)` for the showcase and commands): cells,
   hinge, open state, or empty when refused. `DoorPlacement` only writes a plan. The client preview
   (`client/door/DoorPlacementPreview`, via `selection/DoorPlacementOutline`) draws the same plan for
@@ -213,7 +218,7 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   so rays pass through the passage; since 0.13.1 the collision is smaller (`ArchwayShapes.collision`,
   `ArchwayGeometry.collisionCell`: the lower row's jambs only, nothing of the crown), so players and
   tall mobs walk through. The item model, the world models and the preview are built from the whole mask.
-- **Placement.** `ArchwayPlacementPlan.of(block, context)` (or `at(...)` for the showcase) is the one
+- **Placement.** `ArchwayPlacement.of(block, context)` (or `at(...)` for the showcase) is the one
   read-only decision: anchor = clicked or replaceable cell, facing = the placer's horizontal
   direction, right column = facing's clockwise side, four cells checked for bounds, border, loaded,
   permission, replaceable, dry, entity obstruction against the frame's own collision, and a sturdy

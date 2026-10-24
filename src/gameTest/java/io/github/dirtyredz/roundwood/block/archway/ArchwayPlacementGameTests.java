@@ -1,9 +1,10 @@
 package io.github.dirtyredz.roundwood.block.archway;
 
+import io.github.dirtyredz.roundwood.block.assembly.placement.AssemblyPlacementPlan;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPart;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPlacementPlan;
+import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPlacement;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayGeometry;
 import io.github.dirtyredz.roundwood.fixture.PlacementCanceller;
@@ -113,7 +114,7 @@ public final class ArchwayPlacementGameTests {
         for (ArchwayLayout.Assembly far : List.of(
                 new ArchwayLayout.Assembly(new BlockPos(base.getX(), top, base.getZ()), Direction.NORTH, ArchwayDesign.ORDINARY),
                 new ArchwayLayout.Assembly(base.offset(1_000_000, 0, 1_000_000), Direction.NORTH, ArchwayDesign.ORDINARY))) {
-            check(ArchwayPlacementPlan.at(helper.getLevel(), block(ArchwayDesign.ORDINARY), far).isEmpty(), "a plan outside the world: " + far);
+            check(ArchwayPlacement.at(helper.getLevel(), block(ArchwayDesign.ORDINARY), far).isEmpty(), "a plan outside the world: " + far);
         }
         helper.succeed();
     }
@@ -181,7 +182,7 @@ public final class ArchwayPlacementGameTests {
                 BlockPos floorAbs = helper.absolutePos(ANCHOR.below());
                 BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(floorAbs).add(0, 0.5, 0), Direction.UP, floorAbs, false);
                 player.setItemInHand(InteractionHand.MAIN_HAND, stack);
-                Optional<ArchwayPlacementPlan> plan = ArchwayPlacementPlan.of(block(design),
+                Optional<AssemblyPlacementPlan<ArchwayPart, ArchwayLayout.Assembly>> plan = ArchwayPlacement.of(block(design),
                         new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND, hit)));
                 check(plan.isPresent(), name + ": no plan for a free spot");
                 check(stack.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit)).consumesAction(), name + ": placement failed");
@@ -226,7 +227,7 @@ public final class ArchwayPlacementGameTests {
         BlockPos floorAbs = helper.absolutePos(ANCHOR.below());
         BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(floorAbs).add(0, 0.5, 0), Direction.UP, floorAbs, false);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(block(ArchwayDesign.ORDINARY).asItem()));
-        check(ArchwayPlacementPlan.of(block(ArchwayDesign.ORDINARY),
+        check(ArchwayPlacement.of(block(ArchwayDesign.ORDINARY),
                 new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND, hit))).isEmpty(), "a plan for a blocked spot");
         helper.succeed();
     }

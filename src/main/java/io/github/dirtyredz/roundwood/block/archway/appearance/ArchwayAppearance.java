@@ -1,11 +1,11 @@
 package io.github.dirtyredz.roundwood.block.archway.appearance;
 
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyAnchors;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayBlockEntities;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyAppearanceTarget;
 import net.minecraft.core.BlockPos;
@@ -22,16 +22,19 @@ import java.util.Optional;
  * restyling ({@link AssemblyAppearanceTarget}). Placement installs it itself.
  */
 public final class ArchwayAppearance {
+    public static final AssemblyAnchors.Lookup<ArchwayLayout.Assembly, ArchwayBlockEntity> ANCHORS =
+            new AssemblyAnchors.Lookup<>(state -> state.getBlock() instanceof ArchwayBlock, ArchwayLayout::of, ArchwayBlockEntity.class);
+
     private ArchwayAppearance() {
     }
 
     public static Appearance of(BlockGetter level, BlockPos pos, BlockState state) {
-        return ArchwayBlockEntities.anchor(level, pos, state).map(ArchwayBlockEntity::appearance)
+        return ArchwayAppearance.ANCHORS.anchor(level, pos, state).map(ArchwayBlockEntity::appearance)
                 .orElseGet(() -> AppearanceDefaults.of(state.getBlock()));
     }
 
     public static Appearance forDrops(LootParams.Builder builder, BlockState state) {
-        return ArchwayBlockEntities.forLoot(builder, state).map(ArchwayBlockEntity::appearance)
+        return ArchwayAppearance.ANCHORS.forLoot(builder, state).map(ArchwayBlockEntity::appearance)
                 .orElseGet(() -> AppearanceDefaults.of(state.getBlock()));
     }
 

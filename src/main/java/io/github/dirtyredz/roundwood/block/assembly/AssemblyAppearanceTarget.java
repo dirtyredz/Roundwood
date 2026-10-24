@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.block.assembly;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
-import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
+import io.github.dirtyredz.roundwood.appearance.AppearanceAnchor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -24,9 +24,9 @@ public final class AssemblyAppearanceTarget {
      * empty when it is unloaded, incomplete or its anchor entity is missing.
      */
     public static Optional<AppearanceActions.Target> of(Level level, BlockPos origin, Block block, Assembly<?> assembly,
-                                                        Class<? extends AppearanceAnchorBlockEntity> type) {
+                                                        Class<? extends AppearanceAnchor> type) {
         if (!assembly.loaded(level) || !assembly.complete(level, block)
-                || !(level.getBlockEntity(assembly.anchor()) instanceof AppearanceAnchorBlockEntity entity) || !type.isInstance(entity)) {
+                || !(level.getBlockEntity(assembly.anchor()) instanceof AppearanceAnchor entity) || !type.isInstance(entity)) {
             return Optional.empty();
         }
         return Optional.of(new AppearanceActions.Target() {

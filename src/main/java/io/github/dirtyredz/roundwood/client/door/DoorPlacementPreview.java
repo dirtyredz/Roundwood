@@ -1,10 +1,12 @@
 package io.github.dirtyredz.roundwood.client.door;
 
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.assembly.placement.AssemblyPlacementPlan;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorItem;
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacementPlan;
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorHitResolver;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorPlacementOutline;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorSwingOutline;
@@ -31,7 +33,7 @@ import java.util.Optional;
 /**
  * While a door item is held (0.11.0, both designs), draws where using it would put the door: the
  * leaf's silhouette as it will stand, the cells it will own and the hinge it will turn on. The
- * placement is the server's own decision ({@link DoorPlacementPlan#of}, from a
+ * placement is the server's own decision ({@link DoorPlacement#of}, from a
  * {@link BlockPlaceContext} for the held stack and the door-resolved hit); when it would place
  * nothing, nothing is drawn. Sneaking changes nothing. Nothing here calls a block's or item's use, so
  * whatever an interactive block does with the click is not predicted (as for the window preview).
@@ -48,7 +50,7 @@ public final class DoorPlacementPreview {
     }
 
     /** The plan for {@code player} aiming at {@code hit}, or empty when no door is held, the hit is refused or nothing would be placed. */
-    public static Optional<DoorPlacementPlan> of(Player player, Level level, BlockHitResult hit) {
+    public static Optional<AssemblyPlacementPlan<DoorLayout.Part, DoorLayout.Assembly>> of(Player player, Level level, BlockHitResult hit) {
         InteractionHand hand = doorHand(player);
         if (hand == null) {
             return Optional.empty();
@@ -58,7 +60,7 @@ public final class DoorPlacementPreview {
             return Optional.empty(); // the open leaf's projection: the click is refused
         }
         ItemStack stack = player.getItemInHand(hand);
-        return DoorPlacementPlan.of(((RoundDoorItem) stack.getItem()).door(),
+        return DoorPlacement.of(((RoundDoorItem) stack.getItem()).door(),
                 new BlockPlaceContext(player, hand, stack, resolved.get()));
     }
 
@@ -75,7 +77,7 @@ public final class DoorPlacementPreview {
             PoseStack pose = event.getPoseStack();
             VertexConsumer lines = event.getMultiBufferSource().getBuffer(RenderType.lines());
             draw(pose, lines, origin, DoorPlacementOutline.footprint(plan.assembly()), CELLS);
-            draw(pose, lines, origin, DoorPlacementOutline.silhouette(plan.assembly(), plan.open()), LEAF);
+            draw(pose, lines, origin, DoorPlacementOutline.silhouette(plan.assembly(), plan.anchorState().getValue(net.minecraft.world.level.block.DoorBlock.OPEN)), LEAF);
             draw(pose, lines, origin, List.of(DoorPlacementOutline.hingeAxis(plan.assembly())), HINGE);
         });
     }

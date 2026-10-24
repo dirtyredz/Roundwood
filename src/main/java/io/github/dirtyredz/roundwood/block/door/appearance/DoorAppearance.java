@@ -1,12 +1,12 @@
 package io.github.dirtyredz.roundwood.block.door.appearance;
 
+import io.github.dirtyredz.roundwood.block.assembly.AssemblyAnchors;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyAppearanceTarget;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
-import io.github.dirtyredz.roundwood.block.door.assembly.DoorBlockEntities;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
@@ -23,18 +23,21 @@ import java.util.Optional;
  * restyling target ({@link AssemblyAppearanceTarget}). Placement installs it itself.
  */
 public final class DoorAppearance {
+    public static final AssemblyAnchors.Lookup<DoorLayout.Assembly, RoundDoorBlockEntity> ANCHORS =
+            new AssemblyAnchors.Lookup<>(state -> state.getBlock() instanceof AssemblyDoorBlock, DoorLayout::of, RoundDoorBlockEntity.class);
+
     private DoorAppearance() {
     }
 
     /** The appearance of the assembly {@code pos} belongs to; the block's default when the anchor is not available. */
     public static Appearance of(BlockGetter level, BlockPos pos, BlockState state) {
-        return DoorBlockEntities.anchor(level, pos, state).map(RoundDoorBlockEntity::appearance)
+        return DoorAppearance.ANCHORS.anchor(level, pos, state).map(RoundDoorBlockEntity::appearance)
                 .orElseGet(() -> AppearanceDefaults.of(state.getBlock()));
     }
 
     /** For loot: the anchor as found in the world, else the entity captured with the broken part (if it was the anchor). */
     public static Appearance forDrops(LootParams.Builder builder, BlockState state) {
-        return DoorBlockEntities.forLoot(builder, state).map(RoundDoorBlockEntity::appearance)
+        return DoorAppearance.ANCHORS.forLoot(builder, state).map(RoundDoorBlockEntity::appearance)
                 .orElseGet(() -> AppearanceDefaults.of(state.getBlock()));
     }
 

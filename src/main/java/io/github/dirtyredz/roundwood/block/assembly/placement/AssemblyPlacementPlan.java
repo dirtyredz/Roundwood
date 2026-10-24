@@ -18,8 +18,8 @@ import java.util.function.Predicate;
 
 /**
  * What placing a whole assembly would write, decided once and read-only, shared by every family: the
- * assembly and the state of each part, in the assembly's part order. The family's typed plan (door,
- * archway) is a facade over this; the frame's player-less writer uses it directly. The validation
+ * concrete assembly and the state of each part, in the assembly's part order. Doors, archways and
+ * the frame all use this value directly; no family copies or reconstructs it. The validation
  * skeleton is shared too; a family supplies only its part states and its per-cell policy (power for a
  * door, entity obstruction and floor for doors and archways, floor only for the frame).
  * <ul>
@@ -31,7 +31,7 @@ import java.util.function.Predicate;
  *     <li>Then every part's state must pass the family's {@link CellPolicy} ({@link #of}).</li>
  * </ul>
  */
-public record AssemblyPlacementPlan<P>(Assembly<P> assembly, Map<P, BlockState> states) {
+public record AssemblyPlacementPlan<P, A extends Assembly<P>>(A assembly, Map<P, BlockState> states) {
     /** The family's check of one part's state at its cell (obstruction, survival). */
     @FunctionalInterface
     public interface CellPolicy<P> {
@@ -97,7 +97,7 @@ public record AssemblyPlacementPlan<P>(Assembly<P> assembly, Map<P, BlockState> 
     }
 
     /** The plan writing {@code stateFor} each part, if every part passes {@code policy}. */
-    public static <P> Optional<AssemblyPlacementPlan<P>> of(Assembly<P> assembly, Function<P, BlockState> stateFor, CellPolicy<P> policy) {
+    public static <P, A extends Assembly<P>> Optional<AssemblyPlacementPlan<P, A>> of(A assembly, Function<P, BlockState> stateFor, CellPolicy<P> policy) {
         Map<P, BlockState> states = new LinkedHashMap<>();
         for (P part : assembly.parts()) {
             BlockPos pos = assembly.pos(part);

@@ -8,7 +8,6 @@ import io.github.dirtyredz.roundwood.appearance.item.AppearanceDrops;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.archway.appearance.ArchwayAppearance;
 import io.github.dirtyredz.roundwood.block.archway.appearance.ArchwayInteraction;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayBlockEntities;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPart;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
@@ -136,7 +135,7 @@ public class ArchwayBlock extends Block implements EntityBlock, AppearanceDefaul
     @SuppressWarnings("deprecation")
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         Appearance appearance = ArchwayAppearance.forDrops(builder, state);
-        ArchwayBlockEntities.forLoot(builder, state).ifPresent(anchor -> builder.withParameter(LootContextParams.BLOCK_ENTITY, anchor));
+        ArchwayAppearance.ANCHORS.forLoot(builder, state).ifPresent(anchor -> builder.withParameter(LootContextParams.BLOCK_ENTITY, anchor));
         return AppearanceDrops.decorate(super.getDrops(state, builder), asItem(), appearance);
     }
 
