@@ -1,6 +1,8 @@
 package io.github.dirtyredz.roundwood.client.camouflage;
 
+import io.github.dirtyredz.roundwood.client.render.GeneralQuadModels;
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageGeometry;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
@@ -12,21 +14,15 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockElementFace;
 import net.minecraft.client.renderer.block.model.BlockFaceUV;
 import net.minecraft.client.renderer.block.model.FaceBakery;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
-import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Baked models of one cell's camouflage corner in a donor's materials: Roundwood's own corner
@@ -43,24 +39,14 @@ public final class CamouflageModels {
     private record Key(BlockState donor, DoorDesign design, Direction facing, DoorLayout.Part part) {
     }
 
-    private static final Map<Key, BakedModel> CACHE = new LinkedHashMap<>(64, 0.75F, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<Key, BakedModel> eldest) {
-            return size() > MAX_MODELS;
-        }
-    };
+    private static final AppearanceModelCache<Key, BakedModel> CACHE = new AppearanceModelCache<>(MAX_MODELS);
 
     private CamouflageModels() {
     }
 
     /** The corner model for {@code part} of a door facing {@code facing}, in {@code donor}'s materials. */
-    public static synchronized BakedModel quarter(BlockState donor, DoorDesign design, Direction facing, DoorLayout.Part part) {
-        return CACHE.computeIfAbsent(new Key(donor, design, facing, part), CamouflageModels::build);
-    }
-
-    /** Resource reload: sprites and donor models may all have changed (the donor sprites are cleared with them). */
-    public static synchronized void clear() {
-        CACHE.clear();
+    public static BakedModel quarter(BlockState donor, DoorDesign design, Direction facing, DoorLayout.Part part) {
+        return CACHE.get(new Key(donor, design, facing, part), CamouflageModels::build);
     }
 
     private static BakedModel build(Key key) {
@@ -76,12 +62,7 @@ public final class CamouflageModels {
                     new Vector3f((float) box.maxX(), (float) box.maxY(), (float) box.maxZ()),
                     element, material.sprite(), side, BlockModelRotation.X0_Y0, null, true, NAME));
         }
-        Map<Direction, List<BakedQuad>> culled = new EnumMap<>(Direction.class);
-        for (Direction side : Direction.values()) {
-            culled.put(side, List.of());
-        }
-        return new SimpleBakedModel(List.copyOf(quads), culled, true, true, false,
-                DonorSprites.face(key.donor(), Direction.NORTH).sprite(), ItemTransforms.NO_TRANSFORMS, ItemOverrides.EMPTY);
+        return GeneralQuadModels.world(quads, DonorSprites.face(key.donor(), Direction.NORTH).sprite());
     }
 
     private static Direction direction(CamouflageGeometry.Side side) {

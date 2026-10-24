@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.window.trim;
 
+import io.github.dirtyredz.roundwood.client.render.GeneralQuadModels;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
@@ -10,22 +11,15 @@ import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
 import io.github.dirtyredz.roundwood.client.material.ModelRetexturing;
 import io.github.dirtyredz.roundwood.client.material.TrimLooks;
-import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.FaceUv;
 import io.github.dirtyredz.roundwood.geometry.Surface;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
 import io.github.dirtyredz.roundwood.client.render.SurfaceQuadBaker;
 
 /**
@@ -67,13 +61,7 @@ public final class WindowTrimWorldModels {
             }
             quads.add(quad);
         }
-        Map<Direction, List<BakedQuad>> culled = new EnumMap<>(Direction.class);
-        for (Direction direction : Direction.values()) {
-            culled.put(direction, List.of());
-        }
-        return new SimpleBakedModel(List.copyOf(quads), culled, true, true, false, face, ItemTransforms.NO_TRANSFORMS,
-                ItemOverrides.EMPTY);
+        return GeneralQuadModels.world(quads, face);
     }
-
 
 }

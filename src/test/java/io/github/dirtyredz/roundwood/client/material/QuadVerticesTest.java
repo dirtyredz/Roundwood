@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * vertex: x y z as float bits, colour, u v as float bits, light, packed normal bytes nx | ny << 8 |
  * nz << 16). No BakedQuad or sprite is ever built.
  */
-class ModelRetexturingTest {
-    private static final int STRIDE = ModelRetexturing.STRIDE;
+class QuadVerticesTest {
+    private static final int STRIDE = QuadVertices.STRIDE;
     private static final int COLOUR = 0xFFAABBCC;
     private static final int LIGHT = 0x00F000F0;
 
@@ -56,7 +56,7 @@ class ModelRetexturingTest {
         float[] to = {100f, 200f, 116f, 216f};
         float[][] uvs = {{2f, 4f}, {10f, 4f}, {10f, 12f}, {2f, 12f}};
         int[] vertices = quad(new float[][] {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}}, uvs, pack(0, 0, -1));
-        int[] mapped = ModelRetexturing.remapUv(vertices, from, to);
+        int[] mapped = QuadVertices.remapUv(vertices, from, to);
         float[][] expected = {{100f, 200f}, {116f, 200f}, {116f, 216f}, {100f, 216f}};
         for (int i = 0; i < 4; i++) {
             assertEquals(expected[i][0], f(mapped, i * STRIDE + 4), 1e-4, "u of corner " + i);
@@ -69,11 +69,11 @@ class ModelRetexturingTest {
         float[] from = {2f, 4f, 10f, 12f};
         float[] to = {100f, 200f, 116f, 216f};
         int[] vertices = quad(new float[][] {{0, 0, 0}}, new float[][] {{6f, 8f}}, 0);
-        int[] mapped = ModelRetexturing.remapUv(vertices, from, to);
+        int[] mapped = QuadVertices.remapUv(vertices, from, to);
         assertEquals(108f, f(mapped, 4), 1e-4);
         assertEquals(208f, f(mapped, 5), 1e-4);
         // A quarter of the way along each axis.
-        int[] quarter = ModelRetexturing.remapUv(quad(new float[][] {{0, 0, 0}}, new float[][] {{4f, 7f}}, 0), from, to);
+        int[] quarter = QuadVertices.remapUv(quad(new float[][] {{0, 0, 0}}, new float[][] {{4f, 7f}}, 0), from, to);
         assertEquals(104f, f(quarter, 4), 1e-4);
         assertEquals(206f, f(quarter, 5), 1e-4);
     }
@@ -85,7 +85,7 @@ class ModelRetexturingTest {
         int normal = pack(0, 1, 0);
         int[] vertices = quad(positions, uvs, normal);
         int[] before = vertices.clone();
-        int[] mapped = ModelRetexturing.remapUv(vertices, new float[] {2f, 4f, 10f, 12f}, new float[] {0f, 0f, 1f, 1f});
+        int[] mapped = QuadVertices.remapUv(vertices, new float[] {2f, 4f, 10f, 12f}, new float[] {0f, 0f, 1f, 1f});
         assertArrayEquals(before, vertices, "the input array must not be mutated");
         for (int i = 0; i < 4; i++) {
             for (int slot : new int[] {0, 1, 2, 3, 6, 7}) {
@@ -101,7 +101,7 @@ class ModelRetexturingTest {
     void oneTurnMapsXZToOneMinusZX() {
         int[] vertices = quad(new float[][] {{0.25f, 0.5f, 0.75f}, {0f, 1f, 0f}, {1f, 0f, 0.5f}},
                 new float[][] {{0, 0}, {1, 0}, {1, 1}}, pack(0, 0, -1));
-        int[] turned = ModelRetexturing.rotateVerticesY(vertices, 1);
+        int[] turned = QuadVertices.rotateVerticesY(vertices, 1);
         float[][] expected = {{0.25f, 0.5f, 0.25f}, {1f, 1f, 0f}, {0.5f, 0f, 1f}};
         for (int i = 0; i < 3; i++) {
             assertEquals(expected[i][0], f(turned, i * STRIDE), 1e-6, "x of vertex " + i);
@@ -114,18 +114,18 @@ class ModelRetexturingTest {
     void fourTurnsAreTheIdentityAndTurnsWrap() {
         int[] vertices = quad(new float[][] {{0.125f, 0.5f, 0.75f}, {0.9f, 0.1f, 0.3f}},
                 new float[][] {{0, 0}, {1, 1}}, pack(1, 0, 0));
-        int[] four = ModelRetexturing.rotateVerticesY(vertices, 4);
+        int[] four = QuadVertices.rotateVerticesY(vertices, 4);
         for (int i = 0; i < 2; i++) {
             for (int axis = 0; axis < 3; axis++) {
                 assertEquals(f(vertices, i * STRIDE + axis), f(four, i * STRIDE + axis), 1e-6);
             }
             assertEquals(vertices[i * STRIDE + 7], four[i * STRIDE + 7], "normal after four turns");
         }
-        assertArrayEquals(ModelRetexturing.rotateVerticesY(vertices, 1), ModelRetexturing.rotateVerticesY(vertices, 5));
-        assertArrayEquals(ModelRetexturing.rotateVerticesY(vertices, 3), ModelRetexturing.rotateVerticesY(vertices, -1));
-        assertArrayEquals(vertices, ModelRetexturing.rotateVerticesY(vertices, 0));
+        assertArrayEquals(QuadVertices.rotateVerticesY(vertices, 1), QuadVertices.rotateVerticesY(vertices, 5));
+        assertArrayEquals(QuadVertices.rotateVerticesY(vertices, 3), QuadVertices.rotateVerticesY(vertices, -1));
+        assertArrayEquals(vertices, QuadVertices.rotateVerticesY(vertices, 0));
         // Two quarter turns are a half turn about the centre: (x, z) -> (1 - x, 1 - z).
-        int[] half = ModelRetexturing.rotateVerticesY(vertices, 2);
+        int[] half = QuadVertices.rotateVerticesY(vertices, 2);
         assertEquals(0.875f, f(half, 0), 1e-6);
         assertEquals(0.25f, f(half, 2), 1e-6);
     }
@@ -133,7 +133,7 @@ class ModelRetexturingTest {
     @Test
     void normalsRotateWithThePositionsAndOtherFieldsSurvive() {
         int[] vertices = quad(new float[][] {{0.5f, 0.5f, 0.5f}}, new float[][] {{0.25f, 0.75f}}, pack(0, 1, -1));
-        int[] turned = ModelRetexturing.rotateVerticesY(vertices, 1);
+        int[] turned = QuadVertices.rotateVerticesY(vertices, 1);
         // North (0, *, -1) becomes east (1, *, 0); the vertical component stays.
         assertArrayEquals(new int[] {1, 1, 0}, unpack(turned[7]));
         assertEquals(COLOUR, turned[3]);
@@ -144,7 +144,7 @@ class ModelRetexturingTest {
         int[][] expected = {{1, 0, 0}, {0, 0, 1}, {-1, 0, 0}, {0, 0, -1}};
         int[] north = quad(new float[][] {{0.5f, 0.5f, 0.5f}}, new float[][] {{0, 0}}, pack(0, 0, -1));
         for (int turns = 1; turns <= 4; turns++) {
-            assertArrayEquals(expected[turns - 1], unpack(ModelRetexturing.rotateVerticesY(north, turns)[7]), "turns " + turns);
+            assertArrayEquals(expected[turns - 1], unpack(QuadVertices.rotateVerticesY(north, turns)[7]), "turns " + turns);
         }
     }
 
@@ -152,7 +152,7 @@ class ModelRetexturingTest {
     void rotateVerticesYNeverMutatesItsInput() {
         int[] vertices = quad(new float[][] {{0.2f, 0.3f, 0.4f}, {0.6f, 0.7f, 0.8f}}, new float[][] {{0, 0}, {1, 1}}, pack(0, 0, 1));
         int[] before = vertices.clone();
-        ModelRetexturing.rotateVerticesY(vertices, 3);
+        QuadVertices.rotateVerticesY(vertices, 3);
         assertArrayEquals(before, vertices);
     }
 
@@ -189,7 +189,7 @@ class ModelRetexturingTest {
                 int[] vertex = quad(new float[][] {{0.5f, 0.5f, 0.5f}}, new float[][] {{0, 0}},
                         pack(side.getStepX(), 0, side.getStepZ()));
                 Direction turned = VoxelShapeFactory.turn(side, turns);
-                int[] normal = unpack(ModelRetexturing.rotateVerticesY(vertex, turns)[7]);
+                int[] normal = unpack(QuadVertices.rotateVerticesY(vertex, turns)[7]);
                 assertArrayEquals(new int[] {turned.getStepX(), 0, turned.getStepZ()}, normal, side + " x" + turns);
             }
         }
@@ -243,7 +243,7 @@ class ModelRetexturingTest {
                     }
                     int[] scrambled = quad(positions, uvs, normal);
                     int[] before = scrambled.clone();
-                    int[] fixed = ModelRetexturing.rewind(scrambled, direction);
+                    int[] fixed = QuadVertices.rewind(scrambled, direction);
                     String what = direction + " shift " + shift + (reversed ? " reversed" : "");
                     assertArrayEquals(before, scrambled, what + ": input must not be mutated");
                     for (int i = 0; i < 4; i++) {
@@ -266,7 +266,7 @@ class ModelRetexturingTest {
             float[][] canonical = corners(direction, boundsFor(direction));
             float[][] uvs = {{0f, 0f}, {1f, 0f}, {1f, 1f}, {0f, 1f}};
             int[] ordered = quad(canonical, uvs, pack(0, 1, 0));
-            assertArrayEquals(ordered, ModelRetexturing.rewind(ordered, direction), direction.toString());
+            assertArrayEquals(ordered, QuadVertices.rewind(ordered, direction), direction.toString());
         }
     }
 }

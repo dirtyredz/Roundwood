@@ -77,11 +77,11 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 - `src/main/java/io/github/dirtyredz/roundwood/client/archway/` — the archway renderer, its baked frame, casing and item models, the placement preview (0.12.0)
 - `src/main/java/io/github/dirtyredz/roundwood/client/door/` — the door leaf renderer, the door trim renderer, the per-design casing models, the placement preview, appearance leaf models, leaf model names, targeting events, highlight, particles
 - `src/main/java/io/github/dirtyredz/roundwood/client/trim/` — the frame renderer, appearance quarter models (also used by the door trim), source model names
-- `src/main/java/io/github/dirtyredz/roundwood/client/window/` — the appearance-aware window blockstate/item model (frame, glass and beams; WindowBeamModels composition and WindowBeamCulling snapshot coverage), the restyled item-model cache, WindowBeamPreview and the placement preview/overlay
+- `src/main/java/io/github/dirtyredz/roundwood/client/window/` — the appearance-aware window blockstate/item model (frame, glass and beams; WindowBeamModels composition and WindowBeamCulling snapshot coverage), the directly typed item-model cache, WindowBeamPreview and the placement preview/overlay
 - `src/main/java/io/github/dirtyredz/roundwood/client/window/trim/` — the trim and sill block-entity renderer, its cached world models and the attachment look per slot and profile
 - `src/main/java/io/github/dirtyredz/roundwood/client/render/` — SurfaceQuadBaker shared by fitted beams and face trims; line drawing shared by the highlights and placement previews; baked pixel-mask slab models in a trim look (`PixelSlabModels`, 0.12.0: the arched door casing and the archways)
 - `src/main/java/io/github/dirtyredz/roundwood/client/item/` — NBT-aware item model overrides, `FamilyItemModels` (typed binding of each item kind to its wrapper), the attachment icons (Universal Trim, Arch Sill) per look
-- `src/main/java/io/github/dirtyredz/roundwood/client/material/` — donor sprites and colours, built-in wood and paint artwork bindings, masonry faces (thin mortar), the shared trim look resolver, quad retexturing, bounded model caches
+- `src/main/java/io/github/dirtyredz/roundwood/client/material/` — donor sprites and colours, built-in wood and paint artwork bindings, masonry faces (thin mortar), the shared trim look resolver, quad retexturing and raw vertex maths, bounded model caches
 - `src/main/java/io/github/dirtyredz/roundwood/client/camouflage/` — static corner renderer, cached corner models
 - `src/main/java/io/github/dirtyredz/roundwood/client/compat/emi/` — optional EMI adapter: alias removal and the appearance comparison key
 - `src/main/java/io/github/dirtyredz/roundwood/client/compat/jei/` — optional JEI adapter: subtypes, hidden aliases
@@ -160,7 +160,7 @@ item no longer imports `interaction`). `client/window` imports `block/door/selec
 for the placement preview (a refused projected-door hit shows nothing); `client/door` imports `block/door/selection` for the door placement preview. The door imports `client`
 only for
 `DoorParticles` (client-only call). Geometry, `CamouflageGeometry`, `DoorSwing`, the appearance
-rules and `ModelRetexturing`'s array arithmetic are plain enough for unit tests without a bootstrap.
+rules and `QuadVertices`' array arithmetic are plain enough for unit tests without a bootstrap.
 
 ## Structural notes
 
@@ -255,7 +255,7 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-aef47f84 done: `migration/` grouped under `conversion/` (seven entries), no-growth single-file folders folded, the per-family `appearance/` and `interaction/` pairs declared deliberate
 - dk-7279982a done: GameTest `block/door/` and `block/window/` grouped, tree diagram in Layout, one-file folders declared
 - dk-0dc49165 done in 0.11.0 (door sections grouped, family checks beside the sections, `ShowcaseSamples`)
-- dk-7fd38157 client tidy-ups; partly done (`client/item/FamilyItemModels` replaced the `wrapModels` ladder); left: `QuadVertices`, the door item tint, the camouflage LRU, `WindowItemModels`
+- dk-7fd38157 done: `QuadVertices` owns raw vertex maths; door tint belongs to DoorAppearanceModels; camouflage and window items use AppearanceModelCache directly; GeneralQuadModels shares unculled world model assembly.
 - dk-7abe21de done: `VoxelShapeFactory.turn` owns signed Direction quarter turns for model rotation and camouflage; the old datagen copy was already removed.
 - dk-75a60754 dependency direction (block -> client import, registry <-> migration cycle, trim item on frame concepts)
 - dk-4cf186bd done: `migration/block/LegacyAlias` supplies canonical block, historical appearance, conversion and queue identity; family conversions retain their distinct custody rules.

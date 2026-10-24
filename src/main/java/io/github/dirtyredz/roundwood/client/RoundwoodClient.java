@@ -1,13 +1,9 @@
 package io.github.dirtyredz.roundwood.client;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
-import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.client.archway.ArchwayRenderer;
-import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
-import io.github.dirtyredz.roundwood.client.camouflage.CamouflageModels;
 import io.github.dirtyredz.roundwood.client.door.DoorAppearanceModels;
 import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
 import io.github.dirtyredz.roundwood.client.door.RoundDoorRenderer;
@@ -32,7 +28,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
@@ -88,21 +83,11 @@ public final class RoundwoodClient {
     /** Door items in an unfamiliar wood tint their panel (tint index 0) with the donor colour; brass is never tinted. */
     @SubscribeEvent
     public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
-        List<Item> doors = Stream.concat(ModItems.all().stream(), LegacyContent.items().stream())
-                .filter(item -> item instanceof AppearanceDefaults family && family.appearanceFamily() == AppearanceFamily.DOOR)
-                .toList();
-        event.register((stack, tintIndex) -> {
-            if (tintIndex != DoorAppearanceModels.PANEL_TINT) {
-                return -1;
-            }
-            int tint = DoorAppearanceModels.look(AppearanceStacks.read(stack)).tint();
-            return tint < 0 ? -1 : tint;
-        }, doors.toArray(Item[]::new));
+        DoorAppearanceModels.registerItemColors(event);
     }
 
     @SubscribeEvent
     public static void onModelsBaked(ModelEvent.BakingCompleted event) {
-        CamouflageModels.clear();
         AppearanceModelCache.clearAll();
     }
 }

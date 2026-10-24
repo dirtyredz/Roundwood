@@ -1,5 +1,14 @@
 package io.github.dirtyredz.roundwood.client.door;
 
+import io.github.dirtyredz.roundwood.migration.LegacyContent;
+import io.github.dirtyredz.roundwood.registry.ModItems;
+import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
+import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.minecraft.world.item.Item;
+import java.util.stream.Stream;
+import java.util.List;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
@@ -47,6 +56,20 @@ public final class DoorAppearanceModels {
     private static final AppearanceModelCache<Key, BakedModel> MODELS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
 
     private DoorAppearanceModels() {
+    }
+
+    /** Door panel tint registration; brass remains untinted. */
+    public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
+        List<Item> doors = Stream.concat(ModItems.all().stream(), LegacyContent.items().stream())
+                .filter(item -> item instanceof AppearanceDefaults family && family.appearanceFamily() == AppearanceFamily.DOOR)
+                .toList();
+        event.register((stack, tintIndex) -> {
+            if (tintIndex != PANEL_TINT) {
+                return -1;
+            }
+            int tint = look(AppearanceStacks.read(stack)).tint();
+            return tint < 0 ? -1 : tint;
+        }, doors.toArray(Item[]::new));
     }
 
     public static Look look(Appearance appearance) {

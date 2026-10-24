@@ -71,7 +71,9 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
     }
 
     private static final AppearanceModelCache<Key, List<BakedQuad>> QUADS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
-    private static final WindowItemModels<BakedModel> ITEMS = new WindowItemModels<>(AppearanceModelCache.MODELS);
+    record ItemKey(BakedModel source, ResourceLocation wood, ResourceLocation glass, ResourceLocation beams) {}
+
+    private static final AppearanceModelCache<ItemKey, BakedModel> ITEMS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
 
     public WindowAppearanceModel(BakedModel original) {
         super(original);
@@ -131,13 +133,13 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
             var geometry = new WindowPaneState.Snapshot(retired.design(), pane.pose(state));
             var fitted = WindowBeamNbt.read(stack.getTagElement("BlockEntityTag")).trims()
                     .get(AttachmentFace.FRONT).orElse(appearance);
-            return ITEMS.get(oakItem, wood, glass, TrimLooks.beams(fitted).face(), source ->
-                    WindowBeamModels.item(source, WindowBeamModels.quads(geometry, wood, glass, fitted, java.util.Map.of()), DonorSprites.atlas(wood)));
+            return ITEMS.get(new ItemKey(oakItem, wood, glass, TrimLooks.beams(fitted).face()), key ->
+                    WindowBeamModels.item(key.source(), WindowBeamModels.quads(geometry, wood, glass, fitted, java.util.Map.of()), DonorSprites.atlas(wood)));
         }
         if (wood.equals(BuiltinWoodStyles.OAK_PLANKS) && glass.equals(GlassStyles.CLEAR)) {
             return oakItem;
         }
-        return ITEMS.get(oakItem, wood, glass, source -> ModelRetexturing.map(source,
+        return ITEMS.get(new ItemKey(oakItem, wood, glass, null), key -> ModelRetexturing.map(key.source(),
                 restyler(wood, glass), s -> s));
     }
 
