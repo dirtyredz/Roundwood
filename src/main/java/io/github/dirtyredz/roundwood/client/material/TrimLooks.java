@@ -32,28 +32,20 @@ public final class TrimLooks {
     /** Thin beams retain window plank/paint artwork; masonry uses the existing granular artwork. */
     public static Look beams(Appearance appearance) {
         ResourceLocation texture;
-        if (appearance.paint().isPresent()) texture = PaintStyles.windowPanel(appearance.paint().get());
-        else if (!appearance.isWood()) texture = MasonryMaterials.byBlock(appearance.material()).map(MasonryStyles::edge).orElse(BuiltinWoodStyles.OAK_PLANKS);
-        else texture = DonorSprites.sprite(appearance.material()).map(sprite -> sprite.contents().name()).orElse(BuiltinWoodStyles.OAK_PLANKS);
+        if (!appearance.isWood() && appearance.paint().isEmpty()) texture = MasonryMaterials.byBlock(appearance.material()).map(MasonryStyles::edge).orElse(BuiltinWoodStyles.OAK_PLANKS);
+        else texture = AppearanceLooks.planks(appearance);
         return new Look(false, texture, texture);
     }
 
     public static Look of(Appearance appearance, Function<MasonryMaterials.Material, ResourceLocation> masonryFace) {
-        if (appearance.paint().isPresent()) {
-            ResourceLocation panel = PaintStyles.doorPanel(appearance.paint().get());
-            return new Look(true, panel, panel);
-        }
-        if (!appearance.isWood()) {
+        if (!appearance.isWood() && appearance.paint().isEmpty()) {
             return MasonryMaterials.byBlock(appearance.material())
                     .map(m -> new Look(true, masonryFace.apply(m), MasonryStyles.edge(m)))
                     .orElse(OAK);
         }
-        Optional<BuiltinWoodStyles.Style> builtin = BuiltinWoodStyles.of(appearance.material());
-        if (builtin.isPresent()) {
-            return new Look(false, builtin.get().trimLog(), builtin.get().trimLog());
-        }
-        return DonorSprites.sprite(appearance.material())
-                .map(sprite -> new Look(false, sprite.contents().name(), sprite.contents().name()))
-                .orElse(OAK);
+        return AppearanceLooks.resolve(appearance,
+                dye -> { var panel = PaintStyles.doorPanel(dye); return new Look(true, panel, panel); },
+                style -> Optional.of(new Look(false, style.trimLog(), style.trimLog())),
+                sprite -> new Look(false, sprite.contents().name(), sprite.contents().name()), OAK);
     }
 }

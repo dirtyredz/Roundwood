@@ -249,7 +249,7 @@ The first full review found no correctness problems. The debt is tracked in Dock
 
 - dk-992020e6 done: one `Assembly` contract and shared lifecycle, anchors, placement and anchor persistence (the frame adopted it)
 - dk-ff89f8e5 done: `HeldTrimTool` classifies the acting hand for the three trim routers
-- dk-73e57897 look resolver duplicated across the door and window pane models (the trim part is shared since 0.9.0, `TrimLooks`)
+- dk-73e57897 done: `AppearanceLooks` owns paint / built-in artwork / donor / fallback precedence; callers retain their panel, plank, masonry and tint policies.
 - dk-3d456d06 done: `tools/structures/` owns the NBT writer, shared builder and independent historical fixtures; the entry script only writes their output
 - dk-1af2b67e done: responsibility groups `glass/` and `masonry/`, one streak mask, separate `trim-marker.mjs`; generated texture bytes unchanged.
 - dk-aef47f84 done: `migration/` grouped under `conversion/` (seven entries), no-growth single-file folders folded, the per-family `appearance/` and `interaction/` pairs declared deliberate

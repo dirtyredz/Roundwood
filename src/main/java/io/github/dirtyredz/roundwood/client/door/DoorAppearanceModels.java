@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.door;
 
+import io.github.dirtyredz.roundwood.client.material.AppearanceLooks;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
@@ -73,16 +74,11 @@ public final class DoorAppearanceModels {
     }
 
     public static Look look(Appearance appearance) {
-        if (appearance.paint().isPresent()) {
-            return new Look(PaintStyles.doorPanel(appearance.paint().get()), -1);
-        }
-        Optional<BuiltinWoodStyles.Style> builtin = BuiltinWoodStyles.of(appearance.material());
-        if (builtin.isPresent()) {
-            return new Look(builtin.get().doorPanel(), -1);
-        }
-        Optional<TextureAtlasSprite> donor = DonorSprites.sprite(appearance.material());
-        return donor.map(sprite -> new Look(BuiltinWoodStyles.NEUTRAL_DOOR_PANEL, DonorColors.tint(sprite)))
-                .orElse(new Look(BuiltinWoodStyles.OAK_DOOR_PANEL, -1));
+        return AppearanceLooks.resolve(appearance,
+                dye -> new Look(PaintStyles.doorPanel(dye), -1),
+                style -> Optional.of(new Look(style.doorPanel(), -1)),
+                sprite -> new Look(BuiltinWoodStyles.NEUTRAL_DOOR_PANEL, DonorColors.tint(sprite)),
+                new Look(BuiltinWoodStyles.OAK_DOOR_PANEL, -1));
     }
 
     /** The baked leaf of {@code design} for {@code hinge} in {@code look}. */

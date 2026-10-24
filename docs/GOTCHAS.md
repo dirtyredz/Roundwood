@@ -110,6 +110,10 @@
   an axe and need no pickaxe, nether-wood looks still burn as oak would.
 - **Same-block linking is broader since 0.5.0.** All round doors are one block, so vanilla hinge
   pairing and Double Doors join doors of different looks. No appearance-aware patch.
+- **Shared look resolution must retain resource-pack policy.** `AppearanceLooks` lets a built-in
+  mapping decline authored artwork: windows and beams still read the donor plank sprite, while doors
+  and perimeter trims use their panel/log bindings. Do not replace windows with hard-coded vanilla
+  sprite names during a resolver refactor.
 - **Unfamiliar woods on doors are a tint.** Doors in a non-vanilla wood show Roundwood's neutral
   full-height boards tinted with the donor plank's average colour, not the donor's pixels.
   Windows and trims show the donor's real plank texture (its north face; connected or layered

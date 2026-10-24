@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.window;
 
+import io.github.dirtyredz.roundwood.client.material.AppearanceLooks;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -20,7 +21,6 @@ import io.github.dirtyredz.roundwood.client.material.BuiltinWoodStyles;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
 import io.github.dirtyredz.roundwood.client.material.GlassStyles;
 import io.github.dirtyredz.roundwood.client.material.ModelRetexturing;
-import io.github.dirtyredz.roundwood.client.material.PaintStyles;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -81,11 +81,7 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
 
     /** The frame's artwork for {@code appearance}: its plank sprite, its paint, or oak when unavailable. */
     public static ResourceLocation wood(Appearance appearance) {
-        if (appearance.paint().isPresent()) {
-            return PaintStyles.windowPanel(appearance.paint().get());
-        }
-        return DonorSprites.sprite(appearance.material()).map(sprite -> sprite.contents().name())
-                .orElse(BuiltinWoodStyles.OAK_PLANKS);
+        return AppearanceLooks.planks(appearance);
     }
 
     @Override
