@@ -14,8 +14,8 @@ import net.minecraft.core.Direction;
 
 /**
  * Baked archway models in one look (0.12.0), all built from the design's frame mask
- * ({@link ArchwayDesign#inFrame}) by {@link PixelSlabModels}, so what is drawn is what collides and is
- * hit:
+ * ({@link ArchwayDesign#inFrame}) by {@link PixelSlabModels}, so what is drawn is what is hit
+ * (collision keeps only the lower jambs):
  * <ul>
  *     <li>{@link #body}: one cell's piece of the frame, full block deep, for {@link ArchwayRenderer};</li>
  *     <li>{@link #casing}: one cell's piece of a face's Universal Trim casing, one pixel proud;</li>

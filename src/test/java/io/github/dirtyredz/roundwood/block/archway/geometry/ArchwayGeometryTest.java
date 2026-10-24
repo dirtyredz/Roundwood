@@ -1,6 +1,9 @@
 package io.github.dirtyredz.roundwood.block.archway.geometry;
 
 import io.github.dirtyredz.roundwood.geometry.Box;
+import io.github.dirtyredz.roundwood.geometry.PixelSlab;
+import io.github.dirtyredz.roundwood.geometry.Surface;
+import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.core.Direction;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The archway profiles (0.12.0) against the proportions written out here independently: a 32 x 32
- * outer contour with straight jambs to y 16 under a radius-16 crown; the ordinary opening x 2..30 under
+ * square footprint filled outside the opening; the ordinary opening x 2..30 under
  * a radius-14 crown; the keyhole's shoulders stepping each side in by four pixels over eight, then a
  * twenty-pixel passage x 6..26 to the floor. Pixel-centre convention throughout.
  */
@@ -21,10 +24,6 @@ class ArchwayGeometryTest {
         double dx = u + 0.5 - cx;
         double dy = v + 0.5 - cy;
         return dx * dx + dy * dy <= r * r;
-    }
-
-    private static boolean outer(int u, int v) {
-        return u >= 0 && u < 32 && v >= 0 && (v < 16 || circle(16, 16, 16, u, v));
     }
 
     private static boolean ordinaryOpening(int u, int v) {
@@ -42,12 +41,12 @@ class ArchwayGeometryTest {
     }
 
     @Test
-    void framesAreTheOuterContourMinusTheOpening() {
+    void framesFillTheSquareFootprintOutsideTheUnchangedOpening() {
         for (int u = -2; u < 34; u++) {
             for (int v = -2; v < 34; v++) {
                 boolean in = u >= 0 && u < 32 && v >= 0 && v < 32;
-                assertEquals(in && outer(u, v) && !ordinaryOpening(u, v), ArchwayDesign.ORDINARY.inFrame(u, v), "ordinary " + u + "," + v);
-                assertEquals(in && outer(u, v) && !keyholeOpening(u, v), ArchwayDesign.KEYHOLE.inFrame(u, v), "keyhole " + u + "," + v);
+                assertEquals(in && !ordinaryOpening(u, v), ArchwayDesign.ORDINARY.inFrame(u, v), "ordinary " + u + "," + v);
+                assertEquals(in && !keyholeOpening(u, v), ArchwayDesign.KEYHOLE.inFrame(u, v), "keyhole " + u + "," + v);
                 assertEquals(ordinaryOpening(u, v), ArchwayDesign.ORDINARY.inOpening(u, v), "ordinary opening " + u + "," + v);
                 assertEquals(keyholeOpening(u, v), ArchwayDesign.KEYHOLE.inOpening(u, v), "keyhole opening " + u + "," + v);
             }
@@ -99,6 +98,34 @@ class ArchwayGeometryTest {
         for (int v = 16; v < 32; v++) {
             for (int u = 0; u < 32; u++) {
                 assertEquals(ArchwayDesign.ORDINARY.inFrame(u, v), ArchwayDesign.KEYHOLE.inFrame(u, v), u + "," + v);
+            }
+        }
+    }
+
+    @Test
+    void filledPixelsHaveFullDepthAndSingleVisibleFaces() {
+        for (ArchwayDesign design : ArchwayDesign.values()) {
+            for (int u = 0; u < 32; u++) {
+                for (int v = 0; v < 32; v++) {
+                    final double x = u + 0.5, y = v + 0.5;
+                    boolean opening = design == ArchwayDesign.ORDINARY
+                            ? ordinaryOpening(u, v) : keyholeOpening(u, v);
+                    long boxes = ArchwayGeometry.frame(design).stream().filter(b ->
+                            x > b.minX() && x < b.maxX() && y > b.minY() && y < b.maxY()
+                                    && b.minZ() == 0 && b.maxZ() == 16).count();
+                    assertEquals(opening ? 0 : 1, boxes, "full-depth fill without overlap");
+                    for (Direction side : List.of(Direction.NORTH, Direction.SOUTH)) {
+                        long faces = PixelSlab.cellFaces(design::inFrame, u / 16 * 16, v / 16 * 16,
+                                0, 16, "").stream().filter(f -> f.face() == side)
+                                .map(Surface::backing).filter(b -> x % 16 > b.minX() && x % 16 < b.maxX()
+                                        && y % 16 > b.minY() && y % 16 < b.maxY()).count();
+                        assertEquals(opening ? 0 : 1, faces, "one visible face, no z-fighting");
+                    }
+                }
+            }
+            for (Direction facing : List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST)) {
+                assertEquals(VoxelShapeFactory.rotate(ArchwayGeometry.frame(design),
+                        VoxelShapeFactory.quarterTurns(facing)), ArchwayGeometry.placed(design, facing));
             }
         }
     }

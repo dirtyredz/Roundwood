@@ -86,15 +86,15 @@ short animation; the knobs and straps do not collide.
 
 **Archway and Keyhole Archway** (0.12.0, one item places a 2 wide x 2 high static opening). A
 full-block-deep frame with an open passage: no leaf, glass, swing, camouflage or redstone. Both are
-32 x 32 pixels outside, straight outer jambs up to half height under a round (radius 16) crown.
+32 x 32 pixels outside, with filled square corners around the curved opening (0.13.2).
 - *Archway*: two-pixel jambs and crown; the passage is 28 pixels wide (1.75 blocks) under a radius-14
   crown.
 - *Keyhole Archway*: the same crown, but below the spring line each jamb steps in four pixels over
   eight (one pixel every two rows), leaving a 20-pixel (1.25 blocks) lower passage.
 - Walking through (0.13.1): only the lower jambs collide, and the crown never does, so the opening is
   clear to the full two blocks for a player and for tall mobs such as villagers and zombies (the 0.12.0
-  crown left 1.875 blocks, which a 1.95-block mob could not pass). The frame is drawn exactly as
-  before, and the crown is still targeted and outlined where you aim.
+  crown left 1.875 blocks, which a 1.95-block mob could not pass). The crown and filled upper corners
+  remain targetable and outlined where you aim, but do not collide.
 - Placement: an ordinary click; the cell you target (or the replaceable cell you click) becomes the
   **lower-left** cell seen from where you stand, and the archway extends one block to your right and
   one up, facing you (four facings, always upright, no hinge). All four cells must be empty or
@@ -103,7 +103,7 @@ full-block-deep frame with an open passage: no leaf, glass, swing, camouflage or
   Holding the item previews the frame outline (the real opening) and the four cells; nothing is
   drawn where placement would be refused. A refused or cancelled placement keeps the item and
   restores every cell.
-- You walk through the passage; the jambs and crown collide like a wall. Light and neighbours show
+- You walk through the passage; only the lower jambs collide. Light and neighbours show
   through.
 - Looks: any planks (stripped-log look, like the trims), any dye, or bricks, stone bricks, deepslate
   bricks or mud bricks, with brickwork that follows the contour (radial voussoirs with a keystone,

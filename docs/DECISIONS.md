@@ -2,6 +2,17 @@
 
 Newest first.
 
+## 2026-10-24 - Fill the archway footprint outside the opening (0.13.2)
+
+The ordinary and keyhole archways now fill the square 32 x 32 footprint outside their unchanged
+opening, at the full wall depth (z 0..16). The single frame mask drives selection, preview, oak
+item generation, styled items, body and proud face casings. Existing whole-face masonry artwork
+and wood/paint mapping extend into the corners; no overlapping corner panels are added.
+The 0.13.1 lower-jamb-only collision stays unchanged: making upper corners solid would remove
+previously walkable space, contrary to the requested clearance guarantee. Upper fill is therefore
+rendered and targetable but non-colliding, like the crown. Geometry tests pin every opening pixel,
+full-depth fill, preview rotation and the unchanged collision.
+
 ## 2026-10-23 - Windows never draw a junction pane (0.13.1, owner ruling dk-a970707d)
 
 Owner trial of 0.13.0 (screenshot 3): where a window met a neighbour at a corner or junction a thin

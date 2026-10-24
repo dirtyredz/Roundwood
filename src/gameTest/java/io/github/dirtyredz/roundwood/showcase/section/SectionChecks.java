@@ -126,6 +126,7 @@ public final class SectionChecks {
     /** One archway read back (complete, design, look, no trims) plus its sign; returns the cells it and its sign own. */
     private static Set<BlockPos> archway(ServerLevel level, ShowcaseFrame frame, ArchwayDesign design, int r, int f, Appearance look,
                                          String label) {
+        check(design.inFrame(0, 31) && design.inFrame(31, 31), "archway corners must be filled");
         String what = design + " archway (" + look.key() + ") r " + r;
         ArchwayLayout.Assembly assembly = new ArchwayLayout.Assembly(frame.pos(r, 0, f), frame.forward(), design);
         check(assembly.complete(level, ModBlocks.archway(design)), what + ": missing or incomplete");

@@ -68,9 +68,9 @@ public final class PiecesSection implements ShowcaseSection {
         canvas.door(oak, ROUND_DOOR_R, F, DoorHingeSide.LEFT, false);
         canvas.sign(ARCHED_DOOR_R, F, "Arched door");
         canvas.door(ModBlocks.archedDoor(), oak, ARCHED_DOOR_R, F, DoorHingeSide.LEFT, false);
-        canvas.sign(ARCHWAY_R, F, "Archway");
+        canvas.sign(ARCHWAY_R, F, "Archway", "Filled corners");
         canvas.archway(ModBlocks.archway(ArchwayDesign.ORDINARY), oak, FaceTrims.NONE, ARCHWAY_R, F);
-        canvas.sign(KEYHOLE_R, F, "Keyhole archway");
+        canvas.sign(KEYHOLE_R, F, "Keyhole archway", "Filled corners");
         canvas.archway(ModBlocks.archway(ArchwayDesign.KEYHOLE), oak, FaceTrims.NONE, KEYHOLE_R, F);
     }
 }

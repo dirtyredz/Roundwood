@@ -18,6 +18,9 @@
   Clearing the outer list or switching capture off would break the enclosing transaction.
   `AssemblyPlacementGameTests` guards it.
 
+- **Archway upper corners are filled but do not collide (0.13.2).** Keep the square frame mask
+  shared by body, casing, item and preview; keep collision lower-jamb-only to preserve 0.13.1
+  headroom. Do not add separate overlapping corner panels.
 - **An archway's loot holds two trim-family items.** The archway and its Universal Trims are both
   TRIM family, so `AppearanceDrops.decorate(drops, family, look)` would stamp the archway's look on
   the trims; the archway decorates by item. `ArchwayTrimGameTests` guards it.

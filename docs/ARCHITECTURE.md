@@ -202,7 +202,7 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   compatibility frame; the lower-left cell carries `ArchwayBlockEntity` (type `archway`) with the look
   (appearance family TRIM: wood, paint, the four masonry) and the `ArchwayTrim` payload. No swing,
   glass, camouflage or redstone. It imports `block/attachment` and `block/assembly` only.
-- **Profiles.** `geometry/ArchwayDesign` is a 32 x 32 pixel mask: outer `ArchedProfile(0, 32, 16)`
+- **Profiles.** `geometry/ArchwayDesign` is a 32 x 32 pixel mask: square footprint (filled corners since 0.13.2)
   minus the opening, `ArchedProfile(2, 30, 16)` for the ordinary archway and, for the keyhole,
   `KeyholeGeometry` (the same crown above y 16; below it the edges move in linearly by 4 px over 8 px,
   then x 6..26 to the floor; pixel centres decide). `ArchwayGeometry` rasterises it once, extruded the
