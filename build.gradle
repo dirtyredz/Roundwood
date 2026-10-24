@@ -168,6 +168,9 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
+// doFirst actions prepend: register world settings before cleanup so deletion executes first.
+apply from: 'gradle/gametest-world.gradle'
+
 // Every GameTest run starts from a fresh world: the server saves its world under run/gametest, and
 // item entities or villagers saved by an earlier run load into later tests' areas a few ticks in.
 tasks.matching { it.name == 'runGameTestServer' }.configureEach {

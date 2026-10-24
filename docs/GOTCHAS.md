@@ -239,10 +239,15 @@
   blockstate is one `""` variant so any injected property resolves, and teardown restores any fluid
   in a cleared cell. Never use `registerDefaultState(stateDefinition.any())` in `RoundDoorBlock`;
   extend `defaultBlockState()`.
-- **Villager walk GameTests are intermittent**, more so with the pack mods (Dramatic Doors replaces
-  villager core brain tasks): one walk failed in 1 of 3 plain runs and in 1 of 2 pack runs on 0.2.0,
-  and also failed on 0.1.0 with the pack mods. A rerun passes; do not read a single failure as a
-  regression without a second run.
+- **GameTest defaults generate normal terrain, putting plots in caves.** Falling gravel, flowing
+  water/lava and cave mobs can disrupt unrelated tests; this caused Herbal Witch's flakes and is
+  the suspected cause of Roundwood's assembly/migration flakes (dk-2abfb2b9, dk-79af4223), pending
+  clean ANU runs. A passing rerun alone does not settle them. `gradle/gametest-world.gradle`
+  writes superflat, structure-free server settings before launch; keep it byte-identical to Herbal
+  Witch. The existing world deletion runs first so the new generator settings take effect.
+  Test-only `environment/TestWorldGameTests` disables `doMobSpawning` at server startup and asserts
+  flat generation, no structures and no natural spawning. Server spawn properties alone are not
+  enough: the GameTest server retains always-on spawn flags. Tests explicitly spawn their own mobs.
 - **MineColonies (1.1.452) opens non-vanilla doors with `setOpen`** and treats any `DoorBlock` as
   passable for citizens. Our `setOpen` moves the whole assembly. Not in the GameTest runtime.
 - **Vanilla villagers sometimes leave doors open.** `InteractWithDoor` forgets a door it has moved

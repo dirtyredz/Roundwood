@@ -1,0 +1,19 @@
+// Every GameTest JVM (runGameTestServer and the qualification phases) is a Forge dedicated server, and a
+// dedicated server creates its world from server.properties. Without one it generates normal terrain, so the
+// plots at y = -60 sit in caves: gravel falls into them, water and lava flow in, and cave mobs walk through.
+// A superflat world with no natural spawning or structures gives each plot only what its test builds.
+// Only a new world reads these settings; an existing world (a save-upgrade fixture) keeps its own generator.
+ext.gameTestWorld = { File dir ->
+    dir.mkdirs()
+    new File(dir, 'server.properties').text = [
+            'level-type=minecraft\\:flat',
+            'generate-structures=false',
+            'spawn-monsters=false',
+            'spawn-animals=false',
+            'spawn-npcs=false',
+    ].join('\n') + '\n'
+}
+tasks.matching { it.name == 'runGameTestServer' }.configureEach { task ->
+    // The run configuration owns the working directory; the task only adopts it when it executes.
+    task.doFirst { gameTestWorld(file(minecraft.runs.gameTestServer.workingDirectory)) }
+}
