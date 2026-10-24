@@ -24,6 +24,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.click;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
+import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeOakDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.rel;
 
@@ -44,9 +45,7 @@ public final class DoorInteractionGameTests {
     /** Places an oak assembly facing north at {@link #ANCHOR} with the given hinge. */
     static DoorLayout.Assembly place(GameTestHelper helper, String name, DoorHingeSide hinge) {
         floor(helper);
-        ServerPlayer player = player(helper, name, GameType.SURVIVAL, Direction.NORTH);
-        check(placeDoor(helper, player, oakDoor().asItem(), ANCHOR, hinge).consumesAction(), "placement failed");
-        return assembly(helper, ANCHOR, Direction.NORTH, hinge);
+        return placeOakDoor(helper, ANCHOR, Direction.NORTH, hinge, name);
     }
 
     @GameTest(template = TEMPLATE)

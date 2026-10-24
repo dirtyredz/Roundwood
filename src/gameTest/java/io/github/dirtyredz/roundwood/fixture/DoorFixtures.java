@@ -70,6 +70,14 @@ public final class DoorFixtures {
         return ModBlocks.roundDoor();
     }
 
+    /** Places the canonical oak door at a relative anchor using a named survival player. Floor setup stays with the test. */
+    public static DoorLayout.Assembly placeOakDoor(GameTestHelper helper, BlockPos anchor, Direction facing,
+                                                   DoorHingeSide hinge, String name) {
+        ServerPlayer placer = player(helper, name, GameType.SURVIVAL, facing);
+        check(placeDoor(helper, placer, oakDoor().asItem(), anchor, hinge).consumesAction(), name + ": placement failed");
+        return assembly(helper, anchor, facing, hinge);
+    }
+
     /** One {@code item} carrying {@code appearance}. */
     public static ItemStack styled(ItemLike item, Appearance appearance) {
         return AppearanceStacks.create(item.asItem(), appearance);

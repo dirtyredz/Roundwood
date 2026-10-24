@@ -34,11 +34,10 @@ import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.pick;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.use;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.anchorEntity;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assembly;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
+import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeOakDoor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.rel;
 
@@ -58,9 +57,7 @@ public final class DoorAppearanceGameTests {
     }
 
     private static DoorLayout.Assembly place(GameTestHelper helper, Direction facing, DoorHingeSide hinge, String name) {
-        ServerPlayer placer = player(helper, name + "_placer", GameType.SURVIVAL, facing);
-        check(placeDoor(helper, placer, oakDoor().asItem(), ANCHOR, hinge).consumesAction(), name + ": placement failed");
-        return assembly(helper, ANCHOR, facing, hinge);
+        return placeOakDoor(helper, ANCHOR, facing, hinge, name + "_placer");
     }
 
     private static boolean open(GameTestHelper helper, DoorLayout.Assembly door) {
