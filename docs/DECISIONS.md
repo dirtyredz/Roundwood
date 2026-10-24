@@ -2,6 +2,21 @@
 
 Newest first.
 
+## 2026-10-24 - Neutral ring rendering and the Forge particle boundary (dk-75a60754)
+
+RingGeometry owns the ring profile, source depth, cell geometry and Quarter identity (historical
+serialized names and enum order unchanged). RingModels and RingModelNames live in client/render;
+frame and attached-door renderers share them without importing one another. Source model IDs stay
+round_trim_* so generated assets and resource packs remain compatible. Block-entity valid sets read
+the shared deferred block register after registration, including frozen and crossed aliases; the
+registry adapter no longer imports LegacyContent or CrossWindowCompatibility.
+
+The particle subtask was already implemented: DoorParticles implements IClientBlockExtensions and
+AssemblyDoorBlock references it only in initializeClient. The installed Forge 47.4.10 sources name
+Block.initializeClient(Consumer) as the extension hook, called only when Dist.CLIENT and not datagen;
+IClientBlockExtensions.of reads that block's render properties. Retain this explicit client-only bridge instead of relocating code, reflecting a
+class name or inventing a global registration hook. Revisit if the supported Forge API changes.
+
 ## 2026-10-24 - Share alias dispatch, retain conversion custody (dk-4cf186bd)
 
 The three frozen aliases implement LegacyAlias, so discovery, conversion dispatch and queue identity

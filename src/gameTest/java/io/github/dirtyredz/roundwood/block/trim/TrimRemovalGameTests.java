@@ -5,7 +5,7 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -85,7 +85,7 @@ public final class TrimRemovalGameTests {
     @GameTest(template = TEMPLATE)
     public static void survivalBreakOfAnyQuarterDropsOneOakFrame(GameTestHelper helper) {
         floor(helper);
-        for (TrimPart part : TrimPart.values()) {
+        for (Quarter part : Quarter.values()) {
             TrimLayout.Assembly assembly = place(helper, oakTrim(), "oak_survival_" + part);
             ServerPlayer breaker = player(helper, "oak_survival_breaker", GameType.SURVIVAL, Direction.NORTH);
             check(breaker.gameMode.destroyBlock(assembly.pos(part)), part + ": break refused");
@@ -102,7 +102,7 @@ public final class TrimRemovalGameTests {
      */
     @GameTest(template = TEMPLATE)
     public static void masonryLookDropsWithAnyToolKeepingItsLook(GameTestHelper helper) {
-        for (TrimPart part : TrimPart.values()) {
+        for (Quarter part : Quarter.values()) {
             for (ItemStack tool : new ItemStack[] {new ItemStack(Items.IRON_PICKAXE), ItemStack.EMPTY}) {
                 TrimLayout.Assembly assembly = placeBrick(helper, "brick_" + part);
                 ServerPlayer breaker = player(helper, "brick_breaker", GameType.SURVIVAL, Direction.NORTH);
@@ -121,7 +121,7 @@ public final class TrimRemovalGameTests {
     public static void creativeBreakOfAnyQuarterDropsNothing(GameTestHelper helper) {
         floor(helper);
         for (boolean brick : new boolean[] {false, true}) {
-            for (TrimPart part : TrimPart.values()) {
+            for (Quarter part : Quarter.values()) {
                 TrimLayout.Assembly assembly = brick ? placeBrick(helper, "creative_" + part) : place(helper, oakTrim(), "creative_" + part);
                 ServerPlayer breaker = player(helper, "creative_breaker", GameType.CREATIVE, Direction.NORTH);
                 check(breaker.gameMode.destroyBlock(assembly.pos(part)), part + ": break refused");
@@ -149,7 +149,7 @@ public final class TrimRemovalGameTests {
     public static void explosionYieldsAtMostOneFrame(GameTestHelper helper) {
         floor(helper);
         TrimLayout.Assembly assembly = place(helper, oakTrim(), "explosion");
-        BlockPos lower = assembly.pos(TrimPart.LOWER_LEFT);
+        BlockPos lower = assembly.pos(Quarter.LOWER_LEFT);
         helper.getLevel().explode(null, lower.getX() + 1.0, lower.getY() + 1.0, lower.getZ() + 0.5, 2F, Level.ExplosionInteraction.TNT);
         assertNoTrim(helper, assembly);
         check(dropped(helper, oakTrim().asItem()) <= 1, "explosion dropped " + dropped(helper, oakTrim().asItem()));
@@ -160,7 +160,7 @@ public final class TrimRemovalGameTests {
     public static void replacementAndFireCleanupDropNothing(GameTestHelper helper) {
         floor(helper);
         TrimLayout.Assembly assembly = place(helper, oakTrim(), "replace");
-        BlockPos upperLeft = rel(helper, assembly.pos(TrimPart.UPPER_LEFT));
+        BlockPos upperLeft = rel(helper, assembly.pos(Quarter.UPPER_LEFT));
         helper.setBlock(upperLeft, Blocks.STONE);
         assertNoTrim(helper, assembly);
         check(helper.getBlockState(upperLeft).is(Blocks.STONE), "the replacing block was removed");
@@ -168,12 +168,12 @@ public final class TrimRemovalGameTests {
         helper.setBlock(upperLeft, Blocks.AIR);
 
         assembly = place(helper, oakTrim(), "fire_burn");
-        helper.getLevel().removeBlock(assembly.pos(TrimPart.LOWER_RIGHT), false); // what fire burning a block away does
+        helper.getLevel().removeBlock(assembly.pos(Quarter.LOWER_RIGHT), false); // what fire burning a block away does
         assertNoTrim(helper, assembly);
         check(dropped(helper, oakTrim().asItem()) == 0, "removeBlock dropped " + dropped(helper, oakTrim().asItem()));
 
         assembly = place(helper, oakTrim(), "fire_place");
-        helper.setBlock(rel(helper, assembly.pos(TrimPart.UPPER_RIGHT)), Blocks.FIRE);
+        helper.setBlock(rel(helper, assembly.pos(Quarter.UPPER_RIGHT)), Blocks.FIRE);
         assertNoTrim(helper, assembly);
         check(dropped(helper, oakTrim().asItem()) == 0, "fire replacing a quarter dropped " + dropped(helper, oakTrim().asItem()));
         helper.succeed();
@@ -188,7 +188,7 @@ public final class TrimRemovalGameTests {
         try {
             TrimLayout.Assembly assembly = place(helper, oakTrim(), "tiledrops");
             ServerPlayer breaker = player(helper, "tiledrops_breaker", GameType.SURVIVAL, Direction.NORTH);
-            breaker.gameMode.destroyBlock(assembly.pos(TrimPart.UPPER_RIGHT));
+            breaker.gameMode.destroyBlock(assembly.pos(Quarter.UPPER_RIGHT));
             assertNoTrim(helper, assembly);
             check(dropped(helper, oakTrim().asItem()) == 0, "doTileDrops=false still dropped");
         } finally {
@@ -202,7 +202,7 @@ public final class TrimRemovalGameTests {
         floor(helper);
         TrimLayout.Assembly assembly = place(helper, oakTrim(), "piston");
         // A piston behind the lower-left cell pushing south into it.
-        BlockPos piston = rel(helper, assembly.pos(TrimPart.LOWER_LEFT)).north();
+        BlockPos piston = rel(helper, assembly.pos(Quarter.LOWER_LEFT)).north();
         helper.setBlock(piston, Blocks.PISTON.defaultBlockState().setValue(DirectionalBlock.FACING, Direction.SOUTH));
         helper.setBlock(piston.north(), Blocks.REDSTONE_BLOCK);
         helper.runAfterDelay(4, () -> {
@@ -228,7 +228,7 @@ public final class TrimRemovalGameTests {
     public static void breakingAFittedFrameLeavesTheCamouflagedDoor(GameTestHelper helper) {
         DoorLayout.Assembly door = doorWithCamouflage(helper, "fitted_break");
         TrimLayout.Assembly frame = fittedTo(door);
-        for (TrimPart part : TrimPart.values()) {
+        for (Quarter part : Quarter.values()) {
             ServerPlayer fitter = player(helper, "fitted_break_fitter", GameType.SURVIVAL, Direction.NORTH);
             check(fitToDoor(helper, fitter, new ItemStack(oakTrim()), door, 0.5, 0.5).consumesAction(), part + ": fitting failed");
             assertTrim(helper, frame, oakTrim());

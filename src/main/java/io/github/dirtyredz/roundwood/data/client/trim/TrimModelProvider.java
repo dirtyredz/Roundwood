@@ -1,9 +1,9 @@
 package io.github.dirtyredz.roundwood.data.client.trim;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
-import io.github.dirtyredz.roundwood.block.trim.geometry.TrimGeometry;
-import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry;
+import io.github.dirtyredz.roundwood.client.render.RingModelNames;
 import io.github.dirtyredz.roundwood.data.client.door.DoorModelProvider;
 import io.github.dirtyredz.roundwood.data.client.GeometryModelWriter;
 import io.github.dirtyredz.roundwood.geometry.AssemblyFaceUv;
@@ -29,7 +29,7 @@ import java.util.List;
  * masonry: one image across the whole ring, so radial brick joints and painted boards continue
  * across the quarters, {@link AssemblyFaceUv}). Front and back use {@code #face}, the ring's sides
  * {@code #edge}; faces where two quarters meet are buried and omitted. The source quarters
- * ({@link TrimModelNames}) bind oak; the client retextures and turns them per appearance and facing.
+ * ({@link RingModelNames}) bind oak; the client retextures and turns them per appearance and facing.
  */
 public class TrimModelProvider extends BlockStateProvider {
     public static final String TEMPLATE = "template_round_trim_";
@@ -69,19 +69,19 @@ public class TrimModelProvider extends BlockStateProvider {
 
             @Override
             public String texture(Piece piece, Direction face) {
-                return face.getAxis() == Direction.Axis.Z ? TrimGeometry.FACE : TrimGeometry.EDGE;
+                return face.getAxis() == Direction.Axis.Z ? RingGeometry.FACE : RingGeometry.EDGE;
             }
 
             @Override
             public float[] uv(Piece piece, Box part, Direction face) {
-                return whole ? AssemblyFaceUv.of(part.translate(16 * column, 16 * row, 0), face, TrimGeometry.OUTER) : null;
+                return whole ? AssemblyFaceUv.of(part.translate(16 * column, 16 * row, 0), face, RingGeometry.OUTER) : null;
             }
         };
     }
 
     @Override
     protected void registerStatesAndModels() {
-        for (TrimPart part : TrimPart.values()) {
+        for (Quarter part : Quarter.values()) {
             source(part, template(TEMPLATE, part, false), false);
             source(part, template(WHOLE_TEMPLATE, part, true), true);
         }
@@ -90,22 +90,22 @@ public class TrimModelProvider extends BlockStateProvider {
 
     /** The empty world model every trim state (canonical and alias) uses. */
     private ModelFile worldModel() {
-        return models().getBuilder(TrimModelNames.TRIM_ID).texture("particle", OAK_LOG);
+        return models().getBuilder(RingModelNames.TRIM_ID).texture("particle", OAK_LOG);
     }
 
-    private void source(TrimPart part, BlockModelBuilder template, boolean whole) {
+    private void source(Quarter part, BlockModelBuilder template, boolean whole) {
         String texture = whole ? OAK_PANEL : OAK_LOG;
-        models().getBuilder(TrimModelNames.quarter(part, whole)).parent(template)
-                .texture(TrimGeometry.FACE, texture)
-                .texture(TrimGeometry.EDGE, texture)
+        models().getBuilder(RingModelNames.quarter(part, whole)).parent(template)
+                .texture(RingGeometry.FACE, texture)
+                .texture(RingGeometry.EDGE, texture)
                 .texture("particle", texture);
     }
 
-    private BlockModelBuilder template(String prefix, TrimPart part, boolean whole) {
+    private BlockModelBuilder template(String prefix, Quarter part, boolean whole) {
         BlockModelBuilder builder = models().getBuilder(prefix + part.getSerializedName());
-        builder.texture("particle", "#" + TrimGeometry.EDGE);
-        List<Piece> pieces = TrimGeometry.quarter(part.column, part.row).stream()
-                .map(box -> new Piece(box, TrimGeometry.FACE)).toList();
+        builder.texture("particle", "#" + RingGeometry.EDGE);
+        List<Piece> pieces = RingGeometry.quarter(part.column, part.row).stream()
+                .map(box -> new Piece(box, RingGeometry.FACE)).toList();
         return GeometryModelWriter.addPieces(builder, pieces, true, style(whole, part.column, part.row));
     }
 }

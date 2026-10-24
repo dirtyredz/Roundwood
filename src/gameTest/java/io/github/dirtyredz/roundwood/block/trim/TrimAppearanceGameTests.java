@@ -5,7 +5,7 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -176,7 +176,7 @@ public final class TrimAppearanceGameTests {
             check(use(helper, player, stack, ItemStack.EMPTY, hit, true).consumesAction(), "quarter " + i + " was not handled");
             expect(helper, trim, looks[i], "quarter " + i);
             int stored = 0;
-            for (TrimPart part : TrimPart.values()) {
+            for (Quarter part : Quarter.values()) {
                 if (helper.getLevel().getBlockEntity(trim.pos(part)) instanceof RoundTrimBlockEntity entity
                         && !entity.appearance().equals(Appearance.DEFAULT)) {
                     stored++;
@@ -212,7 +212,7 @@ public final class TrimAppearanceGameTests {
         use(helper, player, new ItemStack(Items.CYAN_DYE), ItemStack.EMPTY, side(trim), false);
         Appearance look = SPRUCE.painted(DyeColor.CYAN);
         expect(helper, trim, look, "setup");
-        for (TrimPart part : TrimPart.values()) {
+        for (Quarter part : Quarter.values()) {
             ItemStack picked = pick(helper, trim.pos(part));
             check(picked.is(ModItems.ROUND_TRIM.get()), part + ": picked " + picked);
             check(AppearanceStacks.read(picked).equals(look), part + ": picked look " + AppearanceStacks.read(picked).key());

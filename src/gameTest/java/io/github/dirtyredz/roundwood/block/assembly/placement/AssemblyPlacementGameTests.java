@@ -15,7 +15,7 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
 import io.github.dirtyredz.roundwood.fixture.ArchwayFixtures;
 import io.github.dirtyredz.roundwood.fixture.DoorFixtures;
@@ -202,7 +202,7 @@ public final class AssemblyPlacementGameTests {
         check(placed, "frame: refused");
         check(effects.isEmpty(), "frame: effects " + effects);
         check(look(helper, anchor).equals(LOOK.toString()), "frame: the look was not installed");
-        for (TrimPart part : TrimPart.values()) {
+        for (Quarter part : Quarter.values()) {
             check(helper.getLevel().getBlockState(frame.pos(part)).equals(frame.stateFor(part, TrimFixtures.oakTrim())),
                     "frame: " + part + " is not its layout state");
         }

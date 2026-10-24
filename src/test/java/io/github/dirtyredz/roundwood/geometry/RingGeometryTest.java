@@ -1,6 +1,5 @@
-package io.github.dirtyredz.roundwood.block.trim.geometry;
+package io.github.dirtyredz.roundwood.geometry;
 
-import io.github.dirtyredz.roundwood.geometry.Box;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -11,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** The round frame ring: an exact 32-over-28 pixel annulus, one pixel deep, split into four cell quarters. */
-class TrimGeometryTest {
+class RingGeometryTest {
     private static final double EPS = 1e-9;
 
     /** Per-pixel coverage count of the boxes in the 32 x 32 plane. */
@@ -38,7 +37,7 @@ class TrimGeometryTest {
         List<Box> all = new ArrayList<>();
         for (int column = 0; column < 2; column++) {
             for (int row = 0; row < 2; row++) {
-                for (Box box : TrimGeometry.quarter(column, row)) {
+                for (Box box : RingGeometry.quarter(column, row)) {
                     all.add(box.translate(16 * column, 16 * row, 0));
                 }
             }
@@ -48,7 +47,7 @@ class TrimGeometryTest {
 
     @Test
     void ringMaskIsExactlyTheDiscMinusTheInnerDisc() {
-        int[][] grid = coverage(TrimGeometry.ring());
+        int[][] grid = coverage(RingGeometry.ring());
         for (int u = 0; u < 32; u++) {
             for (int v = 0; v < 32; v++) {
                 boolean expected = insideDisc(u, v, 32) && !insideDisc(u, v, 28);
@@ -59,9 +58,9 @@ class TrimGeometryTest {
 
     @Test
     void everyRingBoxIsOnePixelDeepAtTheBack() {
-        assertEquals(0, TrimGeometry.BACK, EPS);
-        assertEquals(1, TrimGeometry.FRONT, EPS);
-        for (Box box : TrimGeometry.ring()) {
+        assertEquals(0, RingGeometry.BACK, EPS);
+        assertEquals(1, RingGeometry.FRONT, EPS);
+        for (Box box : RingGeometry.ring()) {
             assertEquals(0, box.minZ(), EPS, "min z: " + box);
             assertEquals(1, box.maxZ(), EPS, "max z: " + box);
             assertTrue(box.within(new Box(0, 0, 0, 32, 32, 1)), "outside the assembly: " + box);
@@ -70,7 +69,7 @@ class TrimGeometryTest {
 
     @Test
     void theApertureIsOpen() {
-        int[][] grid = coverage(TrimGeometry.ring());
+        int[][] grid = coverage(RingGeometry.ring());
         assertEquals(0, grid[16][16], "centre pixel");
         for (int u = 0; u < 32; u++) {
             for (int v = 0; v < 32; v++) {
@@ -86,16 +85,16 @@ class TrimGeometryTest {
         double total = 0;
         for (int column = 0; column < 2; column++) {
             for (int row = 0; row < 2; row++) {
-                for (Box box : TrimGeometry.quarter(column, row)) {
+                for (Box box : RingGeometry.quarter(column, row)) {
                     assertTrue(box.within(new Box(0, 0, 0, 16, 16, 1)), "quarter box outside its cell: " + box);
                     total += box.volume();
                 }
             }
         }
-        double ring = TrimGeometry.ring().stream().mapToDouble(Box::volume).sum();
+        double ring = RingGeometry.ring().stream().mapToDouble(Box::volume).sum();
         assertEquals(ring, total, EPS, "quarters must add up to the ring");
         int[][] grid = coverage(quartersInAssembly());
-        int[][] whole = coverage(TrimGeometry.ring());
+        int[][] whole = coverage(RingGeometry.ring());
         for (int u = 0; u < 32; u++) {
             for (int v = 0; v < 32; v++) {
                 assertEquals(whole[u][v], grid[u][v], "quarter union differs at " + u + "," + v);
@@ -106,22 +105,22 @@ class TrimGeometryTest {
 
     @Test
     void inRingAgreesWithBoxCoverage() {
-        int[][] grid = coverage(TrimGeometry.ring());
+        int[][] grid = coverage(RingGeometry.ring());
         for (int u = 0; u < 32; u++) {
             for (int v = 0; v < 32; v++) {
-                assertEquals(grid[u][v] == 1, TrimGeometry.inRing(u, v), "inRing at " + u + "," + v);
+                assertEquals(grid[u][v] == 1, RingGeometry.inRing(u, v), "inRing at " + u + "," + v);
             }
         }
-        assertFalse(TrimGeometry.inRing(16, 16));
+        assertFalse(RingGeometry.inRing(16, 16));
     }
 
     @Test
     void theRingTouchesAllFourOuterEdges() {
-        List<Box> ring = TrimGeometry.ring();
+        List<Box> ring = RingGeometry.ring();
         assertEquals(0, ring.stream().mapToDouble(Box::minX).min().orElseThrow(), EPS, "x = 0");
         assertEquals(32, ring.stream().mapToDouble(Box::maxX).max().orElseThrow(), EPS, "x = 32");
         assertEquals(0, ring.stream().mapToDouble(Box::minY).min().orElseThrow(), EPS, "y = 0");
         assertEquals(32, ring.stream().mapToDouble(Box::maxY).max().orElseThrow(), EPS, "y = 32");
-        assertEquals(2, TrimGeometry.WIDTH);
+        assertEquals(2, RingGeometry.WIDTH);
     }
 }

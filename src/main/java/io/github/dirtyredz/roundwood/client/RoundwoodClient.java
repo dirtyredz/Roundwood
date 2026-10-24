@@ -3,14 +3,14 @@ package io.github.dirtyredz.roundwood.client;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.client.archway.ArchwayRenderer;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.client.door.DoorAppearanceModels;
 import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
 import io.github.dirtyredz.roundwood.client.door.RoundDoorRenderer;
 import io.github.dirtyredz.roundwood.client.item.FamilyItemModels;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.trim.RoundTrimRenderer;
-import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
+import io.github.dirtyredz.roundwood.client.render.RingModelNames;
 import io.github.dirtyredz.roundwood.client.window.WindowAppearanceModel;
 import io.github.dirtyredz.roundwood.client.window.trim.WindowTrimRenderer;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
@@ -59,9 +59,9 @@ public final class RoundwoodClient {
                 event.register(DoorLeafModels.location(design, hinge));
             }
         }
-        for (TrimPart part : TrimPart.values()) {
-            event.register(TrimModelNames.quarterLocation(part, false));
-            event.register(TrimModelNames.quarterLocation(part, true));
+        for (Quarter part : Quarter.values()) {
+            event.register(RingModelNames.quarterLocation(part, false));
+            event.register(RingModelNames.quarterLocation(part, true));
         }
     }
 

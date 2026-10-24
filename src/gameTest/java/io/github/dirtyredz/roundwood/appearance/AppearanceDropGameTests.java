@@ -6,7 +6,7 @@ import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
@@ -108,7 +108,7 @@ public final class AppearanceDropGameTests {
     public static void survivalHarvestOfAnyTrimQuarterKeepsTheLook(GameTestHelper helper) {
         floor(helper);
         Appearance look = Appearance.masonry(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("minecraft", "deepslate_bricks"));
-        for (TrimPart part : TrimPart.values()) {
+        for (Quarter part : Quarter.values()) {
             TrimLayout.Assembly trim = trim(helper, look, "trim_harvest_" + part);
             ServerPlayer breaker = player(helper, "trim_harvest_breaker", GameType.SURVIVAL, Direction.NORTH);
             check(breaker.gameMode.destroyBlock(trim.pos(part)), part + ": break refused");

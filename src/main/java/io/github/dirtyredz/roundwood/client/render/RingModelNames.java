@@ -1,7 +1,7 @@
-package io.github.dirtyredz.roundwood.client.trim;
+package io.github.dirtyredz.roundwood.client.render;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -12,18 +12,18 @@ import net.minecraft.resources.ResourceLocation;
  * and turns them per appearance. (The 0.8.0 whole-ring item model is gone: the {@code round_trim}
  * item is the Universal Trim's square icon since 0.9.0.)
  */
-public final class TrimModelNames {
+public final class RingModelNames {
     public static final String TRIM_ID = "round_trim";
 
-    private TrimModelNames() {
+    private RingModelNames() {
     }
 
     /** Model path (without namespace) of a quarter. */
-    public static String quarter(TrimPart part, boolean whole) {
+    public static String quarter(Quarter part, boolean whole) {
         return "block/" + TRIM_ID + (whole ? "_whole_" : "_") + part.getSerializedName();
     }
 
-    public static ResourceLocation quarterLocation(TrimPart part, boolean whole) {
+    public static ResourceLocation quarterLocation(Quarter part, boolean whole) {
         return ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, quarter(part, whole));
     }
 }

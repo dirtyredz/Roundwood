@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.block.trim;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -65,10 +65,10 @@ public final class TrimLifecycleGameTests {
         for (Mirror mirror : MIRRORS) {
             for (Rotation rotation : ROTATIONS) {
                 String name = mirror + "/" + rotation;
-                Set<TrimPart> parts = EnumSet.noneOf(TrimPart.class);
+                Set<Quarter> parts = EnumSet.noneOf(Quarter.class);
                 Set<Direction> facings = new HashSet<>();
                 Set<BlockPos> anchors = new HashSet<>();
-                for (TrimPart part : TrimPart.values()) {
+                for (Quarter part : Quarter.values()) {
                     BlockState state = helper.getLevel().getBlockState(assembly.pos(part)).mirror(mirror).rotate(rotation);
                     BlockPos moved = StructureTemplate.transform(assembly.pos(part), mirror, rotation, pivot);
                     parts.add(state.getValue(RoundTrimBlock.PART));
@@ -85,7 +85,7 @@ public final class TrimLifecycleGameTests {
                 check(anchors.size() == 1, name + ": quarters disagree on the anchor " + anchors);
                 // The transformed anchor and facing must put every quarter where the transform put it.
                 TrimLayout.Assembly moved = new TrimLayout.Assembly(anchors.iterator().next(), facings.iterator().next());
-                for (TrimPart part : TrimPart.values()) {
+                for (Quarter part : Quarter.values()) {
                     BlockPos expected = StructureTemplate.transform(assembly.pos(part), mirror, rotation, pivot);
                     BlockState state = helper.getLevel().getBlockState(assembly.pos(part)).mirror(mirror).rotate(rotation);
                     check(moved.pos(state.getValue(RoundTrimBlock.PART)).equals(expected),
@@ -164,7 +164,7 @@ public final class TrimLifecycleGameTests {
         TrimLayout.Assembly right = trimAssembly(helper, second, Direction.NORTH);
         check(TrimPlacement.placeAt(helper.getLevel(), oakTrim(), left), "left placement failed");
         check(TrimPlacement.placeAt(helper.getLevel(), oakTrim(), right), "right placement failed");
-        for (TrimPart part : TrimPart.values()) {
+        for (Quarter part : Quarter.values()) {
             clearDrops(helper);
             ServerPlayer breaker = player(helper, "adjacent_breaker", GameType.SURVIVAL, Direction.NORTH);
             check(breaker.gameMode.destroyBlock(left.pos(part)), part + ": break refused");
@@ -181,7 +181,7 @@ public final class TrimLifecycleGameTests {
     public static void aLoneLowerQuarterIsRemovedByTheIntegrityTick(GameTestHelper helper) {
         floor(helper);
         TrimLayout.Assembly assembly = trimAssembly(helper, ANCHOR, Direction.NORTH);
-        helper.setBlock(ANCHOR, assembly.stateFor(TrimPart.LOWER_LEFT, oakTrim()));
+        helper.setBlock(ANCHOR, assembly.stateFor(Quarter.LOWER_LEFT, oakTrim()));
         lookOnAnchor(helper, assembly, BIRCH);
         clearDrops(helper);
         helper.runAfterDelay(3, () -> {
@@ -198,14 +198,14 @@ public final class TrimLifecycleGameTests {
     public static void threeQuartersAreRemovedAndNeverCompleted(GameTestHelper helper) {
         floor(helper);
         TrimLayout.Assembly assembly = trimAssembly(helper, ANCHOR, Direction.NORTH);
-        for (TrimPart part : new TrimPart[] {TrimPart.LOWER_LEFT, TrimPart.UPPER_LEFT, TrimPart.LOWER_RIGHT}) {
+        for (Quarter part : new Quarter[] {Quarter.LOWER_LEFT, Quarter.UPPER_LEFT, Quarter.LOWER_RIGHT}) {
             helper.setBlock(ANCHOR.relative(Direction.EAST, part.column).above(part.row), assembly.stateFor(part, oakTrim()));
         }
         lookOnAnchor(helper, assembly, SPRUCE);
         clearDrops(helper);
         helper.runAfterDelay(3, () -> {
             assertNoTrim(helper, assembly);
-            check(helper.getLevel().getBlockState(assembly.pos(TrimPart.UPPER_RIGHT)).isAir(), "the missing quarter was created");
+            check(helper.getLevel().getBlockState(assembly.pos(Quarter.UPPER_RIGHT)).isAir(), "the missing quarter was created");
             check(dropped(helper, oakTrim().asItem(), SPRUCE) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropReport(helper, oakTrim().asItem(), SPRUCE));
             helper.succeed();
         });
@@ -221,9 +221,9 @@ public final class TrimLifecycleGameTests {
         }
         BlockPos anchor = new BlockPos(x, 1, 1);
         TrimLayout.Assembly assembly = trimAssembly(helper, anchor, Direction.NORTH);
-        check((assembly.pos(TrimPart.LOWER_LEFT).getX() >> 4) != (assembly.pos(TrimPart.LOWER_RIGHT).getX() >> 4),
+        check((assembly.pos(Quarter.LOWER_LEFT).getX() >> 4) != (assembly.pos(Quarter.LOWER_RIGHT).getX() >> 4),
                 "test setup does not straddle chunks");
-        for (TrimPart broken : new TrimPart[] {TrimPart.LOWER_LEFT, TrimPart.UPPER_RIGHT}) {
+        for (Quarter broken : new Quarter[] {Quarter.LOWER_LEFT, Quarter.UPPER_RIGHT}) {
             ServerPlayer player = player(helper, "chunks_" + broken, GameType.SURVIVAL, Direction.NORTH);
             check(placeFreestanding(helper, player, new ItemStack(oakTrim()), anchor).consumesAction(), broken + ": placement failed");
             assertTrim(helper, assembly, oakTrim());

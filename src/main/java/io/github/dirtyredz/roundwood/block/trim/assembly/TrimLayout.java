@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.trim.assembly;
 
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,30 +21,30 @@ public final class TrimLayout {
     }
 
     /** The four quarters in the shared part order. */
-    private static final List<TrimPart> PARTS = List.of(TrimPart.values());
+    private static final List<Quarter> PARTS = List.of(Quarter.values());
 
     /**
      * One frame: its anchor (lower-left) cell and the direction the placing player faced. The shared
      * traversal is the {@link io.github.dirtyredz.roundwood.block.assembly.Assembly} contract's.
      */
-    public record Assembly(BlockPos anchor, Direction facing) implements io.github.dirtyredz.roundwood.block.assembly.Assembly<TrimPart> {
+    public record Assembly(BlockPos anchor, Direction facing) implements io.github.dirtyredz.roundwood.block.assembly.Assembly<Quarter> {
         @Override
-        public List<TrimPart> parts() {
+        public List<Quarter> parts() {
             return PARTS;
         }
 
         @Override
-        public BlockPos pos(TrimPart part) {
+        public BlockPos pos(Quarter part) {
             return anchor.relative(facing.getClockWise(), part.column).above(part.row);
         }
 
-        public BlockState stateFor(TrimPart part, Block block) {
+        public BlockState stateFor(Quarter part, Block block) {
             return block.defaultBlockState().setValue(RoundTrimBlock.FACING, facing).setValue(RoundTrimBlock.PART, part);
         }
 
         /** Same block, facing and quarter. */
         @Override
-        public boolean isPart(BlockState state, Block block, TrimPart part) {
+        public boolean isPart(BlockState state, Block block, Quarter part) {
             return state.is(block) && state.getValue(RoundTrimBlock.FACING) == facing
                     && state.getValue(RoundTrimBlock.PART) == part;
         }
@@ -52,7 +53,7 @@ public final class TrimLayout {
     /** The frame a quarter belongs to, from its own state. */
     public static Assembly of(BlockPos pos, BlockState state) {
         Direction facing = state.getValue(RoundTrimBlock.FACING);
-        TrimPart part = state.getValue(RoundTrimBlock.PART);
+        Quarter part = state.getValue(RoundTrimBlock.PART);
         BlockPos anchor = pos.below(part.row).relative(facing.getCounterClockWise(), part.column);
         return new Assembly(anchor.immutable(), facing);
     }

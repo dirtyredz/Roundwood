@@ -6,7 +6,7 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
@@ -107,7 +107,7 @@ public final class TrimFixtures {
 
     /** Asserts all four quarters are present for {@code block}. */
     public static void assertTrim(GameTestHelper helper, TrimLayout.Assembly assembly, RoundTrimBlock block) {
-        for (TrimPart part : TrimPart.values()) {
+        for (Quarter part : Quarter.values()) {
             BlockState state = helper.getLevel().getBlockState(assembly.pos(part));
             check(assembly.isPart(state, block, part), part + " missing or wrong at " + assembly.pos(part) + ": " + state);
         }

@@ -6,7 +6,7 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -100,7 +100,7 @@ final class LegacyMigrationFixtures {
     static TrimLayout.Assembly rawTrim(GameTestHelper helper, BlockPos anchor, String id) {
         Block block = legacy(id);
         TrimLayout.Assembly trim = new TrimLayout.Assembly(anchor, Direction.NORTH);
-        for (TrimPart part : TrimPart.values()) {
+        for (Quarter part : Quarter.values()) {
             raw(helper, trim.pos(part), trim.stateFor(part, block));
         }
         return trim;

@@ -9,7 +9,7 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -82,8 +82,8 @@ public final class DoorTrimConversion {
         }
         Appearance look = level.getBlockEntity(frame.anchor()) instanceof RoundTrimBlockEntity entity
                 ? entity.appearance() : frameBlock.defaultAppearance();
-        Map<TrimPart, BlockState> captured = new EnumMap<>(TrimPart.class);
-        for (TrimPart part : TrimPart.values()) {
+        Map<Quarter, BlockState> captured = new EnumMap<>(Quarter.class);
+        for (Quarter part : Quarter.values()) {
             captured.put(part, level.getBlockState(frame.pos(part)));
         }
         List<BlockPos> cells = new ArrayList<>(frame.positions());
@@ -91,7 +91,7 @@ public final class DoorTrimConversion {
         boolean[] installed = {false};
         boolean ran = AssemblyMutationBatch.run(level, cells, () -> {
             boolean all = true;
-            for (TrimPart part : TrimPart.values()) {
+            for (Quarter part : Quarter.values()) {
                 all &= level.setBlock(frame.pos(part), Blocks.AIR.defaultBlockState(), SILENT);
             }
             if (!all) {
@@ -149,8 +149,8 @@ public final class DoorTrimConversion {
         return frame.facing() == door.facing() && frame.anchor().equals(door.anchor().relative(door.facing().getOpposite()));
     }
 
-    private static void restore(ServerLevel level, TrimLayout.Assembly frame, Map<TrimPart, BlockState> captured, Appearance look) {
-        for (TrimPart part : TrimPart.values()) {
+    private static void restore(ServerLevel level, TrimLayout.Assembly frame, Map<Quarter, BlockState> captured, Appearance look) {
+        for (Quarter part : Quarter.values()) {
             level.setBlock(frame.pos(part), captured.get(part), SILENT);
         }
         if (level.getBlockEntity(frame.anchor()) instanceof RoundTrimBlockEntity entity) {

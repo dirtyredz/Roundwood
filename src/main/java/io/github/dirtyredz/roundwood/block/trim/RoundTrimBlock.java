@@ -13,7 +13,7 @@ import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyRemoval;
 import io.github.dirtyredz.roundwood.block.trim.appearance.TrimAppearance;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.block.trim.geometry.TrimShapes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -65,14 +65,14 @@ import java.util.function.Supplier;
  */
 public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefaults {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final EnumProperty<TrimPart> PART = EnumProperty.create("part", TrimPart.class);
+    public static final EnumProperty<Quarter> PART = EnumProperty.create("part", Quarter.class);
 
     private final Supplier<BlockEntityType<RoundTrimBlockEntity>> entityType;
 
     public RoundTrimBlock(Properties properties, Supplier<BlockEntityType<RoundTrimBlockEntity>> entityType) {
         super(properties);
         this.entityType = entityType;
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, TrimPart.LOWER_LEFT));
+        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(PART, Quarter.LOWER_LEFT));
     }
 
     @Override
@@ -93,7 +93,7 @@ public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefa
     @Override
     @Nullable
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return state.getValue(PART) == TrimPart.LOWER_LEFT ? new RoundTrimBlockEntity(entityType.get(), pos, state) : null;
+        return state.getValue(PART) == Quarter.LOWER_LEFT ? new RoundTrimBlockEntity(entityType.get(), pos, state) : null;
     }
 
     /** Sneak + planks or masonry, or dye, restyles the whole frame; everything else is the item's own use. */

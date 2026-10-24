@@ -21,7 +21,7 @@ import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.appearance.TrimAppearance;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
@@ -574,7 +574,7 @@ public final class AssemblyFamilies {
 
         @Override
         public int size() {
-            return TrimPart.values().length;
+            return Quarter.values().length;
         }
 
         @Override
@@ -584,18 +584,18 @@ public final class AssemblyFamilies {
 
         @Override
         public BlockPos pos(int i) {
-            return assembly.pos(TrimPart.values()[i]);
+            return assembly.pos(Quarter.values()[i]);
         }
 
         @Override
         public BlockState state(int i, Block as) {
-            return assembly.stateFor(TrimPart.values()[i], as);
+            return assembly.stateFor(Quarter.values()[i], as);
         }
 
         @Override
         public List<BlockState> foreignLayouts(int i) {
             TrimLayout.Assembly turned = new TrimLayout.Assembly(anchor(), facing().getOpposite());
-            return List.of(turned.stateFor(TrimPart.values()[i], trim()));
+            return List.of(turned.stateFor(Quarter.values()[i], trim()));
         }
 
         @Override
@@ -605,7 +605,7 @@ public final class AssemblyFamilies {
 
         @Override
         public boolean isPart(BlockState state, int i) {
-            return assembly.isPart(state, trim(), TrimPart.values()[i]);
+            return assembly.isPart(state, trim(), Quarter.values()[i]);
         }
 
         @Override

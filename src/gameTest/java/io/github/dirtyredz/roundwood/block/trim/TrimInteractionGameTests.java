@@ -5,7 +5,7 @@ import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorHitResolver;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -93,7 +93,7 @@ public final class TrimInteractionGameTests {
             // The ring itself, in each quarter: credited to that quarter's own cell.
             double edge = 0.5 / 16; // half a pixel in from the outer edge, at mid height or mid width
             double[][] ring = {{edge, 0.9}, {2 - edge, 0.9}, {edge, 1.1}, {2 - edge, 1.1}};
-            TrimPart[] parts = {TrimPart.LOWER_LEFT, TrimPart.LOWER_RIGHT, TrimPart.UPPER_LEFT, TrimPart.UPPER_RIGHT};
+            Quarter[] parts = {Quarter.LOWER_LEFT, Quarter.LOWER_RIGHT, Quarter.UPPER_LEFT, Quarter.UPPER_RIGHT};
             for (int i = 0; i < ring.length; i++) {
                 BlockHitResult hit = ray(helper, door, ring[i][0], ring[i][1], null);
                 check(hit.getType() == HitResult.Type.BLOCK && hit.getBlockPos().equals(trim.pos(parts[i])),

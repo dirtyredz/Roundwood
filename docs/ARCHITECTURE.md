@@ -187,9 +187,10 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   `RoundDoorBlock` adds only `column` (the 0.4.0 aliases and the 0.7.0 frame migration recognise
   exactly this class) and `ArchedDoorBlock` fixes the design. Both anchor on `RoundDoorBlockEntity`
   (type id `round_door`), so appearance family DOOR, camouflage, trim storage and lifecycle are shared.
-- **One placement plan.** `assembly/DoorPlacement` (a typed facade over the shared skeleton) is the immutable, read-only decision (`of(block,
-  context)` for players, `at(level, block, assembly, open)` for the showcase and commands): cells,
-  hinge, open state, or empty when refused. `DoorPlacement` only writes a plan. The client preview
+- **One placement plan.** `assembly/DoorPlacement` builds the typed, immutable
+  `AssemblyPlacementPlan<DoorLayout.Part, DoorLayout.Assembly>` (`of(block, context)` for players,
+  `at(level, block, assembly, open)` for the showcase and commands): cells, hinge, open state, or
+  empty when refused. Its placement entry point installs that same plan. The client preview
   (`client/door/DoorPlacementPreview`, via `selection/DoorPlacementOutline`) draws the same plan for
   both doors, so preview and result cannot drift.
 - **Per-design geometry.** `DoorGeometry`, `DoorShapes`, `CamouflageGeometry`, `DoorTrimGeometry` and
@@ -244,6 +245,10 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   `client/render/PixelSlabModels` (the arched door casing uses it too). Masonry faces are
   `archway_<m>` / `keyhole_archway_<m>` (64 x 64 over the 32 x 32 face). Styled items are baked from the
   mask with the oak item model's transforms. The world model is empty, so no mining crack shows.
+
+The round ring source geometry and quarter identity live in `geometry/RingGeometry`;
+`client/render/RingModels` and `RingModelNames` serve both the frame and door attachment.
+Their historical model identifiers and source depths remain unchanged.
 
 ## Camouflage
 
@@ -431,7 +436,7 @@ services (see Face-trim attachments). Until 0.9.0 the `round_trim` item was the 
   swings and has no collision, pathfinding, support or redstone effect.
 - **Storage.** `DoorTrim: {Version: 1, Front, Back}` on the door anchor entity (`DoorTrimNbt`, the
   `FaceTrimsNbt` codec; an unknown version is kept and fails closed). The update tag always carries
-  it. `block/door/assembly/DoorBlockEntities`, a typed facade over `AssemblyAnchors`, finds the anchor entity.
+  it. `DoorAppearance.ANCHORS`, a typed `AssemblyAnchors.Lookup`, finds the anchor entity.
 - **Targeting.** `DoorSelectionShapes` adds in-cell proxies to the target shape: installed rings
   (the FRONT proxy at z 15..16 inside the door cells, the BACK ring itself), and both while the Door
   Trim is held, so an open door can be fitted. The highlight's visible shape draws installed rings
@@ -446,7 +451,7 @@ services (see Face-trim attachments). Until 0.9.0 the `round_trim` item was the 
   family rules (masonry is not paintable). Otherwise the existing leaf restyle (sneak + planks,
   dye), camouflage and toggle apply. `DoorInteraction.claims` feeds the sneak bridge.
 - **Rendering.** `client/door/DoorTrimRenderer`, called by `RoundDoorRenderer` before the facing and
-  swing transforms, reuses the frame's turned quarter models (`client/trim/TrimAppearanceModels`,
+  swing transforms, uses the shared turned quarter models (`client/render/RingModels`,
   same looks). FRONT is drawn at the cells in front, BACK in the door's cells shifted to 12..13;
   rear surfaces are kept. The BACK ring overlaps the hinge-side brass straps where they cross it
   (cosmetic).
@@ -459,8 +464,7 @@ services (see Face-trim attachments). Until 0.9.0 the `round_trim` item was the 
 
 Before 0.8.0 the `round_trim` item placed an independent 2 x 2 assembly of `RoundTrimBlock` quarters
 (`facing` + `part`) through the ordinary `ItemStack.useOn` path. No item places one any more, but the
-block stays registered for frames in older saves. Geometry (`block/trim/geometry/TrimGeometry`, now
-built on the shared `RingGeometry`): a ring, outer diameter 32, inner 28, one pixel deep at the back
+block stays registered for frames in older saves. Geometry (`geometry/RingGeometry`, shared with door rings): a ring, outer diameter 32, inner 28, one pixel deep at the back
 of its cells (z 0..1, authored facing north), cut into cell-local quarters.
 
 - **Fitted frames** (0.7.0) stood in the cells in front of a closed door, the ring one pixel proud of

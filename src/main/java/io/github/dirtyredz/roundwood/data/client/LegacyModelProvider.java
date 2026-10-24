@@ -4,7 +4,7 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
-import io.github.dirtyredz.roundwood.client.trim.TrimModelNames;
+import io.github.dirtyredz.roundwood.client.render.RingModelNames;
 import io.github.dirtyredz.roundwood.data.client.window.WindowModelProvider;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -54,10 +54,10 @@ public class LegacyModelProvider extends BlockStateProvider {
                 OrientedWindowModelProvider.panes(this, oriented, plain);
             } else WindowModelProvider.panes(this, block, plain);
         }
-        ModelFile trim = existing("block/" + TrimModelNames.TRIM_ID);
+        ModelFile trim = existing("block/" + RingModelNames.TRIM_ID);
         for (Block block : LegacyContent.trims()) {
             getVariantBuilder(block).partialState().setModels(new ConfiguredModel(trim));
-            item(block, TrimModelNames.TRIM_ID);
+            item(block, RingModelNames.TRIM_ID);
         }
     }
 

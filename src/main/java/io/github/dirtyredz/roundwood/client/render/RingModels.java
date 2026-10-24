@@ -1,7 +1,7 @@
-package io.github.dirtyredz.roundwood.client.trim;
+package io.github.dirtyredz.roundwood.client.render;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
 import io.github.dirtyredz.roundwood.client.material.MasonryStyles;
@@ -24,13 +24,13 @@ import java.util.function.UnaryOperator;
  * it with world light at the quarter's own cell. (The item icon is the Universal Trim's,
  * {@code client/item/TrimItemModels}, since 0.9.0.)
  */
-public final class TrimAppearanceModels {
-    private record Key(TrimLooks.Look look, Direction facing, TrimPart part) {
+public final class RingModels {
+    private record Key(TrimLooks.Look look, Direction facing, Quarter part) {
     }
 
     private static final AppearanceModelCache<Key, BakedModel> QUARTERS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
 
-    private TrimAppearanceModels() {
+    private RingModels() {
     }
 
     public static TrimLooks.Look look(Appearance appearance) {
@@ -38,10 +38,10 @@ public final class TrimAppearanceModels {
     }
 
     /** The quarter {@code part} of a frame facing {@code facing}, in {@code look}, turned into place. */
-    public static BakedModel quarter(TrimLooks.Look look, Direction facing, TrimPart part) {
+    public static BakedModel quarter(TrimLooks.Look look, Direction facing, Quarter part) {
         return QUARTERS.get(new Key(look, facing, part), key -> {
             BakedModel source = Minecraft.getInstance().getModelManager()
-                    .getModel(TrimModelNames.quarterLocation(part, look.whole()));
+                    .getModel(RingModelNames.quarterLocation(part, look.whole()));
             int turns = VoxelShapeFactory.quarterTurns(facing);
             UnaryOperator<BakedQuad> paint = painter(look);
             return ModelRetexturing.map(source, quad -> ModelRetexturing.rotateY(paint.apply(quad), turns),

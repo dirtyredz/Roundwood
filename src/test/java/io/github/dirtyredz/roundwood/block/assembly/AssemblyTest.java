@@ -6,7 +6,7 @@ import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
@@ -38,7 +38,7 @@ class AssemblyTest {
         assertEquals(List.of(DoorLayout.Part.LOWER_LEFT, DoorLayout.Part.UPPER_LEFT), door(Direction.NORTH, DoorDesign.ARCHED).parts());
         assertEquals(List.of(ArchwayPart.LOWER_LEFT, ArchwayPart.UPPER_LEFT, ArchwayPart.LOWER_RIGHT, ArchwayPart.UPPER_RIGHT),
                 archway(Direction.NORTH).parts());
-        assertEquals(List.of(TrimPart.LOWER_LEFT, TrimPart.UPPER_LEFT, TrimPart.LOWER_RIGHT, TrimPart.UPPER_RIGHT),
+        assertEquals(List.of(Quarter.LOWER_LEFT, Quarter.UPPER_LEFT, Quarter.LOWER_RIGHT, Quarter.UPPER_RIGHT),
                 frame(Direction.NORTH).parts());
     }
 

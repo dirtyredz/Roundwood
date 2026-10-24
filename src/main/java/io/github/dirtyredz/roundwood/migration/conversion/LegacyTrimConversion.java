@@ -4,7 +4,7 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlockEntity;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.migration.block.LegacyTrimBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -34,8 +34,8 @@ public final class LegacyTrimConversion {
         if (!assembly.loaded(level)) {
             return LegacyCells.Result.DEFERRED;
         }
-        Map<TrimPart, BlockState> cells = new EnumMap<>(TrimPart.class);
-        for (TrimPart part : TrimPart.values()) {
+        Map<Quarter, BlockState> cells = new EnumMap<>(Quarter.class);
+        for (Quarter part : Quarter.values()) {
             BlockState cell = level.getBlockState(assembly.pos(part));
             if (!assembly.isPart(cell, legacy, part) && !assembly.isPart(cell, canonical, part)) {
                 return LegacyCells.Result.INCOMPLETE;
@@ -45,7 +45,7 @@ public final class LegacyTrimConversion {
         BlockPos anchor = assembly.anchor();
         Appearance appearance = level.getBlockEntity(anchor) instanceof RoundTrimBlockEntity entity
                 ? entity.appearance() : legacy.defaultAppearance();
-        boolean anchorLegacy = cells.get(TrimPart.LOWER_LEFT).is(legacy);
+        boolean anchorLegacy = cells.get(Quarter.LOWER_LEFT).is(legacy);
 
         Map<BlockPos, BlockState> writes = new LinkedHashMap<>();
         cells.forEach((part, cell) -> {

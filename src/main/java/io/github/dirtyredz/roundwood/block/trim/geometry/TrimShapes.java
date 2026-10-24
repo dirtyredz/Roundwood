@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.block.trim.geometry;
 
-import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPart;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry;
+import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.core.Direction;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -18,9 +19,9 @@ public final class TrimShapes {
     private TrimShapes() {
     }
 
-    public static VoxelShape shape(Direction facing, TrimPart part) {
+    public static VoxelShape shape(Direction facing, Quarter part) {
         int turns = VoxelShapeFactory.quarterTurns(facing);
         return SHAPES.computeIfAbsent((turns << 2) | part.ordinal(), k -> VoxelShapeFactory.shape(
-                VoxelShapeFactory.rotate(TrimGeometry.quarter(part.column, part.row), turns)));
+                VoxelShapeFactory.rotate(RingGeometry.quarter(part.column, part.row), turns)));
     }
 }
