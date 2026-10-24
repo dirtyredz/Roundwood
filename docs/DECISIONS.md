@@ -2,6 +2,18 @@
 
 Newest first.
 
+## 2026-10-24 - Keep family block adapters explicit (dk-d402bd77)
+
+There are still three appearance families: DOOR, WINDOW and TRIM. Archways add a fourth block
+adapter, but reuse TRIM. Their loot must decorate by item, whereas doors and windows decorate by
+family; otherwise an archway paints its separately dropped attachments. Windows also preserve
+independent glass and pending migration contents. The shared appearance defaults, stack decoration,
+anchor persistence and assembly services already own the actual common operations. A shared block
+wiring layer would add policy switches around these small adapters, so it is deliberately not built.
+Revisit when another appearance family arrives and at least two adapters have identical remaining
+wiring, including pick/drop ownership. This resolves the conditional investigation without changing
+behaviour or postponing an implemented release requirement.
+
 ## 2026-10-24 - Fill the archway footprint outside the opening (0.13.2)
 
 The ordinary and keyhole archways now fill the square 32 x 32 footprint outside their unchanged

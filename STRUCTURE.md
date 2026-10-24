@@ -259,5 +259,5 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-75a60754 dependency direction (block -> client import, registry <-> migration cycle, trim item on frame concepts)
 - dk-4cf186bd `LegacyAlias` contract
 - dk-1d129342 partly done: generated checks split into GeneratedResourceManifestTest, GeneratedResourceReferencesTest, GeneratedContentResourcesTest and GeneratedFiles; door-fixture duplication remains
-- dk-d402bd77 shared appearance-family wiring (P3, only if a fourth family appears)
+- dk-d402bd77 done: family adapters remain explicit; three appearance families and different pick/drop ownership do not justify a wiring abstraction (DECISIONS.md).
 - dk-87f3ad8f TrimFaceCondition <-> ModLootConditions registry cycle
