@@ -2,8 +2,8 @@
 id: dk-1af2b67e
 type: task
 created: 2026-10-21
-status: wip
-since: 2026-10-22
+status: done
+since: 2026-10-24
 area: tools
 priority: P1
 rank: zt
@@ -30,3 +30,9 @@ Done 2026-10-22 (round-1 fixes, bytes unchanged: generate-textures rewrites no P
 - clearWindowGlass and CLEAR_ALPHA_DROP moved into window-glass.mjs; the GLASS_SIZE re-export is gone.
 
 Still open: trimMarker in its own module (tools/textures/ is already at the 10-entry cap, so it needs a grouping folder first); reimplementing radial-bricks.mjs polar/radialFace on mortar.mjs polar (its byte pins are the oldest); the shared glass-streak mask (window-glass.mjs / stained-glass.mjs).
+
+## Completed 2026-10-24
+
+Glass tools are grouped with one streak mask; trimMarker has its own module, and radial masonry lives under masonry/. The earlier partial refactor is retained.
+
+Verified as a batch: ./gradlew --offline test build compileGameTestJava runData; 331 JUnit tests passed. node tools/generate-textures.mjs and datagen leave generated resources and textures byte-identical. git diff --check, shared-file sync -Check and dk check pass. Runtime GameTests remain with the orchestrator.

@@ -4,8 +4,8 @@
 // The face is polar: 24 wedge-shaped bricks around the image centre, one centred on the crown (and,
 // by symmetry, at the springing points and the base), with mortar joints that radiate from the
 // centre. Each brick has its own tone, a lit leading edge, a shaded trailing edge, and speckle.
-import { hash, mix, shade } from './noise.mjs';
-import { brickColour, polar as polarAt } from './mortar.mjs';
+import { hash, mix, shade } from '../noise.mjs';
+import { brickColour, polar as polarAt } from '../mortar.mjs';
 
 export const RADIAL_SIZE = 64;
 export const EDGE_SIZE = 16;

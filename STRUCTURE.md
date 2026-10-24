@@ -19,7 +19,7 @@ src/main/java/.../roundwood/
   data/{client,server}
 src/test/...      mirrors main (pure JUnit)
 src/gameTest/...  mirrors main (Forge GameTests; door/{lifecycle,placement}, window/{design,placement})
-tools/{textures/masonry,structures}   deterministic texture and structure generators
+tools/{textures/{glass,masonry},structures}   deterministic texture and structure generators
 ```
 
 Per-family `appearance/` and `interaction/` folders (door, archway, window, trim) are deliberate: every family keeps the same sibling set so a reader finds the same thing in the same place, and each is expected to grow.
@@ -102,8 +102,9 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 - `src/gameTest/resources/` — GameTest structure templates (empty ones, the 0.4.0 fixture and the 0.7.0 fitted-frame fixture), a test-only plank tag and a test-only `forge:shears` tag (a damageable non-shears item)
 - `tools/` — entry points of the deterministic generators for the textures, mod logo and GameTest structures (Node, not packaged)
 - `tools/generate-logo.mjs` — 32px pixel-art master using the existing oak/stone palettes and PNG encoder; generates `src/main/resources/roundwood-logo.png` (256px, packaged for Forge). Run `node tools/generate-logo.mjs [artifact-directory]` to optionally export the identical launcher icon and a 256/64/32px preview; `node tools/generate-logo.mjs --check` checks reproducibility. `data/ModLogoTest` guards the resource binding, size, transparency and crisp scaling.
-- `tools/textures/` — texture artwork modules: PNG encoding, noise, the 0.1.0 textures, palettes, door boards, paint panels, radial bricks, window glass (and its clearer 0.7.0 variant), stained glass, the round window face and trim markers (`window-trims.mjs`)
-- `tools/textures/masonry/` — the contour-following thin-mortar masonry faces built on the shared thin-mortar primitives in `mortar.mjs` (joint coverage, the one parameterised polar brick position, brick and mortar colours; 0.12.0 grouping): the arched window face, the square-frame Universal Trim face, the 0.10.0 window shape faces, the 0.11.0 arched door casing, the 0.12.0 archway faces
+- `tools/textures/` — PNG encoding, noise, palettes, historical artwork, door and paint boards, trim markers, and shared `mortar.mjs` primitives.
+- `tools/textures/masonry/` — historical and thin radial faces plus arch, square, casing, sill and archway masonry; every face imports the parent mortar primitives.
+- `tools/textures/glass/` — historical, clear and stained glazing, with one shared diagonal streak mask.
 - `docs/` — architecture, decisions, gotchas
 
 ## Components
@@ -250,7 +251,7 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-ff89f8e5 done: `HeldTrimTool` classifies the acting hand for the three trim routers
 - dk-73e57897 look resolver duplicated across the door and window pane models (the trim part is shared since 0.9.0, `TrimLooks`)
 - dk-3d456d06 done: `tools/structures/` owns the NBT writer, shared builder and independent historical fixtures; the entry script only writes their output
-- dk-1af2b67e texture modules split by release, not responsibility; partly done (`masonry/` grouping, `mortar.mjs` and `arch-window.mjs`, `clearWindowGlass` moved); left: `trimMarker` in its own module, `radial-bricks.mjs` on the shared polar, one glass-streak mask
+- dk-1af2b67e done: responsibility groups `glass/` and `masonry/`, one streak mask, separate `trim-marker.mjs`; generated texture bytes unchanged.
 - dk-aef47f84 done: `migration/` grouped under `conversion/` (seven entries), no-growth single-file folders folded, the per-family `appearance/` and `interaction/` pairs declared deliberate
 - dk-7279982a done: GameTest `block/door/` and `block/window/` grouped, tree diagram in Layout, one-file folders declared
 - dk-0dc49165 done in 0.11.0 (door sections grouped, family checks beside the sections, `ShowcaseSamples`)
