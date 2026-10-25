@@ -242,9 +242,12 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   click, sneaking identical through `claimsUse`, main hand first.
 - **Rendering.** `ArchwayRenderer` (anchor BER, solid layer, per-cell world light) draws each cell's
   frame and installed casing pieces from `ArchwayModels`, which bakes them with the shared
-  `client/render/PixelSlabModels` (the arched door casing uses it too). Masonry faces are
-  `archway_<m>` / `keyhole_archway_<m>` (64 x 64 over the 32 x 32 face). Styled items are baked from the
-  mask with the oak item model's transforms. The world model is empty, so no mining crack shows.
+  `client/render/PixelSlabModels` (the arched door casing uses it too). Since 0.13.3, archway bodies,
+  casings and items use the donor block sprite on every face (paint: tiled window boards), with
+  `FaceUv.tiled` applied after rotation: one sprite UV unit per model pixel, aligned with world
+  block axes. They do not use stripped-log trim bindings or whole-face masonry artwork. The old
+  masonry textures remain available to resource packs. Items are baked from the mask with the oak
+  item model's transforms. The world model is empty, so no mining crack shows.
 
 The round ring source geometry and quarter identity live in `geometry/RingGeometry`;
 `client/render/RingModels` and `RingModelNames` serve both the frame and door attachment.

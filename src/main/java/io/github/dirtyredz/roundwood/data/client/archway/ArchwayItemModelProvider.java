@@ -17,7 +17,7 @@ import java.util.List;
 
 /**
  * The archways' inventory models (0.12.0), one per design: the whole frame face-on, full depth,
- * from the same mask as its shapes ({@link ArchwayDesign#inFrame}), cut per cell by {@link PixelSlab}, in oak stripped log tiled like a
+ * from the same mask as its shapes ({@link ArchwayDesign#inFrame}), cut per cell by {@link PixelSlab}, in oak planks tiled like a
  * block (front and back {@code #face}, sides {@code #edge}), with the two-block assembly's display
  * transforms centred on the frame. A styled stack is baked from the same mask on the client
  * ({@code client/archway/ArchwayModels#item}), which copies these transforms.
@@ -49,8 +49,8 @@ public class ArchwayItemModelProvider extends ItemModelProvider {
                             surface -> surface.face().getAxis() == Direction.Axis.Z ? FACE : EDGE, 16 * column, 16 * row);
                 }
             }
-            item.texture(FACE, ArchwayModelProvider.OAK_LOG).texture(EDGE, ArchwayModelProvider.OAK_LOG)
-                    .texture("particle", ArchwayModelProvider.OAK_LOG);
+            item.texture(FACE, ArchwayModelProvider.OAK_PLANKS).texture(EDGE, ArchwayModelProvider.OAK_PLANKS)
+                    .texture("particle", ArchwayModelProvider.OAK_PLANKS);
             ItemModelTransforms.assembly(item, CENTRE);
         }
     }

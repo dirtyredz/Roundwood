@@ -2664,8 +2664,8 @@
   ],
   "gui_light": "front",
   "textures": {
-    "edge": "minecraft:block/stripped_oak_log",
-    "face": "minecraft:block/stripped_oak_log",
-    "particle": "minecraft:block/stripped_oak_log"
+    "edge": "minecraft:block/oak_planks",
+    "face": "minecraft:block/oak_planks",
+    "particle": "minecraft:block/oak_planks"
   }
 }

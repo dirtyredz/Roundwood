@@ -11,7 +11,7 @@ import java.util.function.Function;
 public final class AppearanceLooks {
     private AppearanceLooks() {}
 
-    /** Windows and thin beams preserve the donor's actual plank artwork, including built-in woods. */
+    /** Windows, thin beams and archways preserve donor artwork (archways also pass masonry here). */
     public static ResourceLocation planks(Appearance appearance) {
         return resolve(appearance, PaintStyles::windowPanel, style -> Optional.empty(),
                 sprite -> sprite.contents().name(), BuiltinWoodStyles.OAK_PLANKS);

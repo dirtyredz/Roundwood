@@ -2,6 +2,19 @@
 
 Newest first.
 
+## 2026-10-25 - Tile donor textures across every archway face (0.13.3)
+
+The owner requested vanilla plank grain and block-scale UVs throughout the ordinary and keyhole
+openings, including their fitted casings. Archways previously reused `TrimLooks.of`: vanilla wood
+selected stripped logs, paint used whole-face boards, and masonry selected contour faces with
+granular edges. These artwork choices did not match a surrounding donor-block wall. Archways now
+resolve the donor sprite for wood and masonry, or tiled painted boards, and use it on every face.
+This supersedes the archway artwork policy of 0.12.0; other hosts keep their trim artwork.
+The existing position projection stays: rotating geometry before `FaceUv.tiled` keeps the mapping
+world-aligned. Baked-quad tests guard both UV spans and signed orientation on the body, proud
+casings and items. Generated oak icons and particles use oak planks; runtime items also resolve
+the donor so resource-pack sprite changes apply to oak as well as other woods.
+
 ## 2026-10-24 - Neutral ring rendering and the Forge particle boundary (dk-75a60754)
 
 RingGeometry owns the ring profile, source depth, cell geometry and Quarter identity (historical

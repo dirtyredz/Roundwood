@@ -18,6 +18,11 @@
   Clearing the outer list or switching capture off would break the enclosing transaction.
   `AssemblyPlacementGameTests` guards it.
 
+- **Archway looks use donor blocks, not trim artwork (0.13.3).** A stripped-log sprite can look
+  smeared on a thin soffit strip even with correct UVs. Bodies, casings and items tile the same
+  donor sprite on all six faces; project UVs after facing rotation so vertical plank rows stay
+  horizontal. `PixelSlabModelsTest` checks baked vertex orientation and spans, accounting for
+  FaceBakery's small anti-bleed inset.
 - **Archway upper corners are filled but do not collide (0.13.2).** Keep the square frame mask
   shared by body, casing, item and preview; keep collision lower-jamb-only to preserve 0.13.1
   headroom. Do not add separate overlapping corner panels.

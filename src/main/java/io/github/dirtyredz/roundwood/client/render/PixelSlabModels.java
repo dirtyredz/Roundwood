@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Baked models of a flat pixel mask extruded between two depths, in one trim look (extracted in 0.12.0
@@ -84,8 +85,15 @@ public final class PixelSlabModels {
      */
     private static List<BakedQuad> quads(PixelCircle.PixelTest mask, int column, int row, double back, double front, int turns,
                                          boolean inPlace, TrimLooks.Look look, Extent extent) {
-        TextureAtlasSprite faceSprite = DonorSprites.atlas(look.face());
-        TextureAtlasSprite edgeSprite = DonorSprites.atlas(look.edge());
+        return quads(mask, column, row, back, front, turns, inPlace, look, extent, DonorSprites::atlas);
+    }
+
+    /** The same baking path with an explicit atlas lookup, usable without a running client. */
+    static List<BakedQuad> quads(PixelCircle.PixelTest mask, int column, int row, double back, double front, int turns,
+                                boolean inPlace, TrimLooks.Look look, Extent extent,
+                                Function<ResourceLocation, TextureAtlasSprite> atlas) {
+        TextureAtlasSprite faceSprite = atlas.apply(look.face());
+        TextureAtlasSprite edgeSprite = atlas.apply(look.edge());
         int originX = 16 * column;
         int originY = 16 * row;
         List<BakedQuad> quads = new ArrayList<>();

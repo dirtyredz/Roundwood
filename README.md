@@ -105,9 +105,9 @@ full-block-deep frame with an open passage: no leaf, glass, swing, camouflage or
   restores every cell.
 - You walk through the passage; only the lower jambs collide. Light and neighbours show
   through.
-- Looks: any planks (stripped-log look, like the trims), any dye, or bricks, stone bricks, deepslate
-  bricks or mud bricks, with brickwork that follows the contour (radial voussoirs with a keystone,
-  straight jamb courses, corbelled shoulders on the keyhole). A plain click with planks, masonry or
+- Looks: any planks, any dye, or bricks, stone bricks, deepslate bricks or mud bricks. Since 0.13.3,
+  the body and fitted casings tile the donor block texture on every face, including the passage;
+  paint uses tiled painted boards. Vertical faces keep horizontal plank rows. A plain click with planks, masonry or
   dye restyles it (sneaking does the same).
 - Universal Trim: click either face (a plain click) to fit a casing over that whole face, one pixel
   proud, in its own look; restyle it by aiming planks, masonry or dye at that face; shears take it off.

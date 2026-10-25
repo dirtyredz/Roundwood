@@ -11,12 +11,11 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 /**
  * The archways' blockstates (0.12.0). An archway is drawn whole by its anchor's block-entity renderer
  * ({@code client/archway/ArchwayRenderer}, from the frame mask in the archway's look), so every state of
- * a design (facing, part) uses one empty world model that only carries the break particle, the oak
- * stripped log every oak trim shows.
+ * a design (facing, part) uses one empty world model that only carries the oak plank break particle.
  */
 public class ArchwayModelProvider extends BlockStateProvider {
     /** The oak artwork of the archway's world particle and its oak item model. */
-    public static final String OAK_LOG = "minecraft:block/stripped_oak_log";
+    public static final String OAK_PLANKS = "minecraft:block/oak_planks";
 
     public ArchwayModelProvider(PackOutput output, ExistingFileHelper existingFiles) {
         super(output, Roundwood.MOD_ID, existingFiles);
@@ -31,7 +30,7 @@ public class ArchwayModelProvider extends BlockStateProvider {
     protected void registerStatesAndModels() {
         for (ArchwayBlock archway : ModBlocks.archways()) {
             getVariantBuilder(archway).partialState().setModels(new ConfiguredModel(
-                    models().getBuilder(archway.design().id()).texture("particle", OAK_LOG)));
+                    models().getBuilder(archway.design().id()).texture("particle", OAK_PLANKS)));
         }
     }
 }
