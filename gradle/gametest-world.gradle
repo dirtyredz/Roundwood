@@ -7,7 +7,10 @@ ext.gameTestWorld = { File dir ->
     dir.mkdirs()
     def pack = file('tools/test-world/datapack')
     if (!new File(pack, 'pack.mcmeta').isFile()) throw new GradleException('Missing standalone test-world datapack')
-    sync { from pack; into new File(dir, 'world/datapacks/mod_test_world') }
+    project.sync { spec ->
+        spec.from(pack)
+        spec.into(new File(dir, 'world/datapacks/mod_test_world'))
+    }
     new File(dir, 'server.properties').text = [
             'level-type=minecraft\\:flat',
             'generate-structures=false',

@@ -224,7 +224,11 @@ jobs:
           gh('release', 'create', tag, *map(str, assets), '--verify-tag', '--draft', '--latest=false',
              *(['--prerelease'] if prerelease else []), '--title', tag,
              '--notes-file', 'docs/releases/' + version + '.md')
-          release = json.loads(gh('api', f'repos/{repo}/releases/tags/{tag}'))
+          # The tag endpoint is for published releases; list with the write token to see drafts.
+          pages = json.loads(gh('api', '--paginate', '--slurp', f'repos/{repo}/releases?per_page=100'))
+          matches = [r for page in pages for r in page if r['tag_name'] == tag]
+          assert len(matches) == 1, 'Expected exactly one draft for ' + tag
+          release = matches[0]
           assert release['draft'], 'Release must remain a draft until verified'
           assert sorted(a['name'] for a in release['assets']) == sorted(expected), 'Unexpected release asset set'
           gh('release', 'download', tag, '--dir', 'readback')
