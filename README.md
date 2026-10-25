@@ -419,6 +419,11 @@ windows, tinted window glass, Door Trim attached to doors, plain-click gestures)
 trial together. Use a copy of a world saved in 0.8.0, run `/roundwood showcase` on open ground, and
 check in game (the client-side retexturing and rendering have no automated test):
 
+*0.13.3, archway plank textures*
+- [ ] Cherry (and one other wood) archways, ordinary and keyhole, in all four facings: every face shows
+  real plank grain at block scale (no smeared or sideways stripes), including the inner steps and jambs.
+- [ ] Front and back casings, each masonry material, and the archway icon in the inventory and in hand.
+
 *0.13.1, owner feedback fixes*
 - [ ] `/roundwood showcase`: pieces and signs are well apart, each sign beside its piece and readable
   on its own; the materials wall holds every plank, the four masonry blocks and the dye barrel, and the
