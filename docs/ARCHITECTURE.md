@@ -158,8 +158,14 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   which may not contain the hit point (looking through an empty corner). Before use, attack,
   held mining and pick-block the client moves the hit to the loaded part of the same assembly that
   contains the point (nudged into the surface), so the server's one-block distance check passes.
-  A point in no part (the projection, a neighbouring assembly) cancels the input. Held mining keeps
-  the part it started on (any part removes the whole door).
+  Since 0.13.4, a point on the resting open leaf outside those cells belongs to the nearest loaded
+  part of its own assembly, without moving the point. Projected use travels through
+  `adapter/DoorUseChannel`: `interaction/ProjectedDoorUse` validates reach, complete assembly,
+  permissions, world border and real outline/collision rays, then invokes the normal server
+  interaction router, main hand before offhand. This avoids vanilla's per-cell packet limit without
+  faking a hinge-side hit or changing the highlight. Stale, obstructed or unrelated hits fail.
+  Mining and picking the projection remain refused; held mining inside the cells keeps the part
+  it started on (any part removes the whole door). Collision and the visual swing remain unchanged.
 - **Particles** (`client/door/DoorParticles`): break and hit particles use the cell's collision
   piece, not the whole-door outline (which would scatter four doors' worth of particles).
 - **Rendering**: every door state uses an empty world model (break particle only). The anchor carries

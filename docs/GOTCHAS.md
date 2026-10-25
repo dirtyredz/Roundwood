@@ -145,9 +145,12 @@
 - **The highlight follows the swing, the target does not.** While a leaf turns, the outline is the
   leaf at its drawn angle (client `DoorSwing`), but rays and collision already use the final
   blockstate, so a click mid-swing lands on the final pose.
-- **The open projection is outlined but refused.** Clicking, mining or picking the projected half
-  of an open leaf does nothing (the client cancels it). A ray that crosses a door cell before the
-  projection can also stop a click on a block that sits inside the projection.
+- **Projected door use cannot use vanilla's packet unchanged (0.13.4).** Its real free-edge point
+  can exceed the one-block limit from the owning cell's centre. Keep the point intact and use
+  `DoorUseChannel` / `ProjectedDoorUse`; moving it to the hinge changes region and placement intent.
+  The server checks the real rays and routes normal use. Mining and picking the projection remain
+  refused. Whole-door outline rays can return a point beyond the currently traversed cell, so the
+  projected-use validator also checks a collision ray for intervening solid neighbours.
 - **Per-cell rendering has distinct seed and cull policies.** The compatibility frame culls;
   camouflage, archways and door casings do not. A projected door ring uses the door cell
   for its seed, the projected cell for lighting, and a separate depth shift. Preserve these inputs
@@ -288,8 +291,8 @@
 - **The leaf is drawn by a block-entity renderer.** The door's world model is empty, so the vanilla
   crack overlay does not appear while mining it, and a door whose four parts are not all present
   draws nothing (the integrity check removes it a tick later).
-- **The open leaf's outer half is visual only.** It can overlap blocks or entities in front of the
-  hinge column; it is not collidable or targetable by design.
+- **The open leaf's outer half reserves no cells.** It can overlap blocks or entities in front of
+  the hinge column and never collides. Since 0.13.4 its outlined leaf accepts use when unobstructed.
 - **`GameTestHelper.relativePos` is not the inverse of `absolutePos` in 1.20.1.** Use
   `DoorFixtures.rel`. `getBounds` is private and `killAllEntities` throws, so discard entities
   yourself.

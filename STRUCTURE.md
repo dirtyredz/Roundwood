@@ -58,10 +58,10 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 - `src/main/java/io/github/dirtyredz/roundwood/block/assembly/` — what the multi-cell families (doors, archways, the compatibility frame) share: the `Assembly` contract, integrity, removal, typed anchor lookup, the mutation batch, partner teardown, deferred harvest, the whole-assembly restyling target
 - `src/main/java/io/github/dirtyredz/roundwood/block/assembly/placement/` — the typed read-only placement plan, the installation transaction (with rollback) and player placement
 - `src/main/java/io/github/dirtyredz/roundwood/block/door/` — the door family (grouping only, no code)
-- `src/main/java/io/github/dirtyredz/roundwood/block/door/adapter/` — the Minecraft adapters: the shared door adapter (`AssemblyDoorBlock`), the round and arched door blocks, the item that places either design and the anchor block entity
+- `src/main/java/io/github/dirtyredz/roundwood/block/door/adapter/` — the Minecraft adapters: the shared door adapter (`AssemblyDoorBlock`), the round and arched door blocks, the item that places either design, the anchor block entity and `DoorUseChannel` (projected-leaf use transport)
 - `src/main/java/io/github/dirtyredz/roundwood/block/door/assembly/` — the two- or four-part door: layout (with its design; the shared `Assembly` contract), hinge choice, placement policy and typed plans, state (integrity and removal are `block/assembly`'s)
 - `src/main/java/io/github/dirtyredz/roundwood/block/door/appearance/` — reading, targeting and dropping the door's appearance through its anchor
-- `src/main/java/io/github/dirtyredz/roundwood/block/door/interaction/` — the door's right-click router: restyle, then camouflage, then toggle
+- `src/main/java/io/github/dirtyredz/roundwood/block/door/interaction/` — the door's right-click router: restyle, then camouflage, then toggle; `ProjectedDoorUse` validates projected-leaf requests before the ordinary server interaction path
 - `src/main/java/io/github/dirtyredz/roundwood/block/door/leaf/` — the single leaf: the design (`DoorDesign`), geometry and hardware, collision shapes, swing timeline
 - `src/main/java/io/github/dirtyredz/roundwood/block/door/selection/` — target and visible whole-door shapes (with the installed trim rings), the swinging leaf outline, hit re-attribution, corner-or-leaf hit region, the placement preview outline
 - `src/main/java/io/github/dirtyredz/roundwood/block/door/camouflage/` — corner geometry, accepted materials, stored data, interaction, refunds
@@ -168,7 +168,7 @@ class that touches Minecraft shapes). `geometry/face` and `geometry/trim` build 
 are read by `interaction`, `trim`, `glass` and the client (since 0.10.0 only `WindowShapes` in
 `geometry` imports `geometry/trim`, to compose the selection; the pane geometry does not); `interaction` calls `trim` and `glass` (the
 item no longer imports `interaction`). `client/window` imports `migration/item/CrossWindowPlacement` for the checked retired-stack preview and `block/door/selection/DoorHitResolver`
-for the placement preview (a refused projected-door hit shows nothing); `client/door` imports `block/door/selection` for the door placement preview. The door imports `client`
+for the placement preview (using the same resolved owner and hit point as use); `client/door` imports `block/door/selection` for the door placement preview and `block/door/adapter/DoorUseChannel` for projected use. The door imports `client`
 only for
 `DoorParticles` (client-only call). Geometry, `CamouflageGeometry`, `DoorSwing`, the appearance
 rules and `QuadVertices`' array arithmetic are plain enough for unit tests without a bootstrap.

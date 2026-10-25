@@ -123,7 +123,7 @@ public final class DoorGeometry {
 
     /**
      * Collision boxes for one cell, block-local, facing north: the leaf slab turned as one piece,
-     * then clipped to the cell. Whatever the open leaf covers outside the cells is visual only.
+     * then clipped to the cell. Whatever the open leaf covers outside the cells never collides.
      * The selection outline is the whole leaf instead (see {@code door/selection/DoorOutlineGeometry}).
      */
     public static List<Box> cellEnvelope(DoorDesign design, DoorHingeSide hinge, int column, int row, boolean open) {
@@ -146,7 +146,7 @@ public final class DoorGeometry {
         return box.within(new Box(0, 0, 0, design.width(), DoorDesign.HEIGHT, 16));
     }
 
-    /** The part of the open leaf outside the cells (the visual-only projection), if any. */
+    /** The part of the open leaf outside the cells (the non-colliding projection), if any. */
     public static Optional<Box> projection(Box openBox) {
         return openBox.intersect(new Box(-16, 0, -16, 48, DoorDesign.HEIGHT, 0));
     }

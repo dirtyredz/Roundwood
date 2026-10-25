@@ -430,6 +430,10 @@ windows, tinted window glass, Door Trim attached to doors, plain-click gestures)
 trial together. Use a copy of a world saved in 0.8.0, run `/roundwood showcase` on open ground, and
 check in game (the client-side retexturing and rendering have no automated test):
 
+*0.13.4, open-door targeting*
+- [ ] Close round and arched doors by clicking the outlined free edge from either side, with both
+  hinges and all four facings; reopen them, and repeat with camouflage, trims and a second client.
+
 *0.13.3, archway plank textures*
 - [ ] Cherry (and one other wood) archways, ordinary and keyhole, in all four facings: every face shows
   real plank grain at block scale (no smeared or sideways stripes), including the inner steps and jambs.

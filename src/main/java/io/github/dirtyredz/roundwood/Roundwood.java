@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood;
 
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceUseEvents;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
+import io.github.dirtyredz.roundwood.block.door.adapter.DoorUseChannel;
 import io.github.dirtyredz.roundwood.data.RoundwoodDataProviders;
 import io.github.dirtyredz.roundwood.migration.ChunkMigrations;
 import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
@@ -27,6 +28,7 @@ public final class Roundwood {
     public static final String MOD_ID = "roundwood";
 
     public Roundwood() {
+        DoorUseChannel.register();
         CrossWindowCompatibility.registerWindowHandler();
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         LegacyContent.register(ModBlocks.BLOCKS, ModItems.ITEMS);

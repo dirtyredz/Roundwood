@@ -58,7 +58,7 @@ public final class WindowPlacementPreview {
         }
         Optional<BlockHitResult> resolved = DoorHitResolver.resolve(level, hit);
         if (resolved.isEmpty()) {
-            return Optional.empty(); // the open leaf's projection: the click is refused
+            return Optional.empty(); // no loaded owner for the aimed point
         }
         ItemStack stack = player.getItemInHand(hand);
         BlockItem item = (BlockItem) stack.getItem();

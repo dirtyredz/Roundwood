@@ -2,6 +2,18 @@
 
 Newest first.
 
+## 2026-10-25 - Use the open leaf's projected free edge (0.13.4)
+
+The owner expects clicking the outlined open leaf to close the door, including the round leaf's
+projected half. This supersedes the 0.3.0 policy that outlined that half but canceled its input.
+Keep the real hit point and attribute it to the nearest loaded part of the same assembly. Vanilla
+rejects points more than one block from the owning cell's centre, so projected use has a narrow
+serverbound channel with server reach, assembly, permission and ray validation, followed by the
+ordinary interaction router. Rejected: clamping the hit into the hinge cell (changes the aimed
+region), extra occupied cells (changes placement and collision), or bypassing the router to toggle
+directly (loses restyling, offhand and protection-event behavior). Mining/picking the projection,
+collision and visual swing timing retain their previous policies. Both ends need the new channel.
+
 ## 2026-10-25 - Tile donor textures across every archway face (0.13.3)
 
 The owner requested vanilla plank grain and block-scale UVs throughout the ordinary and keyhole

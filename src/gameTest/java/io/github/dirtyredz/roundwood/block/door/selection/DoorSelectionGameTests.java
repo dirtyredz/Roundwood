@@ -41,7 +41,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.point;
 /**
  * Selection through the real ray cast ({@code Level.clip} with the player's context): the round
  * outline, corners that become targets with a block item in hand or once filled, hits credited to
- * the part that contains them, and the open leaf's projection refused.
+ * the part that contains them, and the open leaf's projection routed for use.
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -200,7 +200,7 @@ public final class DoorSelectionGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void theOpenProjectionIsOutlinedButRefused(GameTestHelper helper) {
+    public static void theOpenProjectionIsOutlinedAndOwned(GameTestHelper helper) {
         floor(helper);
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
             DoorLayout.Assembly assembly = place(helper, Direction.NORTH, hinge, "projection_" + hinge);
@@ -211,7 +211,9 @@ public final class DoorSelectionGameTests {
             Vec3 to = point(assembly, left ? -1.0 : 3.0, 0.9, 1.5);
             BlockHitResult raw = clip(helper, from, to, null);
             check(onDoor(helper, raw), hinge + ": the projection is not outlined");
-            check(DoorHitResolver.resolve(helper.getLevel(), raw).isEmpty(), hinge + ": a projection-only hit was accepted at " + raw.getLocation());
+            BlockHitResult resolved = DoorHitResolver.resolve(helper.getLevel(), raw).orElseThrow();
+            check(assembly.positions().contains(resolved.getBlockPos()), hinge + ": projection lost its assembly");
+            check(raw.getLocation().equals(resolved.getLocation()), hinge + ": projection point moved");
             helper.setBlock(ANCHOR, Blocks.AIR);
         }
         helper.succeed();
