@@ -410,12 +410,15 @@ The release jar is `build/libs/roundwood-1.20.1-<version>.jar`.
 ## Release
 
 Bump `mod_version` in `gradle.properties` and commit non-empty `docs/releases/<version>.md`.
-Push the branch, wait for green CI (tests, build, final-jar guard and datagen), then land on main
-and tag that commit `v<version>`. Pushing the tag builds again, runs the required GameTests,
-and creates a **draft prerelease** containing the jar, its SHA-256 file and `roundwood.pw.toml`.
-The owner publishes the draft after the in-game checks below. The pack session consumes the
-`.pw.toml` asset once published; draft download URLs are not public. Existing releases are never
-overwritten. Pushes and tags still need the owner's go-ahead.
+Push, land on main, and wait for green CI (tests, build, final-jar guard and datagen).
+With the owner's go-ahead, the agent runs `gh workflow run release.yml --ref main`.
+The release workflow verifies again, gates on GameTests, builds the release jar, creates its
+version tag, uploads a draft, reads back and hashes every asset, then **publishes** the release
+with the jar, its `.sha256` and `roundwood.pw.toml`. The pack session consumes the published
+`.pw.toml` asset. The owner does not publish by hand. Versions starting with `0.` or containing
+`-` are prereleases. Existing releases and tags are refused, published bytes are never replaced,
+and stable latest never moves backward. A failed draft remains private for deliberate recovery.
+Pushes and release dispatch still need the owner's go-ahead.
 
 Not released yet. 0.5.0 is the baseline; 0.6.0 (targeted window placement and the arch pieces),
 0.6.1 (no glass bridges on positioned windows, the door highlight follows the swing) and 0.7.0

@@ -6,7 +6,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
-- `.github/workflows/` - canonical hosted push gate and tag-to-draft release workflow.
+- `.github/workflows/` - canonical hosted push gate and dispatch-to-publication release workflow.
 - `.ci/mod.json` - Roundwood package, id, datagen, GameTest and pack-side configuration.
 - `gradle/` - wrapper, flat GameTest world setup and canonical final-jar guard with regression fixtures.
 - `tools/test-world/datapack/` - copied canonical flat-world override, only used in GameTest saves.

@@ -1,70 +1,84 @@
+# Releases follow Command Deck's deliberate dispatch model: pushes only run CI.
+# The agent starts this on main with: gh workflow run release.yml --ref main
+# verify + gametest (read-only) -> build (read-only, exact artifact ID) -> publish.
+# Publication refuses reused versions/tags, creates a tag at the built commit, uploads
+# a draft, downloads and hashes every asset, then publishes. No owner hand-publication.
+# Version comes only from gradle.properties; 0.x and hyphenated versions are prereleases.
+# Published bytes are never replaced and latest never moves backward. A failed draft
+# remains private for diagnosis; recovery requires deliberate cleanup, not a blind rerun.
 name: Release
 on:
-  push:
-    tags: ['v*']
+  workflow_dispatch:
 
-permissions:
-  contents: read
+defaults:
+  run:
+    shell: bash
 
+permissions: {}
 concurrency:
-  group: release-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 jobs:
-  release:
+  verify:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 65
+    timeout-minutes: 20
     permissions:
-      contents: write
+      contents: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          fetch-depth: 0
+          ref: ${{ github.sha }}
           persist-credentials: false
-      - name: Validate tag, main ancestry and notes
-        env:
-          TAG: ${{ github.ref_name }}
-        run: |
-          git merge-base --is-ancestor HEAD refs/remotes/origin/main
-          python3 - <<'PY'
-          import os, pathlib
-          props = dict(line.split('=', 1) for line in pathlib.Path('gradle.properties').read_text().splitlines()
-                       if '=' in line and not line.lstrip().startswith('#'))
-          version = props['mod_version'].strip()
-          assert os.environ['TAG'] == 'v' + version, 'Tag must equal v<mod_version>'
-          notes = pathlib.Path('docs/releases') / (version + '.md')
-          assert notes.read_text().strip(), 'Release notes must be non-empty'
-          PY
-      - name: Refuse an existing release (including drafts)
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          TAG: ${{ github.ref_name }}
-        run: |
-          # Listing must succeed: authentication/network errors must not mean "absent".
-          gh api --paginate "repos/$GH_REPO/releases?per_page=100" --jq '.[].tag_name' > release-tags.txt
-          if grep -Fxq -- "$TAG" release-tags.txt; then
-            echo "Release already exists for $TAG" >&2
-            exit 1
-          fi
       - uses: actions/setup-java@7a445ee88d4e23b52c33b10ccffbebb8a2e0e6c4 # v4.7.1
         with:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
         with:
-          cache-read-only: true
-      - name: Build and verify release jar
-        timeout-minutes: 20
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - name: Verify
         run: |
           chmod +x gradlew
           ./gradlew test build verifyReleaseJar
-      - name: Release GameTests
-        timeout-minutes: 45
+      - name: Check generated resources
         shell: bash
         run: |
+          if [[ "$(jq -er '.datagen | tostring' .ci/mod.json)" == true ]]; then
+            ./gradlew runData
+            changes=$(git status --porcelain --untracked-files=all -- src/generated)
+            if [[ -n "$changes" ]]; then
+              printf '%s\n' "$changes"
+              echo 'Generated resources differ; regenerate and commit them.' >&2
+              exit 1
+            fi
+          fi
+
+  gametest:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@7a445ee88d4e23b52c33b10ccffbebb8a2e0e6c4 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      # The job succeeds without launching Forge when GameTests are not configured.
+      # Keeping the job in the graph means publish can require every job to succeed.
+      - name: Release GameTests
+        run: |
           if [[ "$(jq -er '.gametests | tostring' .ci/mod.json)" == true ]]; then
-            set -o pipefail
+            chmod +x gradlew
             ./gradlew runGameTestServer --console=plain 2>&1 | tee gametest.log
             python3 - <<'PY'
           import pathlib, re
@@ -85,9 +99,49 @@ jobs:
             run/gametest/crash-reports/
           if-no-files-found: ignore
           retention-days: 7
+
+  build:
+    needs: [verify, gametest]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@7a445ee88d4e23b52c33b10ccffbebb8a2e0e6c4 # v4.7.1
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - name: Read version and require release notes
+        id: version
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, re
+          props = dict(line.split('=', 1) for line in pathlib.Path('gradle.properties').read_text().splitlines()
+                       if '=' in line and not line.lstrip().startswith('#'))
+          version = props['mod_version'].strip()
+          assert re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?', version), 'Expected semantic mod_version'
+          assert (pathlib.Path('docs/releases') / (version + '.md')).read_text().strip(), 'Release notes must be non-empty'
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('tag=v' + version + '\n')
+          PY
+      - name: Build the release artifact
+        run: |
+          chmod +x gradlew
+          ./gradlew build verifyReleaseJar
       - name: Prepare checksum and packwiz asset
         env:
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ steps.version.outputs.tag }}
           REPOSITORY: ${{ github.repository }}
           SERVER_URL: ${{ github.server_url }}
         run: |
@@ -109,12 +163,75 @@ jobs:
                   f'hash-format = "sha256"\nhash = {q(digest)}\n')
           (jar.parent / (config['modId'] + '.pw.toml')).write_text(text)
           PY
-      - name: Create draft prerelease
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        id: upload
+        with:
+          name: release-assets
+          path: build/ci/release/*
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: [verify, gametest, build]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          artifact-ids: ${{ needs.build.outputs.artifact-id }}
+          merge-multiple: true
+          path: release
+      - name: Refuse reuse, draft, read back and publish
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ needs.build.outputs.tag }}
         run: |
-          # gh release create fails if a release now exists; never use edit/upload --clobber.
-          gh release create "$TAG" build/ci/release/* --verify-tag --draft --prerelease \
-            --title "$TAG" --notes-file "docs/releases/${TAG#v}.md"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, subprocess
+          def gh(*args):
+              return subprocess.check_output(['gh', *args], text=True)
+          repo, tag = os.environ['GH_REPO'], os.environ['TAG']
+          # Successful, paginated reads are required: auth/network errors never mean absent.
+          releases = json.loads(gh('api', '--paginate', '--slurp', f'repos/{repo}/releases?per_page=100'))
+          releases = [release for page in releases for release in page]
+          assert all(r['tag_name'] != tag for r in releases), 'Release already exists: ' + tag
+          refs = json.loads(gh('api', f'repos/{repo}/git/matching-refs/tags/{tag}'))
+          assert all(r['ref'] != 'refs/tags/' + tag for r in refs), 'Tag already exists: ' + tag
+          version = tag[1:]
+          prerelease = version.startswith('0.') or '-' in version
+          # Explicit false prevents GitHub from automatically choosing an older release.
+          # Compare against ALL published stable versions, not release creation dates.
+          stable = [r['tag_name'] for r in releases if not r['draft'] and not r['prerelease']]
+          def numeric(value):
+              assert re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+', value), 'Cannot order stable release: ' + value
+              return tuple(map(int, value[1:].split('.')))
+          latest = not prerelease and all(numeric(tag) > numeric(previous) for previous in stable)
+          assets = sorted(pathlib.Path('release').iterdir())
+          assert len(assets) == 3 and all(p.is_file() for p in assets), 'Expected jar, checksum and packwiz assets'
+          expected = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in assets}
+          # Create-only API: a racing tag creation fails, and no existing tag is ever moved.
+          gh('api', '--method', 'POST', f'repos/{repo}/git/refs', '-f', 'ref=refs/tags/' + tag,
+             '-f', 'sha=' + os.environ['GITHUB_SHA'])
+          gh('release', 'create', tag, *map(str, assets), '--verify-tag', '--draft', '--latest=false',
+             *(['--prerelease'] if prerelease else []), '--title', tag,
+             '--notes-file', 'docs/releases/' + version + '.md')
+          release = json.loads(gh('api', f'repos/{repo}/releases/tags/{tag}'))
+          assert release['draft'], 'Release must remain a draft until verified'
+          assert sorted(a['name'] for a in release['assets']) == sorted(expected), 'Unexpected release asset set'
+          gh('release', 'download', tag, '--dir', 'readback')
+          for name, digest in expected.items():
+              assert hashlib.sha256((pathlib.Path('readback') / name).read_bytes()).hexdigest() == digest, 'Readback SHA-256 mismatch: ' + name
+          gh('api', '--method', 'PATCH', f"repos/{repo}/releases/{release['id']}",
+             '-F', 'draft=false', '-F', 'prerelease=' + str(prerelease).lower(),
+             '-f', 'make_latest=' + str(latest).lower())
+          print('Published ' + tag + ' after SHA-256 readback of every asset')
+          PY
