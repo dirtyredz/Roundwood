@@ -41,4 +41,3 @@ export function archWindowFace(palette, seed) {
   }
   return px;
 }
-
