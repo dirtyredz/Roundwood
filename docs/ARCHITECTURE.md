@@ -373,7 +373,7 @@ hidden stack with full contents, never separate refunds. `WindowGlass` v1 lives 
 pane stacks; absent means clear, tint covers glazing and connectors only. Viewers use frame plus
 glass subtype keys; the twenty advertised defaults include thirteen profiles and Cross Beams, while
 all retired crossed items and frozen aliases stay hidden. Generated world meshes contain only the
-151 plain pane models; compatibility blockstates reference them and runtime composition supplies beams.
+112 plain pane models; compatibility blockstates reference them and runtime composition supplies beams.
 
 ## Face-trim attachments (0.9.0)
 
