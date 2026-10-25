@@ -107,7 +107,10 @@ tasks.register('verifyReleaseJar') {
         ReleaseJarGuard.verify(jar, expected, config.modId, mod_version.toString(),
                 config.mainPackage.replace('.', '/'), classes, resources)
         // Downstream upload paths cannot accidentally pick a sources/dev jar.
-        sync { from jar; into layout.buildDirectory.dir('ci/release') }
+        project.sync { spec ->
+            spec.from(jar)
+            spec.into(project.layout.buildDirectory.dir('ci/release'))
+        }
         logger.lifecycle("Verified release jar: ${jar.name} (${classes.size()} compiled main classes)")
     }
 }
