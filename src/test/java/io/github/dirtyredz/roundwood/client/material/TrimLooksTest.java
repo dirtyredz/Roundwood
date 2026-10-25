@@ -32,6 +32,15 @@ class TrimLooksTest {
     }
 
     @Test
+    void uniformLookTilesOneTextureOnFacesAndEdges() {
+        var texture = vanilla("block/oak_planks");
+        var look = TrimLooks.Look.tiled(texture);
+        assertFalse(look.whole());
+        assertEquals(texture, look.face());
+        assertEquals(texture, look.edge());
+    }
+
+    @Test
     void everyMasonryShowsTheSquareFrameFaceWhole() {
         for (MasonryMaterials.Material material : MasonryMaterials.ALL) {
             TrimLooks.Look look = TrimLooks.of(Appearance.masonry(material.block()), MasonryStyles::squareFace);

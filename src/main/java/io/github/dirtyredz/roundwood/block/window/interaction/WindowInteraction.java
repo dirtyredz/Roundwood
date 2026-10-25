@@ -23,9 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.Optional;
-import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
-import io.github.dirtyredz.roundwood.migration.conversion.LegacyCells;
-import io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion;
+import io.github.dirtyredz.roundwood.block.window.pane.RetiredCrossWindows;
 
 /**
  * A window's right-click router (0.8.0): the clicked face and region ({@link WindowHitTarget}) and
@@ -49,9 +47,9 @@ public final class WindowInteraction {
         if (plan.isEmpty()) {
             return InteractionResult.PASS;
         }
-        if (!level.isClientSide && CrossWindowCompatibility.isRetired(state)) {
-            if (WindowCrossConversion.convert(level, pos)
-                    != LegacyCells.Result.CONVERTED) return InteractionResult.CONSUME;
+        if (!level.isClientSide && RetiredCrossWindows.isRetired(state)) {
+            if (RetiredCrossWindows.handler().convert(level, pos)
+                    != RetiredCrossWindows.Result.CONVERTED) return InteractionResult.CONSUME;
             return use(level.getBlockState(pos), level, pos, player, hand, hit);
         }
         WindowHitTarget target = plan.get().target();

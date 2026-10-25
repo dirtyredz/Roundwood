@@ -22,7 +22,9 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   one canonical Front address, independent TRIM look, all 13 profiles. The 13 retired `_cross` blocks
   and items remain hidden alongside the 49 frozen aliases; world and stack placement migrate fail closed. Trim attachments go through
   `block/attachment` (`storage/FaceTrimStore`, `host/TrimFitting`, `host/TrimHost`, `TrimSlot`; anchor persistence in
-  `entity/AppearanceAnchorBlockEntity`, held items in `interaction/HeldTrimTool`), never a host copy. Doors, archways and
+  `block/attachment/AppearanceAnchorBlockEntity`, held items in `interaction/HeldTrimTool`), never a host copy.
+  Since 0.13.3, archway bodies, fitted trims and items tile donor wood/masonry sprites
+  (or painted window boards) on every face. Doors, archways and
   the frame share `block/assembly` (`Assembly` contract, integrity, removal, anchors, placement); never copy a lifecycle. Which
   items restyle: `appearance/material` (tagged planks, the fixed four masonry). What a look draws:
   `client/material` (`BuiltinWoodStyles`, `PaintStyles`) plus the generated art. Examples:

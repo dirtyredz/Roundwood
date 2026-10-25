@@ -47,14 +47,14 @@ public final class ArchwayModels {
     }
 
     /** Both designs use block-scale donor artwork on the body, casing and inventory model. */
-    public static TrimLooks.Look look(ArchwayDesign design, Appearance appearance) {
+    public static TrimLooks.Look look(Appearance appearance) {
         return look(appearance, AppearanceLooks::planks);
     }
 
     /** Explicit texture resolver keeps the material policy testable without a live client atlas. */
     static TrimLooks.Look look(Appearance appearance, Function<Appearance, ResourceLocation> textures) {
         ResourceLocation texture = textures.apply(appearance);
-        return new TrimLooks.Look(false, texture, texture);
+        return TrimLooks.Look.tiled(texture);
     }
 
     /** The frame in {@code part}'s cell of an archway facing {@code facing}. */
@@ -75,7 +75,7 @@ public final class ArchwayModels {
 
     /** {@code oakItem} ({@code design}'s generated item model) in {@code appearance}. */
     public static BakedModel item(ArchwayDesign design, BakedModel oakItem, Appearance appearance) {
-        TrimLooks.Look look = look(design, appearance);
+        TrimLooks.Look look = look(appearance);
         return MODELS.get(new Key(design, Layer.ITEM, ArchwayPart.LOWER_LEFT, Direction.NORTH, look), key -> PixelSlabModels.whole(
                 design::inFrame, 2, 2, ArchwayDesign.BACK, ArchwayDesign.FRONT, look, EXTENT, oakItem));
     }

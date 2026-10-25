@@ -22,6 +22,10 @@ import java.util.function.Function;
 public final class TrimLooks {
     /** Whole-face mapping (else tiled), and the face and edge artwork. Also a model-cache key. */
     public record Look(boolean whole, ResourceLocation face, ResourceLocation edge) {
+        /** One block-scale texture on every face and edge. */
+        public static Look tiled(ResourceLocation texture) {
+            return new Look(false, texture, texture);
+        }
     }
 
     public static final Look OAK = new Look(false, BuiltinWoodStyles.OAK_TRIM_LOG, BuiltinWoodStyles.OAK_TRIM_LOG);
@@ -34,7 +38,7 @@ public final class TrimLooks {
         ResourceLocation texture;
         if (!appearance.isWood() && appearance.paint().isEmpty()) texture = MasonryMaterials.byBlock(appearance.material()).map(MasonryStyles::edge).orElse(BuiltinWoodStyles.OAK_PLANKS);
         else texture = AppearanceLooks.planks(appearance);
-        return new Look(false, texture, texture);
+        return Look.tiled(texture);
     }
 
     public static Look of(Appearance appearance, Function<MasonryMaterials.Material, ResourceLocation> masonryFace) {

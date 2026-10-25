@@ -2,7 +2,6 @@ package io.github.dirtyredz.roundwood.client.archway;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.material.MasonryMaterials;
-import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.client.material.PaintStyles;
 import io.github.dirtyredz.roundwood.client.material.TrimLooks;
 import io.github.dirtyredz.roundwood.testsupport.MinecraftBootstrap;
@@ -36,12 +35,10 @@ class ArchwayModelsTest {
 
     @Test
     void paintUsesTheSameTiledBoardsOnFrontAndInnerFaces() {
-        for (ArchwayDesign design : ArchwayDesign.values()) {
-            for (DyeColor dye : DyeColor.values()) {
-                var texture = PaintStyles.windowPanel(dye);
-                assertEquals(new TrimLooks.Look(false, texture, texture),
-                        ArchwayModels.look(design, Appearance.DEFAULT.painted(dye)));
-            }
+        for (DyeColor dye : DyeColor.values()) {
+            var texture = PaintStyles.windowPanel(dye);
+            assertEquals(new TrimLooks.Look(false, texture, texture),
+                    ArchwayModels.look(Appearance.DEFAULT.painted(dye)));
         }
     }
 }

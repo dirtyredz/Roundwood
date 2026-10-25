@@ -49,7 +49,7 @@ public class ArchwayRenderer implements BlockEntityRenderer<ArchwayBlockEntity> 
             return;
         }
         VertexConsumer consumer = buffers.getBuffer(RenderType.solid());
-        TrimLooks.Look body = ArchwayModels.look(assembly.design(), entity.appearance());
+        TrimLooks.Look body = ArchwayModels.look(entity.appearance());
         for (ArchwayPart part : ArchwayPart.values()) {
             draw(level, assembly, part, ArchwayModels.body(assembly.design(), part, assembly.facing(), body), pose, consumer);
         }
@@ -58,7 +58,7 @@ public class ArchwayRenderer implements BlockEntityRenderer<ArchwayBlockEntity> 
             if (trim.isEmpty()) {
                 continue;
             }
-            TrimLooks.Look look = ArchwayModels.look(assembly.design(), trim.get());
+            TrimLooks.Look look = ArchwayModels.look(trim.get());
             for (ArchwayPart part : ArchwayPart.values()) {
                 draw(level, assembly, part, ArchwayModels.casing(assembly.design(), face, part, assembly.facing(), look), pose,
                         consumer);

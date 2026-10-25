@@ -2,6 +2,10 @@ package io.github.dirtyredz.roundwood.migration;
 
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
+import io.github.dirtyredz.roundwood.block.window.pane.RetiredCrossWindows;
+import io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
 import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassNbt;
 import net.minecraft.world.item.DyeColor;
@@ -30,8 +34,24 @@ public final class CrossWindowCompatibility {
 
     private CrossWindowCompatibility() { }
 
+    public static void registerWindowHandler() {
+        RetiredCrossWindows.register(new RetiredCrossWindows.Handler() {
+            @Override public RetiredCrossWindows.Result convert(Level level, BlockPos pos) {
+                return switch (WindowCrossConversion.convert(level, pos)) {
+                    case CONVERTED -> RetiredCrossWindows.Result.CONVERTED;
+                    case DEFERRED -> RetiredCrossWindows.Result.DEFERRED;
+                    case INCOMPLETE, NOT_LEGACY -> RetiredCrossWindows.Result.UNCHANGED;
+                };
+            }
+
+            @Override public ItemStack stack(WindowPaneBlock block, @Nullable RoundWindowBlockEntity entity) {
+                return CrossWindowCompatibility.stack(block, entity);
+            }
+        });
+    }
+
     public static boolean isRetired(BlockState state) {
-        return state.getBlock() instanceof WindowPaneBlock window && window.design().pattern() == WindowPattern.CROSS;
+        return RetiredCrossWindows.isRetired(state);
     }
 
     public static List<WindowPaneBlock> blocks() {

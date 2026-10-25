@@ -51,9 +51,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
-import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
-import io.github.dirtyredz.roundwood.migration.conversion.LegacyCells;
-import io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion;
 
 /**
  * What every single-cell window shares (the round window, the arches and the bottom corners, plain or
@@ -191,9 +188,9 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         BlockEntity entity = builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
         RoundWindowBlockEntity window = entity instanceof RoundWindowBlockEntity found ? found : null;
-        if (CrossWindowCompatibility.isRetired(state)) {
+        if (RetiredCrossWindows.isRetired(state)) {
             return super.getDrops(state, builder).isEmpty() ? List.of()
-                    : List.of(CrossWindowCompatibility.stack(this, window));
+                    : List.of(RetiredCrossWindows.handler().stack(this, window));
         }
         Appearance appearance = window != null ? window.appearance() : defaultAppearance();
         List<ItemStack> drops = AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.WINDOW, appearance);
@@ -219,9 +216,9 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
     @SuppressWarnings("deprecation")
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         super.tick(state, level, pos, random);
-        if (CrossWindowCompatibility.isRetired(state)) {
-            if (WindowCrossConversion.convert(level, pos)
-                    == LegacyCells.Result.DEFERRED) level.scheduleTick(pos, this, 20);
+        if (RetiredCrossWindows.isRetired(state)) {
+            if (RetiredCrossWindows.handler().convert(level, pos)
+                    == RetiredCrossWindows.Result.DEFERRED) level.scheduleTick(pos, this, 20);
             return;
         }
         WindowAttachmentState.reconcile(level, pos);

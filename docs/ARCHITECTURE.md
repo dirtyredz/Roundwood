@@ -571,7 +571,9 @@ absent beam in the frame look or keep an existing valid singleton, then install 
 mutation batch. Unknown beams refuse crossed conversion. Validate the write, destination entity and
 restored contents before publication; failure restores source state/data and only removes the new
 capture snapshots. Pose, water, connections, face identity, frame/glass, trims/sills and unknown
-stores survive. No migration drops. Pending harvest carries full data in one hidden stack. Hidden
+stores survive. No migration drops. Pending harvest carries full data in one hidden stack. The window-owned
+`pane/RetiredCrossWindows` port delegates conversion and pending drops to the migration handler
+registered by `Roundwood` bootstrap; window code never imports migration. Hidden
 items retain inventory identity; their shared placement/preview plan installs all contents before
 payment, with Forge cancellation and rollback preserved.
 
