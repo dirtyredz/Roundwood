@@ -409,6 +409,14 @@ The release jar is `build/libs/roundwood-1.20.1-<version>.jar`.
 
 ## Release
 
+Bump `mod_version` in `gradle.properties` and commit non-empty `docs/releases/<version>.md`.
+Push the branch, wait for green CI (tests, build, final-jar guard and datagen), then land on main
+and tag that commit `v<version>`. Pushing the tag builds again, runs the required GameTests,
+and creates a **draft prerelease** containing the jar, its SHA-256 file and `roundwood.pw.toml`.
+The owner publishes the draft after the in-game checks below. The pack session consumes the
+`.pw.toml` asset once published; draft download URLs are not public. Existing releases are never
+overwritten. Pushes and tags still need the owner's go-ahead.
+
 Not released yet. 0.5.0 is the baseline; 0.6.0 (targeted window placement and the arch pieces),
 0.6.1 (no glass bridges on positioned windows, the door highlight follows the swing) and 0.7.0
 (seamless clearer window glass, corner pieces, cross beams, window trims, thinner mortar) were

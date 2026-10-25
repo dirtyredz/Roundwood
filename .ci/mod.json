@@ -1,0 +1,7 @@
+{
+  "modId": "roundwood",
+  "mainPackage": "io.github.dirtyredz.roundwood",
+  "datagen": true,
+  "gametests": true,
+  "packSide": "both"
+}

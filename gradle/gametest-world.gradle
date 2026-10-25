@@ -5,12 +5,16 @@
 // Only a new world reads these settings; an existing world (a save-upgrade fixture) keeps its own generator.
 ext.gameTestWorld = { File dir ->
     dir.mkdirs()
+    def pack = file('tools/test-world/datapack')
+    if (!new File(pack, 'pack.mcmeta').isFile()) throw new GradleException('Missing standalone test-world datapack')
+    sync { from pack; into new File(dir, 'world/datapacks/mod_test_world') }
     new File(dir, 'server.properties').text = [
             'level-type=minecraft\\:flat',
             'generate-structures=false',
             'spawn-monsters=false',
             'spawn-animals=false',
             'spawn-npcs=false',
+            'initial-enabled-packs=vanilla,mod:forge,mod:roundwood,file/mod_test_world',
     ].join('\n') + '\n'
 }
 tasks.matching { it.name == 'runGameTestServer' }.configureEach { task ->
