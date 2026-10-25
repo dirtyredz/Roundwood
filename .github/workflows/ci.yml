@@ -20,13 +20,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-java@7a445ee88d4e23b52c33b10ccffbebb8a2e0e6c4 # v4.7.1
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - uses: ./.github/actions/setup-mod-build
       - name: Check pushed range whitespace
         env:
           BEFORE: ${{ github.event.before }}
@@ -39,22 +33,8 @@ jobs:
             # A new branch or manual run has no previous tip: check the whole tree.
             git diff --check "$(git hash-object -t tree /dev/null)" HEAD
           fi
-      - name: Build and verify release jar
-        run: |
-          chmod +x gradlew
-          ./gradlew test build verifyReleaseJar
-      - name: Check generated resources
-        shell: bash
-        run: |
-          if [[ "$(jq -er '.datagen | tostring' .ci/mod.json)" == true ]]; then
-            ./gradlew runData
-            changes=$(git status --porcelain --untracked-files=all -- src/generated)
-            if [[ -n "$changes" ]]; then
-              printf '%s\n' "$changes"
-              echo 'Generated resources differ; regenerate and commit them.' >&2
-              exit 1
-            fi
-          fi
+      - name: Verify
+        run: node .ci/scripts/verify.mjs
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: release-jar

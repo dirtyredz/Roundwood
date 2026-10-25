@@ -31,29 +31,9 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: actions/setup-java@7a445ee88d4e23b52c33b10ccffbebb8a2e0e6c4 # v4.7.1
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - uses: ./.github/actions/setup-mod-build
       - name: Verify
-        run: |
-          chmod +x gradlew
-          ./gradlew test build verifyReleaseJar
-      - name: Check generated resources
-        shell: bash
-        run: |
-          if [[ "$(jq -er '.datagen | tostring' .ci/mod.json)" == true ]]; then
-            ./gradlew runData
-            changes=$(git status --porcelain --untracked-files=all -- src/generated)
-            if [[ -n "$changes" ]]; then
-              printf '%s\n' "$changes"
-              echo 'Generated resources differ; regenerate and commit them.' >&2
-              exit 1
-            fi
-          fi
+        run: node .ci/scripts/verify.mjs
 
   gametest:
     if: github.ref == 'refs/heads/main'
@@ -66,13 +46,7 @@ jobs:
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: actions/setup-java@7a445ee88d4e23b52c33b10ccffbebb8a2e0e6c4 # v4.7.1
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      - uses: ./.github/actions/setup-mod-build
       # The job succeeds without launching Forge when GameTests are not configured.
       # Keeping the job in the graph means publish can require every job to succeed.
       - name: Release GameTests
@@ -80,13 +54,7 @@ jobs:
           if [[ "$(jq -er '.gametests | tostring' .ci/mod.json)" == true ]]; then
             chmod +x gradlew
             ./gradlew runGameTestServer --console=plain 2>&1 | tee gametest.log
-            python3 - <<'PY'
-          import pathlib, re
-          log = pathlib.Path('gametest.log').read_text()
-          counts = re.findall(r'All (\d+) required tests passed', log)
-          assert counts and int(counts[-1]) > 0, 'No positive GameTest completion count'
-          assert not re.search(r'\b[1-9]\d* (?:required|optional) tests failed', log), 'GameTests failed'
-          PY
+            node .ci/scripts/verify-gametest.mjs gametest.log
           fi
       - name: Upload GameTest logs
         if: always()
@@ -109,65 +77,25 @@ jobs:
       contents: read
     outputs:
       artifact-id: ${{ steps.upload.outputs.artifact-id }}
-      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: actions/setup-java@7a445ee88d4e23b52c33b10ccffbebb8a2e0e6c4 # v4.7.1
-        with:
-          distribution: temurin
-          java-version: '17'
-      - uses: gradle/actions/setup-gradle@017a9effdb900e5b5b2fddfb590a105619dca3c3 # v4.4.2
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-      - name: Read version and require release notes
-        id: version
-        run: |
-          python3 - <<'PY'
-          import os, pathlib, re
-          props = dict(line.split('=', 1) for line in pathlib.Path('gradle.properties').read_text().splitlines()
-                       if '=' in line and not line.lstrip().startswith('#'))
-          version = props['mod_version'].strip()
-          assert re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?', version), 'Expected semantic mod_version'
-          assert (pathlib.Path('docs/releases') / (version + '.md')).read_text().strip(), 'Release notes must be non-empty'
-          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-              output.write('tag=v' + version + '\n')
-          PY
+      - uses: ./.github/actions/setup-mod-build
       - name: Build the release artifact
         run: |
           chmod +x gradlew
           ./gradlew build verifyReleaseJar
       - name: Prepare checksum and packwiz asset
-        env:
-          TAG: ${{ steps.version.outputs.tag }}
-          REPOSITORY: ${{ github.repository }}
-          SERVER_URL: ${{ github.server_url }}
-        run: |
-          python3 - <<'PY'
-          import hashlib, json, os, pathlib
-          from urllib.parse import quote
-          config = json.loads(pathlib.Path('.ci/mod.json').read_text())
-          props = dict(line.split('=', 1) for line in pathlib.Path('gradle.properties').read_text().splitlines()
-                       if '=' in line and not line.lstrip().startswith('#'))
-          jars = list(pathlib.Path('build/ci/release').glob('*.jar'))
-          assert len(jars) == 1, 'Expected exactly one verified release jar'
-          jar = jars[0]
-          digest = hashlib.sha256(jar.read_bytes()).hexdigest()
-          jar.with_suffix('.jar.sha256').write_text(f'{digest}  {jar.name}\n')
-          url = f"{os.environ['SERVER_URL']}/{os.environ['REPOSITORY']}/releases/download/{quote(os.environ['TAG'], safe='')}/{quote(jar.name, safe='')}"
-          q = json.dumps
-          text = (f'name = {q(props["mod_name"].strip())}\nfilename = {q(jar.name)}\n'
-                  f'side = {q(config["packSide"])}\n\n[download]\nurl = {q(url)}\n'
-                  f'hash-format = "sha256"\nhash = {q(digest)}\n')
-          (jar.parent / (config['modId'] + '.pw.toml')).write_text(text)
-          PY
+        run: node .ci/scripts/release.mjs prepare build/ci/release.json build/ci/release
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         id: upload
         with:
           name: release-assets
-          path: build/ci/release/*
+          path: |
+            build/ci/release.json
+            build/ci/release/*
           if-no-files-found: error
           retention-days: 7
 
@@ -188,54 +116,9 @@ jobs:
         with:
           artifact-ids: ${{ needs.build.outputs.artifact-id }}
           merge-multiple: true
-          path: release
+          path: build/ci
       - name: Refuse reuse, draft, read back and publish
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          TAG: ${{ needs.build.outputs.tag }}
-        run: |
-          python3 - <<'PY'
-          import hashlib, json, os, pathlib, re, subprocess
-          def gh(*args):
-              return subprocess.check_output(['gh', *args], text=True)
-          repo, tag = os.environ['GH_REPO'], os.environ['TAG']
-          # Successful, paginated reads are required: auth/network errors never mean absent.
-          releases = json.loads(gh('api', '--paginate', '--slurp', f'repos/{repo}/releases?per_page=100'))
-          releases = [release for page in releases for release in page]
-          assert all(r['tag_name'] != tag for r in releases), 'Release already exists: ' + tag
-          refs = json.loads(gh('api', f'repos/{repo}/git/matching-refs/tags/{tag}'))
-          assert all(r['ref'] != 'refs/tags/' + tag for r in refs), 'Tag already exists: ' + tag
-          version = tag[1:]
-          prerelease = version.startswith('0.') or '-' in version
-          # Explicit false prevents GitHub from automatically choosing an older release.
-          # Compare against ALL published stable versions, not release creation dates.
-          stable = [r['tag_name'] for r in releases if not r['draft'] and not r['prerelease']]
-          def numeric(value):
-              assert re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+', value), 'Cannot order stable release: ' + value
-              return tuple(map(int, value[1:].split('.')))
-          latest = not prerelease and all(numeric(tag) > numeric(previous) for previous in stable)
-          assets = sorted(pathlib.Path('release').iterdir())
-          assert len(assets) == 3 and all(p.is_file() for p in assets), 'Expected jar, checksum and packwiz assets'
-          expected = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in assets}
-          # Create-only API: a racing tag creation fails, and no existing tag is ever moved.
-          gh('api', '--method', 'POST', f'repos/{repo}/git/refs', '-f', 'ref=refs/tags/' + tag,
-             '-f', 'sha=' + os.environ['GITHUB_SHA'])
-          gh('release', 'create', tag, *map(str, assets), '--verify-tag', '--draft', '--latest=false',
-             *(['--prerelease'] if prerelease else []), '--title', tag,
-             '--notes-file', 'docs/releases/' + version + '.md')
-          # The tag endpoint is for published releases; list with the write token to see drafts.
-          pages = json.loads(gh('api', '--paginate', '--slurp', f'repos/{repo}/releases?per_page=100'))
-          matches = [r for page in pages for r in page if r['tag_name'] == tag]
-          assert len(matches) == 1, 'Expected exactly one draft for ' + tag
-          release = matches[0]
-          assert release['draft'], 'Release must remain a draft until verified'
-          assert sorted(a['name'] for a in release['assets']) == sorted(expected), 'Unexpected release asset set'
-          gh('release', 'download', tag, '--dir', 'readback')
-          for name, digest in expected.items():
-              assert hashlib.sha256((pathlib.Path('readback') / name).read_bytes()).hexdigest() == digest, 'Readback SHA-256 mismatch: ' + name
-          gh('api', '--method', 'PATCH', f"repos/{repo}/releases/{release['id']}",
-             '-F', 'draft=false', '-F', 'prerelease=' + str(prerelease).lower(),
-             '-f', 'make_latest=' + str(latest).lower())
-          print('Published ' + tag + ' after SHA-256 readback of every asset')
-          PY
+        run: node .ci/scripts/release.mjs publish build/ci/release.json build/ci/release

@@ -6,13 +6,18 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
-- `.github/workflows/` - canonical hosted push gate and dispatch-to-publication release workflow.
-- `.ci/mod.json` - Roundwood package, id, datagen, GameTest and pack-side configuration.
-- `gradle/` - wrapper, flat GameTest world setup and canonical final-jar guard with regression fixtures.
-- `tools/test-world/datapack/` - copied canonical flat-world override, only used in GameTest saves.
+- `.github/` - synced workflows and `actions/setup-mod-build/` Java/Gradle composite (checkout bootstraps it).
+- `.ci/` - per-mod `mod.json` plus synced Node `scripts/` for verification, assets, GameTest completion and publication.
+- `gradle/` - wrapper, shared test-world definition/staging and final-jar guard with contamination/staging tests; emits `build/ci/release.json`.
+- `tools/test-world/datapack/` - canonical flat-world override, only used in GameTest saves; its path mirrors the root sync source.
 - `docs/releases/` - required versioned release bodies.
 
 ```
+.github/{workflows,actions/setup-mod-build}
+.ci/{mod.json,scripts}
+gradle/
+docs/releases/
+tools/test-world/datapack/
 src/main/java/.../roundwood/
   appearance/{material,item,interaction}   the look: value, donors, stacks, gestures
   migration/{block,conversion,item}             frozen 0.4.0 aliases, queue, per-family conversions
@@ -104,9 +109,8 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 - `src/test/java/io/github/dirtyredz/roundwood/` — pure JUnit tests (`testsupport/` bootstrap shim, `appearance/`, `migration/`, `client/material/`, `geometry/`, `block/assembly/`, `block/attachment/`, `block/attachment/storage/`, `block/attachment/host/`, `block/archway/geometry/`, `block/archway/trim/`, `block/door/leaf/`, `block/door/selection/`, `block/door/camouflage/`, `block/door/trim/`, `block/trim/geometry/`, `block/window/geometry/`, `block/window/geometry/face/`, `block/window/geometry/trim/`, `block/window/interaction/`, `block/window/glass/`, `block/window/placement/`, `block/window/trim/`, `client/window/`, `data/`)
 - `src/gameTest/java/io/github/dirtyredz/roundwood/` — Forge GameTests (`fixture/`, `fixture/assembly/`, `appearance/`, `block/assembly/`, `block/assembly/placement/`, `block/attachment/` (anchor persistence), `block/attachment/interaction/`, `migration/`, `block/archway/`, `block/door/`, `block/door/lifecycle/`, `block/door/placement/`, `block/door/appearance/`, `block/door/selection/`, `block/door/camouflage/`, `block/door/trim/`, `block/trim/`, `block/window/`, `block/window/design/`, `block/window/placement/`, `block/window/trim/`, `showcase/`, `showcase/section/` (one check class per section family beside the sections: `door/`, `window/`, the root for the pieces and materials rows), `data/`); never in the release jar
 - `src/gameTest/java/io/github/dirtyredz/roundwood/environment/` — test-only server startup spawning rule, flat-world environment guard and opt-in independent navigation repeats (`-PnavigationRepeats`)
-- `gradle/` — Gradle wrapper and mod-agnostic `gametest-world.gradle` (byte-identical to Herbal Witch)
 - `src/gameTest/resources/` — GameTest structure templates (empty ones, the 0.4.0 fixture and the 0.7.0 fitted-frame fixture), a test-only plank tag and a test-only `forge:shears` tag (a damageable non-shears item)
-- `tools/` — entry points of the deterministic generators for the textures, mod logo and GameTest structures (Node, not packaged)
+- `tools/` — deterministic generators for textures, the mod logo and GameTest structures, plus the synced test-world datapack (not packaged)
 - `tools/generate-logo.mjs` — 32px pixel-art master using the existing oak/stone palettes and PNG encoder; generates `src/main/resources/roundwood-logo.png` (256px, packaged for Forge). Run `node tools/generate-logo.mjs [artifact-directory]` to optionally export the identical launcher icon and a 256/64/32px preview; `node tools/generate-logo.mjs --check` checks reproducibility. `data/ModLogoTest` guards the resource binding, size, transparency and crisp scaling.
 - `tools/textures/` — PNG encoding, noise, palettes, historical artwork, door and paint boards, trim markers, and shared `mortar.mjs` primitives.
 - `tools/textures/masonry/` — historical and thin radial faces plus arch, square, casing, sill and archway masonry; every face imports the parent mortar primitives.
@@ -117,6 +121,7 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 
 | Component | Files | Responsibility |
 |---|---|---|
+| **CI/release verification** | `.github/`, `.ci/`, `gradle/`, `docs/releases/` | Shared hosted verify, GameTest completion, jar isolation, manifest, assets and draft readback |
 | Appearance | `appearance/Appearance`, `AppearanceFamily`, `AppearanceDefaults`, `AppearanceNbt`, `AppearanceChanges`, `AppearanceSamples` | Immutable look (wood/masonry + optional dye), which family takes what, a block's/item's default, the one NBT form, restyle rules, bounded examples |
 | Materials | `appearance/material/PlankMaterials`, `MasonryMaterials`, `DonorStacks` (package-private) | Plank donors by tag (+ `roundwood:appearance_planks`), the four masonry blocks and their artwork keys; the shared rule that a stack carrying placed contents or a non-default state is never a donor |
 | Items | `appearance/item/AppearanceStacks`, `AppearanceBlockItem`, `AppearanceTooltip`, `AppearanceDrops` | Normalised stack NBT, the family item (tooltip, alias name, no block-map claim), loot decoration |

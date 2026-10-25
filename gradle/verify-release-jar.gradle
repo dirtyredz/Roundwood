@@ -1,13 +1,16 @@
 import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
 import java.util.zip.ZipFile
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import java.util.regex.Pattern
 
+apply from: 'gradle/test-world.gradle'
+
 // Inspect names against compiled main outputs: reobfuscation changes bytecode, not class paths.
 class ReleaseJarGuard {
     static void verify(File jar, String expectedName, String modId, String version,
-                       String packagePath, Set<String> mainClasses, Set<String> testResources) {
+                       String packagePath, Set<String> mainClasses, Set<String> testResources, Map worldSpec) {
         if (jar.name != expectedName) throw new GradleException("Unexpected release filename: ${jar.name}")
         new ZipFile(jar).withCloseable { zip ->
             def metadata = zip.getEntry('META-INF/mods.toml')
@@ -30,10 +33,11 @@ class ReleaseJarGuard {
                 if (name.toLowerCase(Locale.ROOT).endsWith('.jar')) {
                     throw new GradleException("Nested jar in release jar: ${name}")
                 }
-                if (testResources.contains(name) || name.toLowerCase(Locale.ROOT).contains('gametest')
-                        || name.startsWith('data/mod_test_world/')
-                        || name == 'data/minecraft/dimension/overworld.json'
-                        || name.startsWith('tools/test-world/')) {
+                if (testResources.contains(name) || worldSpec.forbiddenTokens.any { name.toLowerCase(Locale.ROOT).contains(it) }
+                        || name.startsWith("data/${worldSpec.namespace}/")
+                        || name == worldSpec.dimensionPath
+                        || name.startsWith(worldSpec.toolingPath)
+                        || name.startsWith("${worldSpec.worldPath}/datapacks/${worldSpec.packName}/")) {
                     throw new GradleException("Test resource in release jar: ${name}")
                 }
             }
@@ -53,7 +57,11 @@ tasks.register('testReleaseJarVerifier') {
         def cases = [clean: [:], samePackageGameTest: ['example/mod/HiddenTest.class': 'test'],
                      foreignClass: ['other/Main.class': 'test'], nestedJar: ['META-INF/jarjar/dependency.jar': 'test'],
                      testResource: ['data/fixture/structures/empty.nbt': 'test'],
-                     testWorld: ['data/minecraft/dimension/overworld.json': '{}'],
+                     testWorld: [(testWorldSpec.dimensionPath): '{}'],
+                     testNamespace: [("data/${testWorldSpec.namespace}/functions/quiet.mcfunction"): 'test'],
+                     testTooling: [(testWorldSpec.toolingPath + 'fixture.txt'): 'test'],
+                     testPack: [("${testWorldSpec.worldPath}/datapacks/${testWorldSpec.packName}/pack.mcmeta"): '{}'],
+                     testMarker: ['assets/fixture/GameTest.txt': 'test'],
                      unexpandedVersion: ['META-INF/mods.toml': 'modId="fixture"\nversion="${mod_version}"\n'],
                      missingMetadata: [:], wrongFilename: [:]]
         cases.each { label, extra ->
@@ -68,7 +76,7 @@ tasks.register('testReleaseJarVerifier') {
             String failure = null
             try {
                 ReleaseJarGuard.verify(jar, 'fixture.jar', 'fixture', '1.0', 'example/mod',
-                        ['example/mod/Main.class'] as Set, ['data/fixture/structures/empty.nbt'] as Set)
+                        ['example/mod/Main.class'] as Set, ['data/fixture/structures/empty.nbt'] as Set, testWorldSpec)
             } catch (GradleException e) { failure = e.message }
             if ((label == 'clean') != (failure == null)) {
                 throw new GradleException("Jar guard regression ${label}: ${failure ?: 'contamination accepted'}")
@@ -82,6 +90,7 @@ tasks.register('verifyReleaseJar') {
     group = 'verification'
     description = 'Verify and stage only the final reobfuscated production jar.'
     dependsOn 'reobfJar', 'testReleaseJarVerifier'
+    dependsOn tasks.matching { it.name == 'testGameTestWorld' }
     doLast {
         def config = new JsonSlurper().parse(file('.ci/mod.json'))
         if (!(config.modId == mod_id && config.mainPackage ==~ /[a-zA-Z_]\w*(\.[a-zA-Z_]\w*)+/
@@ -90,7 +99,14 @@ tasks.register('verifyReleaseJar') {
             throw new GradleException('Invalid .ci/mod.json')
         }
         def jar = tasks.named('jar', Jar).get().archiveFile.get().asFile
-        def expected = "${config.modId}-${minecraft_version}-${mod_version}.jar".toString()
+        def releaseVersion = mod_version.toString()
+        if (!(releaseVersion ==~ /(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?/)) {
+            throw new GradleException('Expected semantic mod_version')
+        }
+        def expected = "${config.modId}-${minecraft_version}-${releaseVersion}.jar".toString()
+        def manifest = [modId: config.modId, name: mod_name.toString(), version: releaseVersion,
+                        tag: "v${releaseVersion}".toString(), side: config.packSide, jarFilename: expected,
+                        prerelease: releaseVersion.startsWith('0.') || releaseVersion.contains('-')]
         Set<String> classes = [] as Set
         sourceSets.main.output.classesDirs.each { root ->
             fileTree(root).matching { include '**/*.class' }.visit { detail ->
@@ -105,12 +121,14 @@ tasks.register('verifyReleaseJar') {
             }
         }
         ReleaseJarGuard.verify(jar, expected, config.modId, mod_version.toString(),
-                config.mainPackage.replace('.', '/'), classes, resources)
+                config.mainPackage.replace('.', '/'), classes, resources, testWorldSpec)
         // Downstream upload paths cannot accidentally pick a sources/dev jar.
         project.sync { spec ->
             spec.from(jar)
             spec.into(project.layout.buildDirectory.dir('ci/release'))
         }
+        def manifestFile = layout.buildDirectory.file('ci/release.json').get().asFile
+        manifestFile.setText(JsonOutput.prettyPrint(JsonOutput.toJson(manifest)) + '\n', 'UTF-8')
         logger.lifecycle("Verified release jar: ${jar.name} (${classes.size()} compiled main classes)")
     }
 }
