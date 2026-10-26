@@ -1,54 +1,45 @@
 package io.github.dirtyredz.roundwood.block.arch.assembly;
 
+import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
+import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceGeometry;
+import io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side;
 import net.minecraft.core.Direction;
 import org.junit.jupiter.api.Test;
-import static io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side.*;
+import java.util.HashSet;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ArchPieceTargetingTest {
-    @Test void overlayZonesSelectTheSameSideAsPlacementOnEveryFace() {
+    @Test void everyFaceOffersAllFourEdgesAndOverlayCentroidsSelectTheirOwnZone() {
         for (var facing : Direction.Plane.HORIZONTAL) for (var face : Direction.values()) {
-            if (face == facing.getClockWise() || face == facing.getCounterClockWise()) {
-                var side = ArchPieceTargeting.side(facing, face, .5, .5);
-                assertEquals(new ArchPieceTargeting.FaceZone(0, 0, 1, 1), ArchPieceTargeting.zone(facing, face, side));
-                continue;
-            }
-            for (var side : new io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side[]{LEFT, RIGHT}) {
-                var zone = ArchPieceTargeting.zone(facing, face, side);
-                assertEquals(.5, (zone.maxU() - zone.minU()) * (zone.maxV() - zone.minV()));
-                double u = (zone.minU() + zone.maxU()) / 2, v = (zone.minV() + zone.maxV()) / 2;
+            var edges = new HashSet<Direction>();
+            for (var zone : ArchPieceTargeting.Zone.values()) {
+                var polygon = ArchPieceTargeting.polygon(zone);
+                double u = polygon.stream().mapToDouble(ArchPieceTargeting.Point::u).average().orElseThrow();
+                double v = polygon.stream().mapToDouble(ArchPieceTargeting.Point::v).average().orElseThrow();
                 double x = face.getAxis() == Direction.Axis.X ? .5 : u;
+                double y = face.getAxis() == Direction.Axis.Y ? .5 : v;
                 double z = face.getAxis() == Direction.Axis.Y ? v : face.getAxis() == Direction.Axis.X ? u : .5;
-                assertEquals(side, ArchPieceTargeting.side(facing, face, x, z));
-            }
-        }
-    }
-    @Test
-    void frontBackUpDownShareTheSameSplitInEveryFacing() {
-        for (Direction facing : Direction.Plane.HORIZONTAL) {
-            Direction right = facing.getClockWise();
-            for (Direction face : new Direction[]{facing, facing.getOpposite(), Direction.UP, Direction.DOWN}) {
-                for (double along : new double[]{0, .25, .5, .75, 1}) {
-                    double x = .5 + right.getStepX() * (along - .5), z = .5 + right.getStepZ() * (along - .5);
-                    assertEquals(along, ArchPieceTargeting.across(facing, x, z));
-                    assertEquals(along <= .5 ? LEFT : RIGHT, ArchPieceTargeting.side(facing, face, x, z));
+                var target = ArchPieceTargeting.target(facing, face, x, y, z);
+                assertEquals(zone, target.zone());
+                var edge = target.side() == Side.LEFT ? target.facing().getCounterClockWise() : target.facing().getClockWise();
+                assertTrue(edges.add(edge), "unreachable shoulder edge");
+                var boxes = ArchPieceGeometry.placed(ArchPieceDesign.KEYHOLE_SHOULDER, target.side(), target.facing());
+                assertFalse(boxes.isEmpty());
+                for (var box : boxes) {
+                    if (edge == Direction.WEST) assertTrue(box.maxX() <= 4);
+                    if (edge == Direction.EAST) assertTrue(box.minX() >= 12);
+                    if (edge == Direction.NORTH) assertTrue(box.maxZ() <= 4);
+                    if (edge == Direction.SOUTH) assertTrue(box.minZ() >= 12);
                 }
-                // Exact tie and immediately adjacent binary-exact positions.
-                double delta = Math.scalb(1.0, -20);
-                assertEquals(LEFT, ArchPieceTargeting.side(facing, face, .5, .5));
-                assertEquals(RIGHT, ArchPieceTargeting.side(facing, face, .5 + right.getStepX() * delta, .5 + right.getStepZ() * delta));
-                assertEquals(LEFT, ArchPieceTargeting.side(facing, face, .5 - right.getStepX() * delta, .5 - right.getStepZ() * delta));
             }
+            assertEquals(4, edges.size());
         }
     }
-
-    @Test
-    void sideWallsSelectTheEdgeTouchingTheWallRegardlessOfHitHalf() {
-        for (Direction facing : Direction.Plane.HORIZONTAL) for (double hit : new double[]{0, .5, 1}) {
-            assertEquals(LEFT, ArchPieceTargeting.side(facing, facing.getClockWise(), hit, hit));
-            assertEquals(RIGHT, ArchPieceTargeting.side(facing, facing.getCounterClockWise(), hit, hit));
-        }
-        assertThrows(IllegalArgumentException.class, () -> ArchPieceTargeting.across(Direction.UP, .5, .5));
-        assertThrows(IllegalArgumentException.class, () -> ArchPieceTargeting.across(Direction.NORTH, Double.NaN, .5));
+    @Test void tiesAndNonFiniteHitsAreExplicit() {
+        assertEquals(ArchPieceTargeting.Zone.U_MIN, ArchPieceTargeting.classify(.5, .5));
+        assertEquals(ArchPieceTargeting.Zone.U_MAX, ArchPieceTargeting.classify(.75, .75));
+        assertEquals(ArchPieceTargeting.Zone.V_MAX, ArchPieceTargeting.classify(.75, .875));
+        assertThrows(IllegalArgumentException.class, () -> ArchPieceTargeting.classify(Double.NaN, .5));
+        assertThrows(IllegalArgumentException.class, () -> ArchPieceTargeting.target(Direction.UP, Direction.UP, .5, .5, .5));
     }
 }

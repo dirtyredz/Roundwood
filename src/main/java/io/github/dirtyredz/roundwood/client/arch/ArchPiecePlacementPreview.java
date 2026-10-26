@@ -77,10 +77,12 @@ public final class ArchPiecePlacementPreview {
             var face = hit.getDirection();
             Vec3 origin = Vec3.atLowerCornerOf(hit.getBlockPos());
             double plane = hit.getLocation().subtract(origin).get(face.getAxis()) + face.getAxisDirection().getStep() * .002;
-            var full = new ArchPieceTargeting.FaceZone(0, 0, 1, 1);
-            rectangle(event, face, plane, origin.subtract(camera), full, .45F);
             if (assembly.design().shoulder()) {
-                rectangle(event, face, plane, origin.subtract(camera), ArchPieceTargeting.zone(assembly.facing(), face, assembly.side()), 1);
+                Vec3 local = hit.getLocation().subtract(origin);
+                var selected = ArchPieceTargeting.target(client.player.getDirection(), face, local.x, local.y, local.z).zone();
+                for (var zone : ArchPieceTargeting.Zone.values()) {
+                    polygon(event, face, plane, origin.subtract(camera), ArchPieceTargeting.polygon(zone), zone == selected ? 1 : .35F);
+                }
             }
         });
     }
@@ -93,13 +95,13 @@ public final class ArchPiecePlacementPreview {
         };
     }
 
-    private static void rectangle(RenderHighlightEvent.Block event, Direction face, double plane, Vec3 origin,
-                                  ArchPieceTargeting.FaceZone zone, float brightness) {
-        Vec3[] corners = new Vec3[4];
-        for (int i = 0; i < 4; i++) corners[i] = facePoint(face, plane,
-                i == 1 || i == 2 ? zone.maxU() : zone.minU(), i >= 2 ? zone.maxV() : zone.minV()).add(origin);
-        for (int i = 0; i < 4; i++) {
-            Vec3 a = corners[i], b = corners[(i + 1) % 4];
+    private static void polygon(RenderHighlightEvent.Block event, Direction face, double plane, Vec3 origin,
+                                java.util.List<ArchPieceTargeting.Point> points, float brightness) {
+        for (int i = 0; i < points.size(); i++) {
+            var p = points.get(i);
+            var q = points.get((i + 1) % points.size());
+            Vec3 a = facePoint(face, plane, p.u(), p.v()).add(origin);
+            Vec3 b = facePoint(face, plane, q.u(), q.v()).add(origin);
             OutlineLines.line(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.lines()),
                     a.x, a.y, a.z, b.x, b.y, b.z, brightness, brightness, brightness, .9F);
         }

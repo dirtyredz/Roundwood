@@ -23,9 +23,10 @@ public final class ArchPiecePlacement {
     public static Optional<AssemblyPlacementPlan<ArchPieceCell, ArchPieceLayout.Assembly>> of(ArchPieceBlock block, BlockPlaceContext context) {
         BlockPos anchor = context.getClickedPos().immutable();
         Vec3 hit = context.getClickLocation();
-        Side side = block.design().shoulder() ? ArchPieceTargeting.side(context.getHorizontalDirection(), context.getClickedFace(),
-                hit.x - anchor.getX(), hit.z - anchor.getZ()) : Side.LEFT;
-        var assembly = new ArchPieceLayout.Assembly(anchor, context.getHorizontalDirection(), block.design(), side);
+        var target = block.design().shoulder() ? ArchPieceTargeting.target(context.getHorizontalDirection(), context.getClickedFace(),
+                hit.x - anchor.getX(), hit.y - anchor.getY(), hit.z - anchor.getZ())
+                : new ArchPieceTargeting.Target(context.getHorizontalDirection(), Side.LEFT, null);
+        var assembly = new ArchPieceLayout.Assembly(anchor, target.facing(), block.design(), target.side());
         if (!AssemblyPlacementPlan.playerCells(context, assembly, pos -> {})) return Optional.empty();
         var player = context.getPlayer();
         return plan(context.getLevel(), block, assembly, player == null ? CollisionContext.empty() : CollisionContext.of(player));
