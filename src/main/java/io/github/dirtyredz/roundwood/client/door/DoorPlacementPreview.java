@@ -58,6 +58,7 @@ public final class DoorPlacementPreview {
         if (resolved.isEmpty()) {
             return Optional.empty(); // no loaded owner for the aimed point
         }
+        if (io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.claims(new net.minecraft.world.item.context.UseOnContext(player, hand, hit))) return Optional.empty();
         ItemStack stack = player.getItemInHand(hand);
         return DoorPlacement.of(((RoundDoorItem) stack.getItem()).door(),
                 new BlockPlaceContext(player, hand, stack, resolved.get()));
@@ -74,7 +75,7 @@ public final class DoorPlacementPreview {
             draw(pose, lines, origin, DoorPlacementOutline.footprint(plan.assembly()), CELLS);
             draw(pose, lines, origin, DoorPlacementOutline.silhouette(plan.assembly(), plan.anchorState().getValue(net.minecraft.world.level.block.DoorBlock.OPEN)), LEAF);
             draw(pose, lines, origin, DoorPlacementOutline.hingeAxes(plan.assembly()), HINGE);
-            if (plan.assembly().design() != io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ARCHED) {
+            {
                 var hit = event.getTarget();
                 var face = hit.getDirection();
                 var base = Vec3.atLowerCornerOf(hit.getBlockPos());

@@ -29,6 +29,9 @@ public final class Roundwood {
     public static final String MOD_ID = "roundwood";
 
     public Roundwood() {
+        io.github.dirtyredz.roundwood.block.arch.fitting.ArchDoorFitting.bind(
+                io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting::claims,
+                io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting::use);
         DoorUseChannel.register();
         CrossWindowCompatibility.registerWindowHandler();
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();

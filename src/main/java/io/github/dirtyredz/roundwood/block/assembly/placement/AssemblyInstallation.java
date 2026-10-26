@@ -30,44 +30,14 @@ import java.util.List;
  * that is the outer transaction's rollback, not this one.
  */
 public final class AssemblyInstallation {
-    private record Captured(BlockPos pos, BlockState state, @Nullable CompoundTag entity) {
-    }
-
-    private AssemblyInstallation() {
-    }
-
-    /** Installs {@code plan} with {@code appearance} on its anchor entity of {@code anchorType}; false (nothing changed) when refused. */
+    private AssemblyInstallation() {}
     public static <P> boolean install(Level level, AssemblyPlacementPlan<P, ? extends Assembly<P>> plan, Appearance appearance,
                                       Class<? extends AppearanceAnchor> anchorType) {
-        if (level.restoringBlockSnapshots) {
-            return false;
-        }
-        Assembly<P> assembly = plan.assembly();
-        List<BlockPos> cells = assembly.positions();
-        List<Captured> before = capture(level, cells);
-        int mark = level.capturedBlockSnapshots.size();
-        boolean installed;
-        try {
-            boolean[] written = {true};
-            boolean ran = AssemblyMutationBatch.run(level, cells, () -> {
-                for (P part : assembly.parts()) {
-                    if (!level.setBlock(assembly.pos(part), plan.states().get(part), Block.UPDATE_ALL)) {
-                        written[0] = false;
-                        return;
-                    }
-                }
-            });
-            installed = ran && written[0] && installAppearance(level, assembly.anchor(), appearance, anchorType);
-        } catch (RuntimeException | Error failure) {
-            rollback(level, cells, before, mark);
-            throw failure;
-        }
-        if (!installed) {
-            rollback(level, cells, before, mark);
-        }
-        return installed;
+        var states = new java.util.LinkedHashMap<BlockPos, BlockState>();
+        for (P part : plan.assembly().parts()) states.put(plan.assembly().pos(part), plan.states().get(part));
+        return AssemblyWriteTransaction.write(level, states, false,
+                () -> installAppearance(level, plan.assembly().anchor(), appearance, anchorType), () -> true);
     }
-
     private static boolean installAppearance(Level level, BlockPos anchor, Appearance appearance,
                                              Class<? extends AppearanceAnchor> anchorType) {
         if (level.getBlockEntity(anchor) instanceof AppearanceAnchor entity && anchorType.isInstance(entity)) {
@@ -77,58 +47,4 @@ public final class AssemblyInstallation {
         return false;
     }
 
-    private static List<Captured> capture(Level level, List<BlockPos> cells) {
-        List<Captured> captured = new ArrayList<>(cells.size());
-        for (BlockPos pos : cells) {
-            BlockEntity entity = level.getBlockEntity(pos);
-            captured.add(new Captured(pos.immutable(), level.getBlockState(pos), entity == null ? null : entity.saveWithFullMetadata()));
-        }
-        return captured;
-    }
-
-    /**
-     * Puts every cell back, last first. While restoring, snapshot capture is off and the level counts as
-     * restoring snapshots (no drops, and the assemblies' own removal and integrity callbacks stand down),
-     * inside a mutation batch where nesting allows; both flags are restored afterwards whatever happens.
-     * Outside a capture the neighbours are told once everything is back, as the writes told them.
-     */
-    private static void rollback(Level level, List<BlockPos> cells, List<Captured> before, int mark) {
-        boolean capturing = level.captureBlockSnapshots;
-        boolean restoring = level.restoringBlockSnapshots;
-        level.captureBlockSnapshots = false;
-        level.restoringBlockSnapshots = true;
-        try {
-            if (level.capturedBlockSnapshots.size() > mark) {
-                level.capturedBlockSnapshots.subList(mark, level.capturedBlockSnapshots.size()).clear();
-            }
-            Runnable restore = () -> {
-                for (int i = before.size() - 1; i >= 0; i--) {
-                    restore(level, before.get(i));
-                }
-            };
-            if (!AssemblyMutationBatch.run(level, cells, restore)) {
-                restore.run();
-            }
-        } finally {
-            level.captureBlockSnapshots = capturing;
-            level.restoringBlockSnapshots = restoring;
-        }
-        if (!capturing) {
-            for (Captured cell : before) {
-                level.updateNeighborsAt(cell.pos(), cell.state().getBlock());
-                cell.state().updateNeighbourShapes(level, cell.pos(), Block.UPDATE_CLIENTS, Block.UPDATE_LIMIT - 1);
-            }
-        }
-    }
-
-    private static void restore(Level level, Captured cell) {
-        level.setBlock(cell.pos(), cell.state(), Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
-        if (cell.entity() != null) {
-            BlockEntity entity = level.getBlockEntity(cell.pos());
-            if (entity != null) {
-                entity.load(cell.entity());
-                entity.setChanged();
-            }
-        }
-    }
 }

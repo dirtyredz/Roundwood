@@ -396,7 +396,12 @@ public final class AssemblyPlacementGameTests {
     }
 
     private static AssemblyDoorBlock doorBlock(DoorDesign design) {
-        return design == DoorDesign.ROUND ? ModBlocks.roundDoor() : ModBlocks.archedDoor();
+        return switch (design) {
+            case ROUND -> ModBlocks.roundDoor();
+            case ARCHED -> ModBlocks.archedDoor();
+            case DOUBLE_ARCHED -> ModBlocks.doubleArchedDoor();
+            case TALL_DOUBLE_ARCHED -> ModBlocks.tallDoubleArchedDoor();
+        };
     }
 
     /** The floor click {@code DoorFixtures.placeDoor} makes for {@code hinge}, as a context (the stack in the main hand). */

@@ -50,6 +50,10 @@ public final class DoorInteraction {
 
     public static InteractionResult use(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
                                         InteractionHand hand, BlockHitResult hit) {
+        var fitContext = new net.minecraft.world.item.context.UseOnContext(player, hand, hit);
+        if (io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.claims(fitContext)) return io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.use(fitContext);
+        if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty()
+                && player.getOffhandItem().getItem() instanceof io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceItem) return InteractionResult.PASS;
         HeldTrimTool tool = HeldTrimTool.of(player, hand);
         if (tool.is(HeldTrimTool.Kind.ATTACHMENT)) {
             Optional<AttachmentFace> face = fitFace(state, pos, tool, hit);
@@ -81,6 +85,7 @@ public final class DoorInteraction {
     /** The sneak-use bridge: a trim fit, a trim-ring action, or the door's ordinary restyling gesture. */
     public static boolean claims(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand,
                                  BlockHitResult hit) {
+        if (io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.claims(new net.minecraft.world.item.context.UseOnContext(player, hand, hit))) return true;
         HeldTrimTool tool = HeldTrimTool.of(player, hand);
         if (tool.is(HeldTrimTool.Kind.ATTACHMENT)) {
             return fitFace(state, pos, tool, hit).isPresent();

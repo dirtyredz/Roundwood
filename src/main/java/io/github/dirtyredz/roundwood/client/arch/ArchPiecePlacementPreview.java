@@ -54,6 +54,7 @@ public final class ArchPiecePlacementPreview {
     public static Optional<AssemblyPlacementPlan<ArchPieceCell, ArchPieceLayout.Assembly>> of(Player player, Level level, BlockHitResult hit) {
         var hand = PlacementHighlights.held(player, stack -> stack.getItem() instanceof ArchPieceItem);
         if (hand == null || player.isSpectator() || !level.isLoaded(hit.getBlockPos())) return Optional.empty();
+        if (io.github.dirtyredz.roundwood.block.arch.fitting.ArchDoorFitting.claims(new net.minecraft.world.item.context.UseOnContext(player, hand, hit))) return Optional.empty();
         if (!player.isSecondaryUseActive() && !passive(level.getBlockState(hit.getBlockPos()))) return Optional.empty();
         var stack = player.getItemInHand(hand);
         return ArchPiecePlacement.of(((ArchPieceItem) stack.getItem()).piece(), new BlockPlaceContext(player, hand, stack, hit));

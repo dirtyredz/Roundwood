@@ -26,6 +26,9 @@ public class RoundDoorItem extends AppearanceBlockItem {
         return (AssemblyDoorBlock) getBlock();
     }
 
+    @Override public InteractionResult useOn(net.minecraft.world.item.context.UseOnContext context) {
+        return io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.claims(context) ? io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.use(context) : super.useOn(context);
+    }
     @Override
     public InteractionResult place(BlockPlaceContext context) {
         return DoorPlacement.place(this, context);

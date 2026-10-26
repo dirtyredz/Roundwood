@@ -41,7 +41,7 @@ if (project.hasProperty('navigationRepeats')) {
 if (project.hasProperty('doorTargets')) {
     sourceSets.gameTest.java.include '**/fixture/**', '**/DoorTargetsGameTests.java',
             '**/ArchPiecePlacementGameTests.java', '**/ArchPieceTrimGameTests.java', '**/ArchThinningGameTests.java',
-            '**/DoorFreeEdgeGameTests.java', '**/DoorArchPersistenceGameTests.java', '**/TestWorldGameTests.java'
+            '**/DoorFreeEdgeGameTests.java', '**/DoorArchPersistenceGameTests.java', '**/DoorArchFittingGameTests.java', '**/AssemblyPlacementGameTests.java', '**/TestWorldGameTests.java'
 }
 
 // Explicit red witness while the fitted-door slices are still under construction.
