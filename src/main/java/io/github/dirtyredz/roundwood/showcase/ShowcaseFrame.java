@@ -12,7 +12,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
  */
 public final class ShowcaseFrame {
     public static final int WIDTH = 88;
-    public static final int DEPTH = 26;
+    public static final int DEPTH = ShowcaseSpacing.ROW_ARCH_COMPOSITIONS + 2;
     public static final int HEIGHT = 6;
 
     private final BlockPos origin;

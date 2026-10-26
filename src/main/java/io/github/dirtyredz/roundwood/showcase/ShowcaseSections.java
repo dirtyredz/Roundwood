@@ -31,7 +31,9 @@ public final class ShowcaseSections {
             new WindowSillsSection(),
             new WindowMuntinsSection(),
             new CamouflageSection(),
-            new RedstoneSection());
+            new RedstoneSection(),
+            new io.github.dirtyredz.roundwood.showcase.section.arch.ArchPiecesSection(),
+            new io.github.dirtyredz.roundwood.showcase.section.arch.ArchCompositionsSection());
 
     private ShowcaseSections() {
     }

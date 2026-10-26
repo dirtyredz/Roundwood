@@ -1,8 +1,6 @@
 package io.github.dirtyredz.roundwood.showcase.section;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
-import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
@@ -22,7 +20,7 @@ import java.util.stream.IntStream;
 /**
  * One of each placeable piece, oak, default state, in a single row with a sign beside each:
  * the thirteen windows (one per profile), the round door, the arched door (both closed, hinge left)
- * and the ordinary and keyhole archways. Each stands {@link ShowcaseSpacing#GAP} clear blocks from the
+ * with modular arches in their own section. Each stands {@link ShowcaseSpacing#GAP} clear blocks from the
  * next, its sign two columns to its left in the same row. Occupies {@code r 0..R_MAX, f 1}; the
  * section's rectangle is checked to hold nothing else.
  */
@@ -31,10 +29,7 @@ public final class PiecesSection implements ShowcaseSection {
     private static final int WINDOW_PITCH = ShowcaseSpacing.pitch(1);
     public static final int ROUND_DOOR_R = windowR(WindowProfile.values().length);
     public static final int ARCHED_DOOR_R = ROUND_DOOR_R + ShowcaseSpacing.pitch(2);
-    public static final int ARCHWAY_R = ARCHED_DOOR_R + ShowcaseSpacing.pitch(1);
-    public static final int KEYHOLE_R = ARCHWAY_R + ShowcaseSpacing.pitch(2);
-    /** The last column of the section: the keyhole archway is two wide. */
-    public static final int R_MAX = KEYHOLE_R + 1;
+    public static final int R_MAX = ARCHED_DOOR_R;
 
     @Override
     public String id() {
@@ -68,9 +63,5 @@ public final class PiecesSection implements ShowcaseSection {
         canvas.door(oak, ROUND_DOOR_R, F, DoorHingeSide.LEFT, false);
         canvas.sign(ARCHED_DOOR_R, F, "Arched door");
         canvas.door(ModBlocks.archedDoor(), oak, ARCHED_DOOR_R, F, DoorHingeSide.LEFT, false);
-        canvas.sign(ARCHWAY_R, F, "Archway", "Filled corners");
-        canvas.archway(ModBlocks.archway(ArchwayDesign.ORDINARY), oak, FaceTrims.NONE, ARCHWAY_R, F);
-        canvas.sign(KEYHOLE_R, F, "Keyhole archway", "Filled corners");
-        canvas.archway(ModBlocks.archway(ArchwayDesign.KEYHOLE), oak, FaceTrims.NONE, KEYHOLE_R, F);
     }
 }

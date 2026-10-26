@@ -5,6 +5,7 @@ import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.showcase.section.SectionChecks;
+import io.github.dirtyredz.roundwood.showcase.section.arch.ArchSectionsChecks;
 import io.github.dirtyredz.roundwood.showcase.section.door.DoorSectionsChecks;
 import io.github.dirtyredz.roundwood.showcase.section.window.WindowSectionsChecks;
 import net.minecraft.commands.CommandSourceStack;
@@ -28,7 +29,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 
 /**
- * The showcase builder in a 92 x 10 x 92 template (the bounds are 90 x 8 x 28) filled with gold: everything it promises is
+ * The showcase builder in a 92 x 10 x 92 template (the bounds are 90 x 8 x 40) filled with gold: everything it promises is
  * present, complete and in the appearance its section names, and no gold outside its bounds was
  * touched (in each facing).
  */
@@ -110,7 +111,7 @@ public final class ShowcaseGameTests {
         int across = Math.min(bounds.getXSpan(), bounds.getZSpan());
         int along = Math.max(bounds.getXSpan(), bounds.getZSpan());
         check(across == ShowcaseFrame.DEPTH + 2 && along == ShowcaseFrame.WIDTH + 2 && bounds.getYSpan() == 8,
-                "bounds are not 90 x 8 x 28: " + bounds);
+                "bounds are not 90 x 8 x 40: " + bounds);
 
         ShowcaseFrame frame = ShowcaseFrame.at(feet, facing);
         verifyBounds(helper, bounds);
@@ -122,6 +123,7 @@ public final class ShowcaseGameTests {
         WindowSectionsChecks.verifyNewWindowSections(level, frame);
         SectionChecks.verifyPieces(level, frame);
         SectionChecks.verifyMaterials(level, frame);
+        ArchSectionsChecks.verify(level, frame);
         SpacingChecks.verifySpacing(level, frame);
         // Integrity checks run a tick later: everything must still be whole afterwards.
         helper.runAfterDelay(3, () -> {
@@ -130,6 +132,7 @@ public final class ShowcaseGameTests {
             WindowSectionsChecks.verifyNewWindowSections(level, frame);
             SectionChecks.verifyPieces(level, frame);
             SectionChecks.verifyMaterials(level, frame);
+            ArchSectionsChecks.verify(level, frame);
             clearSilently(helper);
             helper.succeed();
         });

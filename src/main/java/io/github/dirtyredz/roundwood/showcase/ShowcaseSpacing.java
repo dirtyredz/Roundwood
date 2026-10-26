@@ -26,6 +26,9 @@ public final class ShowcaseSpacing {
     public static final int ROW_ARCHES = 18;
     public static final int ROW_CORNERS = 24;
 
+    public static final int ROW_ARCH_PIECES = ROW_CORNERS + GAP + 2;
+    public static final int ROW_ARCH_COMPOSITIONS = ROW_ARCH_PIECES + GAP + 2;
+
     private ShowcaseSpacing() {
     }
 

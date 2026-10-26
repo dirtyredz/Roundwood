@@ -1,9 +1,6 @@
 package io.github.dirtyredz.roundwood.showcase.section;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
-import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
@@ -70,8 +67,6 @@ public final class SectionChecks {
         }
         owned.add(sign(level, frame, PiecesSection.ROUND_DOOR_R, f, "Round door"));
         owned.add(sign(level, frame, PiecesSection.ARCHED_DOOR_R, f, "Arched door"));
-        owned.addAll(archway(level, frame, ArchwayDesign.ORDINARY, PiecesSection.ARCHWAY_R, f, Appearance.DEFAULT, "Archway"));
-        owned.addAll(archway(level, frame, ArchwayDesign.KEYHOLE, PiecesSection.KEYHOLE_R, f, Appearance.DEFAULT, "Keyhole archway"));
         verifyOwnsOnly(level, frame, "pieces", 0, PiecesSection.R_MAX, f, f, owned);
     }
 
@@ -121,20 +116,6 @@ public final class SectionChecks {
 
     private static boolean wallSignSays(ServerLevel level, BlockPos pos, String first) {
         return level.getBlockState(pos).getBlock() instanceof WallSignBlock && signSays(level, pos, first);
-    }
-
-    /** One archway read back (complete, design, look, no trims) plus its sign; returns the cells it and its sign own. */
-    private static Set<BlockPos> archway(ServerLevel level, ShowcaseFrame frame, ArchwayDesign design, int r, int f, Appearance look,
-                                         String label) {
-        check(design.inFrame(0, 31) && design.inFrame(31, 31), "archway corners must be filled");
-        String what = design + " archway (" + look.key() + ") r " + r;
-        ArchwayLayout.Assembly assembly = new ArchwayLayout.Assembly(frame.pos(r, 0, f), frame.forward(), design);
-        check(assembly.complete(level, ModBlocks.archway(design)), what + ": missing or incomplete");
-        check(level.getBlockEntity(assembly.anchor()) instanceof ArchwayBlockEntity entity && entity.appearance().equals(look)
-                && entity.trims().equals(FaceTrims.NONE), what + ": wrong look or trims");
-        Set<BlockPos> owned = new HashSet<>(assembly.positions());
-        owned.add(sign(level, frame, r, f, label));
-        return owned;
     }
 
     private static BlockPos sign(ServerLevel level, ShowcaseFrame frame, int pieceR, int f, String first) {
