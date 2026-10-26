@@ -77,15 +77,10 @@ public final class ArchPiecePlacementPreview {
             var face = hit.getDirection();
             Vec3 origin = Vec3.atLowerCornerOf(hit.getBlockPos());
             double plane = hit.getLocation().subtract(origin).get(face.getAxis()) + face.getAxisDirection().getStep() * .002;
-            Vec3[] corners = new Vec3[4];
-            for (int i = 0; i < 4; i++) corners[i] = facePoint(face, plane, i == 1 || i == 2 ? 1 : 0, i >= 2 ? 1 : 0).add(origin).subtract(camera);
-            for (int i = 0; i < 4; i++) line(event, corners[i], corners[(i + 1) % 4]);
-            if (assembly.design().shoulder() && face != assembly.facing().getClockWise() && face != assembly.facing().getCounterClockWise()) {
-                boolean splitU = face.getAxis() != Direction.Axis.Y || assembly.facing().getClockWise().getAxis() == Direction.Axis.X;
-                double mid = ArchPieceTargeting.MIDPOINT;
-                Vec3 a = facePoint(face, plane, splitU ? mid : 0, splitU ? 0 : mid).add(origin).subtract(camera);
-                Vec3 b = facePoint(face, plane, splitU ? mid : 1, splitU ? 1 : mid).add(origin).subtract(camera);
-                line(event, a, b);
+            var full = new ArchPieceTargeting.FaceZone(0, 0, 1, 1);
+            rectangle(event, face, plane, origin.subtract(camera), full, .45F);
+            if (assembly.design().shoulder()) {
+                rectangle(event, face, plane, origin.subtract(camera), ArchPieceTargeting.zone(assembly.facing(), face, assembly.side()), 1);
             }
         });
     }
@@ -98,8 +93,15 @@ public final class ArchPiecePlacementPreview {
         };
     }
 
-    private static void line(RenderHighlightEvent.Block event, Vec3 a, Vec3 b) {
-        OutlineLines.line(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.lines()),
-                a.x, a.y, a.z, b.x, b.y, b.z, 1, 1, 1, .9F);
+    private static void rectangle(RenderHighlightEvent.Block event, Direction face, double plane, Vec3 origin,
+                                  ArchPieceTargeting.FaceZone zone, float brightness) {
+        Vec3[] corners = new Vec3[4];
+        for (int i = 0; i < 4; i++) corners[i] = facePoint(face, plane,
+                i == 1 || i == 2 ? zone.maxU() : zone.minU(), i >= 2 ? zone.maxV() : zone.minV()).add(origin);
+        for (int i = 0; i < 4; i++) {
+            Vec3 a = corners[i], b = corners[(i + 1) % 4];
+            OutlineLines.line(event.getPoseStack(), event.getMultiBufferSource().getBuffer(RenderType.lines()),
+                    a.x, a.y, a.z, b.x, b.y, b.z, brightness, brightness, brightness, .9F);
+        }
     }
 }

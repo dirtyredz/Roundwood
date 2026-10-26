@@ -23,4 +23,17 @@ public final class ArchPieceTargeting {
         if (clickedFace == facing.getCounterClockWise()) return Side.RIGHT;
         return across <= MIDPOINT ? Side.LEFT : Side.RIGHT;
     }
+
+    /** Face-plane coordinates: U is X (Y/Z faces) or Z (X faces); V is Z (Y faces) or Y. */
+    public record FaceZone(double minU, double minV, double maxU, double maxV) {}
+
+    /** The selected shoulder zone, using exactly the same axis and midpoint as placement. */
+    public static FaceZone zone(Direction facing, Direction clickedFace, Side side) {
+        Direction right = facing.getClockWise();
+        if (clickedFace == right || clickedFace == right.getOpposite()) return new FaceZone(0, 0, 1, 1);
+        boolean splitU = clickedFace.getAxis() != Direction.Axis.Y || right.getAxis() == Direction.Axis.X;
+        boolean low = (side == Side.LEFT) == (right.getAxisDirection() == Direction.AxisDirection.POSITIVE);
+        double min = low ? 0 : MIDPOINT, max = low ? MIDPOINT : 1;
+        return splitU ? new FaceZone(min, 0, max, 1) : new FaceZone(0, min, 1, max);
+    }
 }

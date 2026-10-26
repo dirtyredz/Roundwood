@@ -6,6 +6,23 @@ import static io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderP
 import static org.junit.jupiter.api.Assertions.*;
 
 class ArchPieceTargetingTest {
+    @Test void overlayZonesSelectTheSameSideAsPlacementOnEveryFace() {
+        for (var facing : Direction.Plane.HORIZONTAL) for (var face : Direction.values()) {
+            if (face == facing.getClockWise() || face == facing.getCounterClockWise()) {
+                var side = ArchPieceTargeting.side(facing, face, .5, .5);
+                assertEquals(new ArchPieceTargeting.FaceZone(0, 0, 1, 1), ArchPieceTargeting.zone(facing, face, side));
+                continue;
+            }
+            for (var side : new io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side[]{LEFT, RIGHT}) {
+                var zone = ArchPieceTargeting.zone(facing, face, side);
+                assertEquals(.5, (zone.maxU() - zone.minU()) * (zone.maxV() - zone.minV()));
+                double u = (zone.minU() + zone.maxU()) / 2, v = (zone.minV() + zone.maxV()) / 2;
+                double x = face.getAxis() == Direction.Axis.X ? .5 : u;
+                double z = face.getAxis() == Direction.Axis.Y ? v : face.getAxis() == Direction.Axis.X ? u : .5;
+                assertEquals(side, ArchPieceTargeting.side(facing, face, x, z));
+            }
+        }
+    }
     @Test
     void frontBackUpDownShareTheSameSplitInEveryFacing() {
         for (Direction facing : Direction.Plane.HORIZONTAL) {
