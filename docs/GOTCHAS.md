@@ -1,5 +1,12 @@
 # Gotchas - Roundwood
 
+- **Three-wide icons cannot emit x=48.** Shift generated and runtime item geometry
+  together through `ArchPieceItemGeometry`; translate vertices after baking to keep
+  donor UVs. Scale with the dimension-aware display-transform overload.
+- **Modular masonry joints are a surface partition.** Do not add coplanar dark
+  overlays or seams at cell boundaries. Body, casing and item use the same layout;
+  only masonry looks receive it. Resource reload clears both cell and item caches.
+
 - **Modular arch loot uses the anchor and exact body item.** Both casings are TRIM-family
   items too; family-wide decoration would overwrite their independent looks.
 - **Modular previews are conservative on interactive blocks.** Without secondary use,

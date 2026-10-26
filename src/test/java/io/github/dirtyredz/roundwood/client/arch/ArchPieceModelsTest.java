@@ -54,6 +54,90 @@ class ArchPieceModelsTest {
         }
     }
 
+    @Test void masonryBodyCasingsAndItemsShareTheSamePartitionAndUvScale() {
+        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), AnimationMetadataSection.EMPTY)) {
+            var sprite = new Sprite(contents);
+            int mortarQuads = 0;
+            for (var design : ArchPieceDesign.values()) for (var side : Side.values()) for (var cell : ArchPieceCell.of(design))
+                for (var facing : Direction.Plane.HORIZONTAL) {
+                    var plain = ArchPieceModels.quads(design, side, cell, 0, 16, facing, sprite);
+                    var masonry = ArchPieceModels.quads(design, side, cell, 0, 16, facing, sprite, true);
+                    assertTrue(plain.stream().noneMatch(q -> q.getVertices()[3] == ArchMasonryModels.MORTAR), "wood has no mortar");
+                    mortarQuads += masonry.stream().filter(q -> q.getVertices()[3] == ArchMasonryModels.MORTAR).count();
+                    assertEquals(area(plain), area(masonry), 1e-4, "partition must preserve total drawn area");
+                    var body = planarSignature(masonry, facing);
+                    for (double[] depth : new double[][]{{16,17},{-1,0}})
+                        assertEquals(body, planarSignature(ArchPieceModels.quads(design, side, cell, depth[0], depth[1], facing, sprite, true), facing));
+                    for (var quad : masonry) checkUvDeltas(quad, sprite);
+                }
+            assertTrue(mortarQuads > 0, "masonry quads carry the darkened donor colour");
+            for (var design : ArchPieceDesign.values()) for (boolean masonry : new boolean[]{false,true}) {
+                var item = ArchPieceModels.itemQuads(design, sprite, masonry);
+                int index = 0;
+                for (var cell : ArchPieceCell.of(design)) for (var body : ArchPieceModels.quads(design, Side.LEFT, cell, 0, 16, Direction.NORTH, sprite, masonry)) {
+                    var whole = item.get(index++);
+                    int[] before = body.getVertices(), after = whole.getVertices();
+                    int stride = before.length / 4;
+                    for (int i = 0; i < before.length; i += stride) {
+                        double expectedX = Float.intBitsToFloat(before[i]) + cell.column - (design == ArchPieceDesign.TOP_2X3 ? 1 : 0);
+                        assertEquals(expectedX, Float.intBitsToFloat(after[i]), 1e-6);
+                        assertEquals(Float.intBitsToFloat(before[i + 1]) + cell.row, Float.intBitsToFloat(after[i + 1]), 1e-6);
+                        for (int j = 2; j < stride; j++) assertEquals(before[i + j], after[i + j], "only XY positions may move");
+                        for (int j = 0; j < 3; j++) assertTrue(Float.intBitsToFloat(after[i + j]) >= -1 && Float.intBitsToFloat(after[i + j]) <= 2);
+                    }
+                }
+                assertEquals(item.size(), index);
+            }
+        }
+    }
+
+    private static java.util.List<String> planarSignature(java.util.List<BakedQuad> quads, Direction facing) {
+        var out = new java.util.ArrayList<String>();
+        for (var quad : quads) if (quad.getDirection().getAxis() == facing.getAxis()) {
+            var vertices = quad.getVertices().clone();
+            int stride = vertices.length / 4;
+            for (int i = 0; i < vertices.length; i += stride) vertices[i + (facing.getAxis() == Direction.Axis.X ? 0 : 2)] = 0;
+            out.add(quad.getDirection() + java.util.Arrays.toString(vertices));
+        }
+        return out;
+    }
+
+    private static double area(java.util.List<BakedQuad> quads) {
+        double result = 0;
+        for (var quad : quads) {
+            int[] data = quad.getVertices(); int stride = data.length / 4;
+            for (int triangle = 1; triangle <= 2; triangle++) {
+                var a = new net.minecraft.world.phys.Vec3(Float.intBitsToFloat(data[0]), Float.intBitsToFloat(data[1]), Float.intBitsToFloat(data[2]));
+                int b = triangle * stride, c = (triangle + 1) * stride;
+                var ab = new net.minecraft.world.phys.Vec3(Float.intBitsToFloat(data[b]), Float.intBitsToFloat(data[b + 1]), Float.intBitsToFloat(data[b + 2])).subtract(a);
+                var ac = new net.minecraft.world.phys.Vec3(Float.intBitsToFloat(data[c]), Float.intBitsToFloat(data[c + 1]), Float.intBitsToFloat(data[c + 2])).subtract(a);
+                var cross = ab.cross(ac);
+                assertTrue(cross.dot(net.minecraft.world.phys.Vec3.atLowerCornerOf(quad.getDirection().getNormal())) >= -1e-8, "outward winding");
+                result += cross.length() / 2;
+            }
+        }
+        return result;
+    }
+
+    private static void checkUvDeltas(BakedQuad quad, Sprite sprite) {
+        int[] data = quad.getVertices(); int stride = data.length / 4;
+        double[] first = null, firstUv = null;
+        for (int i = 0; i < data.length; i += stride) {
+            double x = Float.intBitsToFloat(data[i]) * 16, y = Float.intBitsToFloat(data[i + 1]) * 16, z = Float.intBitsToFloat(data[i + 2]) * 16;
+            double[] projection = switch (quad.getDirection()) {
+                case NORTH -> new double[]{-x,-y}; case SOUTH -> new double[]{x,-y};
+                case WEST -> new double[]{z,-y}; case EAST -> new double[]{-z,-y};
+                case UP -> new double[]{x,z}; case DOWN -> new double[]{x,-z};
+            };
+            double[] uv = {sprite.getUOffset(Float.intBitsToFloat(data[i + 4])), sprite.getVOffset(Float.intBitsToFloat(data[i + 5]))};
+            if (first == null) { first = projection; firstUv = uv; }
+            for (int axis = 0; axis < 2; axis++) {
+                assertTrue(uv[axis] >= -.0001 && uv[axis] <= 16.0001);
+                assertEquals(projection[axis] - first[axis], (uv[axis] - firstUv[axis]) / ((1 - sprite.uvShrinkRatio()) * .998), .0002);
+            }
+        }
+    }
+
     private static void checkQuad(BakedQuad quad, Sprite sprite) {
         int[] vertices = quad.getVertices();
         int stride = vertices.length / 4;

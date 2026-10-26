@@ -11,11 +11,15 @@ helpers. Internal cell faces are omitted using the whole mask. All six cells of
 the three-wide top are owned even though its lower centre has no drawn pixels.
 Tops have empty collision; shoulder collision equals its cropped body.
 
-`ArchMasonryJoints` is the pure, continuous-coordinate layout for later model
+`ArchMasonryJoints` is the pure, continuous-coordinate layout for model
 baking: 5/9/13 equal-angle sectors, a radius-r..r+2 band, quarter-pixel joints,
 bearing spring joints and shoulder levels 8/12/16, clipped to actual solid pixels.
-It supplies no material policy and no overlay faces. The later baker partitions
+It supplies no material policy and no overlay faces. `ArchMasonryModels` partitions
 donor and mortar surfaces for bodies, casings and items from this same layout.
+Convex clipping subtracts each joint from the donor faces, then triangulates both
+regions without coplanar overlays. Quarter-pixel widths are exact; each circular
+joint end uses four chords with radial error below 0.0001 pixel. Wood and paint
+bypass this partition. Retained archway models and historical PNGs are unchanged.
 
 `ArchPieceLayout.Assembly` implements the shared assembly contract, anchored at
 the lower-left cell. Membership includes exact block/product, facing, cell and
@@ -53,6 +57,11 @@ with each owned cell's light and AO. Cached models key product, side, cell, faci
 depth and look; resource rebakes clear them through `AppearanceModelCache`.
 Every face uses the donor sprite (or painted boards), with UV projection after rotation.
 Empty world models ensure that only the BER draws the body.
+Styled items reuse the body baker and retain its donor UVs while translating cells
+into the complete icon. `ArchPieceItemGeometry` shifts the three-wide icon by -16
+pixels in X, shared by runtime and datagen, fitting the legal [-16,32] interval.
+The dimension-aware transform overload fits each product into the inventory slot;
+the historical two-argument overload keeps all existing transforms unchanged.
 
 ## Door assembly
 

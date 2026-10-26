@@ -3,6 +3,8 @@ package io.github.dirtyredz.roundwood.client.item;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayItem;
+import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceItem;
+import io.github.dirtyredz.roundwood.client.arch.ArchPieceModels;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorItem;
@@ -19,6 +21,9 @@ public final class FamilyItemModels {
 
     /** {@code model} wrapped for {@code item}'s kind, or {@code model} itself when the item has no appearance family. */
     public static BakedModel wrap(Item item, BakedModel model) {
+        if (item instanceof ArchPieceItem piece) {
+            return AppearanceItemOverrides.wrap(model, (oak, look) -> ArchPieceModels.item(piece.piece().design(), oak, look));
+        }
         if (item instanceof ArchwayItem archway) {
             return AppearanceItemOverrides.wrap(model, (oak, look) -> ArchwayModels.item(archway.archway().design(), oak, look));
         }

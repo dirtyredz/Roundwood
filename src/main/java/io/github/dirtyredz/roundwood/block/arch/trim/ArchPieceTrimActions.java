@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Optional;
 
 /**
- * The piece as a face-trim host (0.12.0, like the door): the trims live on the anchor entity of a
+ * The piece as a face-trim host (0.14.0, like the door): the trims live on the anchor entity of a
  * complete, loaded piece, and the player must be able to edit every cell. Hands the shared
  * transaction ({@link TrimFitting}) a {@link TrimHost} for that anchor, so fitting, payment, removal
  * with its refund and wear, and restyling are the doors' and windows' exactly; a refusal changes and

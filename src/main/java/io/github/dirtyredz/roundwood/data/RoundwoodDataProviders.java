@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.data;
 
 import io.github.dirtyredz.roundwood.data.client.archway.ArchwayItemModelProvider;
 import io.github.dirtyredz.roundwood.data.client.arch.ArchPieceModelProvider;
+import io.github.dirtyredz.roundwood.data.client.arch.ArchPieceItemModelProvider;
 import io.github.dirtyredz.roundwood.data.client.archway.ArchwayModelProvider;
 import io.github.dirtyredz.roundwood.data.client.door.DoorItemModelProvider;
 import io.github.dirtyredz.roundwood.data.client.door.DoorModelProvider;
@@ -42,6 +43,7 @@ public final class RoundwoodDataProviders {
         generator.addProvider(event.includeClient(), new DoorItemModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new WindowItemModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new AttachmentItemModelProvider(output, existingFiles));
+        generator.addProvider(event.includeClient(), new ArchPieceItemModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new ArchPieceModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new ArchwayModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new ArchwayItemModelProvider(output, existingFiles));

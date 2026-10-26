@@ -72,7 +72,7 @@ public final class RoundwoodClient {
     public static void wrapModels(ModelEvent.ModifyBakingResult event) {
         Map<ResourceLocation, BakedModel> models = event.getModels();
         WindowAppearanceModel.wrapBlocks(models);
-        for (Item item : Stream.concat(ModItems.all().stream(), LegacyContent.items().stream()).toList()) {
+        for (Item item : Stream.of(ModItems.all().stream(), ModItems.archPieces().stream(), LegacyContent.items().stream()).flatMap(stream -> stream).distinct().toList()) {
             ModelResourceLocation location = new ModelResourceLocation(ForgeRegistries.ITEMS.getKey(item), "inventory");
             BakedModel model = models.get(location);
             if (model == null) {

@@ -4,9 +4,9 @@ import io.github.dirtyredz.roundwood.block.attachment.storage.FaceTrimStore;
 import io.github.dirtyredz.roundwood.block.attachment.storage.FaceTrimsNbt;
 
 /**
- * The saved form of an piece's face trims (0.12.0), on the anchor's entity beside its appearance:
+ * The saved form of a piece's face trims (0.14.0), on the anchor's entity beside its appearance:
  * {@code ArchPieceTrim: {Version: 1, Front: {...}, Back: {...}}} ({@link FaceTrimsNbt}), kept by a
- * {@link FaceTrimStore}. ArchPieces are new, so there is no older layout: missing means no trims and an
+ * {@link FaceTrimStore}. Arch pieces are new, so there is no older layout: missing means no trims and an
  * untrimmed piece writes nothing. Any other version is unknown: kept and saved back unchanged, the
  * piece refusing trim edits meanwhile.
  */

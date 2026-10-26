@@ -17,12 +17,20 @@ public final class ItemModelTransforms {
 
     /** A two-block-wide assembly (door, frame): drawn at half a block's scale throughout. */
     public static void assembly(ItemModelBuilder builder, Vector3f centre) {
+        assembly(builder, centre, 32, 32);
+    }
+
+    /** Scale the complete width/height into the same slot as the historical two-block assembly. */
+    public static void assembly(ItemModelBuilder builder, Vector3f centre, float width, float height) {
+        if (!Float.isFinite(width) || !Float.isFinite(height) || width <= 0 || height <= 0)
+            throw new IllegalArgumentException("Positive finite item dimensions are required");
+        float fit = 32 / Math.max(16, Math.max(width, height));
         builder.guiLight(BlockModel.GuiLight.FRONT);
-        display(builder, ItemDisplayContext.GUI, 0, 0, 0, 0.5F, centre, 0, 0, 0);
-        display(builder, ItemDisplayContext.FIXED, 0, 180, 0, 0.375F, centre, 0, 0, 0);
-        display(builder, ItemDisplayContext.GROUND, 0, 0, 0, 0.25F, centre, 0, 3, 0);
-        display(builder, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, 75, 45, 0, 0.1875F, centre, 0, 2.5F, 0);
-        display(builder, ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, 0, 45, 0, 0.2F, centre, 0, 0, 0);
+        display(builder, ItemDisplayContext.GUI, 0, 0, 0, 0.5F * fit, centre, 0, 0, 0);
+        display(builder, ItemDisplayContext.FIXED, 0, 180, 0, 0.375F * fit, centre, 0, 0, 0);
+        display(builder, ItemDisplayContext.GROUND, 0, 0, 0, 0.25F * fit, centre, 0, 3, 0);
+        display(builder, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, 75, 45, 0, 0.1875F * fit, centre, 0, 2.5F, 0);
+        display(builder, ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, 0, 45, 0, 0.2F * fit, centre, 0, 0, 0);
     }
 
     /** A one-block model (window). */

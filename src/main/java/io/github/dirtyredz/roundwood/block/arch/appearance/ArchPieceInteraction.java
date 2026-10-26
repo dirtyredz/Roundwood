@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * An piece's right-click router (0.12.0), following the window and trim convention: no action needs
+ * A piece's right-click router (0.14.0), following the window and trim convention: no action needs
  * sneaking and sneaking does the same (the sneak-use bridge asks {@link #claims}, the same decision);
  * the main hand wins, the offhand acts only while the main hand is empty; a handled or refused click
  * never falls through to the item (no plank is placed against the piece). Where the hit lands is
@@ -23,18 +23,18 @@ import net.minecraft.world.phys.BlockHitResult;
  * <table>
  *     <tr><th>Item</th><th>Where</th><th>Action</th></tr>
  *     <tr><td>Universal Trim (any id)</td><td>anywhere</td><td>fit the nearer face's casing (occupied: free no-op)</td></tr>
- *     <tr><td>Arch Sill</td><td>anywhere</td><td>refused with a hint, nothing used</td></tr>
+ *     <tr><td>Arch Sill / Cross Beams</td><td>anywhere</td><td>refused with a hint, nothing used</td></tr>
  *     <tr><td>shears</td><td>a face</td><td>remove that face's casing (none: free no-op)</td></tr>
  *     <tr><td>planks, masonry, dye</td><td>a face with a casing</td><td>restyle that casing</td></tr>
  *     <tr><td>planks, masonry, dye</td><td>elsewhere</td><td>restyle the piece</td></tr>
  *     <tr><td>anything else</td><td>anywhere</td><td>the item's ordinary use</td></tr>
  * </table>
- * ArchPieces have no glass, tint, swing, camouflage or redstone action.
+ * Arch pieces have no glass, tint, swing, camouflage or redstone action.
  */
 public final class ArchPieceInteraction {
     /** What a click does. */
     public enum Action {
-        FIT_TRIM, REFUSE_SILL, REFUSE_BEAMS, REMOVE_TRIM, RESTYLE_TRIM, RESTYLE_ARCHWAY, PASS
+        FIT_TRIM, REFUSE_SILL, REFUSE_BEAMS, REMOVE_TRIM, RESTYLE_TRIM, RESTYLE_BODY, PASS
     }
 
     private ArchPieceInteraction() {
@@ -51,7 +51,7 @@ public final class ArchPieceInteraction {
             case REMOVE_TRIM -> ArchPieceTrimActions.remove(level, pos, state, player, hand, tool.stack(), target.face());
             case RESTYLE_TRIM -> AppearanceActions.apply(level, player, tool.donor().orElseThrow(),
                     () -> ArchPieceTrimActions.target(level, pos, state, target.face()));
-            case RESTYLE_ARCHWAY -> AppearanceActions.apply(level, player, tool.donor().orElseThrow(),
+            case RESTYLE_BODY -> AppearanceActions.apply(level, player, tool.donor().orElseThrow(),
                     () -> ArchPieceAppearance.target(block, state, level, pos));
             case PASS -> InteractionResult.PASS;
         };
@@ -74,7 +74,7 @@ public final class ArchPieceInteraction {
             };
             case SHEARS -> onFace ? Action.REMOVE_TRIM : Action.PASS;
             case DONOR -> onFace && ArchPieceAppearance.ANCHORS.anchor(level, pos, state).map(anchor -> anchor.trims().has(target.face())).orElse(false)
-                    ? Action.RESTYLE_TRIM : Action.RESTYLE_ARCHWAY;
+                    ? Action.RESTYLE_TRIM : Action.RESTYLE_BODY;
             case OTHER -> Action.PASS;
         };
     }
