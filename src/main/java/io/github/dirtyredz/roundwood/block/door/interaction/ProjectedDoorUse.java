@@ -44,11 +44,13 @@ public final class ProjectedDoorUse {
             return InteractionResult.FAIL;
         }
         BlockHitResult ray = level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+        // The face of a projected point is an artefact of which part box the ray crossed (it differs
+        // between the client's full-reach ray and this short one), so only the point is compared and
+        // the server's own face is used for dispatch.
         var resolved = DoorHitResolver.resolve(level, ray);
         if (ray.getType() != HitResult.Type.BLOCK || resolved.isEmpty()
                 || !resolved.get().getBlockPos().equals(pos)
-                || resolved.get().getLocation().distanceToSqr(requested.getLocation()) > 1e-6
-                || resolved.get().getDirection() != requested.getDirection()) {
+                || resolved.get().getLocation().distanceToSqr(requested.getLocation()) > 1e-6) {
             return InteractionResult.FAIL;
         }
         player.resetLastActionTime();

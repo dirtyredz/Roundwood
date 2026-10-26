@@ -313,3 +313,5 @@
 - **Client checks belong to the owner.** Models, item display transforms, the swing animation,
   sounds, second-client sync and EMI display are verified in game, never by agents.
 - **GameTest hits at an exact tie need binary-exact coordinates.** `WindowFixtures.hit` adds the cell-local point to the absolute block position, so a decimal such as 0.95 picks up float noise that depends on where the test runs; a test pinning an exact diagonal tie (`zoneBoundaries...`) failed once its class moved and the world positions shifted. Use values like 0.875.
+
+- **A projected leaf hit's face is not stable.** The whole-door outline means the face (`getDirection`) of a hit outside the occupied cells depends on which part box the ray crossed, so the client's full-reach ray and the server's short re-ray disagree. `ProjectedDoorUse` compares only the point and dispatches with the server's face.
