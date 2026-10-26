@@ -28,6 +28,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * guarantee that no two recipes can fill the same crafting grid, mirrored or shifted.
  */
 class GeneratedRecipesTest {
+    @Test void thinningIsOneWayOneToOneAndUsesTheMetadataSerializer() {
+        for (String full : List.of("arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder")) {
+            var thin = json(recipe(full + "_thin"));
+            assertEquals("roundwood:arch_thinning", thin.get("type").getAsString());
+            assertEquals(1, thin.getAsJsonArray("ingredients").size());
+            assertEquals("roundwood:" + full, thin.getAsJsonArray("ingredients").get(0).getAsJsonObject().get("item").getAsString());
+            assertEquals("roundwood:" + full + "_thin", thin.getAsJsonObject("result").get("item").getAsString());
+            assertFalse(thin.getAsJsonObject("result").has("count"));
+            assertEquals("minecraft:crafting_shaped", json(recipe(full)).get("type").getAsString());
+        }
+    }
     private static final Path DATA = Path.of("src/generated/resources/data/roundwood");
     private static final String PLANKS = "{\"tag\":\"minecraft:planks\"}";
     private static final String PANE = "{\"item\":\"minecraft:glass_pane\"}";
@@ -61,9 +72,9 @@ class GeneratedRecipesTest {
                 "round_trim",
                 "round_window_arch_bottom_left", "round_window_arch_bottom_right", "round_window_top_left",
                 "round_window_top_right", "round_window_edge_top", "round_window_edge_left",
-                "round_window_edge_bottom", "round_window_edge_right", "arch_sill_trim", "cross_beams", "arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder")),
+                "round_window_edge_bottom", "round_window_edge_right", "arch_sill_trim", "cross_beams", "arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder", "arch_top_1x1_thin", "arch_top_1x2_thin", "arch_top_2x3_thin", "keyhole_shoulder_thin")),
                 recipeNames());
-        assertEquals(24, recipeNames().size());
+        assertEquals(28, recipeNames().size());
     }
 
     @Test
@@ -118,6 +129,14 @@ class GeneratedRecipesTest {
         Map<String, Set<String>> grids = new TreeMap<>();
         for (String name : recipeNames()) {
             JsonObject recipe = json(recipe(name));
+            if (recipe.get("type").getAsString().equals("roundwood:arch_thinning")) {
+                var ingredients = recipe.getAsJsonArray("ingredients");
+                assertEquals(1, ingredients.size());
+                JsonObject key = new JsonObject(); key.add("A", ingredients.get(0));
+                grids.put(name, placements(List.of("A"), key));
+                continue;
+            }
+            assertEquals("minecraft:crafting_shaped", recipe.get("type").getAsString());
             List<String> rows = new ArrayList<>();
             recipe.getAsJsonArray("pattern").forEach(row -> rows.add(row.getAsString()));
             JsonObject key = recipe.getAsJsonObject("key");
@@ -127,7 +146,7 @@ class GeneratedRecipesTest {
             }
             grids.put(name, placements);
         }
-        assertEquals(24, grids.size());
+        assertEquals(28, grids.size());
         assertTrue(java.util.Collections.disjoint(grids.get("cross_beams"),
                 placements(List.of("S S", "SSS", "S S"), JsonParser.parseString("{\"S\":" + STICK + "}").getAsJsonObject())),
                 "Cross Beams must not match the vanilla ladder");

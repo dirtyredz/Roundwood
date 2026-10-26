@@ -81,7 +81,10 @@ public class ArchPieceBlock extends Block implements EntityBlock, AppearanceDefa
     @Override @Nullable public BlockState getStateForPlacement(BlockPlaceContext context) { return null; }
 
     @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return ArchPieceShapes.shape(design, state.getValue(SIDE), state.getValue(FACING), state.getValue(CELL), thickness(), depth(state));
+        if (!state.getValue(CELL).in(design)) return net.minecraft.world.phys.shapes.Shapes.empty();
+        int casings = ArchPieceAppearance.ANCHORS.anchor(level, pos, state).map(anchor ->
+                (anchor.trims().front().isPresent() ? 1 : 0) | (anchor.trims().back().isPresent() ? 2 : 0)).orElse(0);
+        return ArchPieceShapes.shape(design, state.getValue(SIDE), state.getValue(FACING), state.getValue(CELL), thickness(), depth(state), casings);
     }
     @Override public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return ArchPieceShapes.collision(design, state.getValue(SIDE), state.getValue(FACING), state.getValue(CELL), thickness(), depth(state));

@@ -15,7 +15,7 @@ Generic: not tied to any modpack.
 
 ## Content
 
-24 items: **Round Door**, **Arched Door**, **Double Arched Door**, **Tall Double Arched Door**, thirteen plain window profiles
+28 items: **Round Door**, **Arched Door**, **Double Arched Door**, **Tall Double Arched Door**, thirteen plain window profiles
 (**Round Window**, **Round Window Arch, Left** and **Right**, **Round Window Corner, Bottom Left**
 and **Bottom Right**, and since 0.10.0 **Round Window Arch, Bottom Left** and **Bottom Right**,
 **Round Window Corner, Top Left** and **Top Right**, and **Round Window Edge, Top**, **Left**,
@@ -26,6 +26,11 @@ arch right, corner bottom left, corner bottom right, arch bottom left, arch bott
 left, corner top right, edge top, left, bottom, right), the three arch tops, keyhole shoulder, Universal Trim,
 Arch Sill, Cross Beams. They are crafted (and found in the creative tab) in oak;
 their look is changed once placed and travels with them when picked or broken.
+
+**Thin arches.** All four modular arch pieces also have 3/16-depth thin versions. Craft one full
+piece alone to obtain its thin counterpart, preserving its appearance and supported item metadata;
+there is no reverse recipe. Aim to place thin pieces at FRONT, MIDDLE or BACK. Both casing faces
+follow the slab and keep independent looks. See [feature notes](docs/FEATURES.md).
 
 **Tall Double Arched Door (0.15.0).** The 3-wide, 4-tall variant adds a straight row below
 exactly the same crown as the 3x3 double door. Match it with the 2x3 arch top starting two

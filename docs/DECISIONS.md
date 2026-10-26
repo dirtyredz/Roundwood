@@ -2,6 +2,16 @@
 
 Newest first.
 
+## 2026-10-26 - Separate thin arch products
+
+Each active modular arch product gains a separate `_thin` block/item ID. Existing full-depth
+IDs and historical migration targets retain their identity and state schema. Thin pieces use
+3/16 slabs at FRONT, MIDDLE and BACK; shoulder orientation is resolved before depth.
+
+Full-to-thin crafting is one-way and one-to-one. A custom shapeless serializer preserves known
+appearance and item metadata, refusing unsupported payloads. The slab drives body, casing,
+selection and preview geometry; an explicit model layer replaces depth-based body detection.
+
 ## 2026-10-26 - Framed surfaces and tall paired doors (0.15.0 feedback)
 
 The 3x4 paired door reuses the 3x3 adapter with a size parameter and twelve cells. Its crown

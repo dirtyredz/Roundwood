@@ -10,6 +10,9 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
   `block/arch/adapter/ThinArchPieceBlock` adds only the thin depth property; assembly membership includes thickness and depth.
 - `block/assembly/placement/FaceDepthBands` is the shared aimed-face band authority for doors and thin arches.
   `ArchPieceTargeting.regions` clips shoulder wedges against those bands for the placement overlay.
+- `data/server/recipe/ArchThinningRecipe` owns metadata-preserving full-to-thin crafting;
+  `registry/ModRecipeSerializers` registers its serializer. Focused crafting and thin casing/drop checks
+  live in `src/gameTest/.../block/arch/ArchThinningGameTests`.
 
 - `block/door/adapter/DoubleArchedDoorBlock` owns the size-parameterized nine/twelve-cell saved schema;
   `block/door/assembly/DoorDepth` owns saved depth offsets and shared face bands.

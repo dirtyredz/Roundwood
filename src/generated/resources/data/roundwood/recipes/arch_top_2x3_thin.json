@@ -1,0 +1,13 @@
+{
+  "type": "roundwood:arch_thinning",
+  "category": "misc",
+  "group": "roundwood:arch_thinning",
+  "ingredients": [
+    {
+      "item": "roundwood:arch_top_2x3"
+    }
+  ],
+  "result": {
+    "item": "roundwood:arch_top_2x3_thin"
+  }
+}

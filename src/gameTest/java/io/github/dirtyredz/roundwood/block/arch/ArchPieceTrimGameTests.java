@@ -44,7 +44,8 @@ public final class ArchPieceTrimGameTests {
     /** Surface point transformed independently, with the owning cell on the inward side. */
     private static BlockHitResult hit(ArchPieceLayout.Assembly piece, Direction surface) {
         double x = piece.side() == Side.RIGHT && piece.design().shoulder() ? 15.5 : .5;
-        double y = 15.5, z = surface == Direction.SOUTH ? 16 : surface == Direction.NORTH ? 0 : 8;
+        double y = piece.design().shoulder() ? 8.5 : piece.design().height() - .5;
+        double z = surface == Direction.SOUTH ? piece.front() : surface == Direction.NORTH ? piece.back() : (piece.back() + piece.front()) / 2;
         if (surface == Direction.WEST) x = 0;
         if (surface == Direction.EAST) x = 16;
         int turns = VoxelShapeFactory.quarterTurns(piece.facing());
@@ -59,10 +60,14 @@ public final class ArchPieceTrimGameTests {
     public static void independentFacesRoutingRefusalsAndShearsAcrossEveryPose(GameTestHelper helper) {
         floor(helper);
         for (var design : ArchPieceDesign.values()) for (var facing : Direction.Plane.HORIZONTAL)
-            for (var side : design.shoulder() ? Side.values() : new Side[]{Side.LEFT}) {
-                var piece = assembly(helper, ANCHOR, facing, design, side);
-                check(ArchPiecePlacement.placeAt(helper.getLevel(), ModBlocks.archPiece(design), piece, Appearance.DEFAULT), "place");
-                var player = player(helper, "arch_trim_" + design + facing + side, GameType.SURVIVAL, facing);
+            for (var side : design.shoulder() ? Side.values() : new Side[]{Side.LEFT})
+            for (var thickness : io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.values())
+            for (var depth : thickness == io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL
+                    ? new io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth[]{io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.FRONT}
+                    : io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.values()) {
+                var piece = new ArchPieceLayout.Assembly(helper.absolutePos(ANCHOR), facing, design, side, thickness, depth);
+                check(ArchPiecePlacement.placeAt(helper.getLevel(), ModBlocks.archPiece(design, thickness), piece, Appearance.DEFAULT), "place");
+                var player = player(helper, "arch_trim_" + design + facing + side + thickness + depth, GameType.SURVIVAL, facing);
                 var front = hit(piece, Direction.SOUTH);
                 var back = hit(piece, Direction.NORTH);
                 var reveal = hit(piece, side == Side.RIGHT && design.shoulder() ? Direction.EAST : Direction.WEST);

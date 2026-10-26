@@ -38,6 +38,7 @@ public final class Roundwood {
         ModItems.ITEMS.register(modBus);
         ModCreativeTab.TABS.register(modBus);
         ModLootConditions.CONDITIONS.register(modBus);
+        io.github.dirtyredz.roundwood.registry.ModRecipeSerializers.SERIALIZERS.register(modBus);
         modBus.addListener(RoundwoodDataProviders::gatherData);
 
         IEventBus gameBus = MinecraftForge.EVENT_BUS;

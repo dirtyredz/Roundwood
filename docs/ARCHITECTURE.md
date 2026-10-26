@@ -13,6 +13,12 @@ proposal. Body and casing model layers are explicit, so thin slabs cannot be mis
 Item caches include thickness; item geometry uses the centred thin slab and the existing legal
 icon translation. The showcase stacks all three thin depths beside the full products.
 
+Thin casings retain their one-pixel depth on either slab face. Selection expands only into the
+in-cell portion of installed casings; collision stays at the body slab. The `arch_thinning`
+serializer wraps a one-ingredient shapeless recipe and copies supported stack metadata to one
+matching thin item. Unknown top-level payloads, future appearance data and opaque capabilities
+refuse conversion. There is no reverse recipe.
+
 ## Modular arch geometry (0.14.0)
 
 `block/arch/geometry` is separate from the frozen migration-source `block/archway` family.

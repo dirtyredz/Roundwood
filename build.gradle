@@ -40,7 +40,13 @@ if (project.hasProperty('navigationRepeats')) {
 // Bounded placement/lifecycle gate for 0.15.0; excludes navigation, showcase and migration suites.
 if (project.hasProperty('doorTargets')) {
     sourceSets.gameTest.java.include '**/fixture/**', '**/DoorTargetsGameTests.java',
-            '**/ArchPiecePlacementGameTests.java', '**/DoorArchFittingGameTests.java', '**/DoorFreeEdgeGameTests.java', '**/TestWorldGameTests.java'
+            '**/ArchPiecePlacementGameTests.java', '**/ArchPieceTrimGameTests.java', '**/ArchThinningGameTests.java',
+            '**/DoorFreeEdgeGameTests.java', '**/TestWorldGameTests.java'
+}
+
+// Explicit red witness while the fitted-door slices are still under construction.
+if (project.hasProperty('archFitReproduction')) {
+    sourceSets.gameTest.java.include '**/fixture/**', '**/DoorArchFittingGameTests.java', '**/TestWorldGameTests.java'
 }
 
 configurations {

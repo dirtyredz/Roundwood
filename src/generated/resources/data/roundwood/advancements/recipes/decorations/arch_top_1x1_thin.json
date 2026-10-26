@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_full_arch": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "roundwood:arch_top_1x1"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "roundwood:arch_top_1x1_thin"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_full_arch",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "roundwood:arch_top_1x1_thin"
+    ]
+  },
+  "sends_telemetry_event": false
+}
