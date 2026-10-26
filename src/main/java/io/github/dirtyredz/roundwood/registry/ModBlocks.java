@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.registry;
 
+import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness;
+import io.github.dirtyredz.roundwood.block.arch.adapter.ThinArchPieceBlock;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.migration.block.RetiredArchwayBlock;
 import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlock;
@@ -58,7 +60,8 @@ public final class ModBlocks {
     private static final Map<WindowDesign, RegistryObject<WindowPaneBlock>> WINDOWS = registerWindows();
     /** The static 2 x 2 archways (0.12.0), ordinary then keyhole. */
     private static final Map<ArchwayDesign, RegistryObject<ArchwayBlock>> ARCHWAYS = registerArchways();
-    private static final Map<ArchPieceDesign, RegistryObject<ArchPieceBlock>> ARCH_PIECES = registerArchPieces();
+    private static final Map<ArchPieceDesign, RegistryObject<ArchPieceBlock>> ARCH_PIECES = registerArchPieces(ArchPieceThickness.FULL);
+    private static final Map<ArchPieceDesign, RegistryObject<ArchPieceBlock>> THIN_ARCH_PIECES = registerArchPieces(ArchPieceThickness.THIN);
     public static final RegistryObject<RoundTrimBlock> ROUND_TRIM = BLOCKS.register("round_trim",
             () -> new RoundTrimBlock(trimProperties(), ModBlockEntities::roundTrim));
 
@@ -86,17 +89,22 @@ public final class ModBlocks {
         return Collections.unmodifiableMap(out);
     }
 
-    private static Map<ArchPieceDesign, RegistryObject<ArchPieceBlock>> registerArchPieces() {
+    private static Map<ArchPieceDesign, RegistryObject<ArchPieceBlock>> registerArchPieces(ArchPieceThickness thickness) {
         Map<ArchPieceDesign, RegistryObject<ArchPieceBlock>> out = new LinkedHashMap<>();
         for (ArchPieceDesign design : ArchPieceDesign.values()) {
-            out.put(design, BLOCKS.register(design.id(), () -> new ArchPieceBlock(archwayProperties(), design, ModBlockEntities::archPiece)));
+            out.put(design, BLOCKS.register(thickness.id(design), () -> thickness == ArchPieceThickness.FULL
+                    ? new ArchPieceBlock(archwayProperties(), design, ModBlockEntities::archPiece)
+                    : new ThinArchPieceBlock(archwayProperties(), design, ModBlockEntities::archPiece)));
         }
         return Collections.unmodifiableMap(out);
     }
 
     public static ArchPieceBlock archPiece(ArchPieceDesign design) { return ARCH_PIECES.get(design).get(); }
-    /** The four active modular products, in creative order. */
-    public static List<ArchPieceBlock> archPieces() { return ARCH_PIECES.values().stream().map(RegistryObject::get).toList(); }
+    public static ArchPieceBlock archPiece(ArchPieceDesign design, ArchPieceThickness thickness) {
+        return (thickness == ArchPieceThickness.FULL ? ARCH_PIECES : THIN_ARCH_PIECES).get(design).get();
+    }
+    /** Full products followed by their thin counterparts. */
+    public static List<ArchPieceBlock> archPieces() { return java.util.stream.Stream.concat(ARCH_PIECES.values().stream(), THIN_ARCH_PIECES.values().stream()).map(RegistryObject::get).toList(); }
 
     public static RoundDoorBlock roundDoor() {
         return ROUND_DOOR.get();

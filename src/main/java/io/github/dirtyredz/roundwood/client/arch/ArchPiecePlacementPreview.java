@@ -71,13 +71,19 @@ public final class ArchPiecePlacementPreview {
                         pos.getZ() - camera.z, 0, 0, 0, .4F);
             }
             var anchor = assembly.anchor();
-            OutlineLines.edges(pose, lines, VoxelShapeFactory.shape(ArchPieceGeometry.placed(assembly.design(), assembly.side(), assembly.facing())),
+            OutlineLines.edges(pose, lines, VoxelShapeFactory.shape(ArchPieceGeometry.placed(assembly.design(), assembly.side(), assembly.facing(), assembly.thickness(), assembly.depth())),
                     anchor.getX() - camera.x, anchor.getY() - camera.y, anchor.getZ() - camera.z, .35F, .8F, 1, .9F);
             var hit = event.getTarget();
             var face = hit.getDirection();
             Vec3 origin = Vec3.atLowerCornerOf(hit.getBlockPos());
             double plane = hit.getLocation().subtract(origin).get(face.getAxis()) + face.getAxisDirection().getStep() * .002;
-            if (assembly.design().shoulder()) {
+            if (assembly.thickness() == io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.THIN) {
+                for (var region : ArchPieceTargeting.regions(client.player.getDirection(), face, assembly.design().shoulder())) {
+                    boolean selected = region.target().facing() == assembly.facing() && region.target().side() == assembly.side()
+                            && region.depth() == assembly.depth();
+                    polygon(event, face, plane, origin.subtract(camera), region.polygon(), selected ? 1 : .35F);
+                }
+            } else if (assembly.design().shoulder()) {
                 Vec3 local = hit.getLocation().subtract(origin);
                 var selected = ArchPieceTargeting.target(client.player.getDirection(), face, local.x, local.y, local.z).zone();
                 for (var zone : ArchPieceTargeting.Zone.values()) {

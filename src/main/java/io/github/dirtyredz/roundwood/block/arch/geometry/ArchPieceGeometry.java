@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.arch.geometry;
 
+import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.PixelCircle;
 import io.github.dirtyredz.roundwood.geometry.PixelSlab;
@@ -14,14 +15,21 @@ public final class ArchPieceGeometry {
     private ArchPieceGeometry() {}
 
     public static List<Box> body(ArchPieceDesign design, KeyholeShoulderProfile.Side side) {
+        return body(design, side, ArchPieceThickness.FULL, ArchPieceDepth.FRONT);
+    }
+    public static List<Box> body(ArchPieceDesign design, KeyholeShoulderProfile.Side side, ArchPieceThickness thickness, ArchPieceDepth depth) {
         return PixelCircle.rasterize(design.width(), design.height(), (u, v) -> design.contains(side, u, v))
-                .stream().map(rect -> rect.extrude(0, 16)).toList();
+                .stream().map(rect -> rect.extrude(thickness.back(depth), thickness.front(depth))).toList();
     }
 
     public static List<Box> cell(ArchPieceDesign design, KeyholeShoulderProfile.Side side, int column, int row) {
+        return cell(design, side, column, row, ArchPieceThickness.FULL, ArchPieceDepth.FRONT);
+    }
+    public static List<Box> cell(ArchPieceDesign design, KeyholeShoulderProfile.Side side, int column, int row,
+                                 ArchPieceThickness thickness, ArchPieceDepth depth) {
         checkCell(design, column, row);
         return PixelCircle.rasterize(16, 16, (u, v) -> design.contains(side, u + 16 * column, v + 16 * row))
-                .stream().map(rect -> rect.extrude(0, 16)).toList();
+                .stream().map(rect -> rect.extrude(thickness.back(depth), thickness.front(depth))).toList();
     }
 
     public static List<Surface> surfaces(ArchPieceDesign design, KeyholeShoulderProfile.Side side, int column, int row, double back, double front, String texture) {
@@ -35,7 +43,11 @@ public final class ArchPieceGeometry {
     }
 
     public static List<Box> placed(ArchPieceDesign design, KeyholeShoulderProfile.Side side, Direction facing) {
-        return VoxelShapeFactory.rotate(body(design, side), VoxelShapeFactory.quarterTurns(facing));
+        return placed(design, side, facing, ArchPieceThickness.FULL, ArchPieceDepth.FRONT);
+    }
+    public static List<Box> placed(ArchPieceDesign design, KeyholeShoulderProfile.Side side, Direction facing,
+                                   ArchPieceThickness thickness, ArchPieceDepth depth) {
+        return VoxelShapeFactory.rotate(body(design, side, thickness, depth), VoxelShapeFactory.quarterTurns(facing));
     }
 
     public static Box footprint(ArchPieceDesign design, Direction facing) {

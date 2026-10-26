@@ -3,6 +3,10 @@
     "roundwood:arch_top_1x1",
     "roundwood:arch_top_1x2",
     "roundwood:arch_top_2x3",
-    "roundwood:keyhole_shoulder"
+    "roundwood:keyhole_shoulder",
+    "roundwood:arch_top_1x1_thin",
+    "roundwood:arch_top_1x2_thin",
+    "roundwood:arch_top_2x3_thin",
+    "roundwood:keyhole_shoulder_thin"
   ]
 }

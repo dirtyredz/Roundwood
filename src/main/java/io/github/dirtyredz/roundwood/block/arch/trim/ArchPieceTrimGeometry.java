@@ -15,8 +15,11 @@ public final class ArchPieceTrimGeometry {
     private ArchPieceTrimGeometry() {}
 
     public static double[] depth(AttachmentFace face) {
-        return face == AttachmentFace.FRONT ? new double[]{16, 16 + AttachmentFace.PROUD}
-                : new double[]{-AttachmentFace.PROUD, 0};
+        return depth(face, 0, 16);
+    }
+    public static double[] depth(AttachmentFace face, double back, double front) {
+        return face == AttachmentFace.FRONT ? new double[]{front, front + AttachmentFace.PROUD}
+                : new double[]{back - AttachmentFace.PROUD, back};
     }
 
     public static List<Surface> surfaces(ArchPieceDesign design, Side side,

@@ -32,6 +32,17 @@ public final class ArchSectionsChecks {
         label(level, frame, owned, ArchPiecesSection.MEDIUM_R, f, "Arch top 1x2");
         label(level, frame, owned, ArchPiecesSection.LARGE_R, f, "Arch top 2x3");
         label(level, frame, owned, ArchPiecesSection.SHOULDERS_R, f, "Shoulder pair");
+        for (var design : ArchPieceDesign.values()) {
+            int r = ArchPiecesSection.THIN_R + design.ordinal() * io.github.dirtyredz.roundwood.showcase.ShowcaseSpacing.pitch(3);
+            label(level, frame, owned, r, f, "Thin " + design.id().replace("arch_", ""));
+            for (var depth : io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.values())
+                for (var side : design.shoulder() ? Side.values() : new Side[]{Side.LEFT}) {
+                    var thin = new ArchPieceLayout.Assembly(frame.pos(r + (side == Side.RIGHT ? 1 : 0), 2 * depth.ordinal(), f), frame.forward(), design, side,
+                            io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.THIN, depth);
+                    check(thin.complete(level, ModBlocks.archPiece(design, thin.thickness())), "missing thin showcase pose");
+                    for (var pos : thin.positions()) check(owned.add(pos), "overlapping thin showcase");
+                }
+        }
         verifyOwnsOnly(level, frame, "arch pieces", 0, ArchPiecesSection.R_MAX, f, f, owned);
         owned.clear();
         f = ArchCompositionsSection.F;

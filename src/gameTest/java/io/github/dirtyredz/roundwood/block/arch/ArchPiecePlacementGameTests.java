@@ -38,6 +38,35 @@ public final class ArchPiecePlacementGameTests {
     private ArchPiecePlacementGameTests() {}
 
     @GameTest(template = TEMPLATE)
+    public static void thinProposalsWriteTheirExactPoseForEveryFaceAndHand(GameTestHelper helper) {
+        floor(helper);
+        var level = helper.getLevel();
+        var anchor = helper.absolutePos(ANCHOR);
+        for (var design : ArchPieceDesign.values()) for (var facing : Direction.Plane.HORIZONTAL)
+            for (var face : Direction.values()) for (var hand : InteractionHand.values())
+                for (double u : new double[]{.125, .5, .875}) for (double v : new double[]{.125, .5, .875}) {
+                    var player = player(helper, "thin_plan", GameType.SURVIVAL, facing);
+                    var block = ModBlocks.archPiece(design, io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.THIN);
+                    var stack = new ItemStack(block.asItem(), 2);
+                    player.setItemInHand(hand, stack);
+                    // Aim at the landing cell itself; an air cell is replaceable for every face.
+                    double x = face.getAxis() == Direction.Axis.X ? .5 : u;
+                    double y = face.getAxis() == Direction.Axis.Y ? .5 : v;
+                    double z = face.getAxis() == Direction.Axis.Y ? v : face.getAxis() == Direction.Axis.X ? u : .5;
+                    var hit = new net.minecraft.world.phys.BlockHitResult(Vec3.atLowerCornerOf(anchor).add(x, y, z), face, anchor, false);
+                    var context = new net.minecraft.world.item.context.BlockPlaceContext(player, hand, stack, hit);
+                    var plan = ArchPiecePlacement.of(block, context).orElseThrow();
+                    check(stack.useOn(new net.minecraft.world.item.context.UseOnContext(player, hand, hit)).consumesAction(), "thin placement refused");
+                    check(stack.getCount() == 1, "thin payment");
+                    check(plan.assembly().complete(level, block), "thin incomplete");
+                    plan.states().forEach((cell, state) -> check(level.getBlockState(plan.assembly().pos(cell)).equals(state), "thin preview/result mismatch"));
+                    level.removeBlock(plan.assembly().anchor(), false);
+                    assertAir(helper, plan.assembly());
+                }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
     public static void proposalsMatchEveryProductFacingAndShoulderSide(GameTestHelper helper) {
         floor(helper);
         for (var design : ArchPieceDesign.values()) for (Direction facing : Direction.Plane.HORIZONTAL)

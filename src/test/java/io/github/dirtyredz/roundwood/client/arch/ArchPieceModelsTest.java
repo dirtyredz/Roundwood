@@ -27,6 +27,30 @@ class ArchPieceModelsTest {
         Sprite(SpriteContents contents) { super(TEXTURE, contents, 256, 256, 32, 64); }
     }
 
+    @Test void thinBodiesStayExactAndCasingFacesSeparateWithoutTextureBleed() {
+        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), AnimationMetadataSection.EMPTY)) {
+            var sprite = new Sprite(contents);
+            for (var design : ArchPieceDesign.values()) for (var side : Side.values()) for (var cell : ArchPieceCell.of(design))
+                for (var depth : io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.values())
+                    for (var facing : Direction.Plane.HORIZONTAL) for (boolean masonry : new boolean[]{false, true}) {
+                        var body = ArchPieceModels.quads(design, side, cell, depth.back(), depth.back() + 3, facing, sprite, masonry, ArchPieceModels.Layer.BODY);
+                        for (var quad : body) { if (masonry) checkUvDeltas(quad, sprite); else checkQuad(quad, sprite); }
+                        for (var face : AttachmentFace.values()) {
+                            var band = ArchPieceTrimGeometry.depth(face, depth.back(), depth.back() + 3);
+                            var casing = ArchPieceModels.quads(design, side, cell, band[0], band[1], facing, sprite, masonry, ArchPieceModels.Layer.CASING);
+                            for (var quad : casing) { if (masonry) checkUvDeltas(quad, sprite); else checkQuad(quad, sprite); }
+                            // A contact surface must move along its normal, including jamb/reveal faces.
+                            var unseparated = ArchPieceModels.quads(design, side, cell, band[0], band[1], facing, sprite, masonry, ArchPieceModels.Layer.BODY);
+                            if (masonry) continue;
+                            assertEquals(unseparated.size(), casing.size());
+                            for (int i = 0; i < casing.size(); i++) {
+                                assertFalse(java.util.Arrays.equals(unseparated.get(i).getVertices(), casing.get(i).getVertices()), "casing face remained coplanar");
+                            }
+                        }
+                    }
+        }
+    }
+
     @Test void bodyAndCasingsTileTheDonorAtBlockScaleInEveryFacingAndSide() {
         try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), AnimationMetadataSection.EMPTY)) {
             var sprite = new Sprite(contents);
@@ -34,7 +58,7 @@ class ArchPieceModelsTest {
             for (var design : ArchPieceDesign.values()) for (var side : Side.values()) for (var cell : ArchPieceCell.of(design))
                 for (var facing : Direction.Plane.HORIZONTAL) {
                     for (double[] depth : new double[][]{{0,16}, ArchPieceTrimGeometry.depth(AttachmentFace.FRONT), ArchPieceTrimGeometry.depth(AttachmentFace.BACK)}) {
-                        var quads = ArchPieceModels.quads(design, side, cell, depth[0], depth[1], facing, sprite);
+                        var quads = ArchPieceModels.quads(design, side, cell, depth[0], depth[1], facing, sprite, false, depth[1] - depth[0] == 1 ? ArchPieceModels.Layer.CASING : ArchPieceModels.Layer.BODY);
                         boolean empty = design == ArchPieceDesign.TOP_2X3 && cell.column == 1 && cell.row == 0;
                         assertEquals(empty, quads.isEmpty());
                         for (var quad : quads) { seen.add(quad.getDirection()); checkQuad(quad, sprite); }
@@ -67,7 +91,7 @@ class ArchPieceModelsTest {
                     assertEquals(area(plain), area(masonry), 1e-4, "partition must preserve total drawn area");
                     var body = planarSignature(masonry, facing);
                     for (double[] depth : new double[][]{{16,17},{-1,0}})
-                        assertEquals(body, planarSignature(ArchPieceModels.quads(design, side, cell, depth[0], depth[1], facing, sprite, true), facing));
+                        assertEquals(body, planarSignature(ArchPieceModels.quads(design, side, cell, depth[0], depth[1], facing, sprite, true, ArchPieceModels.Layer.CASING), facing));
                     for (var quad : masonry) checkUvDeltas(quad, sprite);
                 }
             assertTrue(mortarQuads > 0, "masonry quads carry the darkened donor colour");

@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.arch.assembly;
 
+import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlock;
 import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlockEntity;
@@ -26,14 +27,17 @@ public final class ArchPiecePlacement {
         var target = block.design().shoulder() ? ArchPieceTargeting.target(context.getHorizontalDirection(), context.getClickedFace(),
                 hit.x - anchor.getX(), hit.y - anchor.getY(), hit.z - anchor.getZ())
                 : new ArchPieceTargeting.Target(context.getHorizontalDirection(), Side.LEFT, null);
-        var assembly = new ArchPieceLayout.Assembly(anchor, target.facing(), block.design(), target.side());
+        var depth = block.thickness() == ArchPieceThickness.FULL ? ArchPieceDepth.FRONT
+                : ArchPieceDepth.target(target.facing(), context.getClickedFace(),
+                        hit.x - anchor.getX(), hit.y - anchor.getY(), hit.z - anchor.getZ());
+        var assembly = new ArchPieceLayout.Assembly(anchor, target.facing(), block.design(), target.side(), block.thickness(), depth);
         if (!AssemblyPlacementPlan.playerCells(context, assembly, pos -> {})) return Optional.empty();
         var player = context.getPlayer();
         return plan(context.getLevel(), block, assembly, player == null ? CollisionContext.empty() : CollisionContext.of(player));
     }
 
     public static Optional<AssemblyPlacementPlan<ArchPieceCell, ArchPieceLayout.Assembly>> at(Level level, ArchPieceBlock block, ArchPieceLayout.Assembly assembly) {
-        if (block.design() != assembly.design() || !AssemblyPlacementPlan.playerlessCells(level, assembly)) return Optional.empty();
+        if (block.design() != assembly.design() || block.thickness() != assembly.thickness() || !AssemblyPlacementPlan.playerlessCells(level, assembly)) return Optional.empty();
         return plan(level, block, assembly, CollisionContext.empty());
     }
 

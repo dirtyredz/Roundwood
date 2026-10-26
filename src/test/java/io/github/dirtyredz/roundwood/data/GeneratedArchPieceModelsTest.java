@@ -12,13 +12,13 @@ class GeneratedArchPieceModelsTest {
         for (int product = 0; product < GeneratedFiles.ARCH_PIECES.size(); product++) {
             String id = GeneratedFiles.ARCH_PIECES.get(product);
             var model = resolve("roundwood:item/" + id);
-            int width = widths[product], height = heights[product], radius = radii[product], spring = springs[product], offset = width == 48 ? -16 : 0;
+            int width = widths[product % 4], height = heights[product % 4], radius = radii[product % 4], spring = springs[product % 4], offset = width == 48 ? -16 : 0;
             int[][] front = new int[width][height], back = new int[width][height];
             assertEquals("minecraft:block/oak_planks", model.texture("#donor"));
             for (var element : elements(model)) {
                 var from = vec(element, "from"); var to = vec(element, "to");
                 for (int axis = 0; axis < 3; axis++) assertTrue(from[axis] >= -16 && to[axis] <= 32);
-                assertEquals(0, from[2]); assertEquals(16, to[2]);
+                assertEquals(product < 4 ? 0 : 6.5, from[2]); assertEquals(product < 4 ? 16 : 9.5, to[2]);
                 var faces = element.getAsJsonObject("faces");
                 assertEquals(1, faces.size(), "only visible surfaces are emitted");
                 for (int x = (int) from[0] - offset; x < to[0] - offset; x++)

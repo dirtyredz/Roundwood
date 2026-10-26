@@ -38,6 +38,15 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         }
         add(ModBlocks.archway(ArchwayDesign.ORDINARY), "Archway");
         add(ModBlocks.archway(ArchwayDesign.KEYHOLE), "Keyhole Archway");
+        for (var design : io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.values()) {
+            String label = switch (design) {
+                case TOP_1X1 -> "Thin Arch Top 1x1";
+                case TOP_1X2 -> "Thin Arch Top 1x2";
+                case TOP_2X3 -> "Thin Arch Top 2x3";
+                case KEYHOLE_SHOULDER -> "Thin Keyhole Shoulder";
+            };
+            add(ModBlocks.archPiece(design, io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.THIN), label);
+        }
         add(ModBlocks.archPiece(io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.TOP_1X1), "Arch Top 1x1");
         add(ModBlocks.archPiece(io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.TOP_1X2), "Arch Top 1x2");
         add(ModBlocks.archPiece(io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.TOP_2X3), "Arch Top 2x3");

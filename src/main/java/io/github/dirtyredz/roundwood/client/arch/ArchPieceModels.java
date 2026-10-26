@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.client.arch;
 
+import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth;
+import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceCell;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
@@ -29,10 +31,11 @@ import java.util.function.Function;
 /** Cached cell models: the same donor on every surface, projected after facing rotation. */
 public final class ArchPieceModels {
     public record Look(ResourceLocation texture, boolean masonry) {}
+    public enum Layer { BODY, CASING }
     private record Key(ArchPieceDesign design, Side side, ArchPieceCell cell, Direction facing,
-                       double back, double front, Look look) {}
+                       double back, double front, Layer layer, Look look) {}
     private static final AppearanceModelCache<Key, BakedModel> MODELS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
-    private record ItemKey(ArchPieceDesign design, Look look) {}
+    private record ItemKey(ArchPieceDesign design, ArchPieceThickness thickness, Look look) {}
     private static final AppearanceModelCache<ItemKey, BakedModel> ITEMS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
     private ArchPieceModels() {}
 
@@ -42,18 +45,26 @@ public final class ArchPieceModels {
     }
 
     public static BakedModel body(ArchPieceDesign design, Side side, ArchPieceCell cell, Direction facing, Look look) {
-        return model(new Key(design, side, cell, facing, 0, 16, look));
+        return body(design, side, cell, facing, 0, 16, look);
+    }
+    public static BakedModel body(ArchPieceDesign design, Side side, ArchPieceCell cell, Direction facing,
+                                  double back, double front, Look look) {
+        return model(new Key(design, side, cell, facing, back, front, Layer.BODY, look));
     }
 
     public static BakedModel casing(ArchPieceDesign design, Side side, AttachmentFace face, ArchPieceCell cell, Direction facing, Look look) {
-        double[] depth = ArchPieceTrimGeometry.depth(face);
-        return model(new Key(design, side, cell, facing, depth[0], depth[1], look));
+        return casing(design, side, face, cell, facing, 0, 16, look);
+    }
+    public static BakedModel casing(ArchPieceDesign design, Side side, AttachmentFace face, ArchPieceCell cell,
+                                    Direction facing, double back, double front, Look look) {
+        double[] depth = ArchPieceTrimGeometry.depth(face, back, front);
+        return model(new Key(design, side, cell, facing, depth[0], depth[1], Layer.CASING, look));
     }
 
     private static BakedModel model(Key key) {
         return MODELS.get(key, ignored -> {
             var sprite = DonorSprites.atlas(key.look.texture());
-            return GeneralQuadModels.world(quads(key.design, key.side, key.cell, key.back, key.front, key.facing, sprite, key.look.masonry()), sprite);
+            return GeneralQuadModels.world(quads(key.design, key.side, key.cell, key.back, key.front, key.facing, sprite, key.look.masonry(), key.layer), sprite);
         });
     }
 
@@ -65,10 +76,14 @@ public final class ArchPieceModels {
 
     static List<BakedQuad> quads(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front,
                                   Direction facing, TextureAtlasSprite sprite, boolean masonry) {
+        return quads(design, side, cell, back, front, facing, sprite, masonry, Layer.BODY);
+    }
+    static List<BakedQuad> quads(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front,
+                                  Direction facing, TextureAtlasSprite sprite, boolean masonry, Layer layer) {
         int turns = VoxelShapeFactory.quarterTurns(facing);
         List<BakedQuad> quads = new ArrayList<>();
         var joints = masonry ? ArchMasonryModels.joints(design) : List.<List<ArchMasonryModels.Point>>of();
-        for (var surface : back == 0 && front == 16
+        for (var surface : layer == Layer.BODY
                 ? ArchPieceGeometry.surfaces(design, side, cell.column, cell.row, back, front, "")
                 : ArchPieceTrimGeometry.surfaces(design, side, cell.column, cell.row, back, front, "")) {
             var quad = SurfaceQuadBaker.bake(surface.backing().rotateY(turns), VoxelShapeFactory.turn(surface.face(), turns), sprite);
@@ -80,21 +95,27 @@ public final class ArchPieceModels {
     }
 
     public static BakedModel item(ArchPieceDesign design, BakedModel oak, Appearance appearance) {
+        return item(design, ArchPieceThickness.FULL, oak, appearance);
+    }
+    public static BakedModel item(ArchPieceDesign design, ArchPieceThickness thickness, BakedModel oak, Appearance appearance) {
         var look = look(appearance);
-        return ITEMS.get(new ItemKey(design, look), ignored -> {
+        return ITEMS.get(new ItemKey(design, thickness, look), ignored -> {
             var sprite = DonorSprites.atlas(look.texture());
             var culled = new EnumMap<Direction, List<BakedQuad>>(Direction.class);
             for (var direction : Direction.values()) culled.put(direction, List.of());
-            return new SimpleBakedModel(itemQuads(design, sprite, look.masonry()), culled, true, oak.usesBlockLight(), true,
+            return new SimpleBakedModel(itemQuads(design, thickness, sprite, look.masonry()), culled, true, oak.usesBlockLight(), true,
                     sprite, oak.getTransforms(), ItemOverrides.EMPTY);
         });
     }
 
     /** Same cell bake as the body, translated afterwards so authored donor UVs are preserved. */
     static List<BakedQuad> itemQuads(ArchPieceDesign design, TextureAtlasSprite sprite, boolean masonry) {
+        return itemQuads(design, ArchPieceThickness.FULL, sprite, masonry);
+    }
+    static List<BakedQuad> itemQuads(ArchPieceDesign design, ArchPieceThickness thickness, TextureAtlasSprite sprite, boolean masonry) {
         List<BakedQuad> out = new ArrayList<>();
         for (var cell : ArchPieceCell.of(design)) {
-            for (var quad : quads(design, Side.LEFT, cell, 0, 16, Direction.NORTH, sprite, masonry)) {
+            for (var quad : quads(design, Side.LEFT, cell, thickness.back(ArchPieceDepth.MIDDLE), thickness.front(ArchPieceDepth.MIDDLE), Direction.NORTH, sprite, masonry, Layer.BODY)) {
                 int[] vertices = quad.getVertices().clone();
                 int stride = vertices.length / 4;
                 for (int i = 0; i < vertices.length; i += stride) {

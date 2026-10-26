@@ -1,5 +1,18 @@
 # Architecture - Roundwood
 
+## Thin standalone arch pieces
+
+Each modular product has a separate `_thin` registration. Existing IDs remain full-depth and
+retain their old state schema. Thin pieces add `depth`: FRONT is authored z=13..16,
+MIDDLE=6.5..9.5 and BACK=0..3. Product, thickness, side and depth participate in assembly
+membership and geometry caches. Tops remain non-colliding; shoulders collide through their slab.
+
+Shoulder wedges resolve facing/side first, then `FaceDepthBands` resolves depth in that facing.
+The overlay clips those same wedge and band regions. Placement and preview consume the same
+proposal. Body and casing model layers are explicit, so thin slabs cannot be mistaken for casings.
+Item caches include thickness; item geometry uses the centred thin slab and the existing legal
+icon translation. The showcase stacks all three thin depths beside the full products.
+
 ## Modular arch geometry (0.14.0)
 
 `block/arch/geometry` is separate from the frozen migration-source `block/archway` family.

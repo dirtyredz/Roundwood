@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.arch.adapter;
 
+import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth;
+import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
@@ -49,7 +51,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /** Minecraft callbacks only; assembly services own completeness, removal, harvesting and anchors. */
-public final class ArchPieceBlock extends Block implements EntityBlock, AppearanceDefaults, AppearanceUseTarget {
+public class ArchPieceBlock extends Block implements EntityBlock, AppearanceDefaults, AppearanceUseTarget {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<ArchPieceCell> CELL = EnumProperty.create("cell", ArchPieceCell.class);
     public static final EnumProperty<Side> SIDE = EnumProperty.create("side", Side.class);
@@ -63,6 +65,11 @@ public final class ArchPieceBlock extends Block implements EntityBlock, Appearan
         registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH)
                 .setValue(CELL, ArchPieceCell.LOWER_LEFT).setValue(SIDE, Side.LEFT));
     }
+    public ArchPieceThickness thickness() { return ArchPieceThickness.FULL; }
+    public String id() { return thickness().id(design); }
+    public static ArchPieceDepth depth(BlockState state) {
+        return state.hasProperty(ArchPieceDepth.PROPERTY) ? state.getValue(ArchPieceDepth.PROPERTY) : ArchPieceDepth.FRONT;
+    }
     public ArchPieceDesign design() { return design; }
     @Override public AppearanceFamily appearanceFamily() { return AppearanceFamily.TRIM; }
     @Override public Appearance defaultAppearance() { return Appearance.DEFAULT; }
@@ -74,10 +81,10 @@ public final class ArchPieceBlock extends Block implements EntityBlock, Appearan
     @Override @Nullable public BlockState getStateForPlacement(BlockPlaceContext context) { return null; }
 
     @Override public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return ArchPieceShapes.shape(design, state.getValue(SIDE), state.getValue(FACING), state.getValue(CELL));
+        return ArchPieceShapes.shape(design, state.getValue(SIDE), state.getValue(FACING), state.getValue(CELL), thickness(), depth(state));
     }
     @Override public VoxelShape getCollisionShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return ArchPieceShapes.collision(design, state.getValue(SIDE), state.getValue(FACING), state.getValue(CELL));
+        return ArchPieceShapes.collision(design, state.getValue(SIDE), state.getValue(FACING), state.getValue(CELL), thickness(), depth(state));
     }
     @Override public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));

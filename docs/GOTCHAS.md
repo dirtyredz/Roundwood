@@ -1,5 +1,10 @@
 # Gotchas - Roundwood
 
+- Thin arch depth is resolved after shoulder orientation. Overlay regions must intersect wedges
+  with bands in the resulting facing. Full arch IDs have no depth property and remain full-depth.
+- Arch model layers must be explicit: `back == 0 && front == 16` cannot distinguish bodies from
+  casings once thin products exist. Include thickness in styled-item cache keys.
+
 - **0.14.0 replaces archways.** Old 2x2 cells are migration sources, never placeable content. Tops
   move to the upper row; ordinary jambs vanish; keyholes get two untrimmed shoulders. Both old
   casings belong to the top. Unknown trim versions defer; never partially rewrite an assembly.

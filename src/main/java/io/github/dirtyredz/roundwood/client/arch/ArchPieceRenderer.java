@@ -50,7 +50,7 @@ public class ArchPieceRenderer implements BlockEntityRenderer<ArchPieceBlockEnti
         VertexConsumer consumer = buffers.getBuffer(RenderType.solid());
         ArchPieceModels.Look body = ArchPieceModels.look(entity.appearance());
         for (ArchPieceCell part : assembly.parts()) {
-            draw(level, assembly, part, ArchPieceModels.body(assembly.design(), assembly.side(), part, assembly.facing(), body), pose, consumer);
+            draw(level, assembly, part, ArchPieceModels.body(assembly.design(), assembly.side(), part, assembly.facing(), assembly.back(), assembly.front(), body), pose, consumer);
         }
         for (AttachmentFace face : AttachmentFace.values()) {
             Optional<Appearance> trim = entity.trims().get(face);
@@ -59,7 +59,7 @@ public class ArchPieceRenderer implements BlockEntityRenderer<ArchPieceBlockEnti
             }
             ArchPieceModels.Look look = ArchPieceModels.look(trim.get());
             for (ArchPieceCell part : assembly.parts()) {
-                draw(level, assembly, part, ArchPieceModels.casing(assembly.design(), assembly.side(), face, part, assembly.facing(), look), pose,
+                draw(level, assembly, part, ArchPieceModels.casing(assembly.design(), assembly.side(), face, part, assembly.facing(), assembly.back(), assembly.front(), look), pose,
                         consumer);
             }
         }

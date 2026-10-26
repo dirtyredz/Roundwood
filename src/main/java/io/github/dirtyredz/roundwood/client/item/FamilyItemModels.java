@@ -22,7 +22,7 @@ public final class FamilyItemModels {
     /** {@code model} wrapped for {@code item}'s kind, or {@code model} itself when the item has no appearance family. */
     public static BakedModel wrap(Item item, BakedModel model) {
         if (item instanceof ArchPieceItem piece) {
-            return AppearanceItemOverrides.wrap(model, (oak, look) -> ArchPieceModels.item(piece.piece().design(), oak, look));
+            return AppearanceItemOverrides.wrap(model, (oak, look) -> ArchPieceModels.item(piece.piece().design(), piece.piece().thickness(), oak, look));
         }
         if (item instanceof ArchwayItem archway) {
             return AppearanceItemOverrides.wrap(model, (oak, look) -> ArchwayModels.item(archway.archway().design(), oak, look));

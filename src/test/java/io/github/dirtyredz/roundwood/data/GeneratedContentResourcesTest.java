@@ -166,7 +166,8 @@ class GeneratedContentResourcesTest {
         assertEquals("Round Door", lang.get("block.roundwood.round_door").getAsString());
         assertEquals("Arched Door", lang.get("block.roundwood.arched_door").getAsString());
         for (String id : ARCH_PIECES) {
-            assertEquals(id.equals("keyhole_shoulder") ? "Keyhole Shoulder" : "Arch Top " + id.substring(9),
+            String base = id.replace("_thin", "");
+            assertEquals((id.endsWith("_thin") ? "Thin " : "") + (base.equals("keyhole_shoulder") ? "Keyhole Shoulder" : "Arch Top " + base.substring(9)),
                     lang.get("block.roundwood." + id).getAsString());
         }
         assertTrue(lang.has("tooltip.roundwood.arch_piece") && lang.has("tooltip.roundwood.retired_archway"));

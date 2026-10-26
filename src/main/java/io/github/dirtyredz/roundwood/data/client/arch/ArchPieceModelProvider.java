@@ -26,7 +26,7 @@ public class ArchPieceModelProvider extends BlockStateProvider {
     protected void registerStatesAndModels() {
         for (ArchPieceBlock piece : ModBlocks.archPieces()) {
             getVariantBuilder(piece).partialState().setModels(new ConfiguredModel(
-                    models().getBuilder(piece.design().id()).texture("particle", OAK_PLANKS)));
+                    models().getBuilder(piece.id()).texture("particle", OAK_PLANKS)));
         }
     }
 }

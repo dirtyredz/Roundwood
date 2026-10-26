@@ -40,7 +40,7 @@ public final class ArchPieceTrimTarget {
         ArchPieceLayout.Assembly assembly = ArchPieceLayout.of(pos, state);
         Vec3 normal = Vec3.atLowerCornerOf(hit.getDirection().getNormal());
         Vec3 local = assembly.toAuthored(hit.getLocation().subtract(normal.scale(INWARD)));
-        AttachmentFace face = AttachmentFace.at(local.z, ArchPieceTrimGeometry.MIDDLE);
+        AttachmentFace face = AttachmentFace.at(local.z, (assembly.back() + assembly.front()) / 2);
         Direction side = hit.getDirection();
         boolean planar = side == assembly.facing() || side == assembly.facing().getOpposite();
         return new Hit(planar ? Region.FACE : Region.BODY, face);

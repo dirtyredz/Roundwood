@@ -122,8 +122,15 @@ public final class ShowcaseCanvas {
 
     /** Places one whole modular piece and its independent casings through production transactions. */
     public boolean archPiece(ArchPieceDesign design, Side side, Appearance appearance, FaceTrims trims, int r, int y, int f) {
-        var assembly = new ArchPieceLayout.Assembly(pos(r, y, f), frame.forward(), design, side);
-        if (!ArchPiecePlacement.placeAt(level, ModBlocks.archPiece(design), assembly, appearance)) {
+        return archPiece(design, side, io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL,
+                io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.FRONT, appearance, trims, r, y, f);
+    }
+    public boolean archPiece(ArchPieceDesign design, Side side,
+            io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness thickness,
+            io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth depth,
+            Appearance appearance, FaceTrims trims, int r, int y, int f) {
+        var assembly = new ArchPieceLayout.Assembly(pos(r, y, f), frame.forward(), design, side, thickness, depth);
+        if (!ArchPiecePlacement.placeAt(level, ModBlocks.archPiece(design, thickness), assembly, appearance)) {
             problem("arch piece not placed at " + assembly.anchor().toShortString());
             return false;
         }

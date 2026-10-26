@@ -1,0 +1,85 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "roundwood:arch_top_1x2_thin"
+        }
+      ],
+      "rolls": 1.0
+    },
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "roundwood:trim_face",
+          "face": "front"
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "ArchPieceTrim.Front.RoundwoodAppearance",
+                  "target": "RoundwoodAppearance"
+                }
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "roundwood:round_trim"
+        }
+      ],
+      "rolls": 1.0
+    },
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "roundwood:trim_face",
+          "face": "back"
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "ArchPieceTrim.Back.RoundwoodAppearance",
+                  "target": "RoundwoodAppearance"
+                }
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "roundwood:round_trim"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "roundwood:blocks/arch_top_1x2_thin"
+}

@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.arch.assembly;
 
+import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness;
 import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlock;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
 import io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side;
@@ -15,12 +16,21 @@ import java.util.Objects;
 public final class ArchPieceLayout {
     private ArchPieceLayout() {}
 
-    public record Assembly(BlockPos anchor, Direction facing, ArchPieceDesign design, Side side)
+    public record Assembly(BlockPos anchor, Direction facing, ArchPieceDesign design, Side side, ArchPieceThickness thickness, ArchPieceDepth depth)
             implements io.github.dirtyredz.roundwood.block.assembly.Assembly<ArchPieceCell> {
+        public Assembly(BlockPos anchor, Direction facing, ArchPieceDesign design, Side side) {
+            this(anchor, facing, design, side, ArchPieceThickness.FULL, ArchPieceDepth.FRONT);
+        }
+        public double back() { return thickness.back(depth); }
+        public double front() { return thickness.front(depth); }
         public Assembly {
             anchor = anchor.immutable();
             Objects.requireNonNull(design);
             Objects.requireNonNull(side);
+            Objects.requireNonNull(thickness);
+            Objects.requireNonNull(depth);
+            if (thickness == ArchPieceThickness.FULL && depth != ArchPieceDepth.FRONT)
+                throw new IllegalArgumentException("Full pieces have no depth pose");
             if (!facing.getAxis().isHorizontal()) throw new IllegalArgumentException("Arch pieces face horizontally");
         }
         @Override public List<ArchPieceCell> parts() { return ArchPieceCell.of(design); }
@@ -29,15 +39,17 @@ public final class ArchPieceLayout {
             return anchor.relative(facing.getClockWise(), cell.column).above(cell.row);
         }
         public BlockState stateFor(ArchPieceCell cell, Block block) {
-            if (!cell.in(design) || !(block instanceof ArchPieceBlock piece) || piece.design() != design)
+            if (!cell.in(design) || !(block instanceof ArchPieceBlock piece) || piece.design() != design || piece.thickness() != thickness)
                 throw new IllegalArgumentException("State does not belong to this product");
-            return block.defaultBlockState().setValue(ArchPieceBlock.FACING, facing)
+            BlockState state = block.defaultBlockState().setValue(ArchPieceBlock.FACING, facing)
                     .setValue(ArchPieceBlock.CELL, cell).setValue(ArchPieceBlock.SIDE, side);
+            return thickness == ArchPieceThickness.THIN ? state.setValue(ArchPieceDepth.PROPERTY, depth) : state;
         }
         @Override public boolean isPart(BlockState state, Block block, ArchPieceCell cell) {
             return cell.in(design) && state.is(block) && block instanceof ArchPieceBlock piece && piece.design() == design
                     && state.getValue(ArchPieceBlock.FACING) == facing && state.getValue(ArchPieceBlock.CELL) == cell
-                    && state.getValue(ArchPieceBlock.SIDE) == side;
+                    && state.getValue(ArchPieceBlock.SIDE) == side && piece.thickness() == thickness
+                    && ArchPieceBlock.depth(state) == depth;
         }
         public AABB renderBounds() {
             AABB bounds = new AABB(anchor);
@@ -55,6 +67,6 @@ public final class ArchPieceLayout {
         var cell = state.getValue(ArchPieceBlock.CELL);
         if (!cell.in(block.design())) throw new IllegalArgumentException("Invalid cell for arch product");
         Direction facing = state.getValue(ArchPieceBlock.FACING);
-        return new Assembly(anchorFor(pos, facing, cell), facing, block.design(), state.getValue(ArchPieceBlock.SIDE));
+        return new Assembly(anchorFor(pos, facing, cell), facing, block.design(), state.getValue(ArchPieceBlock.SIDE), block.thickness(), ArchPieceBlock.depth(state));
     }
 }
