@@ -1,6 +1,10 @@
 package io.github.dirtyredz.roundwood.block.assembly.placement;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlockEntity;
+import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
+import io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side;
+import io.github.dirtyredz.roundwood.fixture.ArchPieceFixtures;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
@@ -79,32 +83,26 @@ public final class AssemblyPlacementGameTests {
 
     /** One family placed by a player with an item: its name, its item and its cells when anchored at {@link #ANCHOR}. */
     private enum Family {
-        ROUND_DOOR, ARCHED_DOOR, ARCHWAY, KEYHOLE_ARCHWAY;
+        ROUND_DOOR(null), ARCHED_DOOR(null),
+        TOP_1X1(ArchPieceDesign.TOP_1X1), TOP_1X2(ArchPieceDesign.TOP_1X2),
+        TOP_2X3(ArchPieceDesign.TOP_2X3), SHOULDER(ArchPieceDesign.KEYHOLE_SHOULDER);
+
+        private final ArchPieceDesign piece;
+        Family(ArchPieceDesign piece) { this.piece = piece; }
 
         Item item() {
-            return switch (this) {
-                case ROUND_DOOR -> ModBlocks.roundDoor().asItem();
-                case ARCHED_DOOR -> ModBlocks.archedDoor().asItem();
-                case ARCHWAY -> ModBlocks.archway(ArchwayDesign.ORDINARY).asItem();
-                case KEYHOLE_ARCHWAY -> ModBlocks.archway(ArchwayDesign.KEYHOLE).asItem();
-            };
+            if (piece != null) return ModBlocks.archPiece(piece).asItem();
+            return this == ROUND_DOOR ? ModBlocks.roundDoor().asItem() : ModBlocks.archedDoor().asItem();
         }
 
         List<BlockPos> cells(GameTestHelper helper) {
-            return switch (this) {
-                case ROUND_DOOR -> door(helper, DoorDesign.ROUND).positions();
-                case ARCHED_DOOR -> door(helper, DoorDesign.ARCHED).positions();
-                case ARCHWAY -> ArchwayFixtures.assembly(helper, ANCHOR, Direction.NORTH, ArchwayDesign.ORDINARY).positions();
-                case KEYHOLE_ARCHWAY -> ArchwayFixtures.assembly(helper, ANCHOR, Direction.NORTH, ArchwayDesign.KEYHOLE).positions();
-            };
+            if (piece != null) return ArchPieceFixtures.assembly(helper, ANCHOR, Direction.NORTH, piece, Side.LEFT).positions();
+            return door(helper, this == ROUND_DOOR ? DoorDesign.ROUND : DoorDesign.ARCHED).positions();
         }
 
-        /** Uses {@code stack} on the floor under the anchor (a door with its hinge on the left). */
         InteractionResult place(GameTestHelper helper, ServerPlayer player, ItemStack stack) {
-            return switch (this) {
-                case ROUND_DOOR, ARCHED_DOOR -> DoorFixtures.placeDoor(helper, player, stack, ANCHOR, DoorHingeSide.LEFT);
-                case ARCHWAY, KEYHOLE_ARCHWAY -> ArchwayFixtures.place(helper, player, stack, ANCHOR);
-            };
+            return piece != null ? ArchPieceFixtures.place(helper, player, stack, ANCHOR, Side.LEFT)
+                    : DoorFixtures.placeDoor(helper, player, stack, ANCHOR, DoorHingeSide.LEFT);
         }
     }
 
@@ -418,6 +416,7 @@ public final class AssemblyPlacementGameTests {
         if (entity instanceof RoundDoorBlockEntity door) {
             return door.appearance().toString();
         }
+        if (entity instanceof ArchPieceBlockEntity piece) return piece.appearance().toString();
         if (entity instanceof ArchwayBlockEntity archway) {
             return archway.appearance().toString();
         }

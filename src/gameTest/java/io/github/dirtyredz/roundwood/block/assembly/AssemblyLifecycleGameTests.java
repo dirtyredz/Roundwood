@@ -33,7 +33,7 @@ import static io.github.dirtyredz.roundwood.fixture.assembly.AssemblyFamilies.wr
  * integrity check without any read or forced load; a lone part is removed one tick later while a
  * complete assembly survives its own scheduled check; identical neighbours never touch each other;
  * and Forge's snapshot restoration, like Roundwood's own mutation batch, never tears partners down or
- * schedules a check. Every test loops over all five families.
+ * schedules a check. Every test loops over the two doors and compatibility frame.
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -93,7 +93,7 @@ public final class AssemblyLifecycleGameTests {
                 }
             }
         }
-        check(visited == 8, "expected 4 multi-column families x 2 edges, visited " + visited);
+        check(visited == 4, "expected 2 multi-column families x 2 edges, visited " + visited);
         helper.succeed();
     }
 

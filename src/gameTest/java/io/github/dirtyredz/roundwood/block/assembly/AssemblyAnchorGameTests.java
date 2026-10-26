@@ -162,7 +162,7 @@ public final class AssemblyAnchorGameTests {
                 tried++;
             }
         }
-        check(tried == 11, "expected 3 + 3 + 2 + 2 + 1 foreign layouts, tried " + tried);
+        check(tried == 7, "expected 3 + 3 + 1 foreign layouts, tried " + tried);
         helper.succeed();
     }
 
@@ -231,7 +231,7 @@ public final class AssemblyAnchorGameTests {
                 }
             }
         }
-        check(edge == 4, "expected 4 multi-column families, visited " + edge);
+        check(edge == 2, "expected 2 multi-column families, visited " + edge);
         helper.succeed();
     }
 
