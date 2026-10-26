@@ -1,6 +1,10 @@
 package io.github.dirtyredz.roundwood.block.door.adapter;
 
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.properties.BlockSetType;
 
@@ -15,6 +19,13 @@ import java.util.function.Supplier;
 public class ArchedDoorBlock extends AssemblyDoorBlock {
     public ArchedDoorBlock(Properties properties, BlockSetType type, Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType) {
         super(properties, type, entityType);
+        registerDefaultState(defaultBlockState().setValue(DoorDepth.PROPERTY, DoorDepth.FRONT));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        super.createBlockStateDefinition(builder);
+        builder.add(DoorDepth.PROPERTY);
     }
 
     @Override

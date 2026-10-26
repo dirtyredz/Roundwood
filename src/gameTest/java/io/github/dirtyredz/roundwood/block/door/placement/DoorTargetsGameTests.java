@@ -89,7 +89,7 @@ public final class DoorTargetsGameTests {
         floor(helper);
         var level = helper.getLevel();
         var anchor = helper.absolutePos(new BlockPos(3, 1, 3));
-        for (var block : java.util.List.of(ModBlocks.roundDoor(), ModBlocks.doubleArchedDoor(), ModBlocks.tallDoubleArchedDoor())) {
+        for (var block : java.util.List.of(ModBlocks.archedDoor(), ModBlocks.roundDoor(), ModBlocks.doubleArchedDoor(), ModBlocks.tallDoubleArchedDoor())) {
             for (var facing : Direction.Plane.HORIZONTAL) for (var depth : DoorDepth.values()) for (var hinge : DoorHingeSide.values()) {
                 var player = player(helper, "depth_target", GameType.SURVIVAL, facing);
                 var stack = new ItemStack(block.asItem(), 2);
@@ -127,7 +127,7 @@ public final class DoorTargetsGameTests {
 
     @GameTest(template = TEMPLATE)
     public static void oldRoundStatesDefaultToTheirHistoricalDepth(GameTestHelper helper) {
-        var block = ModBlocks.roundDoor();
+        for (var block : java.util.List.of(ModBlocks.archedDoor(), ModBlocks.roundDoor()))
         for (var facing : Direction.Plane.HORIZONTAL) for (var hinge : DoorHingeSide.values()) {
             var assembly = new DoorLayout.Assembly(BlockPos.ZERO, facing, hinge, block.design());
             for (var part : assembly.parts()) {

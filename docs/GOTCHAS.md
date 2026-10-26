@@ -372,3 +372,5 @@
 - **Four-block door models exceed vanilla's legal element range.** The tall leaf compresses Y
   by 3/4 before the shared -16 shift. Renderer and item display transforms restore Y; board UVs
   use authored coordinates and a 64px square extent. Do not author elements up to y=48.
+
+Fitted-frame clearance must include hardware and both hinges throughout the continuous swing. Endpoint-only or unbounded sampled-angle checks are insufficient. Unknown `DoorArch` payloads must round-trip unchanged; clients receive a locked marker rather than inventing an editable empty frame.

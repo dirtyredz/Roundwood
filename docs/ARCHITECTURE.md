@@ -755,3 +755,5 @@ whole-image), oak source quarters per family, one empty world model and a single
 over the canonical models and item models parenting the canonical items. Items carry front GUI light
 and computed centred transforms. Plus 20 recipes and their advancements, loot (aliases drop the
 canonical item; windows and doors add one trim pool per face), tags and English names.
+
+Fitted-top geometry uses a BACK door and a top anchored at y+1 (arched, round, double) or y+2 (tall double). Full tops retain their front mask; each mask pixel retreats behind conservative interval bounds of both hinges and all hardware, with room for a one-pixel rear casing. Exposed faces subtract neighboring depth intervals. Thin MIDDLE/FRONT slabs must pass the same clearance predicate; BACK is incompatible. The door anchor has an independent versioned `DoorArch` store; missing means absent, explicit empty updates clear clients, and unknown payloads remain opaque and refuse edits. Arched doors now default the existing depth property to FRONT.

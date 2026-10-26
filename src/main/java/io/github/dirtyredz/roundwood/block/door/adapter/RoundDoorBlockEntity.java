@@ -6,6 +6,8 @@ import io.github.dirtyredz.roundwood.block.attachment.TrimAttachmentSource;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.block.door.frame.DoorArchAttachment;
+import io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorSwing;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimNbt;
@@ -34,6 +36,15 @@ import java.util.Optional;
  */
 public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements TrimAttachmentSource {
     private final DoorSwing swing;
+    private final DoorArchStore arch = new DoorArchStore();
+
+    public Optional<DoorArchAttachment> arch() { return arch.attachment(); }
+    public boolean archEditable() { return arch.editable(); }
+    public boolean setArch(@Nullable DoorArchAttachment attachment) {
+        if (!arch.set(attachment)) return false;
+        changed();
+        return true;
+    }
     @Nullable
     private CamouflageData camouflage;
 
@@ -70,6 +81,7 @@ public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements
     /** On disk the camouflage keeps its refund. */
     @Override
     protected void saveFamily(CompoundTag tag) {
+        arch.save(tag);
         if (camouflage != null) {
             tag.put(CamouflageData.TAG, camouflage.write(true));
         }
@@ -78,11 +90,13 @@ public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements
     /** Clients get the material, never the refund, and an explicit empty compound once it is cleared. */
     @Override
     protected void writeFamilyUpdate(CompoundTag tag) {
+        arch.writeUpdate(tag);
         tag.put(CamouflageData.TAG, camouflage == null ? new CompoundTag() : camouflage.write(false));
     }
 
     @Override
     protected void loadFamily(CompoundTag tag) {
+        arch.load(tag);
         camouflage = CamouflageData.read(tag).orElse(null);
     }
 
