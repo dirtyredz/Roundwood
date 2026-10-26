@@ -73,7 +73,7 @@ public final class ArchwayMigrationGameTests {
                         var lower = (ArchPieceBlockEntity) level.getBlockEntity(bottom);
                         check(lower.appearance().equals(look) && !lower.trims().any(), "shoulder look or duplicated casing");
                         var state = level.getBlockState(bottom);
-                        double px = side == Side.LEFT ? 5.5 / 16 : 10.5 / 16;
+                        double px = side == Side.LEFT ? 3.5 / 16 : 12.5 / 16;
                         check(state.getCollisionShape(level, bottom).toAabbs().stream()
                                 .anyMatch(b -> b.contains(px, .5 / 16, .5)), "migrated shoulder does not reach the floor");
                     }
