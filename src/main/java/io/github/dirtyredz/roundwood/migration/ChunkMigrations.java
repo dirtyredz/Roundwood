@@ -3,6 +3,9 @@ package io.github.dirtyredz.roundwood.migration;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
+import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
+import io.github.dirtyredz.roundwood.migration.block.RetiredArchwayBlock;
+import io.github.dirtyredz.roundwood.migration.conversion.ArchwayConversion;
 import io.github.dirtyredz.roundwood.migration.conversion.DoorTrimConversion;
 import io.github.dirtyredz.roundwood.migration.conversion.LegacyCells;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
@@ -23,13 +26,14 @@ import io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion;
  * scheduling extracted from {@code LegacyChunkMigration}). The chunk-load event only reads the chunk's
  * own sections (skipping any whose palette cannot hold a candidate) and queues one entry per object
  * ({@link ChunkMigrationQueue}); the work runs at the end of the level tick, at most 64 entries per
- * level per tick. Two migrations, in order:
+ * level per tick. Shared discovery for frozen aliases, retired crossed windows/archways and fitted frames:
  * <ol>
  *     <li>0.4.0 aliases become canonical ({@link LegacyChunkMigration}, unchanged policy);</li>
  *     <li>then a 0.7.0 fitted frame becomes its door's FRONT trim ({@link DoorTrimConversion}). Frames
  *     and doors are both discovered, so whichever of the two loads last retries the pair; a door is
  *     queued only when the cell in front of it may hold a frame.</li>
  * </ol>
+ * Retired archways use their four-cell anchor as the queue key and convert before integrity.
  * Work for a chunk that has unloaded again is dropped (its next load queues it anew).
  */
 public final class ChunkMigrations {
@@ -97,15 +101,24 @@ public final class ChunkMigrations {
                 return;
             }
         }
+        if (state.getBlock() instanceof RetiredArchwayBlock) {
+            var result = ArchwayConversion.convert(level, pos);
+            if (result == LegacyCells.Result.DEFERRED || result == LegacyCells.Result.INCOMPLETE) level.scheduleTick(pos, state.getBlock(), 1);
+            return;
+        }
         WindowCrossConversion.convert(level, pos);
         DoorTrimConversion.convert(level, pos);
     }
 
     private static boolean candidate(BlockState state) {
-        return CrossWindowCompatibility.isRetired(state) || LegacyChunkMigration.isLegacy(state) || state.is(ModBlocks.roundTrim()) || state.is(ModBlocks.roundDoor());
+        return state.getBlock() instanceof RetiredArchwayBlock || CrossWindowCompatibility.isRetired(state) || LegacyChunkMigration.isLegacy(state) || state.is(ModBlocks.roundTrim()) || state.is(ModBlocks.roundDoor());
     }
 
     private static void enqueue(LevelAccessor level, LevelChunk chunk, BlockPos pos, BlockState state) {
+        if (state.getBlock() instanceof RetiredArchwayBlock) {
+            QUEUE.add(level, pos, ArchwayLayout.of(pos, state).anchor());
+            return;
+        }
         if (CrossWindowCompatibility.isRetired(state)) {
             QUEUE.add(level, pos, pos);
             return;

@@ -30,7 +30,7 @@ import java.util.Map;
 /**
  * Twenty-two advertised items: two doors, thirteen plain profiles, four arch pieces and three attachments.
  * The window map also retains the thirteen hidden crossed items. Frozen aliases and window_trim
- * remain registered by LegacyContent. The two retired archways keep their original behavior.
+ * remain registered by LegacyContent. The two retired archways are non-placeable migration sources.
  * Looks travel in stack data.
  */
 public final class ModItems {

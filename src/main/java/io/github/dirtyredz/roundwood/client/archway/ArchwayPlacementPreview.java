@@ -50,7 +50,7 @@ public final class ArchwayPlacementPreview {
 
     /** The plan for {@code player} aiming at {@code hit}, or empty when no archway is held or nothing would be placed. */
     public static Optional<AssemblyPlacementPlan<ArchwayPart, ArchwayLayout.Assembly>> of(Player player, Level level, BlockHitResult hit) {
-        InteractionHand hand = PlacementHighlights.held(player, stack -> stack.getItem() instanceof ArchwayItem);
+        InteractionHand hand = PlacementHighlights.held(player, stack -> stack.getItem() instanceof ArchwayItem && !(stack.getItem() instanceof io.github.dirtyredz.roundwood.migration.item.RetiredArchwayItem));
         if (hand == null) {
             return Optional.empty();
         }

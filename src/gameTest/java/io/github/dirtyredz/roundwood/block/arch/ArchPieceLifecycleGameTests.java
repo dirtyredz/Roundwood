@@ -4,9 +4,6 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlock;
 import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceCell;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
-import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
-import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.fixture.assembly.AssemblyFamilies;
 import io.github.dirtyredz.roundwood.fixture.assembly.SingleChunk;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
@@ -118,27 +115,4 @@ public final class ArchPieceLifecycleGameTests {
         });
     }
 
-    @GameTest(template = "archways_v0133")
-    public static void historicalFixtureKeepsItsIdsPartsAndKnownAppearancePayloads(GameTestHelper helper) {
-        helper.runAfterDelay(3, () -> {
-            for (var design : ArchwayDesign.values()) {
-                // GameTest places template y=1 at helper y=2 (as in the older migration fixtures).
-                BlockPos pos = helper.absolutePos(new BlockPos(design == ArchwayDesign.ORDINARY ? 1 : 5, 2, 1));
-                var block = ModBlocks.archway(design);
-                var state = helper.getLevel().getBlockState(pos);
-                check(state.is(block), "historical id changed: " + state + " at " + pos);
-                check(ArchwayLayout.of(pos, state).complete(helper.getLevel(), block), "historical parts changed");
-                check(helper.getLevel().getBlockEntity(pos) instanceof ArchwayBlockEntity, "historical entity type changed");
-                var entity = (ArchwayBlockEntity) helper.getLevel().getBlockEntity(pos);
-                if (design == ArchwayDesign.ORDINARY) {
-                    check(entity.appearance().equals(AssemblyFamilies.wood("spruce_planks")), "historical body look lost");
-                    check(entity.saveWithFullMetadata().getCompound("ArchwayTrim").getCompound("Back")
-                            .getCompound("RoundwoodAppearance").getString("Material").equals("minecraft:bricks"), "historical back look lost");
-                    check(entity.saveWithFullMetadata().getCompound("ArchwayTrim").contains("Front"), "historical oak front trim lost");
-                } else check(entity.saveWithFullMetadata().getCompound("RoundwoodAppearance").getString("Material")
-                        .equals("minecraft:stone_bricks"), "historical masonry look lost");
-            }
-            helper.succeed();
-        });
-    }
 }

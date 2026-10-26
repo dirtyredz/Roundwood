@@ -5,6 +5,7 @@ import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
 import io.github.dirtyredz.roundwood.block.door.adapter.DoorUseChannel;
 import io.github.dirtyredz.roundwood.data.RoundwoodDataProviders;
 import io.github.dirtyredz.roundwood.migration.ChunkMigrations;
+import io.github.dirtyredz.roundwood.migration.ArchwayStackMigration;
 import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
@@ -46,5 +47,10 @@ public final class Roundwood {
         gameBus.addListener(ChunkMigrations::onChunkLoad);
         gameBus.addListener(ChunkMigrations::onLevelTick);
         gameBus.addListener(ChunkMigrations::onLevelUnload);
+        gameBus.addListener(ArchwayStackMigration::onChunkLoad);
+        gameBus.addListener(ArchwayStackMigration::onLevelTick);
+        gameBus.addListener(ArchwayStackMigration::onLevelUnload);
+        gameBus.addListener(ArchwayStackMigration::onPlayerTick);
+        gameBus.addListener(ArchwayStackMigration::onEntityJoin);
     }
 }

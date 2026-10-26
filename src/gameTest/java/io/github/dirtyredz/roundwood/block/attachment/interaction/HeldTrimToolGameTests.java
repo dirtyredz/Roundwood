@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.block.attachment.interaction;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceUseTarget;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
@@ -54,9 +55,6 @@ import java.util.function.Supplier;
 
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.BRICKS;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.SPRUCE;
-import static io.github.dirtyredz.roundwood.fixture.ArchwayFixtures.anchorEntity;
-import static io.github.dirtyredz.roundwood.fixture.ArchwayFixtures.through;
-import static io.github.dirtyredz.roundwood.fixture.ArchwayFixtures.write;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assembly;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
@@ -137,11 +135,30 @@ public final class HeldTrimToolGameTests {
         }
     }
 
+    private static io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceLayout.Assembly write(
+            GameTestHelper helper, BlockPos anchor, Direction facing, ArchwayDesign ignored, Appearance look) {
+        var piece = new io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceLayout.Assembly(helper.absolutePos(anchor), facing,
+                io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.TOP_1X2,
+                io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side.LEFT);
+        check(io.github.dirtyredz.roundwood.block.arch.assembly.ArchPiecePlacement.placeAt(helper.getLevel(),
+                ModBlocks.archPiece(piece.design()), piece, look), "arch top placement refused");
+        return piece;
+    }
+    private static io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlockEntity anchorEntity(
+            GameTestHelper helper, io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceLayout.Assembly piece) {
+        return (io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlockEntity) helper.getLevel().getBlockEntity(piece.anchor());
+    }
+    private static BlockHitResult through(GameTestHelper helper, ServerPlayer player,
+            io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceLayout.Assembly piece, double across, double up, boolean front) {
+        return io.github.dirtyredz.roundwood.fixture.ArchwayFixtures.through(helper, player,
+                new ArchwayLayout.Assembly(piece.anchor(), piece.facing(), ArchwayDesign.ORDINARY), across, up, front);
+    }
+
     private static Scene archway(GameTestHelper helper, String name, boolean installed) {
         floor(helper);
-        ArchwayLayout.Assembly archway = write(helper, ANCHOR, Direction.NORTH, ArchwayDesign.ORDINARY, Appearance.DEFAULT);
+        io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceLayout.Assembly archway = write(helper, ANCHOR, Direction.NORTH, ArchwayDesign.ORDINARY, Appearance.DEFAULT);
         if (installed) {
-            check(ArchwayTrimActions.install(helper.getLevel(), archway.anchor(), AttachmentFace.FRONT, Appearance.DEFAULT), "casing not installed");
+            check(io.github.dirtyredz.roundwood.block.arch.trim.ArchPieceTrimActions.install(helper.getLevel(), archway.anchor(), AttachmentFace.FRONT, Appearance.DEFAULT), "casing not installed");
         }
         ServerPlayer player = player(helper, name, GameType.SURVIVAL, Direction.NORTH);
         return new Scene(helper, player, () -> through(helper, player, archway, JAMB_A, JAMB_H, true),
@@ -296,7 +313,7 @@ public final class HeldTrimToolGameTests {
     public static void everyUniversalTrimIdFitsAnArchwayFace(GameTestHelper helper) {
         floor(helper);
         for (Item id : AppearanceFixtures.universalTrimIds()) {
-            ArchwayLayout.Assembly archway = write(helper, ANCHOR, Direction.NORTH, ArchwayDesign.ORDINARY, Appearance.DEFAULT);
+            io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceLayout.Assembly archway = write(helper, ANCHOR, Direction.NORTH, ArchwayDesign.ORDINARY, Appearance.DEFAULT);
             ServerPlayer player = player(helper, "arch_ids", GameType.SURVIVAL, Direction.NORTH);
             ItemStack stack = new ItemStack(id, 2);
             Appearance look = AppearanceStacks.read(stack);

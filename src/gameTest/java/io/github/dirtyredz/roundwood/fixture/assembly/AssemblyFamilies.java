@@ -3,13 +3,7 @@ package io.github.dirtyredz.roundwood.fixture.assembly;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
-import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
-import io.github.dirtyredz.roundwood.block.archway.appearance.ArchwayAppearance;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPart;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPlacement;
-import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.assembly.AssemblyMutationBatch;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
@@ -50,7 +44,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * The five multi-cell objects (round door, arched door, ordinary and keyhole archway, compatibility
+ * The active multi-cell objects (round door, arched door, modular arch pieces, compatibility
  * frame) behind one test-side vocabulary, so one lifecycle or anchor test can loop over all of them.
  * Every method forwards to the family's own production method (its layout, placement, anchor lookup,
  * appearance and target); nothing here reimplements them. Cells are indexed in the family's part
@@ -71,13 +65,11 @@ public final class AssemblyFamilies {
         return Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", block));
     }
 
-    /** Round door, arched door, ordinary archway, keyhole archway, frame. */
+    /** Round door, arched door and compatibility frame; modular layouts are enumerated separately. */
     public static List<Family> all() {
         List<Family> out = new ArrayList<>();
         out.add(new DoorFamily("round door", ModBlocks.roundDoor(), LegacyContent.doors().get(0), DoorDesign.ARCHED, ModBlocks.archedDoor()));
         out.add(new DoorFamily("arched door", ModBlocks.archedDoor(), null, DoorDesign.ROUND, ModBlocks.roundDoor()));
-        out.add(new ArchwayFamily("ordinary archway", ArchwayDesign.ORDINARY, ArchwayDesign.KEYHOLE));
-        out.add(new ArchwayFamily("keyhole archway", ArchwayDesign.KEYHOLE, ArchwayDesign.ORDINARY));
         out.add(new TrimFamily("frame", ModBlocks.roundTrim(), LegacyContent.trims().get(0)));
         return out;
     }
@@ -447,113 +439,6 @@ public final class AssemblyFamilies {
         @Override
         public Optional<AppearanceActions.Target> target(Level level, BlockPos pos, BlockState state) {
             return DoorAppearance.target((AssemblyDoorBlock) state.getBlock(), state, level, pos);
-        }
-    }
-
-    // ---- archways ----
-
-    private static final class ArchwayFamily extends Family {
-        private final ArchwayDesign design;
-        private final ArchwayDesign other;
-
-        ArchwayFamily(String name, ArchwayDesign design, ArchwayDesign other) {
-            super(name, ModBlocks.archway(design), null);
-            this.design = design;
-            this.other = other;
-        }
-
-        @Override
-        public Instance at(BlockPos anchor, Direction facing) {
-            return new ArchwayInstance(this, anchor, facing);
-        }
-    }
-
-    private static final class ArchwayInstance extends Instance {
-        private final ArchwayLayout.Assembly assembly;
-        private final ArchwayFamily archway;
-
-        ArchwayInstance(ArchwayFamily family, BlockPos anchor, Direction facing) {
-            super(family, anchor, facing);
-            this.archway = family;
-            this.assembly = new ArchwayLayout.Assembly(anchor, facing, family.design);
-        }
-
-        @Override
-        public int size() {
-            return ArchwayPart.values().length;
-        }
-
-        @Override
-        public int columns() {
-            return 2;
-        }
-
-        @Override
-        public BlockPos pos(int i) {
-            return assembly.pos(ArchwayPart.values()[i]);
-        }
-
-        @Override
-        public BlockState state(int i, Block as) {
-            return assembly.stateFor(ArchwayPart.values()[i], as);
-        }
-
-        @Override
-        public List<BlockState> foreignLayouts(int i) {
-            ArchwayPart part = ArchwayPart.values()[i];
-            ArchwayLayout.Assembly turned = new ArchwayLayout.Assembly(anchor(), facing().getOpposite(), archway.design);
-            return List.of(turned.stateFor(part, archway.block()),
-                    assembly.stateFor(part, ModBlocks.archway(archway.other)));
-        }
-
-        @Override
-        public Instance atCell(int i, BlockPos cell) {
-            return family().at(anchorForCell(i, cell), facing());
-        }
-
-        @Override
-        public boolean isPart(BlockState state, int i) {
-            return assembly.isPart(state, archway.block(), ArchwayPart.values()[i]);
-        }
-
-        @Override
-        public boolean loaded(Level level) {
-            return assembly.loaded(level);
-        }
-
-        @Override
-        public int present(Level level) {
-            return assembly.presentParts(level, archway.block()).size();
-        }
-
-        @Override
-        public boolean complete(Level level) {
-            return assembly.complete(level, archway.block());
-        }
-
-        @Override
-        public boolean place(Level level, Appearance look) {
-            return ArchwayPlacement.placeAt(level, (ArchwayBlock) archway.block(), assembly, look);
-        }
-
-        @Override
-        public Optional<Appearance> anchorLook(BlockGetter level, BlockPos pos, BlockState state) {
-            return ArchwayAppearance.ANCHORS.anchor(level, pos, state).map(ArchwayBlockEntity::appearance);
-        }
-
-        @Override
-        public Appearance look(BlockGetter level, BlockPos pos, BlockState state) {
-            return ArchwayAppearance.of(level, pos, state);
-        }
-
-        @Override
-        public Appearance dropsLook(LootParams.Builder builder, BlockState state) {
-            return ArchwayAppearance.forDrops(builder, state);
-        }
-
-        @Override
-        public Optional<AppearanceActions.Target> target(Level level, BlockPos pos, BlockState state) {
-            return ArchwayAppearance.target((ArchwayBlock) state.getBlock(), state, level, pos);
         }
     }
 

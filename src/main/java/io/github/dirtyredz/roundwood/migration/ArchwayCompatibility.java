@@ -6,7 +6,7 @@ import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.world.item.Item;
 import java.util.List;
 
-/** Retired IDs retain 0.13.3 behavior; no conversion or payload-custody policy. */
+/** Frozen 0.13.3 identities for automatic world/stack replacement; never advertised or placeable. */
 public final class ArchwayCompatibility {
     private ArchwayCompatibility() { }
     public static List<ArchwayBlock> blocks() { return ModBlocks.archways(); }

@@ -15,6 +15,8 @@ export function archways0133() {
   builder.frame(5, 1, 'roundwood:keyhole_archway', compound({
     id: string('roundwood:archway'),
     RoundwoodAppearance: look('masonry', 'minecraft:stone_bricks'),
+    ArchwayTrim: compound({ Version: int(1), Front: compound({}),
+      Back: compound({ RoundwoodAppearance: look('masonry', 'minecraft:bricks') }) }),
   }));
   return builder.file();
 }
