@@ -6,6 +6,13 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
+- `tools/structures/archways-v0133.mjs` pins historical archway IDs, parts and known
+  appearance/trim payloads; `archways_v0133.nbt` is its generated GameTest fixture.
+- `src/test/java/io/github/dirtyredz/roundwood/block/arch/geometry/` holds independent
+  historical acceptance masks and modular profile/composition tests.
+- `src/main/java/io/github/dirtyredz/roundwood/block/arch/geometry/` owns modular
+  product dimensions, pure semicircle profiles and cell-clipped body/surface geometry.
+
 - `.github/` - synced workflows and `actions/setup-mod-build/` Java/Gradle composite (checkout bootstraps it).
 - `.ci/` - per-mod `mod.json` plus synced Node `scripts/` for verification, assets, GameTest completion and publication.
 - `gradle/` - wrapper, shared test-world definition/staging and final-jar guard with contamination/staging tests; emits `build/ci/release.json`.

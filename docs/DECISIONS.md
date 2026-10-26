@@ -2,6 +2,35 @@
 
 Newest first.
 
+## 2026-10-25 - Modular arch pieces (0.14.0)
+
+The approved products are height x width 1x1, 1x2 and 2x3 tops and one LEFT/RIGHT
+keyhole shoulder. Tops subtract true pixel-centre semicircles of radii 6, 14 and 22
+from rectangles 16x16, 32x16 and 48x32, with centres at (width/2, 0).
+The one- and three-wide tops therefore have ten pixels of upper fill; moving the
+spring line upward would add jambs and is rejected. Tops retain empty collision
+for crown clearance. The six-cell footprint reserves even the empty lower centre.
+
+Retain existing archways instead of splitting them: redistributing their geometry,
+looks and whole-face trim ownership cannot preserve the complete old opening.
+Their 0.13.3 behaviour and donor artwork stay intact; later content work hides them
+from recipes, creative and viewers. Unknown-payload custody and a new installation
+overload are explicitly deferred to dk-ade471a7, outside this release's arch work.
+
+Shoulders crop the old transition to rows 8..15, with solid widths
+6,5,5,4,4,3,3,2; rows 0..7 are entirely empty. RIGHT reflects LEFT.
+Together with a 1x2 top they preserve the old crown and transition, not its posts.
+Full-block columns belong outside the opening, never in its lower two cells.
+
+Pieces remain dry, with no waterlogging or external support requirement. Placement
+checks every owned cell through the shared assembly proposal and installer.
+
+New masonry pieces are an explicit exception to unaltered donor artwork: quarter-pixel
+contour joints divide 5/9/13 equal-angle voussoirs in the two-pixel crown band,
+with a centred keystone, plus bearing/shoulder joints. Bake donor and darkened joint
+regions as a partition, never overlapping faces. Wood and paint have no joints;
+historical masonry PNGs and retained archway models remain unchanged.
+
 ## 2026-10-25 - Use the open leaf's projected free edge (0.13.4)
 
 The owner expects clicking the outlined open leaf to close the door, including the round leaf's

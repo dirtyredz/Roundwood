@@ -26,6 +26,7 @@ import { file } from './structures/nbt.mjs';
 import { legacyBuild } from './structures/legacy-v040.mjs';
 import { build070 } from './structures/door-trim-v070.mjs';
 import { windowCross0120 } from './structures/window-cross-v0120.mjs';
+import { archways0133 } from './structures/archways-v0133.mjs';
 
 const empty = (size) => file(size, [{ name: 'minecraft:air' }], []);
 
@@ -41,3 +42,5 @@ console.log('wrote legacy_v070.nbt 13x4x6');
 
 writeFileSync(join(outDir, 'window_cross_v0120.nbt'), windowCross0120());
 console.log('wrote window_cross_v0120.nbt 15x4x3');
+writeFileSync(join(outDir, 'archways_v0133.nbt'), archways0133());
+console.log('wrote archways_v0133.nbt 9x4x4');
