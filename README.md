@@ -86,9 +86,10 @@ short animation; the knobs and straps do not collide.
 
 **Modular arch pieces** (0.14.0). Names are **height x width**: 1x1, 1x2 and 2x3 tops,
 plus one Keyhole Shoulder item that can face LEFT or RIGHT. All are one block deep. The tops
-have true semicircular openings, square upper corners and no lower posts. The one- and
-three-wide tops have extra material above the crown; the two-wide top is the old crown.
-The shoulder keeps only the old upper corbel transition, with its lower half empty.
+have true semicircular openings, square upper corners and no lower posts. The 1x1 is only
+the two upper corners above a radius-8 round door opening, with nothing below y=8 or above its apex. The wider tops have radii 16 and 24
+and no spring margin; the 2x3 retains eight pixels of fill above its apex.
+The shoulder extends its six-pixel-wide base down to the floor beneath the stepped transition.
 
 - Place with an ordinary click. The landing cell is the lower-left anchor; tops extend right
   and up. Aim at the left or right half of a face to choose a shoulder side (an exact tie chooses
@@ -96,7 +97,7 @@ The shoulder keeps only the old upper corbel transition, with its lower half emp
   occupied cell. The 2x3 top reserves all six cells, including its visually empty lower centre.
 - Every cell must be loaded, dry, replaceable, inside the border and editable. No supporting floor
   is required. Refused or cancelled placement keeps the item and restores the cells.
-- Tops have no collision. Shoulders collide only with their visible upper transition. Compose an
+- Tops have no collision. Shoulders collide with their full visible body. Compose an
   ordinary opening from a top, or a keyhole opening from a top and two shoulders directly below.
   Put full-block columns **outside** the opening; full blocks beneath it reduce walking clearance.
 
@@ -109,7 +110,8 @@ C = ordinary full-block column; L/R = independent shoulders
 ```
 
 - Planks, paint and the four masonry materials restyle each piece. Wood/paint tile donor grain or
-  painted boards; masonry adds contour mortar and a centred keystone (5/9/13 sectors by top size).
+  painted boards; masonry adds contour mortar (5/9/13 sectors by top size, centred around the keystone axis).
+  The 1x1/1x2 apex stays open; no extra keystone band is added.
 - Universal Trim fits either face of each piece, one per face in an independent look. Donors on an
   installed casing restyle it; donors on the reveal restyle the body. Shears refund the casing.
   Arch Sill and Cross Beams are refused without payment.
@@ -361,7 +363,8 @@ Neither viewer is required.
 ## Upgrading
 
 **To 0.14.0 from a world with old archways:** loaded ordinary archways become a 1x2 top in the
-upper row and air below. Keyhole archways become that top plus LEFT/RIGHT shoulders below. Facing
+upper row and air below. The crown opening widens from radius 14 to 16. Keyhole archways become
+that top plus full-height LEFT/RIGHT shoulders below, preserving their old lower shape. Facing
 and body look survive; both old casings move to the same faces of the top, in their own looks.
 Shoulders start untrimmed. Conversion is atomic and repeat-safe. Unloaded partners defer it;
 damaged assemblies use the established integrity cleanup. Unknown trim versions defer conversion.
@@ -454,6 +457,8 @@ check in game (the client-side retexturing and rendering have no automated test)
   facings, body looks and both casing looks; reload and confirm there are no duplicate pieces.
 - [ ] Check old chest and player stacks, including a full inventory: counts and looks survive,
   with excess shoulders dropped at the holder. Old items cannot place an old opening.
+- [ ] Check the 1x1 behind/above a one-wide round-topped door: only upper corners, no crown band.
+- [ ] Check 1x2/2x3 beside full blocks: no two-pixel spring ledge; shoulders reach the floor.
 - [ ] Build all three tops and both shoulder sides in all facings. Check preview, six-cell
   obstruction and ownership, ordinary/keyhole clearance, and taller outside-column compositions.
 - [ ] Check cherry and another wood, paint, all four masonry looks, front/back casings, reveals,

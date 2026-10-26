@@ -30,7 +30,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 
-/** Real player/villager movement through ordinary/keyhole compositions, at legacy and taller spring heights. */
+/** Real player/villager movement through ordinary/keyhole compositions, for every top size at low and taller placement heights. */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class ArchPieceWalkGameTests {
@@ -63,28 +63,33 @@ public final class ArchPieceWalkGameTests {
 
     private static void walkAll(GameTestHelper helper, Entity walker, String who) {
         for (int height : new int[] {1, 3}) {
-        for (ArchwayDesign design : ArchwayDesign.values()) {
-            for (Direction facing : List.of(Direction.NORTH, Direction.EAST)) {
-                ArchwayLayout.Assembly archway = new ArchwayLayout.Assembly(helper.absolutePos(ANCHOR), facing, design);
-                install(helper, archway.anchor().above(height), facing, ArchPieceDesign.TOP_1X2, Side.LEFT);
-                if (design == ArchwayDesign.KEYHOLE) {
-                    install(helper, archway.anchor().above(height - 1), facing, ArchPieceDesign.KEYHOLE_SHOULDER, Side.LEFT);
-                    install(helper, archway.anchor().above(height - 1).relative(facing.getClockWise()), facing, ArchPieceDesign.KEYHOLE_SHOULDER, Side.RIGHT);
-                }
-                for (int y = 0; y <= height; y++) {
-                    helper.getLevel().setBlockAndUpdate(archway.anchor().relative(facing.getCounterClockWise()).above(y), Blocks.OAK_PLANKS.defaultBlockState());
-                    helper.getLevel().setBlockAndUpdate(archway.anchor().relative(facing.getClockWise(), 2).above(y), Blocks.OAK_PLANKS.defaultBlockState());
-                }
-                for (double across : LATERAL) {
-                    for (boolean fromFront : new boolean[] {true, false}) {
-                        String what = who + " " + design + " " + facing + " at " + across + (fromFront ? " from the front" : " from behind");
-                        walk(walker, archway, across, fromFront, what);
+            for (ArchPieceDesign top : ArchPieceDesign.values()) {
+                if (top.shoulder()) continue;
+                for (ArchwayDesign design : ArchwayDesign.values()) {
+                    if (top.columns() == 1 && design == ArchwayDesign.KEYHOLE) continue;
+                    for (Direction facing : List.of(Direction.NORTH, Direction.EAST)) {
+                        ArchwayLayout.Assembly archway = new ArchwayLayout.Assembly(helper.absolutePos(ANCHOR), facing, design);
+                        install(helper, archway.anchor().above(height), facing, top, Side.LEFT);
+                        if (design == ArchwayDesign.KEYHOLE) {
+                            install(helper, archway.anchor().above(height - 1), facing, ArchPieceDesign.KEYHOLE_SHOULDER, Side.LEFT);
+                            install(helper, archway.anchor().above(height - 1).relative(facing.getClockWise(), top.columns() - 1), facing, ArchPieceDesign.KEYHOLE_SHOULDER, Side.RIGHT);
+                        }
+                        for (int y = 0; y < height + top.rows(); y++) {
+                            helper.getLevel().setBlockAndUpdate(archway.anchor().relative(facing.getCounterClockWise()).above(y), Blocks.OAK_PLANKS.defaultBlockState());
+                            helper.getLevel().setBlockAndUpdate(archway.anchor().relative(facing.getClockWise(), top.columns()).above(y), Blocks.OAK_PLANKS.defaultBlockState());
+                        }
+                        for (double offset : LATERAL) {
+                            double across = top.columns() / 2.0 + (offset - 1.0) * (top.columns() == 1 ? .5 : 1);
+                            for (boolean fromFront : new boolean[] {true, false}) {
+                                String what = who + " " + top + " " + design + " " + facing + " at " + across + (fromFront ? " from the front" : " from behind");
+                                walk(walker, archway, across, fromFront, what);
+                            }
+                        }
+                        for (int y = 0; y < height + top.rows(); y++) for (int x = -1; x <= top.columns(); x++)
+                            helper.getLevel().setBlockAndUpdate(archway.anchor().relative(facing.getClockWise(), x).above(y), Blocks.AIR.defaultBlockState());
                     }
                 }
-                for (int y = 0; y <= height; y++) for (int x = -1; x <= 2; x++)
-                    helper.getLevel().setBlockAndUpdate(archway.anchor().relative(facing.getClockWise(), x).above(y), Blocks.AIR.defaultBlockState());
             }
-        }
         }
         walker.discard();
     }

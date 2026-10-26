@@ -26,7 +26,8 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `src/test/java/io/github/dirtyredz/roundwood/block/arch/geometry/` holds independent
   historical acceptance masks and modular profile/composition tests.
 - `src/main/java/io/github/dirtyredz/roundwood/block/arch/geometry/` owns modular
-  product dimensions, pure semicircle profiles, cell-clipped body/surface geometry and shared legal icon translation.
+  product dimensions, spring-offset semicircle and full-height shoulder profiles, cell-clipped body/surface geometry
+  and shared legal icon translation. Profile, rotated-shape and composition tests guard owner feedback geometry.
 - `src/main/java/io/github/dirtyredz/roundwood/block/arch/adapter/` owns the modular
   block/item callbacks and distinct `arch_piece` anchor entity.
 - `src/main/java/io/github/dirtyredz/roundwood/block/arch/assembly/` owns variable

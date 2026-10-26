@@ -8,11 +8,11 @@ import static org.junit.jupiter.api.Assertions.*;
 /** Independent authored mask and display bounds, read from the generated oak models. */
 class GeneratedArchPieceModelsTest {
     @Test void oakIconsCoverExactlyTheirMasksInsideLegalBounds() {
-        int[] widths = {16,32,48,16}, heights = {16,16,32,16}, radii = {6,14,22,0};
+        int[] widths = {16,32,48,16}, heights = {16,16,32,16}, radii = {8,16,24,0}, springs = {8,0,0,0};
         for (int product = 0; product < GeneratedFiles.ARCH_PIECES.size(); product++) {
             String id = GeneratedFiles.ARCH_PIECES.get(product);
             var model = resolve("roundwood:item/" + id);
-            int width = widths[product], height = heights[product], radius = radii[product], offset = width == 48 ? -16 : 0;
+            int width = widths[product], height = heights[product], radius = radii[product], spring = springs[product], offset = width == 48 ? -16 : 0;
             int[][] front = new int[width][height], back = new int[width][height];
             assertEquals("minecraft:block/oak_planks", model.texture("#donor"));
             for (var element : elements(model)) {
@@ -27,10 +27,10 @@ class GeneratedArchPieceModelsTest {
                         if (faces.has("north")) back[x][y]++;
                     }
             }
-            int[] shoulderWidths = {0,0,0,0,0,0,0,0,6,5,5,4,4,3,3,2};
+            int[] shoulderWidths = {6,6,6,6,6,6,6,6,6,5,5,4,4,3,3,2};
             for (int x = 0; x < width; x++) for (int y = 0; y < height; y++) {
-                double dx = x + .5 - width / 2.0, dy = y + .5;
-                boolean solid = radius == 0 ? x < shoulderWidths[y] : dx * dx + dy * dy > radius * radius;
+                double dx = x + .5 - width / 2.0, dy = y + .5 - spring;
+                boolean solid = radius == 0 ? x < shoulderWidths[y] : y >= spring && dx * dx + dy * dy > radius * radius;
                 assertEquals(solid ? 1 : 0, front[x][y], id + " front " + x + "," + y);
                 assertEquals(solid ? 1 : 0, back[x][y], id + " back " + x + "," + y);
             }

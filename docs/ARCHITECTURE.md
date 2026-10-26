@@ -4,16 +4,17 @@
 
 `block/arch/geometry` is separate from the frozen migration-source `block/archway` family.
 `ArchPieceDesign` names three tops and one mirrored shoulder. `ArchTopProfile`
-subtracts a semicircle at y=0 from the full rectangle; `KeyholeShoulderProfile`
-keeps only rows 8..15 of the historical transition. `ArchPieceGeometry` supplies
+subtracts radius-8/16/24 semicircles above springs 8/0/0; rows below the spring are empty.
+`KeyholeShoulderProfile` keeps the historical transition and extends its six-pixel base to y=0.
+`ArchPieceGeometry` supplies
 full-depth boxes and per-cell visible surfaces through the shared raster/slab
 helpers. Internal cell faces are omitted using the whole mask. All six cells of
 the three-wide top are owned even though its lower centre has no drawn pixels.
-Tops have empty collision; shoulder collision equals its cropped body.
+Tops have empty collision; shoulder collision equals its full-height body.
 
 `ArchMasonryJoints` is the pure, continuous-coordinate layout for model
 baking: 5/9/13 equal-angle sectors, a radius-r..r+2 band, quarter-pixel joints,
-bearing spring joints and shoulder levels 8/12/16, clipped to actual solid pixels.
+no bearing joints and shoulder levels 0/4/8/12/16, clipped to actual solid pixels.
 It supplies no material policy and no overlay faces. `ArchMasonryModels` partitions
 donor and mortar surfaces for bodies, casings and items from this same layout.
 Convex clipping subtracts each joint from the donor faces, then triangulates both
@@ -31,7 +32,8 @@ The four registrations have separate `archPieces()` enumerations and replace the
 archways in advertised lists. `archways()` remains the old two designs, registered
 through retired adapters and aggregated by `LegacyContent`. Their entity ID and state schema
 remain readable. `ArchwayConversion` replaces the four cells atomically: a top above, plus two
-shoulders for keyholes or air for ordinary arches. Both casings transfer to the top. Scheduled
+shoulders for keyholes or air for ordinary arches. The new crown is wider than the historical one;
+keyhole lower geometry is preserved. Both casings transfer to the top. Scheduled
 ticks convert before integrity cleanup; unknown trims defer. Item placement and editing are refused. Command-created cell states outside a product's dimensions are
 inert and removed without looking up or tearing down a neighbouring assembly.
 

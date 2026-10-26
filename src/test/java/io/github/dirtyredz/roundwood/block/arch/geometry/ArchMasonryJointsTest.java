@@ -16,12 +16,13 @@ class ArchMasonryJointsTest {
             for (int k = 1; k < n; k++) assertEquals(k * Math.PI / n, angles.get(k - 1), 1e-12);
             assertEquals(Math.PI, angles.get(n / 2 - 1) + angles.get(n / 2), 1e-12);
             double r = design.top().radius();
-            assertFalse(ArchMasonryJoints.contains(design, LEFT, design.width() / 2.0, r + 1));
+            assertFalse(ArchMasonryJoints.contains(design, LEFT, design.width() / 2.0, design.top().spring() + r + 1));
             for (double angle : angles) {
-                double x = design.width() / 2.0 + (r + 1) * Math.cos(angle), y = (r + 1) * Math.sin(angle);
-                assertTrue(ArchMasonryJoints.contains(design, LEFT, x, y));
+                double x = design.width() / 2.0 + (r + 1) * Math.cos(angle), y = design.top().spring() + (r + 1) * Math.sin(angle);
+                assertEquals(design.contains(LEFT, (int) Math.floor(x), (int) Math.floor(y)),
+                        ArchMasonryJoints.contains(design, LEFT, x, y));
             }
-            assertTrue(ArchMasonryJoints.contains(design, LEFT, 1, .0625));
+            assertFalse(ArchMasonryJoints.contains(design, LEFT, 1, .0625));
             assertFalse(ArchMasonryJoints.contains(design, LEFT, 1, .25));
             // A block seam alone never adds mortar high in the upper fill.
             for (int x = 16; x < design.width(); x += 16)

@@ -23,25 +23,23 @@ public final class ArchMasonryModels {
         if (design.shoulder()) {
             for (double y : ArchMasonryJoints.SHOULDER_LEVELS) joints.add(rectangle(0, y - half, 16, y + half));
         } else {
-            double radius = design.top().radius(), centre = design.width() / 2.0;
-            joints.add(rectangle(0, 0, centre - radius, half));
-            joints.add(rectangle(centre + radius, 0, design.width(), half));
+            double radius = design.top().radius(), centre = design.width() / 2.0, spring = design.top().spring();
             for (double angle : ArchMasonryJoints.radialAngles(design)) {
                 for (int slice = 0; slice < 4; slice++) {
                     double a = -half + slice * ArchMasonryJoints.WIDTH / 4;
                     double b = -half + (slice + 1) * ArchMasonryJoints.WIDTH / 4;
-                    joints.add(List.of(radial(centre, radius, angle, a), radial(centre, radius + 2, angle, a),
-                            radial(centre, radius + 2, angle, b), radial(centre, radius, angle, b)));
+                    joints.add(List.of(radial(centre, spring, radius, angle, a), radial(centre, spring, radius + 2, angle, a),
+                            radial(centre, spring, radius + 2, angle, b), radial(centre, spring, radius, angle, b)));
                 }
             }
         }
         return List.copyOf(joints);
     }
 
-    private static Point radial(double centre, double radius, double angle, double across) {
+    private static Point radial(double centre, double spring, double radius, double angle, double across) {
         double along = Math.sqrt(radius * radius - across * across);
         return new Point(centre + along * Math.cos(angle) - across * Math.sin(angle),
-                along * Math.sin(angle) + across * Math.cos(angle));
+                spring + along * Math.sin(angle) + across * Math.cos(angle));
     }
 
     private static List<Point> rectangle(double x0, double y0, double x1, double y1) {

@@ -7,13 +7,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ArchPieceCompositionTest {
     @Test
-    void retainedCrownAndShouldersMatchHistoryAndOnlySpecifiedPostsAreRemoved() {
+    void newCrownWidensHistoryWhileFullShouldersPreserveTheLowerKeyhole() {
         for (var old : ArchwayDesign.values()) for (int y = 0; y < 32; y++) for (int x = 0; x < 32; x++) {
             boolean composed = y >= 16 ? ArchPieceDesign.TOP_1X2.top().contains(x, y - 16)
                     : old == ArchwayDesign.KEYHOLE && (KeyholeShoulderProfile.contains(LEFT, x, y)
                     || KeyholeShoulderProfile.contains(RIGHT, x - 16, y));
-            if (y >= 16 || (old == ArchwayDesign.KEYHOLE && y >= 8)) assertEquals(old.inFrame(x, y), composed);
-            else assertFalse(composed);
+            if (y < 16) assertEquals(old == ArchwayDesign.KEYHOLE && old.inFrame(x, y), composed);
+            else {
+                int dx = 2 * x + 1 - 32, dy = 2 * (y - 16) + 1;
+                assertEquals(dx * dx + dy * dy > 32 * 32, composed);
+            }
             assertFalse(composed && !old.inFrame(x, y), "no added pixels");
         }
         // Narrowest paired shoulder opening: 20 pixels in two cells, 36 in three.

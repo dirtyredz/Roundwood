@@ -2,9 +2,9 @@ package io.github.dirtyredz.roundwood.block.arch.geometry;
 
 import net.minecraft.util.StringRepresentable;
 
-/** Only the historical corbel transition; no hidden strip survives below row eight. */
+/** Historical corbel transition supported by its six-pixel-wide base down to the floor. */
 public final class KeyholeShoulderProfile {
-    private static final int[] WIDTHS = {0, 0, 0, 0, 0, 0, 0, 0, 6, 5, 5, 4, 4, 3, 3, 2};
+    private static final int[] WIDTHS = {6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 4, 4, 3, 3, 2};
 
     public enum Side implements StringRepresentable {
         LEFT, RIGHT;

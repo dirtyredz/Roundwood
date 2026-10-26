@@ -65,6 +65,16 @@ public final class ArchSectionsChecks {
         }
         var entity = (ArchPieceBlockEntity) level.getBlockEntity(piece.anchor());
         check(entity.appearance().equals(look) && entity.trims().equals(trims), "showcase look/casings changed");
+        var state = level.getBlockState(piece.anchor());
+        var shape = state.getShape(level, piece.anchor());
+        if (design.shoulder()) {
+            check(shape.min(net.minecraft.core.Direction.Axis.Y) == 0, "showcase shoulder floats above floor");
+            check(!state.getCollisionShape(level, piece.anchor()).isEmpty(), "shoulder lost collision");
+        } else {
+            check(state.getCollisionShape(level, piece.anchor()).isEmpty(), "showcase top blocks walking");
+            if (design == ArchPieceDesign.TOP_1X1)
+                check(shape.min(net.minecraft.core.Direction.Axis.Y) >= .5, "small top has lower fill");
+        }
     }
     private static void label(ServerLevel level, ShowcaseFrame frame, Set<BlockPos> owned, int r, int f, String text) {
         var pos = frame.pos(ShowcaseCanvas.labelR(r), 0, f);

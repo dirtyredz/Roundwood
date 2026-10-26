@@ -22,7 +22,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/** Atomic four-cell replacement. Unknown trim versions and unloaded assemblies stay untouched. */
+/**
+ * Atomic replacement with the current wider crown and full-height keyhole bases.
+ * Unknown trim versions and unloaded assemblies stay untouched.
+ */
 public final class ArchwayConversion {
     private static final int SILENT = Block.UPDATE_KNOWN_SHAPE | Block.UPDATE_SUPPRESS_DROPS;
     private ArchwayConversion() {}

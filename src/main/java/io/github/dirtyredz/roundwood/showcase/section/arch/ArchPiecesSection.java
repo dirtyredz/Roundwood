@@ -26,13 +26,13 @@ public final class ArchPiecesSection implements ShowcaseSection {
 
     @Override public String id() { return "arch_pieces"; }
     @Override public void build(ShowcaseCanvas canvas) {
-        canvas.sign(SMALL_R, F, "Arch top 1x1", "Height x width");
+        canvas.sign(SMALL_R, F, "Arch top 1x1", "Upper door corners");
         canvas.archPiece(ArchPieceDesign.TOP_1X1, Side.LEFT, Appearance.DEFAULT, FaceTrims.NONE, SMALL_R, 0, F);
         canvas.sign(MEDIUM_R, F, "Arch top 1x2", "Cherry front", "Blue back");
         canvas.archPiece(ArchPieceDesign.TOP_1X2, Side.LEFT, Appearance.DEFAULT, CASINGS, MEDIUM_R, 0, F);
         canvas.sign(LARGE_R, F, "Arch top 2x3", "Masonry contour");
         canvas.archPiece(ArchPieceDesign.TOP_2X3, Side.LEFT, BRICK, FaceTrims.both(BRICK), LARGE_R, 0, F);
-        canvas.sign(SHOULDERS_R, F, "Shoulder pair", "Independent pieces");
+        canvas.sign(SHOULDERS_R, F, "Shoulder pair", "Full-height bases");
         canvas.archPiece(ArchPieceDesign.KEYHOLE_SHOULDER, Side.LEFT, Appearance.DEFAULT, FaceTrims.NONE, SHOULDERS_R, 0, F);
         canvas.archPiece(ArchPieceDesign.KEYHOLE_SHOULDER, Side.RIGHT, Appearance.DEFAULT, FaceTrims.NONE, SHOULDERS_R + 1, 0, F);
     }

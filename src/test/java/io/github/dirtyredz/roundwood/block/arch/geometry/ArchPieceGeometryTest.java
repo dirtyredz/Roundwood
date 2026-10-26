@@ -41,6 +41,26 @@ class ArchPieceGeometryTest {
     }
 
     @Test
+    void rotatedSelectionAndCollisionFollowTheChangedPixels() {
+        for (var design : ArchPieceDesign.values()) for (var side : KeyholeShoulderProfile.Side.values())
+            for (var cell : io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceCell.of(design))
+                for (var facing : Direction.Plane.HORIZONTAL) {
+                    var selection = ArchPieceShapes.shape(design, side, facing, cell).toAabbs();
+                    var collision = ArchPieceShapes.collision(design, side, facing, cell).toAabbs();
+                    for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++) {
+                        double px = (x + .5) / 16, pz = .5, py = (y + .5) / 16;
+                        for (int turn = 0; turn < io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory.quarterTurns(facing); turn++) {
+                            double nextX = 1 - pz; pz = px; px = nextX;
+                        }
+                        final double sx = px, sz = pz;
+                        boolean expected = design.contains(side, x + 16 * cell.column, y + 16 * cell.row);
+                        assertEquals(expected, selection.stream().anyMatch(b -> b.contains(sx, py, sz)));
+                        assertEquals(design.shoulder() && expected, collision.stream().anyMatch(b -> b.contains(sx, py, sz)));
+                    }
+                }
+    }
+
+    @Test
     void sixCellFootprintIncludesEmptyLowerCentre() {
         var design = ArchPieceDesign.TOP_2X3;
         assertEquals(6, design.columns() * design.rows());

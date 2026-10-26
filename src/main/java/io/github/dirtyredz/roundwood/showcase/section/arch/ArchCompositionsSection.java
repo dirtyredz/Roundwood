@@ -19,10 +19,10 @@ public final class ArchCompositionsSection implements ShowcaseSection {
 
     @Override public String id() { return "arch_compositions"; }
     @Override public void build(ShowcaseCanvas canvas) {
-        canvas.sign(ORDINARY_R, F, "Ordinary opening", "Outside columns");
+        canvas.sign(ORDINARY_R, F, "Ordinary opening", "Flush spring edges");
         columns(canvas, ORDINARY_R, 2, 2);
         canvas.archPiece(ArchPieceDesign.TOP_1X2, Side.LEFT, Appearance.DEFAULT, FaceTrims.NONE, ORDINARY_R + 1, 1, F);
-        canvas.sign(KEYHOLE_R, F, "Keyhole opening", "Cropped shoulders");
+        canvas.sign(KEYHOLE_R, F, "Keyhole opening", "Full-height shoulders");
         columns(canvas, KEYHOLE_R, 2, 2);
         canvas.archPiece(ArchPieceDesign.TOP_1X2, Side.LEFT, Appearance.DEFAULT, FaceTrims.NONE, KEYHOLE_R + 1, 1, F);
         canvas.archPiece(ArchPieceDesign.KEYHOLE_SHOULDER, Side.LEFT, Appearance.DEFAULT, FaceTrims.NONE, KEYHOLE_R + 1, 0, F);

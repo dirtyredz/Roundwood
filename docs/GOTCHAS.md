@@ -27,9 +27,9 @@
 
 - **Modular tops reserve empty cells.** The 2x3 top's lower centre is empty geometry
   but owned assembly space; placement and integrity must still check it. Tops do
-  not collide, preserving crown clearance; shoulders collide only in rows 8..15.
-- **Modular composition removes posts.** A 1x2 top and two shoulders reproduce the
-  historical crown and transition, not its lower posts. Full-block columns go
+  not collide, preserving crown clearance; shoulders collide through their full-height bases and stepped tops.
+- **Modular composition widens the crown.** A 1x2 top has radius 16 instead of the
+  historical 14; two full-height shoulders preserve the historical lower keyhole. Full-block columns go
   outside the opening; filling its two lower cells closes the passage.
 
 - **A window packet without a tag clears its trims.** The shared anchor reads a tagless packet as
@@ -330,6 +330,9 @@
   `DoorFixtures.rel`. `getBounds` is private and `killAllEntities` throws, so discard entities
   yourself.
 - **Armor stands do not block placement**; use a mob in entity-obstruction tests.
+- **Rebuild after datagen changes resources.** In `runData test build`, Gradle can run
+  `processResources` before `runData`, leaving old generated models in that invocation's jar.
+  Run the build again after generation and compare changed jar resources to their sources.
 - **Generated resources are tracked, the datagen cache is not.** `src/generated/resources/.cache/`
   is ignored and excluded from the jar. `runData` is deterministic: two runs give identical bytes.
 - **Doors are always dry.** Placement refuses any fluid in the door's cells (two or four).
@@ -340,3 +343,7 @@
 - **GameTest hits at an exact tie need binary-exact coordinates.** `WindowFixtures.hit` adds the cell-local point to the absolute block position, so a decimal such as 0.95 picks up float noise that depends on where the test runs; a test pinning an exact diagonal tie (`zoneBoundaries...`) failed once its class moved and the world positions shifted. Use values like 0.875.
 
 - **A projected leaf hit's face is not stable.** The whole-door outline means the face (`getDirection`) of a hit outside the occupied cells depends on which part box the ray crossed, so the client's full-reach ray and the server's short re-ray disagree. `ProjectedDoorUse` compares only the point and dispatches with the server's face.
+
+- **Modular arch profiles no longer match the old crowns (0.14.0 feedback).** Use radii 8/16/24
+  with springs 8/0/0 for bodies, casings and mortar. The 1x1 has no lower fill or apex band.
+  Shoulders have six-pixel bases to y=0; migration preserves keyhole lower pixels, not crown pixels.

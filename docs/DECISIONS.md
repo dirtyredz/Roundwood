@@ -2,6 +2,24 @@
 
 Newest first.
 
+## 2026-10-25 - Flush arch springs and supported shoulders (0.14.0 owner feedback)
+
+Supersedes the original modular profile dimensions below. The 1x1 is the two corner
+regions outside a radius-8 semicircle centred at (8,8); its lower half is empty and
+there is no band above the apex, so it frames a one-wide round-topped door.
+The 1x2 and 2x3 use radii 16 and 24 at y=0. Removing the two-pixel bearing margin
+removes the projecting spring ledge beside full-block columns. The 2x3 still has
+eight pixels of upper fill and one continuous semicircle, never a flat middle.
+
+The shoulder retains widths 6,5,5,4,4,3,3,2 in rows 8..15, with width 6 all the
+way down to y=0. This supports the corbel instead of leaving it hanging mid-cell.
+Collision follows that full body; tops and casings remain non-colliding. Masonry
+keeps 5/9/13 centred sectors, clipped to the actual corner fill; the 1x1 and 1x2
+have no solid apex keystone band. Joints use the same spring offset and add base courses.
+Migration still produces a 1x2 top and optional shoulders, preserving looks, casings
+and ownership, but deliberately widens the crown. Keyhole lower pixels now match
+history completely; ordinary lower jambs are removed. Frozen source profiles stay unchanged.
+
 ## 2026-10-25 - Replace, not retain (0.14.0)
 
 The owner's correction supersedes plan section 2 and the retention paragraph below: old archways

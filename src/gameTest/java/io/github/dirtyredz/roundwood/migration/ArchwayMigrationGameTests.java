@@ -48,6 +48,16 @@ public final class ArchwayMigrationGameTests {
                 var look = anchor.equals(ordinary) ? wood("spruce_planks") : Appearance.masonry(id("stone_bricks"));
                 var top = new ArchPieceLayout.Assembly(anchor.above(), Direction.NORTH, ArchPieceDesign.TOP_1X2, Side.LEFT);
                 check(top.complete(level, ModBlocks.archPiece(ArchPieceDesign.TOP_1X2)), "missing top cells");
+                // Migration deliberately widens the historical radius-14 crown to radius 16.
+                for (int x = 0; x < 32; x++) for (int y = 0; y < 16; y++) {
+                    int dx = 2 * x + 1 - 32, dy = 2 * y + 1;
+                    var cell = top.anchor().east(x / 16);
+                    var state = level.getBlockState(cell);
+                    double px = (x % 16 + .5) / 16, py = (y + .5) / 16;
+                    boolean solid = state.getShape(level, cell).toAabbs().stream().anyMatch(b -> b.contains(px, py, .5));
+                    check(solid == (dx * dx + dy * dy > 1024), "migrated crown retained its old margin");
+                    check(state.getCollisionShape(level, cell).isEmpty(), "migrated crown blocks passage");
+                }
                 var entity = (ArchPieceBlockEntity) level.getBlockEntity(top.anchor());
                 check(entity.appearance().equals(look), "body look lost");
                 check(entity.getPersistentData().getString("MigrationGuard").equals("keep"), "persistent metadata lost");
@@ -62,6 +72,10 @@ public final class ArchwayMigrationGameTests {
                         check(shoulder.complete(level, ModBlocks.archPiece(ArchPieceDesign.KEYHOLE_SHOULDER)), "shoulder side/owner lost");
                         var lower = (ArchPieceBlockEntity) level.getBlockEntity(bottom);
                         check(lower.appearance().equals(look) && !lower.trims().any(), "shoulder look or duplicated casing");
+                        var state = level.getBlockState(bottom);
+                        double px = side == Side.LEFT ? 5.5 / 16 : 10.5 / 16;
+                        check(state.getCollisionShape(level, bottom).toAabbs().stream()
+                                .anyMatch(b -> b.contains(px, .5 / 16, .5)), "migrated shoulder does not reach the floor");
                     }
                     check(ArchwayConversion.convert(level, bottom) == LegacyCells.Result.NOT_LEGACY, "repeat converted bottom");
                 }

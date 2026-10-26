@@ -43,9 +43,9 @@ class ArchMasonryModelsTest {
             if (design.shoulder()) continue;
             var joints = ArchMasonryModels.joints(design);
             double radius = design.top().radius() + 1, centre = design.width() / 2.0;
-            assertFalse(joints.stream().anyMatch(p -> contains(p, centre, radius)), "centred keystone");
+            assertFalse(joints.stream().anyMatch(p -> contains(p, centre, design.top().spring() + radius)), "centred keystone");
             for (double angle : ArchMasonryJoints.radialAngles(design)) {
-                double x = centre + radius * Math.cos(angle), y = radius * Math.sin(angle);
+                double x = centre + radius * Math.cos(angle), y = design.top().spring() + radius * Math.sin(angle);
                 // Avoid exact polygon edges along the radial centreline.
                 assertTrue(joints.stream().anyMatch(p -> contains(p, x - .03 * Math.sin(angle), y + .03 * Math.cos(angle))));
                 assertFalse(joints.stream().anyMatch(p -> contains(p, x - .13 * Math.sin(angle), y + .13 * Math.cos(angle))));
