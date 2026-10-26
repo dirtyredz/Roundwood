@@ -6,12 +6,14 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
-- `block/door/adapter/DoubleArchedDoorBlock` owns the new nine-cell saved schema;
+- `block/door/adapter/DoubleArchedDoorBlock` owns the size-parameterized nine/twelve-cell saved schema;
   `block/door/assembly/DoorDepth` owns saved depth offsets and shared face bands.
 - `src/test/java/io/github/dirtyredz/roundwood/block/door/assembly/` guards depth targeting.
+- `block/door/trim/FramedDoorFacesTest` checks production casing surfaces against panels, hardware and adjacent arch models.
+  `client/door/DoorLeafModels` owns legal model-coordinate mapping for both paired-door heights.
   Leaf/selection tests guard both hinges, three depths, matching arch masks and projected rays.
 - `src/gameTest/java/io/github/dirtyredz/roundwood/block/door/placement/DoorTargetsGameTests`
-  guards real item proposals/writes, old-state defaults and nine-cell lifecycle.
+  guards real item proposals/writes, old-state defaults and nine/twelve-cell lifecycle.
   `-PdoorTargets` selects these, arch placement and environment checks for the bounded headless gate.
 
 
@@ -87,7 +89,7 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 - `src/main/java/io/github/dirtyredz/roundwood/migration/block/` — the deprecated alias block adapters (historical default, convert before integrity)
 - `src/main/java/io/github/dirtyredz/roundwood/migration/item/` — retired crossed-stack adapters and checked CrossWindowPlacement shared with the preview
 - `src/main/java/io/github/dirtyredz/roundwood/migration/conversion/` — the per-family conversions (door, frame, window), their shared cell rewrites (`LegacyCells`; windows use checked, lossless `WindowCellConversion` and `WindowCrossConversion`), and the 0.7.0 fitted-frame to door-trim conversion (`DoorTrimConversion`)
-- `src/main/java/io/github/dirtyredz/roundwood/registry/` — deferred registration: the 21 canonical/compatibility base blocks and 23 advertised items, block entities, creative tab, mod tags, the `trim_face` loot condition type
+- `src/main/java/io/github/dirtyredz/roundwood/registry/` — deferred registration: the 22 canonical/compatibility base blocks and 24 advertised items, block entities, creative tab, mod tags, the `trim_face` loot condition type
 - `src/main/java/io/github/dirtyredz/roundwood/block/` — the block families and what they share (grouping only, no code)
 - `src/main/java/io/github/dirtyredz/roundwood/block/archway/` — frozen archway migration sources (0.12.0): historical Minecraft adapters (the block, its anchor entity, the item)
 - `src/main/java/io/github/dirtyredz/roundwood/block/archway/assembly/` — the four-cell archway: part identity, its layout (the shared `Assembly` contract), placement policy and typed plans (integrity and removal are `block/assembly`'s)

@@ -1,6 +1,6 @@
 # Roundwood
 
-Forge 1.20.1 mod: a round 2x2 wooden door, an arched 1x2 door and a double arched 3x3 door, a round window with arch, corner and edge profiles with optional Cross Beams attachments, three modular arch tops and a mirrored keyhole shoulder, a Universal Trim for all of them and an Arch Sill, hobbit-hole style. Each is one item you
+Forge 1.20.1 mod: a round 2x2 wooden door, an arched 1x2 door and double arched 3x3 and 3x4 doors, a round window with arch, corner and edge profiles with optional Cross Beams attachments, three modular arch tops and a mirrored keyhole shoulder, a Universal Trim for all of them and an Arch Sill, hobbit-hole style. Each is one item you
 restyle in the world: any planks (vanilla or modded) set the wood, any of the 16 dyes paints it,
 and trims can also be faced with radial brick. Install on **both** the server and every client.
 Generic: not tied to any modpack.
@@ -15,17 +15,23 @@ Generic: not tied to any modpack.
 
 ## Content
 
-23 items: **Round Door**, **Arched Door**, **Double Arched Door**, thirteen plain window profiles
+24 items: **Round Door**, **Arched Door**, **Double Arched Door**, **Tall Double Arched Door**, thirteen plain window profiles
 (**Round Window**, **Round Window Arch, Left** and **Right**, **Round Window Corner, Bottom Left**
 and **Bottom Right**, and since 0.10.0 **Round Window Arch, Bottom Left** and **Bottom Right**,
 **Round Window Corner, Top Left** and **Top Right**, and **Round Window Edge, Top**, **Left**,
 **Bottom** and **Right**), **Arch Top 1x1**, **Arch Top 1x2**, **Arch Top 2x3** and
 **Keyhole Shoulder** (0.14.0), the **Universal Trim**, **Arch Sill** and **Cross Beams**. Creative tab order: round
-door, arched door, double arched door, then each plain window profile (round, arch left,
+door, arched door, double arched door, tall double arched door, then each plain window profile (round, arch left,
 arch right, corner bottom left, corner bottom right, arch bottom left, arch bottom right, corner top
 left, corner top right, edge top, left, bottom, right), the three arch tops, keyhole shoulder, Universal Trim,
 Arch Sill, Cross Beams. They are crafted (and found in the creative tab) in oak;
 their look is changed once placed and travels with them when picked or broken.
+
+**Tall Double Arched Door (0.15.0).** The 3-wide, 4-tall variant adds a straight row below
+exactly the same crown as the 3x3 double door. Match it with the 2x3 arch top starting two
+blocks above the door floor in the adjacent depth layer. Both leaves move together; all
+three depths, paint, two face trims, redstone and single-item drops work as on the 3x3.
+Craft it with PPP / NDN / PPP (P = planks, N = gold nugget, D = Double Arched Door).
 
 **Door depth targeting (0.15.0).** Round and double arched doors have front, middle and back
 positions. Aim along depth on a floor, ceiling or side wall; on a wall facing the door,
@@ -372,7 +378,7 @@ would be a bottom corner's recipe, so each piece has its own. Shaped recipes als
 the left and right edges differ by where the pane sits.
 
 Crafting always gives the oak object; restyle it in the world. With **EMI** and **JEI** each of the
-23 items (three doors, 13 plain windows, four arch pieces, Universal Trim, Arch Sill and Cross Beams) is
+24 items (four doors, 13 plain windows, four arch pieces, Universal Trim, Arch Sill and Cross Beams) is
 listed once, as its plain oak look, and nothing cycles; retired crossed windows and old archways stay hidden.
 Styled stacks in your inventory are told apart by their look (EMI comparison key, JEI subtype).
 Neither viewer is required.

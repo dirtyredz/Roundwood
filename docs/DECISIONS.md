@@ -2,6 +2,16 @@
 
 Newest first.
 
+## 2026-10-26 - Framed surfaces and tall paired doors (0.15.0 feedback)
+
+The 3x4 paired door reuses the 3x3 adapter with a size parameter and twelve cells. Its crown
+uses the existing TOP_2X3 complement at y+2, exactly the 3x3 curve plus one straight row.
+No new arch product is needed. Both leaves keep one shared open/redstone state.
+
+Casing faces receive a 1/256-pixel normal separation at model construction. Offsetting only
+Z cannot fix jamb/strap and arch-reveal coplanarity; removing rear faces would make open
+doors lose their casing backs. Selection and collision continue to use the exact authored geometry.
+
 ## 2026-10-26 - Aimed depths and one paired-door assembly (0.15.0)
 
 Shoulder aim chooses an existing facing/side pair, retaining saved states. Round-door depths

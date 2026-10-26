@@ -15,7 +15,7 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   normal suite and fast gate; Gradle recompiles the complete GameTest source set.
 - **Generated resources are source.** Change a provider, run `./gradlew runData`, commit the
   regenerated `src/generated/resources/` with the code. Never hand-edit generated JSON.
-- **Separate authorities, no catalogue.** Content is 21 canonical/compatibility base blocks and 23 advertised items in
+- **Separate authorities, no catalogue.** Content is 22 canonical/compatibility base blocks and 24 advertised items in
   three appearance families (door = round, arched and double arched doors; window family = 13 plain profiles; trim = four modular arch pieces,
   the Universal Trim, Arch Sill and Cross Beams attachment items); looks are data. `round_trim` stays a registered compatibility block (frames from older
   saves) while its item, the Universal Trim, attaches to window, door and archway faces; `window_trim` is

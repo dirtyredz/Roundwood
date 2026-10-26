@@ -90,23 +90,28 @@ retain their old schema. Depth participates in assembly membership, shape caches
 cell clipping, selection shifts before facing rotation, and the renderer moves leaf,
 camouflage and casings together. Back-flush casing targets stay inside the cell.
 
-`DoubleArchedDoorBlock` has cell_x/cell_y 0..2 alongside vanilla door properties and depth.
-`DoorLayout.Part` retains the four historical enum entries first, then the five additional
-cells. Use columnIndex()/row() for geometry and Part.of(design) for traversal; the legacy
-column/half fields alone cannot identify a nine-cell part. Vanilla half remains a compatibility
+`DoubleArchedDoorBlock` takes a DoorDesign size parameter and has cell_x 0..2 / cell_y 0..3 alongside vanilla door properties and depth.
+`DoorLayout.Part` retains the four historical enum entries first, then the five 3x3 cells and three additional 3x4 cells. Use columnIndex()/row() for geometry and Part.of(design) for traversal; the legacy
+column/half fields alone cannot identify a nine/twelve-cell part. Vanilla half remains a compatibility
 summary, while vertical survival uses the real row. Shared assembly services own installation,
 integrity, teardown, appearance and synchronized open/redstone state.
 
-The new profile is a square lower row plus the complement of TOP_2X3, translated up 16
+The paired profiles have one or two square lower rows plus the complement of TOP_2X3, translated up 16 or 32
 pixels. Each half is clipped at x=24, with its own outer pivot and full two-sided hardware.
 Rendering and swing outlines turn both halves; collision and target geometry use the same
-clipped envelopes. Leaf templates shift x/y by -16 to fit the legal model range;
-the renderer undoes that shift after swinging, and the item combines both halves. Board
-UVs span one square 48px image extent; casings use tiled donor/paint sprites.
+clipped envelopes. Leaf templates shift x/y by -16 to fit the legal model range; the 3x4 template first scales Y by 3/4;
+the renderer and item transforms undo the Y compression, and the renderer undoes that shift after swinging, and the item combines both halves. Board
+UVs span one square 48px/64px image extent; casings use tiled donor/paint sprites.
+
+Door casing models all consume DoorTrimGeometry.surfaces through PixelSlabModels.
+Surface.separated moves each render face 1/256 pixel along its normal, including hidden
+contact faces and jamb/reveal edges. Modular arch casings use the same separation; body,
+collision and targeting geometry remain exact. This avoids coplanar frame/panel/hardware
+and frame/arch faces while retaining rear faces visible when a door opens.
 
 ## Door assembly
 
-There are three door designs (`leaf/DoorDesign`: ROUND, ARCHED, DOUBLE_ARCHED). This
+There are four door designs (`leaf/DoorDesign`: ROUND, ARCHED, DOUBLE_ARCHED, TALL_DOUBLE_ARCHED). This
 section describes the round door's four-part assembly; the arched door is the two-part case.
 
 An assembly is four ordinary `DoorBlock` states of one block, 2 wide x 2 high x 1 deep, showing one

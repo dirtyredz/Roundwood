@@ -204,7 +204,8 @@
 - **Trims and door hardware are decorative.** Nothing collides with the rings or the knobs and
   straps; mobs and players walk through the ring's area and the knob pokes two pixels into the
   cell in front of the door. The front ring is drawn one pixel into the cells in front of the door
-  and the back ring overlaps the hinge-side brass straps where they cross it (cosmetic). Door
+  and the back ring intersects the hinge-side brass straps where they cross it. Render faces must
+  use normal separation to avoid coplanar jamb/strap faces. Door
   trims are static and never swing with the leaf.
 - **Fitted-frame migration is conservative.** An occupied FRONT keeps the old frame (even in the
   same look); a frame converts only when exactly matched to a complete door (same facing, anchor
@@ -352,9 +353,17 @@
   before facing rotation; undo depth in authored hit coordinates. Shift the whole renderer,
   including casings/camouflage, and keep back-flush casing targets in-cell. FRONT is the old-world
   default. Do not change it to MIDDLE just because aim-at-centre now places in the middle.
-- **The double door owns nine cells.** Iterate assembly.parts() / Part.of(design), never
+- **The double doors own nine or twelve cells.** Iterate assembly.parts() / Part.of(design), never
   Part.values() for a historical round door. Its columnIndex()/row() are authoritative;
   legacy column/half cannot identify the third column or row. Whole-door shape cache keys
-  must allow all nine cells without overlapping bit fields.
+  must allow all twelve cells without overlapping bit fields.
 - **A matching arch and door need adjacent depth layers.** The 3x3 door crown complements
-  the 2x3 arch at y+1, but the shared installer deliberately does not merge occupied cells.
+  the 2x3 arch at y+1 (the 3x4 at y+2), but the shared installer deliberately does not merge occupied cells.
+
+- **Separate casing surfaces, not only front/back depths (0.15.0).** The old casing contact faces
+  coincided with the closed leaf at z=13/16; jamb faces also coincided with hinge straps. Use
+  Surface.separated on every rendered door/arch casing face (1/256 pixel normal offset).
+  Keep targeting/collision slabs exact. A depth-only offset leaves coplanar side faces in arches.
+- **Four-block door models exceed vanilla's legal element range.** The tall leaf compresses Y
+  by 3/4 before the shared -16 shift. Renderer and item display transforms restore Y; board UVs
+  use authored coordinates and a 64px square extent. Do not author elements up to y=48.
