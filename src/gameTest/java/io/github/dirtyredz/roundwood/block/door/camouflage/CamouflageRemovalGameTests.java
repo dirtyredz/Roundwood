@@ -105,7 +105,7 @@ public final class CamouflageRemovalGameTests {
         floor(helper);
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
             for (boolean open : new boolean[] {false, true}) {
-                for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
                     String name = hinge + "/open=" + open + "/" + part;
                     DoorLayout.Assembly assembly = place(helper, "camo_survival", hinge, open, paid());
                     ServerPlayer breaker = player(helper, "camo_survival_breaker", GameType.SURVIVAL, Direction.NORTH);
@@ -123,7 +123,7 @@ public final class CamouflageRemovalGameTests {
         floor(helper);
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
             for (boolean open : new boolean[] {false, true}) {
-                for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
                     String name = hinge + "/open=" + open + "/" + part;
                     DoorLayout.Assembly assembly = place(helper, "camo_creative", hinge, open, paid());
                     ServerPlayer breaker = player(helper, "camo_creative_breaker", GameType.CREATIVE, Direction.NORTH);
@@ -217,7 +217,7 @@ public final class CamouflageRemovalGameTests {
         DoorLayout.Assembly assembly = place(helper, "camo_cancel");
         ServerPlayer breaker = player(helper, "camo_cancelled", GameType.SURVIVAL, Direction.NORTH);
         check("rw_camo_cancelled".equals(breaker.getName().getString()), "fixture player is not the cancelled one");
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
             check(!breaker.gameMode.destroyBlock(assembly.pos(part)), part + ": the cancelled break went through");
         }
         assertAssembly(helper, assembly, oakDoor(), false);

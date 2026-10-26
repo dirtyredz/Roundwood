@@ -48,6 +48,9 @@ public final class ModBlocks {
     /** The 1 x 2 arched door (0.11.0); its anchor entity is the round door's type. */
     public static final RegistryObject<ArchedDoorBlock> ARCHED_DOOR = BLOCKS.register(DoorDesign.ARCHED.id(),
             () -> new ArchedDoorBlock(doorProperties(), BlockSetType.OAK, ModBlockEntities::roundDoor));
+    public static final RegistryObject<io.github.dirtyredz.roundwood.block.door.adapter.DoubleArchedDoorBlock> DOUBLE_ARCHED_DOOR = BLOCKS.register(DoorDesign.DOUBLE_ARCHED.id(),
+            () -> new io.github.dirtyredz.roundwood.block.door.adapter.DoubleArchedDoorBlock(doorProperties(), BlockSetType.OAK, ModBlockEntities::roundDoor));
+    public static io.github.dirtyredz.roundwood.block.door.adapter.DoubleArchedDoorBlock doubleArchedDoor() { return DOUBLE_ARCHED_DOOR.get(); }
     /** The 13 plain windows and their 13 retained crossed variants, keyed by design. */
     private static final Map<WindowDesign, RegistryObject<WindowPaneBlock>> WINDOWS = registerWindows();
     /** The static 2 x 2 archways (0.12.0), ordinary then keyhole. */
@@ -102,7 +105,7 @@ public final class ModBlocks {
 
     /** The canonical doors, round then arched. */
     public static List<AssemblyDoorBlock> doors() {
-        return List.of(roundDoor(), archedDoor());
+        return List.of(roundDoor(), archedDoor(), doubleArchedDoor());
     }
 
     /** The plain round window (the block id since 0.3). */

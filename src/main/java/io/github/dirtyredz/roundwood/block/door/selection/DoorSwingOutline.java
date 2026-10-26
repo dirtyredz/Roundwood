@@ -65,6 +65,14 @@ public final class DoorSwingOutline {
 
     /** The leaf's outline at swing {@code progress} (0 closed .. 1 open), assembly coordinates. */
     public static List<Edge> at(DoorDesign design, DoorHingeSide hinge, double progress) {
+        if (design.doubleLeaf()) {
+            List<Edge> edges = new ArrayList<>();
+            for (DoorHingeSide side : DoorHingeSide.values()) {
+                var half = DoorGeometry.envelope(design).stream().flatMap(b -> b.intersect(DoorGeometry.half(design, side)).stream()).toList();
+                for (Edge edge : silhouette(half)) edges.add(edge.turn(design, DoorGeometry.swingDegrees(side, progress), side));
+            }
+            return List.copyOf(edges);
+        }
         double degrees = DoorGeometry.swingDegrees(hinge, progress);
         return closed(design).stream().map(edge -> edge.turn(design, degrees, hinge)).toList();
     }

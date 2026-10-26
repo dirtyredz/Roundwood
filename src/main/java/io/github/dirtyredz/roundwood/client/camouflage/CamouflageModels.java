@@ -52,7 +52,7 @@ public final class CamouflageModels {
     private static BakedModel build(Key key) {
         int turns = VoxelShapeFactory.quarterTurns(key.facing());
         List<BakedQuad> quads = new ArrayList<>();
-        for (CamouflageGeometry.Face face : CamouflageGeometry.exposedFaces(key.design(), key.part().column.index(), key.part().row())) {
+        for (CamouflageGeometry.Face face : CamouflageGeometry.exposedFaces(key.design(), key.part().columnIndex(), key.part().row())) {
             Box box = face.box().rotateY(turns);
             Direction side = VoxelShapeFactory.turn(direction(face.side()), turns);
             DonorSprites.FaceMaterial material = DonorSprites.face(key.donor(), side);

@@ -55,11 +55,14 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
         if (!assembly.complete(level, door)) {
             return;
         }
+        pose.pushPose();
+        double shift = assembly.depth().offset() / 16;
+        pose.translate(-assembly.facing().getStepX() * shift, 0, -assembly.facing().getStepZ() * shift);
         // The corners stay in the closed door plane: drawn before any facing or swing transform.
         CamouflageRenderer.render(entity, assembly, level, pose, buffers);
         trims.render(entity, assembly, level, pose, buffers);
 
-        DoorHingeSide hinge = state.getValue(DoorBlock.HINGE);
+        for (DoorHingeSide hinge : door.design().doubleLeaf() ? DoorHingeSide.values() : new DoorHingeSide[]{state.getValue(DoorBlock.HINGE)}) {
         DoorAppearanceModels.Look look = DoorAppearanceModels.look(entity.appearance());
         DoorDesign design = door.design();
         BakedModel model = DoorAppearanceModels.leaf(look, design, hinge);
@@ -79,8 +82,11 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
         pose.translate(pivotX, 0, pivotZ);
         pose.mulPose(Axis.YP.rotationDegrees((float) DoorGeometry.swingDegrees(hinge, progress)));
         pose.translate(-pivotX, 0, -pivotZ);
+        if (design.doubleLeaf()) pose.translate(1, 1, 0); // Undo legal model-coordinate shift.
         blocks.getModelRenderer().renderModel(pose.last(), buffers.getBuffer(Sheets.solidBlockSheet()), state, model,
                 red, green, blue, light, overlay, ModelData.EMPTY, RenderType.solid());
+        pose.popPose();
+        }
         pose.popPose();
     }
 

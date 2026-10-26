@@ -90,7 +90,7 @@ public final class AppearanceDropGameTests {
     public static void survivalHarvestOfAnyDoorPartKeepsTheLook(GameTestHelper helper) {
         floor(helper);
         Appearance look = wood("jungle_planks").painted(DyeColor.PINK);
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
             DoorLayout.Assembly door = door(helper, look, "harvest_" + part);
             anchorEntity(helper, door).setCamouflage(CamouflageData.paid(Blocks.CALCITE.defaultBlockState(), new ItemStack(Items.CALCITE)));
             ServerPlayer breaker = player(helper, "harvest_breaker", GameType.SURVIVAL, Direction.NORTH);

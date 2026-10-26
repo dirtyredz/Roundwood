@@ -222,7 +222,7 @@ public final class DoorAppearanceGameTests {
         floor(helper);
         DoorLayout.Assembly door = place(helper, Direction.EAST, DoorHingeSide.RIGHT, "pick");
         anchorEntity(helper, door).setAppearance(SPRUCE.painted(DyeColor.CYAN));
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
             ItemStack picked = pick(helper, door.pos(part));
             check(picked.is(oakDoor().asItem()), part + ": picked " + picked);
             check(AppearanceStacks.read(picked).equals(SPRUCE.painted(DyeColor.CYAN)),

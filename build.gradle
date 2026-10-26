@@ -37,6 +37,12 @@ if (project.hasProperty('navigationRepeats')) {
             '**/TrimNavigationGameTests.java', '**/environment/**'
 }
 
+// Bounded placement/lifecycle gate for 0.15.0; excludes navigation, showcase and migration suites.
+if (project.hasProperty('doorTargets')) {
+    sourceSets.gameTest.java.include '**/fixture/**', '**/DoorTargetsGameTests.java',
+            '**/ArchPiecePlacementGameTests.java', '**/DoorFreeEdgeGameTests.java', '**/TestWorldGameTests.java'
+}
+
 configurations {
     gameTestImplementation.extendsFrom implementation
     gameTestCompileOnly.extendsFrom compileOnly

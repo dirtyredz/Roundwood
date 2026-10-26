@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.block.door.adapter;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorColumn;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import net.minecraft.world.level.block.Block;
+import io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,7 +25,7 @@ public class RoundDoorBlock extends AssemblyDoorBlock {
     public RoundDoorBlock(Properties properties, BlockSetType type, Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType) {
         super(properties, type, entityType);
         // Extend the inherited default (never stateDefinition.any()): other mods inject properties into DoorBlock.
-        registerDefaultState(defaultBlockState().setValue(COLUMN, DoorColumn.LEFT));
+        registerDefaultState(defaultBlockState().setValue(COLUMN, DoorColumn.LEFT).setValue(DoorDepth.PROPERTY, DoorDepth.FRONT));
     }
 
     @Override
@@ -35,7 +36,7 @@ public class RoundDoorBlock extends AssemblyDoorBlock {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(COLUMN);
+        builder.add(COLUMN, DoorDepth.PROPERTY);
     }
 
     /** Mirroring swaps which column is on the left as well as the physical hinge (vanilla cycles the hinge). */

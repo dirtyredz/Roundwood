@@ -31,6 +31,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("itemGroup." + Roundwood.MOD_ID, "Roundwood");
         add(ModBlocks.roundDoor(), "Round Door");
         add(ModBlocks.archedDoor(), "Arched Door");
+        add(ModBlocks.doubleArchedDoor(), "Double Arched Door");
         for (WindowDesign design : WindowDesign.all()) {
             add(ModBlocks.window(design), windowName(design));
         }

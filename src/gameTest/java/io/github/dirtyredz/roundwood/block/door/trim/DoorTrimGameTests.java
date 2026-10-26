@@ -264,7 +264,7 @@ public final class DoorTrimGameTests {
     public static void everyQuarterDropsTheDoorAndBothTrims(GameTestHelper helper) {
         Appearance front = AppearanceFixtures.oakPainted(DyeColor.PURPLE);
         Appearance back = AppearanceFixtures.oakPainted(DyeColor.ORANGE);
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
             DoorLayout.Assembly door = place(helper, Direction.NORTH, DoorHingeSide.LEFT, "drops_" + part.name().toLowerCase());
             DoorTrimActions.install(helper.getLevel(), door.anchor(), AttachmentFace.FRONT, front);
             DoorTrimActions.install(helper.getLevel(), door.anchor(), AttachmentFace.BACK, back);

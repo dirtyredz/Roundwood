@@ -71,13 +71,14 @@ class GeneratedContentResourcesTest {
         Set<String> blockDoors = new TreeSet<>();
         blockDoors.add("roundwood:round_door");
         blockDoors.add("roundwood:arched_door");
+        blockDoors.add("roundwood:double_arched_door");
         ModelExpectations.aliasDoors().forEach(d -> blockDoors.add("roundwood:" + d));
-        assertEquals(17, blockDoors.size());
+        assertEquals(18, blockDoors.size());
         for (String tag : List.of("blocks/doors", "blocks/wooden_doors")) {
             assertEquals(blockDoors, tagValues(tags.resolve(tag + ".json")), tag);
         }
         for (String tag : List.of("items/doors", "items/wooden_doors")) {
-            assertEquals(Set.of("roundwood:round_door", "roundwood:arched_door"), tagValues(tags.resolve(tag + ".json")), tag);
+            assertEquals(Set.of("roundwood:round_door", "roundwood:arched_door", "roundwood:double_arched_door"), tagValues(tags.resolve(tag + ".json")), tag);
         }
     }
 
@@ -97,7 +98,7 @@ class GeneratedContentResourcesTest {
     void familyTagsListOnlyTheCanonicalBlocks() {
         Path tags = GENERATED.resolve("data/roundwood/tags");
         for (String kind : List.of("blocks", "items")) {
-            assertEquals(Set.of("roundwood:round_door", "roundwood:arched_door"), tagValues(tags.resolve(kind + "/round_doors.json")), kind);
+            assertEquals(Set.of("roundwood:round_door", "roundwood:arched_door", "roundwood:double_arched_door"), tagValues(tags.resolve(kind + "/round_doors.json")), kind);
             Set<String> windows = new TreeSet<>();
             WINDOWS.forEach(w -> windows.add("roundwood:" + w));
             assertEquals(26, windows.size());
@@ -128,7 +129,7 @@ class GeneratedContentResourcesTest {
                 continue;
             }
             boolean window = WINDOWS.contains(block) || block.endsWith("_round_window");
-            boolean door = block.equals("round_door") || block.equals("arched_door") || block.endsWith("_round_door");
+            boolean door = block.equals("round_door") || block.equals("arched_door") || block.equals("double_arched_door") || block.endsWith("_round_door");
             boolean piece = ARCH_PIECES.contains(block);
             boolean archway = ARCHWAYS.contains(block) || piece;
             boolean upperArch = UPPER_ARCHES.contains(block);

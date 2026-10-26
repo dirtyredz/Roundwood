@@ -16,23 +16,27 @@ import java.util.concurrent.ConcurrentHashMap;
  * column, half and open (128 variants at most), built once and cached.
  */
 public final class DoorShapes {
-    private static final ConcurrentHashMap<Integer, VoxelShape> SHAPES = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Key, VoxelShape> SHAPES = new ConcurrentHashMap<>();
+
+    private record Key(DoorDesign design, Direction facing, DoorHingeSide hinge, DoorLayout.Part part, boolean open, double depth) {}
 
     private DoorShapes() {
     }
 
     public static VoxelShape shape(BlockState state) {
         return shape(DoorLayout.designOf(state), state.getValue(DoorBlock.FACING), state.getValue(DoorBlock.HINGE),
-                DoorLayout.partOf(state), state.getValue(DoorBlock.OPEN));
+                DoorLayout.partOf(state), state.getValue(DoorBlock.OPEN), DoorLayout.depthOf(state).offset());
     }
 
     public static VoxelShape shape(DoorDesign design, Direction facing, DoorHingeSide hinge, DoorLayout.Part part, boolean open) {
+        return shape(design, facing, hinge, part, open, 0);
+    }
+
+    public static VoxelShape shape(DoorDesign design, Direction facing, DoorHingeSide hinge, DoorLayout.Part part, boolean open, double depth) {
         int turns = VoxelShapeFactory.quarterTurns(facing);
-        int column = part.column.index();
+        int column = part.columnIndex();
         int row = part.row();
-        int hingeBit = hinge == DoorHingeSide.LEFT ? 0 : 1;
-        int key = (design.ordinal() << 6) | (turns << 4) | (hingeBit << 3) | (column << 2) | (row << 1) | (open ? 1 : 0);
-        return SHAPES.computeIfAbsent(key, k -> VoxelShapeFactory.shape(
-                VoxelShapeFactory.rotate(DoorGeometry.cellEnvelope(design, hinge, column, row, open), turns)));
+        return SHAPES.computeIfAbsent(new Key(design, facing, hinge, part, open, depth), k -> VoxelShapeFactory.shape(
+                VoxelShapeFactory.rotate(DoorGeometry.cellEnvelope(design, hinge, column, row, open, depth), turns)));
     }
 }

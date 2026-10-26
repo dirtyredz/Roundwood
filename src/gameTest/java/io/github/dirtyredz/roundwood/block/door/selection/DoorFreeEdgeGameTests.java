@@ -63,26 +63,31 @@ public final class DoorFreeEdgeGameTests {
     @GameTest(template = TEMPLATE)
     public static void freeEdgeClosesBothDesignsAndClosedLeafReopens(GameTestHelper helper) {
         floor(helper);
-        for (AssemblyDoorBlock door : new AssemblyDoorBlock[] {ModBlocks.roundDoor(), ModBlocks.archedDoor()}) {
+        for (AssemblyDoorBlock door : new AssemblyDoorBlock[] {ModBlocks.roundDoor(), ModBlocks.archedDoor(), ModBlocks.doubleArchedDoor()}) {
             for (Direction facing : new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
+                for (var depth : door.defaultBlockState().hasProperty(io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.PROPERTY)
+                        ? io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.values()
+                        : new io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth[]{io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.FRONT})
                 for (DoorHingeSide hinge : DoorHingeSide.values()) {
-                    String label = door.design() + " " + facing + " " + hinge;
+                    String label = door.design() + " " + facing + " " + hinge + " " + depth;
                     ServerPlayer player = player(helper, "free_edge_" + label, GameType.SURVIVAL, facing);
-                    check(placeDoor(helper, player, door.asItem(), ANCHOR, hinge).consumesAction(), label + ": placement failed");
+                    check(io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement.placeAt(helper.getLevel(), door,
+                            new DoorLayout.Assembly(helper.absolutePos(ANCHOR), facing, hinge, door.design(), depth), false), label + ": placement failed");
                     hold(player, ItemStack.EMPTY, ItemStack.EMPTY);
                     var level = helper.getLevel();
                     BlockPos anchor = helper.absolutePos(ANCHOR);
                     var assembly = DoorLayout.of(anchor, level.getBlockState(anchor));
                     door.setOpen(null, level, level.getBlockState(anchor), anchor, true);
                     double width = door.design().width() / 16.0;
+                    double leafWidth = door.design().doubleLeaf() ? width / 2 : width;
                     boolean left = hinge == DoorHingeSide.LEFT;
                     Vec3 eye = point(assembly, left ? width - 0.5 : 0.5, 0.9, 0.5);
-                    Vec3 target = point(assembly, left ? 3.0 / 16 : width - 3.0 / 16, 0.9, width - 0.125);
+                    Vec3 target = point(assembly, left ? 3.0 / 16 : width - 3.0 / 16, 0.9, leafWidth - 0.125 - depth.offset() / 16);
                     BlockHitResult hit = aim(helper, player, eye, target);
                     check(DoorHitRegion.classify(level.getBlockState(hit.getBlockPos()), hit.getBlockPos(), hit)
                             == DoorHitRegion.Region.LEAF, label + ": free edge classified as corner");
                     boolean projected = DoorHitResolver.projected(level, hit);
-                    check(projected == (width == 2), label + ": unexpected projection");
+                    check(projected == (leafWidth - .125 - depth.offset() / 16 > 1), label + ": unexpected projection");
                     InteractionResult result = projected ? ProjectedDoorUse.use(player, hit) : use(helper, player, hit);
                     check(result.consumesAction(), label + ": free-edge use refused");
                     check(assembly.positions().stream().noneMatch(pos -> level.getBlockState(pos).getValue(DoorBlock.OPEN)),
@@ -91,7 +96,7 @@ public final class DoorFreeEdgeGameTests {
                         check(ProjectedDoorUse.use(player, hit) == InteractionResult.FAIL, label + ": stale projection accepted");
                     }
                     BlockHitResult closed = aim(helper, player, point(assembly, width / 2, 0.9, -1),
-                            point(assembly, width / 2, 0.9, 0.25));
+                            point(assembly, width / 2, 0.9, 0.25 - depth.offset() / 16));
                     check(use(helper, player, closed).consumesAction(), label + ": closed use refused");
                     check(assembly.positions().stream().allMatch(pos -> level.getBlockState(pos).getValue(DoorBlock.OPEN)),
                             label + ": closed leaf did not reopen");

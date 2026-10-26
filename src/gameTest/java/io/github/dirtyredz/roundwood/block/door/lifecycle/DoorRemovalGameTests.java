@@ -65,7 +65,7 @@ public final class DoorRemovalGameTests {
         floor(helper);
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
             for (boolean open : new boolean[] {false, true}) {
-                for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
                     String name = hinge + "/open=" + open + "/" + part;
                     DoorLayout.Assembly assembly = place(helper, "survival", hinge, open);
                     ServerPlayer player = player(helper, "survival_breaker", GameType.SURVIVAL, Direction.NORTH);
@@ -84,7 +84,7 @@ public final class DoorRemovalGameTests {
         floor(helper);
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
             for (boolean open : new boolean[] {false, true}) {
-                for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
                     String name = hinge + "/open=" + open + "/" + part;
                     DoorLayout.Assembly assembly = place(helper, "creative", hinge, open);
                     ServerPlayer player = player(helper, "creative_breaker", GameType.CREATIVE, Direction.NORTH);

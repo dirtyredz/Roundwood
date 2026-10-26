@@ -204,6 +204,17 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
         if (AssemblyMutationBatch.isMutating(level, pos)) {
             return state; // Roundwood is rewriting this assembly (placement, migration): no reactions
         }
+        if (design().doubleLeaf()) {
+            var assembly = DoorLayout.of(pos, state);
+            if (direction.getAxis() == Direction.Axis.Y) {
+                int row = DoorLayout.partOf(state).row() + direction.getStepY();
+                if (row >= 0 && row < 3) {
+                    var partner = DoorLayout.Part.at(DoorLayout.partOf(state).columnIndex(), row);
+                    if (!assembly.isPart(neighbor, this, partner)) return Blocks.AIR.defaultBlockState();
+                } else if (row < 0 && !neighbor.isFaceSturdy(level, neighborPos, Direction.UP)) return Blocks.AIR.defaultBlockState();
+            }
+            return state;
+        }
         boolean lower = state.getValue(HALF) == DoubleBlockHalf.LOWER;
         if (direction.getAxis() == Direction.Axis.Y && lower == (direction == Direction.UP) && !verticalPartner(state, neighbor)) {
             return Blocks.AIR.defaultBlockState();
@@ -243,6 +254,7 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
                 && neighbor.getValue(HALF) != state.getValue(HALF)
                 && neighbor.getValue(FACING) == state.getValue(FACING)
                 && neighbor.getValue(HINGE) == state.getValue(HINGE)
-                && DoorLayout.columnOf(neighbor) == DoorLayout.columnOf(state);
+                && DoorLayout.columnOf(neighbor) == DoorLayout.columnOf(state)
+                && DoorLayout.depthOf(neighbor) == DoorLayout.depthOf(state);
     }
 }

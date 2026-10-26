@@ -28,6 +28,12 @@ public enum DoorDesign {
         public boolean inLeaf(int u, int v) {
             return u >= 0 && u < 16 && v >= 0 && v < HEIGHT && ARCH.contains(u, v);
         }
+    },
+    DOUBLE_ARCHED("double_arched_door", 3, 2, 20) {
+        @Override public boolean inLeaf(int u, int v) {
+            return u >= 0 && u < 48 && v >= 0 && v < 48 && (v < 16 ||
+                    !io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.TOP_2X3.top().contains(u, v - 16));
+        }
     };
 
     /** Every design is two blocks tall. */
@@ -67,6 +73,9 @@ public enum DoorDesign {
     }
 
     /** Width in pixels (16 per column). */
+    public int height() { return this == DOUBLE_ARCHED ? 48 : HEIGHT; }
+    public boolean doubleLeaf() { return this == DOUBLE_ARCHED; }
+
     public int width() {
         return 16 * columns;
     }
@@ -74,7 +83,7 @@ public enum DoorDesign {
     /** The leaf's pixels merged into rectangles, x across, y up. */
     public synchronized List<PixelCircle.Rect> leafRects() {
         if (rects == null) {
-            rects = PixelCircle.rasterize(width(), HEIGHT, this::inLeaf);
+            rects = PixelCircle.rasterize(width(), height(), this::inLeaf);
         }
         return rects;
     }
@@ -100,6 +109,6 @@ public enum DoorDesign {
 
     /** The bottom edge of the knob: mid-height on both designs. */
     public int knobY() {
-        return HEIGHT / 2 - 1;
+        return height() / 2 - 1;
     }
 }

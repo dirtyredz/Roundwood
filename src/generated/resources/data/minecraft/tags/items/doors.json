@@ -1,6 +1,7 @@
 {
   "values": [
     "roundwood:round_door",
-    "roundwood:arched_door"
+    "roundwood:arched_door",
+    "roundwood:double_arched_door"
   ]
 }

@@ -14,14 +14,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class DoorHitResolverTest {
     @Test
     void everyRestingLeafSurfaceKeepsItsPointAndOwnAssembly() {
-        for (DoorDesign design : DoorDesign.values()) {
+        for (DoorDesign design : DoorDesign.values()) for (var depth : io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.values()) {
             for (Direction facing : new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
                 for (DoorHingeSide hinge : DoorHingeSide.values()) {
                     for (boolean open : new boolean[] {false, true}) {
-                        var assembly = new DoorLayout.Assembly(new BlockPos(-17, 8, 31), facing, hinge, design);
+                        var assembly = new DoorLayout.Assembly(new BlockPos(-17, 8, 31), facing, hinge, design, depth);
                         for (DoorLayout.Part part : assembly.parts()) {
-                            var shape = DoorSelectionShapes.shape(design, facing, hinge, part, open, false, 0, true);
-                            var visible = DoorSelectionShapes.shape(design, facing, hinge, part, open, false, 0, false);
+                            var shape = DoorSelectionShapes.shape(design, facing, hinge, part, open, false, 0, true, depth.offset());
+                            var visible = DoorSelectionShapes.shape(design, facing, hinge, part, open, false, 0, false, depth.offset());
                             assertEquals(visible.toAabbs(), shape.toAabbs(), "highlight and target disagree");
                             for (var box : shape.toAabbs()) {
                                 for (Direction side : Direction.values()) {

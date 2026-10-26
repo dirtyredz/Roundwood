@@ -78,7 +78,7 @@ public class DoorModelProvider extends BlockStateProvider {
             @Override
             public float[] uv(Piece piece, Box part, Direction face) {
                 return DoorGeometry.PANEL.equals(piece.texture())
-                        ? AssemblyFaceUv.of(part, face, design.width(), DoorDesign.HEIGHT, DoorGeometry.DIAMETER) : null;
+                        ? AssemblyFaceUv.of(design.doubleLeaf() ? part.translate(16, 16, 0) : part, face, design.width(), design.height(), Math.max(32, design.width())) : null;
             }
         };
     }
@@ -86,6 +86,6 @@ public class DoorModelProvider extends BlockStateProvider {
     private BlockModelBuilder template(DoorDesign design, DoorHingeSide hinge, GeometryModelWriter.FaceStyle faces) {
         BlockModelBuilder builder = models().getBuilder(template(design, hinge));
         builder.texture("particle", "#" + DoorGeometry.PANEL);
-        return GeometryModelWriter.addPieces(builder, DoorGeometry.leaf(design, hinge), false, faces);
+        return GeometryModelWriter.addPieces(builder, DoorGeometry.leaf(design, hinge).stream().map(p -> design.doubleLeaf() ? new Piece(p.box().translate(-16, -16, 0), p.texture()) : p).toList(), false, faces);
     }
 }

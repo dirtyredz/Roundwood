@@ -76,7 +76,7 @@ final class LegacyMigrationFixtures {
     /** A saved 0.4.0 door, one block id per part ({@code null}: leave that cell alone), anchor entity from {@code anchorSnbt}. */
     static DoorLayout.Assembly rawDoor(GameTestHelper helper, DoorLayout.Assembly door, Block[] parts, boolean open,
                                        String anchorSnbt) {
-        DoorLayout.Part[] order = DoorLayout.Part.values();
+        DoorLayout.Part[] order = DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND);
         for (int i = 0; i < order.length; i++) {
             if (parts[i] != null) {
                 raw(helper, door.pos(order[i]), door.stateFor(order[i], parts[i], open, false));

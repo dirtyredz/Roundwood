@@ -48,11 +48,13 @@ class GeneratedModelsTest {
     static double[] assemblyUv(String face, double[] from, double[] to, double offsetX, double offsetY, double width) {
         double x1 = from[0] + offsetX;
         double x2 = to[0] + offsetX;
-        double v1 = (32 - (to[1] + offsetY)) / 2;
-        double v2 = (32 - (from[1] + offsetY)) / 2;
+        double height = width == 48 ? 48 : 32;
+        double scale = height / 16;
+        double v1 = (height - (to[1] + offsetY)) / scale;
+        double v2 = (height - (from[1] + offsetY)) / scale;
         return switch (face) {
-            case "south" -> new double[] {x1 / 2, v1, x2 / 2, v2};
-            case "north" -> new double[] {(width - x2) / 2, v1, (width - x1) / 2, v2};
+            case "south" -> new double[] {x1 / scale, v1, x2 / scale, v2};
+            case "north" -> new double[] {(width - x2) / scale, v1, (width - x1) / scale, v2};
             default -> null;
         };
     }
@@ -68,6 +70,9 @@ class GeneratedModelsTest {
         }
         if (id.startsWith("roundwood:block/template_arched_door_leaf_")) {
             return new Object[] {"#panel", 0.0, 0.0, 16.0};
+        }
+        if (id.startsWith("roundwood:block/template_double_arched_door_leaf_") || id.equals("roundwood:item/template_double_arched_door")) {
+            return new Object[] {"#panel", 16.0, 16.0, 48.0};
         }
         String quarter = "roundwood:block/template_round_trim_whole_";
         if (id.startsWith(quarter)) {

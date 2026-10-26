@@ -125,7 +125,7 @@ public final class DoorSelectionGameTests {
                     for (ItemStack[] hands : new ItemStack[][] {{new ItemStack(Items.STONE), ItemStack.EMPTY},
                             {ItemStack.EMPTY, new ItemStack(Items.OAK_PLANKS)}}) {
                         hold(looker, hands[0], hands[1]);
-                        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                        for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
                             BlockPos pos = assembly.pos(part);
                             BlockState state = helper.getLevel().getBlockState(pos);
                             check(contains(state.getShape(helper.getLevel(), pos, CollisionContext.of(looker)), pos, corner),
@@ -138,13 +138,13 @@ public final class DoorSelectionGameTests {
                         }
                     }
                     anchorEntity(helper, assembly).setCamouflage(CamouflageData.free(Blocks.STONE.defaultBlockState()));
-                    for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                    for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
                         BlockPos pos = assembly.pos(part);
                         check(contains(DoorSelectionShapes.visible(helper.getLevel().getBlockState(pos), helper.getLevel(), pos), pos, corner),
                                 facing + " " + hinge + " " + part + ": a filled corner is not highlighted");
                     }
                     anchorEntity(helper, assembly).setCamouflage(null);
-                    for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                    for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
                         BlockPos pos = assembly.pos(part);
                         check(!contains(DoorSelectionShapes.visible(helper.getLevel().getBlockState(pos), helper.getLevel(), pos), pos, corner),
                                 facing + " " + hinge + " " + part + ": a cleared corner is still highlighted");

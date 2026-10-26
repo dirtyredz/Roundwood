@@ -130,7 +130,8 @@ public final class DoorFixtures {
         double along = hinge == DoorHingeSide.LEFT ? 0.25 : 0.75;
         BlockPos floor = helper.absolutePos(anchor.below());
         Vec3 hit = Vec3.atCenterOf(floor).add(0, 0.5, 0)
-                .add(across.getStepX() * (along - 0.5), 0, across.getStepZ() * (along - 0.5));
+                .add(across.getStepX() * (along - 0.5), 0, across.getStepZ() * (along - 0.5))
+                .relative(player.getDirection().getOpposite(), .375);
         player.setItemInHand(InteractionHand.MAIN_HAND, stack);
         return stack.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, new BlockHitResult(hit, Direction.UP, floor, false)));
     }

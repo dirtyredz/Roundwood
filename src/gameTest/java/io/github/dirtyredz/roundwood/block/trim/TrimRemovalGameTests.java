@@ -245,7 +245,7 @@ public final class TrimRemovalGameTests {
 
     @GameTest(template = TEMPLATE)
     public static void breakingTheDoorLeavesTheFittedFrame(GameTestHelper helper) {
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
             DoorLayout.Assembly door = doorWithCamouflage(helper, "door_break_" + part);
             ServerPlayer fitter = player(helper, "door_break_fitter", GameType.SURVIVAL, Direction.NORTH);
             check(fitToDoor(helper, fitter, new ItemStack(oakTrim()), door, 0.5, 0.5).consumesAction(), part + ": fitting failed");

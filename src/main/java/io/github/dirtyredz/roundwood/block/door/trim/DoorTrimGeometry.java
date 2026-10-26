@@ -39,7 +39,7 @@ public final class DoorTrimGeometry {
 
     static {
         for (DoorDesign design : DoorDesign.values()) {
-            List<PixelCircle.Rect> rects = PixelCircle.rasterize(design.width(), DoorDesign.HEIGHT, (u, v) -> inCasing(design, u, v));
+            List<PixelCircle.Rect> rects = PixelCircle.rasterize(design.width(), design.height(), (u, v) -> inCasing(design, u, v));
             CASINGS.put(design, new Casing(extrude(rects, DoorGeometry.FRONT, DoorGeometry.FRONT + AttachmentFace.PROUD),
                     extrude(rects, DoorGeometry.BACK - AttachmentFace.PROUD, DoorGeometry.BACK),
                     extrude(rects, DoorGeometry.FRONT - AttachmentFace.PROUD, DoorGeometry.FRONT)));
@@ -53,6 +53,7 @@ public final class DoorTrimGeometry {
     public static boolean inCasing(DoorDesign design, int u, int v) {
         return switch (design) {
             case ROUND -> RingGeometry.inRing(u, v);
+            case DOUBLE_ARCHED -> design.inLeaf(u, v) && !new ArchedProfile(WIDTH, 48 - WIDTH, 16).contains(u, v);
             case ARCHED -> design.inLeaf(u, v) && !ARCHED_INNER.contains(u, v);
         };
     }
@@ -67,6 +68,12 @@ public final class DoorTrimGeometry {
     public static List<Box> target(DoorDesign design, AttachmentFace face) {
         Casing casing = CASINGS.get(design);
         return face == AttachmentFace.FRONT ? casing.frontProxy() : casing.back();
+    }
+
+    /** Keep the back-flush casing target inside its owning cell, like the historical front proxy. */
+    public static List<Box> target(DoorDesign design, AttachmentFace face, double offset) {
+        var boxes = target(design, face);
+        return face == AttachmentFace.BACK && offset == -13 ? boxes.stream().map(b -> b.translate(0, 0, 1)).toList() : boxes;
     }
 
     /** True when an authored point lies on the casing's footprint (any depth). */
@@ -86,8 +93,12 @@ public final class DoorTrimGeometry {
                 : z >= DoorGeometry.BACK - AttachmentFace.PROUD && z <= DoorGeometry.BACK;
     }
 
+    public static boolean inTargetDepth(AttachmentFace face, double z, double offset) {
+        return inTargetDepth(face, face == AttachmentFace.BACK && offset == -13 ? z - 1 : z);
+    }
+
     private static boolean inPlane(DoorDesign design, double x, double y) {
-        return x >= 0 && x < design.width() && y >= 0 && y < DoorDesign.HEIGHT;
+        return x >= 0 && x < design.width() && y >= 0 && y < design.height();
     }
 
     private static List<Box> extrude(List<PixelCircle.Rect> rects, double z1, double z2) {

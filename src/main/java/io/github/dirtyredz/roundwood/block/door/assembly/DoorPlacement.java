@@ -45,7 +45,10 @@ public final class DoorPlacement {
         BlockPos anchor = context.getClickedPos().immutable();
         DoorDesign design = block.design();
         DoorLayout.Assembly assembly = new DoorLayout.Assembly(anchor, facing,
-                DoorHingePlacement.choose(block, context, anchor, facing, design.columns()), design);
+                DoorHingePlacement.choose(block, context, anchor, facing, design.columns()), design,
+                block.defaultBlockState().hasProperty(DoorDepth.PROPERTY) ? DoorDepth.target(facing, context.getClickedFace(),
+                        context.getClickLocation().x - anchor.getX(), context.getClickLocation().y - anchor.getY(),
+                        context.getClickLocation().z - anchor.getZ()) : DoorDepth.FRONT);
         Level level = context.getLevel();
         boolean[] powered = {false};
         if (!AssemblyPlacementPlan.playerCells(context, assembly, pos -> powered[0] |= level.hasNeighborSignal(pos))) {
@@ -71,7 +74,7 @@ public final class DoorPlacement {
     private static Optional<AssemblyPlacementPlan<DoorLayout.Part, DoorLayout.Assembly>> plan(Level level, AssemblyDoorBlock block, DoorLayout.Assembly assembly,
                                                     boolean open, boolean powered, CollisionContext collision) {
         return AssemblyPlacementPlan.of(assembly, part -> assembly.stateFor(part, block, open, powered),
-                        AssemblyPlacementPlan.unobstructed(level, collision, part -> part.half == DoubleBlockHalf.LOWER));
+                        AssemblyPlacementPlan.unobstructed(level, collision, part -> part.row() == 0));
     }
 
     public static InteractionResult place(RoundDoorItem item, BlockPlaceContext context) {

@@ -69,12 +69,21 @@ public final class DoorGeometry {
      */
     public static List<Piece> leaf(DoorDesign design, DoorHingeSide hinge) {
         Leaf leaf = LEAVES.get(design);
-        return hinge == DoorHingeSide.LEFT ? leaf.left() : leaf.right();
+        List<Piece> pieces = hinge == DoorHingeSide.LEFT ? leaf.left() : leaf.right();
+        if (!design.doubleLeaf()) return pieces;
+        Box half = half(design, hinge);
+        return pieces.stream().flatMap(p -> p.box().intersect(half).stream().map(b -> new Piece(b, p.texture()))).toList();
     }
 
     /** The closed leaf's solid slab (the whole outline, 3/16 thick) in assembly coordinates. */
     public static List<Box> envelope(DoorDesign design) {
         return LEAVES.get(design).envelope();
+    }
+
+    public static Box half(DoorDesign design, DoorHingeSide hinge) {
+        double middle = design.width() / 2.0;
+        return new Box(hinge == DoorHingeSide.LEFT ? 0 : middle, 0, -16,
+                hinge == DoorHingeSide.LEFT ? middle : design.width(), design.height(), 32);
     }
 
     /** x of the swing axis in assembly pixels: the middle of the hinge-side leaf thickness. */
@@ -127,10 +136,14 @@ public final class DoorGeometry {
      * The selection outline is the whole leaf instead (see {@code door/selection/DoorOutlineGeometry}).
      */
     public static List<Box> cellEnvelope(DoorDesign design, DoorHingeSide hinge, int column, int row, boolean open) {
+        return cellEnvelope(design, hinge, column, row, open, 0);
+    }
+
+    public static List<Box> cellEnvelope(DoorDesign design, DoorHingeSide hinge, int column, int row, boolean open, double depthOffset) {
         Box cell = new Box(16 * column, 16 * row, 0, 16 * column + 16, 16 * row + 16, 16);
         List<Box> out = new ArrayList<>();
-        for (Box box : envelope(design)) {
-            Box placed = open ? swing(design, box, hinge) : box;
+        for (Box box : placedEnvelope(design, hinge, open)) {
+            Box placed = box.translate(0, 0, depthOffset);
             placed.intersect(cell).map(b -> b.translate(-16 * column, -16 * row, 0)).ifPresent(out::add);
         }
         return out;
@@ -138,12 +151,19 @@ public final class DoorGeometry {
 
     /** The whole leaf, open or closed, as one list of assembly-coordinate boxes (for tests and bounds). */
     public static List<Box> placedEnvelope(DoorDesign design, DoorHingeSide hinge, boolean open) {
+        if (design.doubleLeaf() && open) {
+            List<Box> boxes = new ArrayList<>();
+            for (DoorHingeSide side : DoorHingeSide.values()) for (Box box : envelope(design)) {
+                box.intersect(half(design, side)).map(b -> swing(design, b, side)).ifPresent(boxes::add);
+            }
+            return List.copyOf(boxes);
+        }
         return open ? envelope(design).stream().map(box -> swing(design, box, hinge)).toList() : envelope(design);
     }
 
     /** True when {@code box} lies in the design's own cells (x 0..width, y 0..32, z 0..16). */
     public static boolean insideCells(DoorDesign design, Box box) {
-        return box.within(new Box(0, 0, 0, design.width(), DoorDesign.HEIGHT, 16));
+        return box.within(new Box(0, 0, 0, design.width(), design.height(), 16));
     }
 
     /** The part of the open leaf outside the cells (the non-colliding projection), if any. */

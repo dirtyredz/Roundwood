@@ -56,10 +56,12 @@ public final class SectionChecks {
                 DoorDesign.ROUND);
         DoorLayout.Assembly arched = new DoorLayout.Assembly(frame.pos(PiecesSection.ARCHED_DOOR_R, 0, f), frame.forward(), DoorHingeSide.LEFT,
                 DoorDesign.ARCHED);
-        for (DoorLayout.Assembly door : List.of(round, arched)) {
+        DoorLayout.Assembly doubleDoor = new DoorLayout.Assembly(frame.pos(PiecesSection.DOUBLE_DOOR_R, 0, f), frame.forward(), DoorHingeSide.LEFT,
+                DoorDesign.DOUBLE_ARCHED);
+        for (DoorLayout.Assembly door : List.of(round, arched, doubleDoor)) {
             boolean isRound = door == round;
             String what = (isRound ? "round" : "arched") + " door";
-            check(door.complete(level, isRound ? ModBlocks.roundDoor() : ModBlocks.archedDoor()), what + ": missing or incomplete");
+            check(door.complete(level, isRound ? ModBlocks.roundDoor() : door == arched ? ModBlocks.archedDoor() : ModBlocks.doubleArchedDoor()), what + ": missing or incomplete");
             check(!level.getBlockState(door.anchor()).getValue(DoorBlock.OPEN), what + ": not closed");
             check(level.getBlockEntity(door.anchor()) instanceof RoundDoorBlockEntity entity && entity.appearance().equals(Appearance.DEFAULT)
                     && entity.trims().equals(FaceTrims.NONE) && entity.camouflage().isEmpty(), what + ": not oak and plain");
@@ -67,6 +69,7 @@ public final class SectionChecks {
         }
         owned.add(sign(level, frame, PiecesSection.ROUND_DOOR_R, f, "Round door"));
         owned.add(sign(level, frame, PiecesSection.ARCHED_DOOR_R, f, "Arched door"));
+        owned.add(sign(level, frame, PiecesSection.DOUBLE_DOOR_R, f, "Double arched door"));
         verifyOwnsOnly(level, frame, "pieces", 0, PiecesSection.R_MAX, f, f, owned);
     }
 

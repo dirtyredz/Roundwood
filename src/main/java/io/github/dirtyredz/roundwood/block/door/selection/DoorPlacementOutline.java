@@ -21,13 +21,14 @@ public final class DoorPlacementOutline {
 
     /** {@code assembly}'s leaf at rest, open or closed. */
     public static List<DoorSwingOutline.Edge> silhouette(DoorLayout.Assembly assembly, boolean open) {
-        return DoorSwingOutline.forCell(assembly.design(), assembly.hinge(), open ? 1 : 0, 0, 0, turns(assembly));
+        return DoorSwingOutline.at(assembly.design(), assembly.hinge(), open ? 1 : 0).stream()
+                .map(e -> e.translate(0, 0, assembly.depth().offset()).rotateY(turns(assembly))).toList();
     }
 
     /** {@code assembly}'s cells: the twelve edges of their joint box. */
     public static List<DoorSwingOutline.Edge> footprint(DoorLayout.Assembly assembly) {
         double w = assembly.design().width();
-        double h = DoorDesign.HEIGHT;
+        double h = assembly.design().height();
         List<DoorSwingOutline.Edge> edges = new ArrayList<>(12);
         for (double y : new double[] {0, h}) {
             edges.add(new DoorSwingOutline.Edge(0, y, 0, w, y, 0));
@@ -46,8 +47,14 @@ public final class DoorPlacementOutline {
     /** {@code assembly}'s hinge: the leaf's swing axis, floor to top. */
     public static DoorSwingOutline.Edge hingeAxis(DoorLayout.Assembly assembly) {
         double x = DoorGeometry.pivotX(assembly.design(), assembly.hinge());
-        return new DoorSwingOutline.Edge(x, 0, DoorGeometry.PIVOT_Z, x, DoorDesign.HEIGHT, DoorGeometry.PIVOT_Z)
+        return new DoorSwingOutline.Edge(x, 0, DoorGeometry.PIVOT_Z + assembly.depth().offset(), x, assembly.design().height(), DoorGeometry.PIVOT_Z + assembly.depth().offset())
                 .rotateY(turns(assembly));
+    }
+
+    public static List<DoorSwingOutline.Edge> hingeAxes(DoorLayout.Assembly assembly) {
+        if (!assembly.design().doubleLeaf()) return List.of(hingeAxis(assembly));
+        return java.util.Arrays.stream(net.minecraft.world.level.block.state.properties.DoorHingeSide.values())
+                .map(side -> hingeAxis(new DoorLayout.Assembly(assembly.anchor(), assembly.facing(), side, assembly.design(), assembly.depth()))).toList();
     }
 
     private static int turns(DoorLayout.Assembly assembly) {

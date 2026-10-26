@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.block.door.assembly;
 
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.DoubleArchedDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
 import net.minecraft.core.BlockPos;
@@ -36,14 +37,26 @@ public final class DoorLayout {
         LOWER_LEFT(DoorColumn.LEFT, DoubleBlockHalf.LOWER),
         UPPER_LEFT(DoorColumn.LEFT, DoubleBlockHalf.UPPER),
         LOWER_RIGHT(DoorColumn.RIGHT, DoubleBlockHalf.LOWER),
-        UPPER_RIGHT(DoorColumn.RIGHT, DoubleBlockHalf.UPPER);
+        UPPER_RIGHT(DoorColumn.RIGHT, DoubleBlockHalf.UPPER),
+        TOP_LEFT(0, 2), TOP_MIDDLE(1, 2), LOWER_FAR_RIGHT(2, 0), MIDDLE_FAR_RIGHT(2, 1), TOP_FAR_RIGHT(2, 2);
 
         public final DoorColumn column;
         public final DoubleBlockHalf half;
+        private final int x, y;
+        Part(int x, int y) {
+            this.column = x == 0 ? DoorColumn.LEFT : DoorColumn.RIGHT;
+            this.half = y == 0 ? DoubleBlockHalf.LOWER : DoubleBlockHalf.UPPER;
+            this.x = x; this.y = y;
+        }
+        public int columnIndex() { return x; }
+        public static Part at(int x, int y) {
+            return java.util.Arrays.stream(values()).filter(p -> p.x == x && p.y == y).findFirst().orElseThrow();
+        }
 
         Part(DoorColumn column, DoubleBlockHalf half) {
             this.column = column;
             this.half = half;
+            this.x = column.index(); this.y = half == DoubleBlockHalf.LOWER ? 0 : 1;
         }
 
         public static Part of(DoorColumn column, DoubleBlockHalf half) {
@@ -55,12 +68,12 @@ public final class DoorLayout {
 
         /** 0 for the lower row, 1 for the upper. */
         public int row() {
-            return half == DoubleBlockHalf.LOWER ? 0 : 1;
+            return y;
         }
 
         /** The parts a door of {@code design} owns, in this enum's order. */
         public static List<Part> of(DoorDesign design) {
-            return design.columns() == 1 ? List.of(LOWER_LEFT, UPPER_LEFT) : List.of(values());
+            return java.util.Arrays.stream(values()).filter(p -> p.x < design.columns() && p.y < design.height() / 16).toList();
         }
     }
 
@@ -69,8 +82,15 @@ public final class DoorLayout {
      * door's design. The shared traversal (positions, loaded, present parts, completeness, the authored
      * frame) is the {@link io.github.dirtyredz.roundwood.block.assembly.Assembly} contract's.
      */
-    public record Assembly(BlockPos anchor, Direction facing, DoorHingeSide hinge, DoorDesign design)
+    public record Assembly(BlockPos anchor, Direction facing, DoorHingeSide hinge, DoorDesign design, DoorDepth depth)
             implements io.github.dirtyredz.roundwood.block.assembly.Assembly<Part> {
+        public Assembly(BlockPos anchor, Direction facing, DoorHingeSide hinge, DoorDesign design) {
+            this(anchor, facing, hinge, design, DoorDepth.FRONT);
+        }
+        /** Coordinates of geometry, undoing the saved depth before targeting. */
+        @Override public Vec3 toAuthored(Vec3 point) {
+            return io.github.dirtyredz.roundwood.block.assembly.Assembly.super.toAuthored(point).add(0, 0, -depth.offset());
+        }
         /** The parts this assembly owns (four for the round door, two for the arched door). */
         @Override
         public List<Part> parts() {
@@ -79,8 +99,7 @@ public final class DoorLayout {
 
         @Override
         public BlockPos pos(Part part) {
-            BlockPos pos = part.column == DoorColumn.LEFT ? anchor : anchor.relative(facing.getClockWise());
-            return part.half == DoubleBlockHalf.LOWER ? pos : pos.above();
+            return anchor.relative(facing.getClockWise(), part.columnIndex()).above(part.row());
         }
 
         /** The block state a part should have, open/powered as given; keeps any injected properties. */
@@ -91,6 +110,9 @@ public final class DoorLayout {
                     .setValue(DoorBlock.HALF, part.half)
                     .setValue(DoorBlock.OPEN, open)
                     .setValue(DoorBlock.POWERED, powered);
+            if (state.hasProperty(DoorDepth.PROPERTY)) state = state.setValue(DoorDepth.PROPERTY, depth);
+            if (design.doubleLeaf()) return state.setValue(DoubleArchedDoorBlock.CELL_X, part.columnIndex())
+                    .setValue(DoubleArchedDoorBlock.CELL_Y, part.row());
             return state.hasProperty(RoundDoorBlock.COLUMN) ? state.setValue(RoundDoorBlock.COLUMN, part.column) : state;
         }
 
@@ -104,8 +126,8 @@ public final class DoorLayout {
                     && designOf(state) == design
                     && state.getValue(DoorBlock.FACING) == facing
                     && state.getValue(DoorBlock.HINGE) == hinge
-                    && columnOf(state) == part.column
-                    && state.getValue(DoorBlock.HALF) == part.half;
+                    && partOf(state) == part
+                    && depthOf(state) == depth;
         }
 
         /**
@@ -113,7 +135,7 @@ public final class DoorLayout {
          * front of them along {@code facing}, where an open round leaf projects, and the hardware margin.
          */
         public AABB sweepBounds() {
-            AABB cells = new AABB(anchor).minmax(new AABB(topRight().relative(facing)));
+            AABB cells = new AABB(anchor).minmax(new AABB(topRight().relative(facing, depth == DoorDepth.FRONT ? 1 : 2)));
             // The knobs and straps stand proud of the leaf; at any swing angle they stay within this margin.
             return cells.inflate(DoorGeometry.SWEEP_MARGIN / 16);
         }
@@ -125,20 +147,25 @@ public final class DoorLayout {
 
         /** The upper cell of the rightmost column. */
         private BlockPos topRight() {
-            return pos(Part.of(DoorColumn.values()[design.columns() - 1], DoubleBlockHalf.UPPER));
+            return pos(Part.at(design.columns() - 1, design.height() / 16 - 1));
         }
     }
 
     /** The assembly a part belongs to, derived from its own state. */
     public static Assembly of(BlockPos pos, BlockState state) {
         Direction facing = state.getValue(DoorBlock.FACING);
-        BlockPos lower = state.getValue(DoorBlock.HALF) == DoubleBlockHalf.UPPER ? pos.below() : pos;
-        BlockPos anchor = columnOf(state) == DoorColumn.LEFT ? lower : lower.relative(facing.getCounterClockWise());
-        return new Assembly(anchor.immutable(), facing, state.getValue(DoorBlock.HINGE), designOf(state));
+        Part part = partOf(state);
+        BlockPos anchor = pos.below(part.row()).relative(facing.getCounterClockWise(), part.columnIndex());
+        return new Assembly(anchor.immutable(), facing, state.getValue(DoorBlock.HINGE), designOf(state), depthOf(state));
     }
 
     public static Part partOf(BlockState state) {
+        if (state.hasProperty(DoubleArchedDoorBlock.CELL_X)) return Part.at(state.getValue(DoubleArchedDoorBlock.CELL_X), state.getValue(DoubleArchedDoorBlock.CELL_Y));
         return Part.of(columnOf(state), state.getValue(DoorBlock.HALF));
+    }
+
+    public static DoorDepth depthOf(BlockState state) {
+        return state.hasProperty(DoorDepth.PROPERTY) ? state.getValue(DoorDepth.PROPERTY) : DoorDepth.FRONT;
     }
 
     /** The design of a door part's block (only ever asked of Roundwood door states). */

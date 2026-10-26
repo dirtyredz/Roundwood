@@ -275,7 +275,7 @@ public final class LegacyMigrationGameTests {
         helper.setBlock(windowRel, legacy("cherry_round_window").defaultBlockState());
         DoorLayout.Assembly door = new DoorLayout.Assembly(helper.absolutePos(ANCHOR), Direction.NORTH, DoorHingeSide.LEFT, DoorDesign.ROUND);
         Block alias = legacy("yellow_round_door");
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
             helper.getLevel().setBlockAndUpdate(door.pos(part), door.stateFor(part, alias, false, false));
         }
         helper.runAfterDelay(3, () -> {

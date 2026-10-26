@@ -34,12 +34,12 @@ class GeneratedResourceManifestTest {
         assertEquals(15, ModelExpectations.aliasWindows().size());
         assertEquals(19, ModelExpectations.aliasTrims().size());
         assertEquals(49, ALIASES.size());
-        assertEquals(20, CANONICAL.size());
+        assertEquals(21, CANONICAL.size());
         assertEquals(26, WINDOWS.size());
         assertEquals(13, PLAIN_WINDOWS.size());
         assertEquals(13, RETIRED.size());
-        assertEquals(84, BLOCKS.size());
-        assertEquals(84, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
+        assertEquals(85, BLOCKS.size());
+        assertEquals(85, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
     }
 
     @Test
@@ -63,6 +63,9 @@ class GeneratedResourceManifestTest {
         Set<String> item = new TreeSet<>(List.of("template_round_door", "round_door", "template_arched_door", "arched_door",
                 "round_trim", WINDOW_TRIM,
                 ARCH_SILL_TRIM, "cross_beams", "archway", "keyhole_archway"));
+        block.addAll(List.of("double_arched_door", "double_arched_door_leaf_left", "double_arched_door_leaf_right",
+                "template_double_arched_door_leaf_left", "template_double_arched_door_leaf_right"));
+        item.addAll(List.of("double_arched_door", "template_double_arched_door"));
         block.addAll(windowBlockModels());
         block.addAll(ARCH_PIECES);
         item.addAll(WINDOWS);
@@ -75,8 +78,8 @@ class GeneratedResourceManifestTest {
         }
         item.addAll(ALIASES);
         assertEquals(112, windowBlockModels().size());
-        assertEquals(33 + 112, block.size()); // 22 before 0.11.0, the arched door adds 5; 0.12.0 the two archways
-        assertEquals(89, item.size()); // 63 of 0.9.0, 16 new windows, arch_sill_trim; 0.11.0 the arched door and its template; 0.12.0 the two archways
+        assertEquals(38 + 112, block.size()); // 22 before 0.11.0, the arched door adds 5; 0.12.0 the two archways
+        assertEquals(91, item.size()); // 63 of 0.9.0, 16 new windows, arch_sill_trim; 0.11.0 the arched door and its template; 0.12.0 the two archways
         // Exact sets: no per-finish models remain; the 49 old ids are only item-model aliases.
         assertEquals(block, names(assets("models/block")));
         assertEquals(item, names(assets("models/item")));
@@ -91,11 +94,11 @@ class GeneratedResourceManifestTest {
         crafted.add(ARCH_SILL_TRIM); // crafted, but an item only
         assertEquals(crafted, names(data("recipes")));
         assertEquals(crafted, names(data("advancements/recipes")));
-        assertEquals(84, allJson(assets("blockstates")).size());
-        assertEquals(33 + 112, allJson(assets("models/block")).size());
-        assertEquals(89, allJson(assets("models/item")).size());
-        assertEquals(22, allJson(data("recipes")).size());
-        assertEquals(84, allJson(data("loot_tables/blocks")).size());
-        assertEquals(22, allJson(data("advancements/recipes")).size());
+        assertEquals(85, allJson(assets("blockstates")).size());
+        assertEquals(38 + 112, allJson(assets("models/block")).size());
+        assertEquals(91, allJson(assets("models/item")).size());
+        assertEquals(23, allJson(data("recipes")).size());
+        assertEquals(85, allJson(data("loot_tables/blocks")).size());
+        assertEquals(23, allJson(data("advancements/recipes")).size());
     }
 }

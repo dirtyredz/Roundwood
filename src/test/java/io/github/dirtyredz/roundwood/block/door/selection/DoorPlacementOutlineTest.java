@@ -34,7 +34,7 @@ class DoorPlacementOutlineTest {
             assertEquals(0, bounds[0], 1e-9);
             assertEquals(design.width(), bounds[3], 1e-9, design + ": footprint width");
             assertEquals(0, bounds[1], 1e-9);
-            assertEquals(32, bounds[4], 1e-9);
+            assertEquals(design.height(), bounds[4], 1e-9);
             assertEquals(0, bounds[2], 1e-9);
             assertEquals(16, bounds[5], 1e-9);
         }

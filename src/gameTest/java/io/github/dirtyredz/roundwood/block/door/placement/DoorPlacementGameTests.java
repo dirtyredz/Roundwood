@@ -88,7 +88,7 @@ public final class DoorPlacementGameTests {
                 check(placeDoor(helper, player, door.asItem(), anchor, hinge).consumesAction(), name + ": placement failed");
                 DoorLayout.Assembly assembly = assembly(helper, anchor, facing, hinge);
                 assertAssembly(helper, assembly, door, false);
-                for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
                     BlockState state = helper.getLevel().getBlockState(assembly.pos(part));
                     check(state.getValue(DoorBlock.HINGE) == hinge, name + ": hinge differs on " + part);
                     check(state.getValue(RoundDoorBlock.COLUMN) == part.column, name + ": wrong column on " + part);

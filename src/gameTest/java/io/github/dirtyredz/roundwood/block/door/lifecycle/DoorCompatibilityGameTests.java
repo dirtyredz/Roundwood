@@ -42,7 +42,7 @@ public final class DoorCompatibilityGameTests {
     @GameTest(template = TEMPLATE)
     public static void externalOpenWriteOnAnySinglePartMovesAllFour(GameTestHelper helper) {
         floor(helper);
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
             for (int flags : FLAG_SETS) {
                 String name = part + "/flags=" + flags;
                 ServerPlayer player = player(helper, "compat", GameType.SURVIVAL, Direction.NORTH);

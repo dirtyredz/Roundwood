@@ -46,8 +46,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Built once per variant and cached.
  */
 public final class DoorSelectionShapes {
-    private static final ConcurrentHashMap<Integer, VoxelShape> SHAPES = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Integer, VoxelShape> STATIC = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<java.util.List<Object>, VoxelShape> SHAPES = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<java.util.List<Object>, VoxelShape> STATIC = new ConcurrentHashMap<>();
 
     private DoorSelectionShapes() {
     }
@@ -79,19 +79,19 @@ public final class DoorSelectionShapes {
         DoorDesign design = assembly.design();
         int turns = VoxelShapeFactory.quarterTurns(state.getValue(DoorBlock.FACING));
         DoorLayout.Part part = DoorLayout.partOf(state);
-        int column = part.column.index();
+        int column = part.columnIndex();
         int row = part.row();
-        int key = (design.ordinal() << 7) | (turns << 5) | (column << 4) | (row << 3) | ((corners ? 1 : 0) << 2) | rings;
+        var key = java.util.List.<Object>of(design, turns, part, corners, rings, assembly.depth());
         return STATIC.computeIfAbsent(key, k -> {
             List<Box> boxes = new ArrayList<>(corners ? CamouflageGeometry.corners(design) : List.of());
-            addRings(boxes, design, rings, false);
-            return VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes, column, row), turns));
+            addRings(boxes, design, rings, false, assembly.depth().offset());
+            return VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes.stream().map(b -> b.translate(0, 0, assembly.depth().offset())).toList(), column, row), turns));
         });
     }
 
     private static VoxelShape shape(BlockState state, boolean corners, int rings, boolean target) {
         return shape(DoorLayout.designOf(state), state.getValue(DoorBlock.FACING), state.getValue(DoorBlock.HINGE),
-                DoorLayout.partOf(state), state.getValue(DoorBlock.OPEN), corners, rings, target);
+                DoorLayout.partOf(state), state.getValue(DoorBlock.OPEN), corners, rings, target, DoorLayout.depthOf(state).offset());
     }
 
     /**
@@ -100,22 +100,26 @@ public final class DoorSelectionShapes {
      */
     public static VoxelShape shape(DoorDesign design, Direction facing, DoorHingeSide hinge, DoorLayout.Part part, boolean open,
                                    boolean corners, int rings, boolean target) {
+        return shape(design, facing, hinge, part, open, corners, rings, target, 0);
+    }
+
+    public static VoxelShape shape(DoorDesign design, Direction facing, DoorHingeSide hinge, DoorLayout.Part part, boolean open,
+                                   boolean corners, int rings, boolean target, double depth) {
         int turns = VoxelShapeFactory.quarterTurns(facing);
-        int column = part.column.index();
+        int column = part.columnIndex();
         int row = part.row();
-        int key = (design.ordinal() << 11) | (turns << 9) | ((hinge == DoorHingeSide.LEFT ? 0 : 1) << 8) | (column << 7)
-                | (row << 6) | ((open ? 1 : 0) << 5) | ((corners ? 1 : 0) << 4) | (rings << 1) | (target ? 1 : 0);
+        var key = java.util.List.<Object>of(design, turns, hinge, part, open, corners, rings, target, depth);
         return SHAPES.computeIfAbsent(key, k -> {
             List<Box> boxes = new ArrayList<>(DoorOutlineGeometry.outline(design, hinge, open, corners));
-            addRings(boxes, design, rings, target);
-            return VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes, column, row), turns));
+            addRings(boxes, design, rings, target, depth);
+            return VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes.stream().map(b -> b.translate(0, 0, depth)).toList(), column, row), turns));
         });
     }
 
-    private static void addRings(List<Box> boxes, DoorDesign design, int rings, boolean target) {
+    private static void addRings(List<Box> boxes, DoorDesign design, int rings, boolean target, double depth) {
         for (AttachmentFace face : AttachmentFace.values()) {
             if ((rings & bit(face)) != 0) {
-                boxes.addAll(target ? DoorTrimGeometry.target(design, face) : DoorTrimGeometry.ring(design, face));
+                boxes.addAll(target ? DoorTrimGeometry.target(design, face, depth) : DoorTrimGeometry.ring(design, face));
             }
         }
     }

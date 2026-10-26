@@ -35,6 +35,7 @@ public final class DoorTrimModels {
 
     /** What {@code appearance} draws on {@code design}'s casing (masonry follows the casing's contour). */
     public static TrimLooks.Look look(DoorDesign design, Appearance appearance) {
+        if (design.doubleLeaf()) return TrimLooks.Look.tiled(io.github.dirtyredz.roundwood.client.material.AppearanceLooks.planks(appearance));
         return TrimLooks.of(appearance, material -> design == DoorDesign.ROUND
                 ? MasonryStyles.doorFace(material) : MasonryStyles.archedDoorCasingFace(material));
     }
@@ -49,8 +50,8 @@ public final class DoorTrimModels {
         boolean front = key.face() == AttachmentFace.FRONT;
         double back = front ? DoorGeometry.FRONT : DoorGeometry.BACK - AttachmentFace.PROUD;
         double out = front ? DoorGeometry.FRONT + AttachmentFace.PROUD : DoorGeometry.BACK;
-        return PixelSlabModels.cell((u, v) -> DoorTrimGeometry.inCasing(key.design(), u, v), key.part().column.index(),
+        return PixelSlabModels.cell((u, v) -> DoorTrimGeometry.inCasing(key.design(), u, v), key.part().columnIndex(),
                 key.part().row(), back, out, key.facing(), key.look(),
-                new PixelSlabModels.Extent(key.design().width(), DoorDesign.HEIGHT, DoorGeometry.DIAMETER));
+                new PixelSlabModels.Extent(key.design().width(), key.design().height(), Math.max(key.design().width(), key.design().height())));
     }
 }

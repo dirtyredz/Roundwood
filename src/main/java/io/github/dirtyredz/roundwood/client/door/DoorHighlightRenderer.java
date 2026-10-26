@@ -67,8 +67,9 @@ public final class DoorHighlightRenderer {
                 && anchor.swing().moving(now)) {
             OutlineLines.edges(pose, lines, DoorSelectionShapes.visibleStatic(state, level, pos), x, y, z, 0F, 0F, 0F, ALPHA);
             DoorLayout.Part part = DoorLayout.partOf(state);
-            for (DoorSwingOutline.Edge e : DoorSwingOutline.forCell(door.design(), state.getValue(DoorBlock.HINGE), anchor.swing().progress(now),
-                    part.column.index(), part.row(), VoxelShapeFactory.quarterTurns(state.getValue(DoorBlock.FACING)))) {
+            for (DoorSwingOutline.Edge e : DoorSwingOutline.at(door.design(), state.getValue(DoorBlock.HINGE), anchor.swing().progress(now)).stream()
+                    .map(edge -> edge.translate(-16 * part.columnIndex(), -16 * part.row(), DoorLayout.depthOf(state).offset())
+                            .rotateY(VoxelShapeFactory.quarterTurns(state.getValue(DoorBlock.FACING)))).toList()) {
                 OutlineLines.line(pose, lines, x + e.x1() / 16, y + e.y1() / 16, z + e.z1() / 16,
                         x + e.x2() / 16, y + e.y2() / 16, z + e.z2() / 16, 0F, 0F, 0F, ALPHA);
             }

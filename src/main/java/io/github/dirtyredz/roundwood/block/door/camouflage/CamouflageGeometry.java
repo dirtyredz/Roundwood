@@ -44,7 +44,7 @@ public final class CamouflageGeometry {
 
     static {
         for (DoorDesign design : DoorDesign.values()) {
-            CORNERS.put(design, PixelCircle.rasterize(design.width(), DoorDesign.HEIGHT, (u, v) -> inCorner(design, u, v)).stream()
+            CORNERS.put(design, PixelCircle.rasterize(design.width(), design.height(), (u, v) -> inCorner(design, u, v)).stream()
                     .map(rect -> rect.extrude(BACK, FRONT)).toList());
         }
     }
@@ -54,7 +54,7 @@ public final class CamouflageGeometry {
 
     /** True when pixel (u, v) of the door's rectangle is a corner pixel (inside the rectangle, outside the leaf). */
     public static boolean inCorner(DoorDesign design, int u, int v) {
-        return u >= 0 && v >= 0 && u < design.width() && v < DoorDesign.HEIGHT && !design.inLeaf(u, v);
+        return u >= 0 && v >= 0 && u < design.width() && v < design.height() && !design.inLeaf(u, v);
     }
 
     /** All the design's corners as assembly-coordinate boxes. */

@@ -38,9 +38,23 @@ public class DoorItemModelProvider extends ItemModelProvider {
         for (DoorDesign design : DoorDesign.values()) {
             ItemModelBuilder template = getBuilder(template(design))
                     .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + DoorModelProvider.template(design, DoorHingeSide.LEFT))));
+            if (design.doubleLeaf()) {
+                var pieces = new java.util.ArrayList<io.github.dirtyredz.roundwood.geometry.Piece>();
+                for (DoorHingeSide side : DoorHingeSide.values()) for (var p : DoorGeometry.leaf(design, side))
+                    pieces.add(new io.github.dirtyredz.roundwood.geometry.Piece(p.box().translate(-16, -16, 0), p.texture()));
+                template = getBuilder(template(design));
+                io.github.dirtyredz.roundwood.data.client.GeometryModelWriter.addPieces(template, pieces, false,
+                        new io.github.dirtyredz.roundwood.data.client.GeometryModelWriter.FaceStyle() {
+                            @Override public float[] uv(io.github.dirtyredz.roundwood.geometry.Piece piece,
+                                    io.github.dirtyredz.roundwood.geometry.Box part, net.minecraft.core.Direction face) {
+                                return DoorGeometry.PANEL.equals(piece.texture()) ? io.github.dirtyredz.roundwood.geometry.AssemblyFaceUv.of(
+                                        part.translate(16, 16, 0), face, 48) : null;
+                            }
+                        });
+            }
             // The leaf's middle, in model pixels.
-            ItemModelTransforms.assembly(template, new Vector3f(design.width() / 2F, DoorDesign.HEIGHT / 2F,
-                    (float) DoorGeometry.PIVOT_Z));
+            ItemModelTransforms.assembly(template, new Vector3f(design.width() / 2F - (design.doubleLeaf() ? 16 : 0), design.height() / 2F - (design.doubleLeaf() ? 16 : 0),
+                    (float) DoorGeometry.PIVOT_Z), Math.max(32, design.width()), design.height());
             getBuilder(design.id()).parent(template)
                     .texture(DoorGeometry.PANEL, modLoc(DoorModelProvider.OAK_PANEL))
                     .texture(DoorGeometry.BRASS, modLoc("block/brass"))

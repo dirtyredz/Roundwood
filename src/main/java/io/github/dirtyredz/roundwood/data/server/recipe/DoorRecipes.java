@@ -36,5 +36,10 @@ public final class DoorRecipes {
                 .group(Roundwood.MOD_ID + ":arched_door")
                 .unlockedBy("has_planks", unlock)
                 .save(writer);
+        ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModItems.DOUBLE_ARCHED_DOOR.get())
+                .pattern("PNP").pattern("PPP").pattern("PNP")
+                .define('P', ItemTags.PLANKS).define('N', Items.GOLD_NUGGET)
+                .group(Roundwood.MOD_ID + ":double_arched_door")
+                .unlockedBy("has_planks", unlock).save(writer);
     }
 }

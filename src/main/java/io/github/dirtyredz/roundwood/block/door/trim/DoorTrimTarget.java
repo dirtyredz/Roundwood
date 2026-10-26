@@ -33,7 +33,7 @@ public final class DoorTrimTarget {
             return Optional.empty();
         }
         AttachmentFace face = AttachmentFace.at(local.z, DoorTrimGeometry.MIDDLE);
-        if (!state.getValue(DoorBlock.OPEN) || DoorTrimGeometry.inTargetDepth(face, local.z)) {
+        if (!state.getValue(DoorBlock.OPEN) || DoorTrimGeometry.inTargetDepth(face, local.z, DoorLayout.depthOf(state).offset())) {
             return Optional.of(face);
         }
         return Optional.empty();

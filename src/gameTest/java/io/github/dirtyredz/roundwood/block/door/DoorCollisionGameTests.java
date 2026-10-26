@@ -138,7 +138,7 @@ public final class DoorCollisionGameTests {
                 check(!free(helper, new AABB(point(assembly, slab - 0.02, 0.98, 0.4), point(assembly, slab + 0.02, 1.02, 0.6))),
                         name + ": hinge-side slab missing");
                 // The non-hinge column has no shape at all, in either row.
-                for (DoorLayout.Part part : DoorLayout.Part.values()) {
+                for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
                     if (part.column != hingeColumn(assembly)) {
                         BlockPos pos = assembly.pos(part);
                         BlockState state = helper.getLevel().getBlockState(pos);

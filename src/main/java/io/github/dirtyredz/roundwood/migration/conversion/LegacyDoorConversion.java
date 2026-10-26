@@ -42,7 +42,7 @@ public final class LegacyDoorConversion {
             return LegacyCells.Result.DEFERRED;
         }
         Map<DoorLayout.Part, BlockState> cells = new EnumMap<>(DoorLayout.Part.class);
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
             BlockState cell = level.getBlockState(assembly.pos(part));
             if (!assembly.isPart(cell, legacy, part) && !assembly.isPart(cell, canonical, part)) {
                 return LegacyCells.Result.INCOMPLETE;

@@ -40,6 +40,8 @@ public final class ModItems {
             () -> new RoundDoorItem(ModBlocks.roundDoor(), new Item.Properties()));
     public static final RegistryObject<RoundDoorItem> ARCHED_DOOR = ITEMS.register("arched_door",
             () -> new RoundDoorItem(ModBlocks.archedDoor(), new Item.Properties()));
+    public static final RegistryObject<RoundDoorItem> DOUBLE_ARCHED_DOOR = ITEMS.register("double_arched_door",
+            () -> new RoundDoorItem(ModBlocks.doubleArchedDoor(), new Item.Properties()));
     private static final Map<WindowDesign, RegistryObject<RoundWindowItem>> WINDOWS = registerWindows();
     public static final RegistryObject<RoundWindowItem> ROUND_WINDOW = WINDOWS.get(WindowDesign.plain(WindowProfile.ROUND));
     public static final RegistryObject<RoundWindowItem> ROUND_WINDOW_ARCH_LEFT = WINDOWS.get(WindowDesign.plain(WindowProfile.ARCH_LEFT));
@@ -110,6 +112,7 @@ public final class ModItems {
         List<Item> out = new ArrayList<>();
         out.add(ROUND_DOOR.get());
         out.add(ARCHED_DOOR.get());
+        out.add(DOUBLE_ARCHED_DOOR.get());
         out.addAll(windows());
         out.addAll(archPieces());
         out.add(ROUND_TRIM.get());

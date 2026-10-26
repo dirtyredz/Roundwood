@@ -54,7 +54,7 @@ public final class DoorInteractionGameTests {
             DoorLayout.Assembly assembly = place(helper, "click_" + hinge, hinge);
             ServerPlayer player = player(helper, "clicker_" + hinge, GameType.SURVIVAL, Direction.NORTH);
             boolean open = false;
-            for (DoorLayout.Part part : DoorLayout.Part.values()) {
+            for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
                 InteractionResult result = click(helper, player, rel(helper, assembly.pos(part)));
                 check(result.consumesAction(), hinge + ": click on " + part + " was not handled: " + result);
                 open = !open;
@@ -90,7 +90,7 @@ public final class DoorInteractionGameTests {
     @GameTest(template = TEMPLATE)
     public static void redstoneOnAnySinglePartDrivesTheAssembly(GameTestHelper helper) {
         DoorLayout.Assembly assembly = place(helper, "redstone");
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
             BlockPos behind = rel(helper, assembly.pos(part)).north(); // the free side of the cell
             helper.setBlock(behind, Blocks.REDSTONE_BLOCK);
             assertAssembly(helper, assembly, oakDoor(), true);

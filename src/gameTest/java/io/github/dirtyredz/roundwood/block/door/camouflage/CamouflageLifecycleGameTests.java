@@ -219,7 +219,7 @@ public final class CamouflageLifecycleGameTests {
         ServerPlayer player = player(helper, "camo_chunks", GameType.SURVIVAL, Direction.NORTH);
         check(placeDoor(helper, player, oakDoor().asItem(), anchor).consumesAction(), "placement failed");
         anchorEntity(helper, assembly).setCamouflage(paidStone());
-        for (DoorLayout.Part part : DoorLayout.Part.values()) {
+        for (DoorLayout.Part part : DoorLayout.Part.of(io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND)) {
             BlockPos pos = assembly.pos(part);
             BlockPos resolved = DoorLayout.of(pos, helper.getLevel().getBlockState(pos)).anchor();
             check(resolved.equals(assembly.anchor()), part + " resolves anchor " + resolved + ", expected " + assembly.anchor());

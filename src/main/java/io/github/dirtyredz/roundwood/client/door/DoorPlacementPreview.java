@@ -73,7 +73,30 @@ public final class DoorPlacementPreview {
             VertexConsumer lines = event.getMultiBufferSource().getBuffer(RenderType.lines());
             draw(pose, lines, origin, DoorPlacementOutline.footprint(plan.assembly()), CELLS);
             draw(pose, lines, origin, DoorPlacementOutline.silhouette(plan.assembly(), plan.anchorState().getValue(net.minecraft.world.level.block.DoorBlock.OPEN)), LEAF);
-            draw(pose, lines, origin, List.of(DoorPlacementOutline.hingeAxis(plan.assembly())), HINGE);
+            draw(pose, lines, origin, DoorPlacementOutline.hingeAxes(plan.assembly()), HINGE);
+            if (plan.assembly().design() != io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ARCHED) {
+                var hit = event.getTarget();
+                var face = hit.getDirection();
+                var base = Vec3.atLowerCornerOf(hit.getBlockPos());
+                double plane = hit.getLocation().subtract(base).get(face.getAxis()) + face.getAxisDirection().getStep() * .002;
+                for (var depth : io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.values()) {
+                    var zone = depth.zone(plan.assembly().facing(), face);
+                    Vec3[] points = new Vec3[4];
+                    for (int i = 0; i < 4; i++) {
+                        double u = i == 1 || i == 2 ? zone.maxU() : zone.minU(), v = i >= 2 ? zone.maxV() : zone.minV();
+                        points[i] = (switch (face.getAxis()) {
+                            case X -> new Vec3(plane, v, u);
+                            case Y -> new Vec3(u, plane, v);
+                            case Z -> new Vec3(u, v, plane);
+                        }).add(base).subtract(camera);
+                    }
+                    float brightness = depth == plan.assembly().depth() ? 1 : .35F;
+                    for (int i = 0; i < 4; i++) {
+                        Vec3 a = points[i], b = points[(i + 1) % 4];
+                        OutlineLines.line(pose, lines, a.x, a.y, a.z, b.x, b.y, b.z, brightness, brightness, brightness, .9F);
+                    }
+                }
+            }
         });
     }
 
