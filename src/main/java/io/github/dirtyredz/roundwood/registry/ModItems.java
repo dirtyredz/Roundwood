@@ -1,6 +1,8 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceItem;
+import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayItem;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.attachment.item.ArchSillTrimItem;
@@ -41,6 +43,7 @@ public final class ModItems {
     public static final RegistryObject<RoundWindowItem> ROUND_WINDOW_ARCH_LEFT = WINDOWS.get(WindowDesign.plain(WindowProfile.ARCH_LEFT));
     public static final RegistryObject<RoundWindowItem> ROUND_WINDOW_ARCH_RIGHT = WINDOWS.get(WindowDesign.plain(WindowProfile.ARCH_RIGHT));
     private static final Map<ArchwayDesign, RegistryObject<ArchwayItem>> ARCHWAYS = registerArchways();
+    private static final Map<ArchPieceDesign, RegistryObject<ArchPieceItem>> ARCH_PIECES = registerArchPieces();
     public static final RegistryObject<UniversalTrimItem> ROUND_TRIM = ITEMS.register(UniversalTrimItem.ID,
             () -> new UniversalTrimItem(ModBlocks.roundTrim(), new Item.Properties()));
     public static final RegistryObject<ArchSillTrimItem> ARCH_SILL_TRIM = ITEMS.register(ArchSillTrimItem.ID,
@@ -69,6 +72,16 @@ public final class ModItems {
         }
         return Collections.unmodifiableMap(out);
     }
+
+    private static Map<ArchPieceDesign, RegistryObject<ArchPieceItem>> registerArchPieces() {
+        Map<ArchPieceDesign, RegistryObject<ArchPieceItem>> out = new LinkedHashMap<>();
+        for (ArchPieceDesign design : ArchPieceDesign.values()) {
+            out.put(design, ITEMS.register(design.id(), () -> new ArchPieceItem(ModBlocks.archPiece(design), new Item.Properties())));
+        }
+        return Collections.unmodifiableMap(out);
+    }
+    public static ArchPieceItem archPiece(ArchPieceDesign design) { return ARCH_PIECES.get(design).get(); }
+    public static List<Item> archPieces() { return ARCH_PIECES.values().stream().map(e -> (Item) e.get()).toList(); }
 
     /** The archway item with {@code design}. */
     public static ArchwayItem archway(ArchwayDesign design) {

@@ -1,6 +1,8 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlock;
+import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.block.door.adapter.ArchedDoorBlock;
@@ -48,6 +50,7 @@ public final class ModBlocks {
     private static final Map<WindowDesign, RegistryObject<WindowPaneBlock>> WINDOWS = registerWindows();
     /** The static 2 x 2 archways (0.12.0), ordinary then keyhole. */
     private static final Map<ArchwayDesign, RegistryObject<ArchwayBlock>> ARCHWAYS = registerArchways();
+    private static final Map<ArchPieceDesign, RegistryObject<ArchPieceBlock>> ARCH_PIECES = registerArchPieces();
     public static final RegistryObject<RoundTrimBlock> ROUND_TRIM = BLOCKS.register("round_trim",
             () -> new RoundTrimBlock(trimProperties(), ModBlockEntities::roundTrim));
 
@@ -74,6 +77,18 @@ public final class ModBlocks {
         }
         return Collections.unmodifiableMap(out);
     }
+
+    private static Map<ArchPieceDesign, RegistryObject<ArchPieceBlock>> registerArchPieces() {
+        Map<ArchPieceDesign, RegistryObject<ArchPieceBlock>> out = new LinkedHashMap<>();
+        for (ArchPieceDesign design : ArchPieceDesign.values()) {
+            out.put(design, BLOCKS.register(design.id(), () -> new ArchPieceBlock(archwayProperties(), design, ModBlockEntities::archPiece)));
+        }
+        return Collections.unmodifiableMap(out);
+    }
+
+    public static ArchPieceBlock archPiece(ArchPieceDesign design) { return ARCH_PIECES.get(design).get(); }
+    /** New modular products; kept separate from advertised content until the content batch. */
+    public static List<ArchPieceBlock> archPieces() { return ARCH_PIECES.values().stream().map(RegistryObject::get).toList(); }
 
     public static RoundDoorBlock roundDoor() {
         return ROUND_DOOR.get();

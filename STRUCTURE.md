@@ -12,6 +12,14 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
   historical acceptance masks and modular profile/composition tests.
 - `src/main/java/io/github/dirtyredz/roundwood/block/arch/geometry/` owns modular
   product dimensions, pure semicircle profiles and cell-clipped body/surface geometry.
+- `src/main/java/io/github/dirtyredz/roundwood/block/arch/adapter/` owns the modular
+  block/item callbacks and distinct `arch_piece` anchor entity.
+- `src/main/java/io/github/dirtyredz/roundwood/block/arch/assembly/` owns variable
+  cell identity, layouts, targeting and placement proposals over shared assembly services.
+- `src/main/java/io/github/dirtyredz/roundwood/block/arch/appearance/` adapts typed
+  anchor lookup and whole-piece appearance targets; fitting/routing follows in part 2.
+- `src/test/java/io/github/dirtyredz/roundwood/block/arch/assembly/` holds pure
+  layout, rotation and targeting tests.
 
 - `.github/` - synced workflows and `actions/setup-mod-build/` Java/Gradle composite (checkout bootstraps it).
 - `.ci/` - per-mod `mod.json` plus synced Node `scripts/` for verification, assets, GameTest completion and publication.

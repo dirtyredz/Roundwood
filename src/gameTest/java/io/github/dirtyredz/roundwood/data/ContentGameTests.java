@@ -53,10 +53,8 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 
 /**
- * Registrations, tags, recipes, loot and the creative tab, as loaded by a dedicated server: 31
- * canonical blocks (round and (0.11.0) arched door, 26 windows, (0.12.0) the two archways, round trim), 32 advertised items (0.9.0: the Universal Trim is
- * {@code round_trim}; 0.10.0: the Arch Sill, an item only), 49 hidden 0.4.0 aliases that keep their
- * looks, the hidden 0.8.0 window trim (an item only), and nothing else.
+ * Loaded registrations and advertised content. Modular arches are registered separately until
+ * their content batch; the historical advertised lists and resource guards still apply here.
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -68,8 +66,17 @@ public final class ContentGameTests {
     public static void canonicalEntriesAndFortyNineHiddenAliasesAreRegistered(GameTestHelper helper) {
         long blocks = ForgeRegistries.BLOCKS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         long items = ForgeRegistries.ITEMS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(blocks == 80, "expected 18 + 13 + 49 blocks, found " + blocks);
-        check(items == 83, "expected 18 + two attachments + 13 + 49 + the window trim items, found " + items);
+        check(blocks == 84, "expected 18 + 4 modular + 13 + 49 blocks, found " + blocks);
+        check(items == 87, "expected 18 + 4 modular + two attachments + 13 + 49 + the window trim items, found " + items);
+        for (String id : List.of("arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder")) {
+            Block block = ForgeRegistries.BLOCKS.getValue(id(id));
+            Item item = ForgeRegistries.ITEMS.getValue(id(id));
+            check(block instanceof io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlock
+                    && item instanceof io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceItem
+                    && block.asItem() == item, "modular registration " + id);
+            check(ModBlockEntities.archPiece().isValid(block.defaultBlockState()), "modular anchor type " + id);
+            check(!ModBlockEntities.archway().isValid(block.defaultBlockState()), "modular piece reused old anchor type " + id);
+        }
         for (String id : CANONICAL_BLOCKS) {
             check(ForgeRegistries.BLOCKS.containsKey(id(id)) && ForgeRegistries.ITEMS.containsKey(id(id)), "missing " + id);
             check(ForgeRegistries.BLOCKS.getValue(id(id)).asItem() == ForgeRegistries.ITEMS.getValue(id(id)), id + ": item mapping");

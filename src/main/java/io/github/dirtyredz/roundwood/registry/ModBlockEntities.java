@@ -1,6 +1,8 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlock;
+import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlockEntity;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
@@ -49,6 +51,13 @@ public final class ModBlockEntities {
 
     private ModBlockEntities() {
     }
+
+    @SuppressWarnings("DataFlowIssue")
+    public static final RegistryObject<BlockEntityType<ArchPieceBlockEntity>> ARCH_PIECE = BLOCK_ENTITIES.register("arch_piece",
+            () -> BlockEntityType.Builder.of((pos, state) -> new ArchPieceBlockEntity(archPiece(), pos, state),
+                    blocksOf(ArchPieceBlock.class)).build(null));
+
+    public static BlockEntityType<ArchPieceBlockEntity> archPiece() { return ARCH_PIECE.get(); }
 
     public static BlockEntityType<ArchwayBlockEntity> archway() {
         return ARCHWAY.get();

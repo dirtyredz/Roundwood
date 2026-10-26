@@ -17,6 +17,17 @@ bearing spring joints and shoulder levels 8/12/16, clipped to actual solid pixel
 It supplies no material policy and no overlay faces. The later baker partitions
 donor and mortar surfaces for bodies, casings and items from this same layout.
 
+`ArchPieceLayout.Assembly` implements the shared assembly contract, anchored at
+the lower-left cell. Membership includes exact block/product, facing, cell and
+side. `ArchPieceBlock` delegates lifecycle callbacks to `AssemblyIntegrity`,
+`AssemblyRemoval` and `AssemblyHarvest`; no external floor is required. Only the
+anchor carries the distinct `arch_piece` entity, extending shared appearance
+persistence. `ArchPieceAppearance` uses shared anchor lookup and appearance targets.
+The four registrations have separate `archPieces()` enumerations; part 3 switches
+advertised content when resources and recipes are ready. `archways()` remains the
+old two designs. Command-created cell states outside a product's dimensions are
+inert and removed without looking up or tearing down a neighbouring assembly.
+
 ## Door assembly
 
 There are two door designs (`leaf/DoorDesign`: ROUND, ARCHED; see "The arched door" below). This
