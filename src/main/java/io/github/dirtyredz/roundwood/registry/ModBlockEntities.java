@@ -22,7 +22,8 @@ import net.minecraftforge.registries.RegistryObject;
  * anchors the arched door since 0.11.0),
  * the window's and the trim's. Each is valid for its canonical block(s) and that family's hidden
  * 0.4.0 aliases, so saved entities load into unconverted blocks. The window entity (id
- * {@code round_window}) serves all 26 canonical windows and the fifteen window aliases.
+ * {@code round_window}) serves 13 plain and 13 retired crossed windows and fifteen window aliases.
+ * Modular pieces use the distinct {@code arch_piece} type, separate from historical archways.
  */
 public final class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =

@@ -35,8 +35,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The 18 canonical blocks and 13 retained crossed windows. Canonical window lists expose only
- * plain profiles; CrossWindowCompatibility owns retired discovery and hidden-content aggregation.
+ * The 18 currently advertised/compatibility base blocks, four staged modular arches and 13 retained
+ * crossed windows. Canonical window lists expose only plain profiles; CrossWindowCompatibility
+ * owns retired discovery and hidden-content aggregation.
  */
 public final class ModBlocks {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Roundwood.MOD_ID);
@@ -46,7 +47,7 @@ public final class ModBlocks {
     /** The 1 x 2 arched door (0.11.0); its anchor entity is the round door's type. */
     public static final RegistryObject<ArchedDoorBlock> ARCHED_DOOR = BLOCKS.register(DoorDesign.ARCHED.id(),
             () -> new ArchedDoorBlock(doorProperties(), BlockSetType.OAK, ModBlockEntities::roundDoor));
-    /** The 26 windows by design, in creative order (each plain piece, then its crossed variant). */
+    /** The 13 plain windows and their 13 retained crossed variants, keyed by design. */
     private static final Map<WindowDesign, RegistryObject<WindowPaneBlock>> WINDOWS = registerWindows();
     /** The static 2 x 2 archways (0.12.0), ordinary then keyhole. */
     private static final Map<ArchwayDesign, RegistryObject<ArchwayBlock>> ARCHWAYS = registerArchways();
@@ -126,12 +127,12 @@ public final class ModBlocks {
         return WINDOWS.get(design).get();
     }
 
-    /** All 26 canonical windows, in creative order. */
+    /** All 13 plain windows, in creative order. */
     public static List<WindowPaneBlock> windows() {
         return WINDOWS.entrySet().stream().filter(e -> e.getKey().pattern() == WindowPattern.PLAIN).map(e -> e.getValue().get()).toList();
     }
 
-    /** The 24 oriented windows (every piece but the round window, plain and crossed). */
+    /** The 12 plain oriented windows (every profile but the round window). */
     public static List<OrientedWindowBlock> orientedWindows() {
         return windows().stream().filter(OrientedWindowBlock.class::isInstance).map(OrientedWindowBlock.class::cast).toList();
     }
@@ -184,8 +185,8 @@ public final class ModBlocks {
     }
 
     /**
-     * A static archway (0.12.0): oak planks' hardness, sound, tool and map colour; its jambs and crown
-     * collide, but it never occludes (light and neighbours show through the passage), carries no
+     * Static arch-family material properties: oak planks' hardness, sound, tool and map colour.
+     * Product geometry supplies collision. It never occludes, carries no
      * redstone, and a multi-cell assembly cannot be pushed.
      */
     public static BlockBehaviour.Properties archwayProperties() {

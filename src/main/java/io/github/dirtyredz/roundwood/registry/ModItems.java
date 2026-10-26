@@ -29,7 +29,8 @@ import java.util.Map;
 /**
  * Twenty advertised items: two doors, thirteen plain profiles, two archways and three attachments.
  * The window map also retains the thirteen hidden crossed items. Frozen aliases and window_trim
- * remain registered by LegacyContent. Looks travel in stack data.
+ * remain registered by LegacyContent. Four modular products are registered separately until the
+ * content batch advertises them. Looks travel in stack data.
  */
 public final class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Roundwood.MOD_ID);
@@ -98,12 +99,12 @@ public final class ModItems {
         return WINDOWS.get(design).get();
     }
 
-    /** The 26 window items, in creative order. */
+    /** The 13 plain window items, in creative order. */
     public static List<Item> windows() {
         return WINDOWS.entrySet().stream().filter(e -> e.getKey().pattern() == WindowPattern.PLAIN).map(e -> (Item) e.getValue().get()).toList();
     }
 
-    /** The advertised items in creative order: the two doors, the 26 windows, the two archways, the Universal Trim, the Arch Sill. */
+    /** The advertised items: two doors, 13 windows, two archways and three attachments. */
     public static List<Item> all() {
         List<Item> out = new ArrayList<>();
         out.add(ROUND_DOOR.get());

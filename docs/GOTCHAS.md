@@ -140,7 +140,8 @@
   0.4.0 content; old items in containers are not renamed (they place canonical blocks).
 - **Structure templates in GameTests sit one block up and lose their scheduled ticks**: the framework
   clears block ticks in the area after placing, and places a template at the
-  helper's origin plus (0, 1, 0), so template y 1 is `helper` y 2 (`legacy_v040` tests).
+  helper's origin plus (0, 1, 0), so template y 1 is `helper` y 2 (`legacy_v040` and
+  `archways_v0133` tests). Tests that build their own floor do not have this offset.
 - **GameTest drop counts must be look-specific.** Every family is one item now, so tests that count
   drops use a look no other test drops (`DoorFixtures.dropped(helper, item, appearance)`).
 - **Empty corners are only targetable with a block item in hand.** The target shape (`getShape`)

@@ -122,10 +122,11 @@ public final class ArchPieceLifecycleGameTests {
     public static void historicalFixtureKeepsItsIdsPartsAndKnownAppearancePayloads(GameTestHelper helper) {
         helper.runAfterDelay(3, () -> {
             for (var design : ArchwayDesign.values()) {
-                BlockPos pos = helper.absolutePos(new BlockPos(design == ArchwayDesign.ORDINARY ? 1 : 5, 1, 1));
+                // GameTest places template y=1 at helper y=2 (as in the older migration fixtures).
+                BlockPos pos = helper.absolutePos(new BlockPos(design == ArchwayDesign.ORDINARY ? 1 : 5, 2, 1));
                 var block = ModBlocks.archway(design);
                 var state = helper.getLevel().getBlockState(pos);
-                check(state.is(block), "historical id changed");
+                check(state.is(block), "historical id changed: " + state + " at " + pos);
                 check(ArchwayLayout.of(pos, state).complete(helper.getLevel(), block), "historical parts changed");
                 check(helper.getLevel().getBlockEntity(pos) instanceof ArchwayBlockEntity, "historical entity type changed");
                 var entity = (ArchwayBlockEntity) helper.getLevel().getBlockEntity(pos);
