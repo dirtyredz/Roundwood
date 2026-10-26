@@ -77,6 +77,6 @@ public class RoundwoodBlockLoot extends BlockLootSubProvider {
 
     @Override
     protected Iterable<Block> getKnownBlocks() {
-        return Stream.of(ModBlocks.canonical().stream(), ModBlocks.archPieces().stream(), LegacyContent.blocks().stream()).flatMap(stream -> stream).map(block -> (Block) block).toList();
+        return Stream.of(ModBlocks.canonical().stream(), LegacyContent.blocks().stream()).flatMap(stream -> stream).map(block -> (Block) block).toList();
     }
 }

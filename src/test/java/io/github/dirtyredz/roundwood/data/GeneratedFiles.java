@@ -48,7 +48,7 @@ final class GeneratedFiles {
     static final List<String> ARCHWAYS = List.of("archway", "keyhole_archway");
     static final List<String> PLAIN_WINDOWS = WINDOWS.stream().filter(id -> !id.endsWith("_cross")).toList();
     static final List<String> RETIRED = WINDOWS.stream().filter(id -> id.endsWith("_cross")).toList();
-    static final List<String> CANONICAL = Stream.of(List.of("round_door", "arched_door"), PLAIN_WINDOWS, ARCHWAYS, List.of("round_trim"))
+    static final List<String> CANONICAL = Stream.of(List.of("round_door", "arched_door"), PLAIN_WINDOWS, ARCH_PIECES, List.of("round_trim"))
             .flatMap(List::stream).toList();
     /** window_trim is an item only. */
     static final String WINDOW_TRIM = "window_trim";
@@ -58,7 +58,7 @@ final class GeneratedFiles {
     static final List<String> UPPER_ARCHES = List.of("round_window_arch_left", "round_window_arch_left_cross",
             "round_window_arch_right", "round_window_arch_right_cross");
     static final List<String> ALIASES = ModelExpectations.aliases();
-    static final List<String> BLOCKS = Stream.of(CANONICAL, ALIASES, RETIRED).flatMap(List::stream).toList();
+    static final List<String> BLOCKS = Stream.of(CANONICAL, ALIASES, RETIRED, ARCHWAYS).flatMap(List::stream).toList();
     static final List<String> PARTS = ModelExpectations.PARTS;
     static final Set<String> ALLOWED_NAMESPACES = Set.of("minecraft", "roundwood", "forge");
     static final Pattern NAMESPACED = Pattern.compile("\"#?([a-z0-9_.-]+):[a-z0-9_./-]+\"");
@@ -87,7 +87,7 @@ final class GeneratedFiles {
         if (id.endsWith("_round_door") || id.equals("round_door")) {
             return "round_door";
         }
-        if (WINDOWS.contains(id) || ARCHWAYS.contains(id)) {
+        if (WINDOWS.contains(id) || ARCHWAYS.contains(id) || ARCH_PIECES.contains(id)) {
             return id;
         }
         return id.endsWith("_round_window") ? "round_window" : "round_trim";

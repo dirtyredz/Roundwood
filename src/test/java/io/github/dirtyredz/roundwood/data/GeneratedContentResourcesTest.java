@@ -107,6 +107,10 @@ class GeneratedContentResourcesTest {
             assertEquals(Set.of("roundwood:archway", "roundwood:keyhole_archway"),
                     tagValues(tags.resolve(kind + "/archways.json")), kind + " archways");
         }
+        for (String kind : List.of("blocks", "items")) {
+            assertEquals(ARCH_PIECES.stream().map(id -> "roundwood:" + id).collect(java.util.stream.Collectors.toSet()),
+                    tagValues(tags.resolve(kind + "/arch_pieces.json")), kind + " modular pieces");
+        }
         assertEquals(Set.of("roundwood:round_trim"), tagValues(tags.resolve("blocks/round_trims.json")), "block trims");
         assertEquals(Set.of("roundwood:round_trim", "roundwood:window_trim"),
                 tagValues(tags.resolve("items/round_trims.json")), "item trims");
@@ -125,13 +129,14 @@ class GeneratedContentResourcesTest {
             }
             boolean window = WINDOWS.contains(block) || block.endsWith("_round_window");
             boolean door = block.equals("round_door") || block.equals("arched_door") || block.endsWith("_round_door");
-            boolean archway = ARCHWAYS.contains(block);
+            boolean piece = ARCH_PIECES.contains(block);
+            boolean archway = ARCHWAYS.contains(block) || piece;
             boolean upperArch = UPPER_ARCHES.contains(block);
             assertEquals(upperArch ? 6 : window ? 4 : door || archway ? 3 : 1, pools.size(), block);
             assertEquals(JsonParser.parseString(ownItemPool("roundwood:" + family(block))), pools.get(0), block);
             if (window || door || archway) {
                 String item = "roundwood:round_trim";
-                String tag = archway ? "ArchwayTrim" : window ? "WindowTrim" : "DoorTrim";
+                String tag = piece ? "ArchPieceTrim" : archway ? "ArchwayTrim" : window ? "WindowTrim" : "DoorTrim";
                 assertEquals(JsonParser.parseString(trimFacePool("front", item, tag + ".Front")), pools.get(1), block + ": front trim pool");
                 assertEquals(JsonParser.parseString(trimFacePool("back", item, tag + ".Back")), pools.get(2), block + ": back trim pool");
             }
@@ -158,6 +163,11 @@ class GeneratedContentResourcesTest {
         JsonObject lang = json(assets("lang/en_us.json"));
         assertEquals("Round Door", lang.get("block.roundwood.round_door").getAsString());
         assertEquals("Arched Door", lang.get("block.roundwood.arched_door").getAsString());
+        for (String id : ARCH_PIECES) {
+            assertEquals(id.equals("keyhole_shoulder") ? "Keyhole Shoulder" : "Arch Top " + id.substring(9),
+                    lang.get("block.roundwood." + id).getAsString());
+        }
+        assertTrue(lang.has("tooltip.roundwood.arch_piece") && lang.has("tooltip.roundwood.retired_archway"));
         assertEquals("Archway", lang.get("block.roundwood.archway").getAsString());
         assertEquals("Keyhole Archway", lang.get("block.roundwood.keyhole_archway").getAsString());
         List<String> windowNames = List.of("Round Window", "Round Window with Cross Beams", "Round Window Arch, Left",

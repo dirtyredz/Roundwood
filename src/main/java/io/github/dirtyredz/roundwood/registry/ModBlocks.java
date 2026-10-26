@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The 18 currently advertised/compatibility base blocks, four staged modular arches and 13 retained
+ * The 20 current base blocks (including the compatibility frame), two retired archways and 13 retained
  * crossed windows. Canonical window lists expose only plain profiles; CrossWindowCompatibility
  * owns retired discovery and hidden-content aggregation.
  */
@@ -89,7 +89,7 @@ public final class ModBlocks {
     }
 
     public static ArchPieceBlock archPiece(ArchPieceDesign design) { return ARCH_PIECES.get(design).get(); }
-    /** New modular products; kept separate from advertised content until the content batch. */
+    /** The four active modular products, in creative order. */
     public static List<ArchPieceBlock> archPieces() { return ARCH_PIECES.values().stream().map(RegistryObject::get).toList(); }
 
     public static RoundDoorBlock roundDoor() {
@@ -143,7 +143,7 @@ public final class ModBlocks {
         return ARCHWAYS.get(design).get();
     }
 
-    /** The canonical archways, ordinary then keyhole. */
+    /** The retired archways, ordinary then keyhole. */
     public static List<ArchwayBlock> archways() {
         return ARCHWAYS.values().stream().map(RegistryObject::get).toList();
     }
@@ -152,12 +152,12 @@ public final class ModBlocks {
         return ROUND_TRIM.get();
     }
 
-    /** The 18 canonical blocks in creative order: two doors, 13 profiles, two archways, trim. */
+    /** The 20 base blocks: two doors, 13 profiles, four arch pieces and the compatibility trim block. */
     public static List<Block> canonical() {
         List<Block> out = new ArrayList<>();
         out.addAll(doors());
         out.addAll(windows());
-        out.addAll(archways());
+        out.addAll(archPieces());
         out.add(roundTrim());
         return List.copyOf(out);
     }

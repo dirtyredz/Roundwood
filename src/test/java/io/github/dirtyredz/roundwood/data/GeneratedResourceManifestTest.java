@@ -34,12 +34,12 @@ class GeneratedResourceManifestTest {
         assertEquals(15, ModelExpectations.aliasWindows().size());
         assertEquals(19, ModelExpectations.aliasTrims().size());
         assertEquals(49, ALIASES.size());
-        assertEquals(18, CANONICAL.size());
+        assertEquals(20, CANONICAL.size());
         assertEquals(26, WINDOWS.size());
         assertEquals(13, PLAIN_WINDOWS.size());
         assertEquals(13, RETIRED.size());
-        assertEquals(80, BLOCKS.size());
-        assertEquals(80, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
+        assertEquals(84, BLOCKS.size());
+        assertEquals(84, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
     }
 
     @Test
@@ -94,8 +94,8 @@ class GeneratedResourceManifestTest {
         assertEquals(84, allJson(assets("blockstates")).size());
         assertEquals(33 + 112, allJson(assets("models/block")).size());
         assertEquals(89, allJson(assets("models/item")).size());
-        assertEquals(20, allJson(data("recipes")).size());
+        assertEquals(22, allJson(data("recipes")).size());
         assertEquals(84, allJson(data("loot_tables/blocks")).size());
-        assertEquals(20, allJson(data("advancements/recipes")).size());
+        assertEquals(22, allJson(data("advancements/recipes")).size());
     }
 }

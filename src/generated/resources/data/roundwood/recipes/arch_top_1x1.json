@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "misc",
-  "group": "roundwood:archway",
+  "group": "roundwood:arch_piece",
   "key": {
     "P": {
       "tag": "minecraft:planks"
@@ -9,11 +9,10 @@
   },
   "pattern": [
     "PPP",
-    "P P",
     "P P"
   ],
   "result": {
-    "item": "roundwood:archway"
+    "item": "roundwood:arch_top_1x1"
   },
   "show_notification": true
 }

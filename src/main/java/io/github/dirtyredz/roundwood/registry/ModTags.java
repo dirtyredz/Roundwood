@@ -20,6 +20,9 @@ public final class ModTags {
     public static final TagKey<Block> ROUND_TRIMS = BlockTags.create(id("round_trims"));
     public static final TagKey<Item> ROUND_TRIM_ITEMS = ItemTags.create(id("round_trims"));
 
+    public static final TagKey<Block> ARCH_PIECES = BlockTags.create(id("arch_pieces"));
+    public static final TagKey<Item> ARCH_PIECE_ITEMS = ItemTags.create(id("arch_pieces"));
+
     private ModTags() {
     }
 

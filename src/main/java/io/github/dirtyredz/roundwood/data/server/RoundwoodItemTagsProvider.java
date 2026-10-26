@@ -31,6 +31,7 @@ public class RoundwoodItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.ROUND_DOOR_ITEMS).add(ModItems.ROUND_DOOR.get(), ModItems.ARCHED_DOOR.get());
         tag(ModTags.ROUND_WINDOW_ITEMS).add(ModItems.windows().toArray(Item[]::new))
                 .add(CrossWindowCompatibility.items().toArray(Item[]::new));
+        tag(ModTags.ARCH_PIECE_ITEMS).add(ModItems.archPieces().toArray(Item[]::new));
         tag(ModTags.ARCHWAY_ITEMS).add(ModItems.archways().toArray(Item[]::new));
         tag(ModTags.ROUND_TRIM_ITEMS).add(ModItems.ROUND_TRIM.get(), LegacyContent.windowTrim());
         tag(ItemTags.DOORS).add(ModItems.ROUND_DOOR.get(), ModItems.ARCHED_DOOR.get());

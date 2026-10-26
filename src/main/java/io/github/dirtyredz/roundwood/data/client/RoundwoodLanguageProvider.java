@@ -36,6 +36,13 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         }
         add(ModBlocks.archway(ArchwayDesign.ORDINARY), "Archway");
         add(ModBlocks.archway(ArchwayDesign.KEYHOLE), "Keyhole Archway");
+        add(ModBlocks.archPiece(io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.TOP_1X1), "Arch Top 1x1");
+        add(ModBlocks.archPiece(io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.TOP_1X2), "Arch Top 1x2");
+        add(ModBlocks.archPiece(io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.TOP_2X3), "Arch Top 2x3");
+        add(ModBlocks.archPiece(io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.KEYHOLE_SHOULDER), "Keyhole Shoulder");
+        add("tooltip.roundwood.arch_piece", "Size is height x width; landing cell is the lower-left anchor; all cells must be dry and clear");
+        add("tooltip.roundwood.keyhole_shoulder", "Aim at the left or right half to choose the shoulder; midpoint chooses left");
+        add("tooltip.roundwood.retired_archway", "Retired archway: converts to modular arch pieces");
         add(ModBlocks.roundTrim(), "Universal Trim");
         add(ModItems.ARCH_SILL_TRIM.get(), "Arch Sill");
         add(ModItems.CROSS_BEAMS.get(), "Cross Beams");
@@ -50,7 +57,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("tooltip.roundwood.unavailable", "Material %s is not installed (shown as oak)");
         add("tooltip.roundwood.restyle", "Restyle placed: planks or dye (doors: sneak + planks)");
         add("tooltip.roundwood.universal_trim",
-                "Trims the clicked face of a window, door or archway; restyle with planks, masonry or dye, remove with shears");
+                "Trims the clicked face of a window, door, arch piece or retired archway; restyle with planks, masonry or dye, remove with shears");
         add("tooltip.roundwood.glass", "Glass: %s");
         add("message.roundwood.aim_at_leaf", "Aim at the door leaf to restyle or paint it");
         add("message.roundwood.masonry_unpaintable", "Masonry trims cannot be painted");

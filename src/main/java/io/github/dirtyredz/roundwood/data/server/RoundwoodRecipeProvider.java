@@ -1,6 +1,6 @@
 package io.github.dirtyredz.roundwood.data.server;
 
-import io.github.dirtyredz.roundwood.data.server.recipe.ArchwayRecipes;
+import io.github.dirtyredz.roundwood.data.server.recipe.ArchPieceRecipes;
 import io.github.dirtyredz.roundwood.data.server.recipe.DoorRecipes;
 import io.github.dirtyredz.roundwood.data.server.recipe.TrimRecipes;
 import io.github.dirtyredz.roundwood.data.server.recipe.WindowRecipes;
@@ -13,9 +13,9 @@ import net.minecraft.tags.ItemTags;
 import java.util.function.Consumer;
 
 /**
- * Coordinates the 32 recipes (0.10.0: split by family under {@code recipe/}): the two doors
- * ({@link DoorRecipes}), the 26 windows ({@link WindowRecipes}), the two archways (0.12.0,
- * {@link ArchwayRecipes}) and the two attachments ({@link TrimRecipes}). Every recipe takes raw materials over any planks (mixed types allowed), so
+ * Coordinates the 22 recipes (0.10.0: split by family under {@code recipe/}): the two doors
+ * ({@link DoorRecipes}), the 13 windows ({@link WindowRecipes}), the four modular arch pieces (0.14.0,
+ * {@link ArchPieceRecipes}) and the three attachments ({@link TrimRecipes}). Every recipe takes raw materials over any planks (mixed types allowed), so
  * no recipe ever consumes a styled object and loses its look; each is unlocked by holding planks. No
  * two shapes match each other's grid, mirrored or moved (the unit and GameTests check). The result
  * is always the default oak object; its look is chosen in the world (planks, dye and, for trims,
@@ -31,7 +31,7 @@ public class RoundwoodRecipeProvider extends RecipeProvider {
         InventoryChangeTrigger.TriggerInstance planks = has(ItemTags.PLANKS);
         DoorRecipes.build(writer, planks);
         WindowRecipes.build(writer, planks);
-        ArchwayRecipes.build(writer, planks);
+        ArchPieceRecipes.build(writer, planks);
         TrimRecipes.build(writer, planks);
     }
 }

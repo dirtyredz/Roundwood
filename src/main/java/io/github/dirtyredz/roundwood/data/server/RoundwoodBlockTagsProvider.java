@@ -34,6 +34,7 @@ public class RoundwoodBlockTagsProvider extends BlockTagsProvider {
         tag(ModTags.ROUND_DOORS).add(ModBlocks.doors().toArray(Block[]::new));
         tag(ModTags.ROUND_WINDOWS).add(ModBlocks.windows().toArray(Block[]::new))
                 .add(CrossWindowCompatibility.blocks().toArray(Block[]::new));
+        tag(ModTags.ARCH_PIECES).add(ModBlocks.archPieces().toArray(Block[]::new));
         tag(ModTags.ARCHWAYS).add(ModBlocks.archways().toArray(Block[]::new));
         tag(ModTags.ROUND_TRIMS).add(ModBlocks.roundTrim());
         List<Block> doors = new ArrayList<>(ModBlocks.doors());

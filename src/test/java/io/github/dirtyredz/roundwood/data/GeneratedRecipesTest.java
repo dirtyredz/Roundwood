@@ -55,19 +55,19 @@ class GeneratedRecipesTest {
     }
 
     @Test
-    void thereAreExactlyTheTwentyRecipes() throws IOException {
+    void thereAreExactlyTheTwentyTwoRecipes() throws IOException {
         assertEquals(new TreeSet<>(List.of("round_door", "arched_door", "round_window", "round_window_arch_left",
                 "round_window_arch_right", "round_window_bottom_left", "round_window_bottom_right",
                 "round_trim",
                 "round_window_arch_bottom_left", "round_window_arch_bottom_right", "round_window_top_left",
                 "round_window_top_right", "round_window_edge_top", "round_window_edge_left",
-                "round_window_edge_bottom", "round_window_edge_right", "arch_sill_trim", "cross_beams", "archway", "keyhole_archway")),
+                "round_window_edge_bottom", "round_window_edge_right", "arch_sill_trim", "cross_beams", "arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder")),
                 recipeNames());
-        assertEquals(20, recipeNames().size());
+        assertEquals(22, recipeNames().size());
     }
 
     @Test
-    void theTwentyRecipesAreExactlyAsDesigned() {
+    void theTwentyTwoRecipesAreExactlyAsDesigned() {
         assertRecipe("cross_beams", "", List.of(" S ", "SSS", " S "), Map.of("S", STICK));
         assertRecipe("round_door", "roundwood:round_door", List.of("PPP", "PNP", "PPP"), Map.of("P", PLANKS, "N", NUGGET));
         assertRecipe("arched_door", "roundwood:arched_door", List.of(" P ", "PNP", "PPP"), Map.of("P", PLANKS, "N", NUGGET));
@@ -99,9 +99,10 @@ class GeneratedRecipesTest {
                 Map.of("P", PLANKS, "G", PANE));
         assertRecipe("arch_sill_trim", "roundwood:arch_sill_trim", List.of("PPP", "S S"),
                 Map.of("P", PLANKS, "S", STICK));
-        assertRecipe("archway", "roundwood:archway", List.of("PPP", "P P", "P P"), Map.of("P", PLANKS));
-        assertRecipe("keyhole_archway", "roundwood:archway", List.of("SPS", "P P", "P P"),
-                Map.of("P", PLANKS, "S", STICK));
+        assertRecipe("arch_top_1x1", "roundwood:arch_piece", List.of("PPP", "P P"), Map.of("P", PLANKS));
+        assertRecipe("arch_top_1x2", "roundwood:arch_piece", List.of("PPP", "P P", " S "), Map.of("P", PLANKS, "S", STICK));
+        assertRecipe("arch_top_2x3", "roundwood:arch_piece", List.of("PPP", "P P", "S S"), Map.of("P", PLANKS, "S", STICK));
+        assertRecipe("keyhole_shoulder", "roundwood:arch_piece", List.of("PP", " P"), Map.of("P", PLANKS));
     }
 
     /**
@@ -123,7 +124,7 @@ class GeneratedRecipesTest {
             }
             grids.put(name, placements);
         }
-        assertEquals(20, grids.size());
+        assertEquals(22, grids.size());
         assertTrue(java.util.Collections.disjoint(grids.get("cross_beams"),
                 placements(List.of("S S", "SSS", "S S"), JsonParser.parseString("{\"S\":" + STICK + "}").getAsJsonObject())),
                 "Cross Beams must not match the vanilla ladder");

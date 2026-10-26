@@ -1,22 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "misc",
-  "group": "roundwood:archway",
+  "group": "roundwood:arch_piece",
   "key": {
     "P": {
       "tag": "minecraft:planks"
-    },
-    "S": {
-      "item": "minecraft:stick"
     }
   },
   "pattern": [
-    "SPS",
-    "P P",
-    "P P"
+    "PP",
+    " P"
   ],
   "result": {
-    "item": "roundwood:keyhole_archway"
+    "item": "roundwood:keyhole_shoulder"
   },
   "show_notification": true
 }

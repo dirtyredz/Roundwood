@@ -15,8 +15,10 @@
     "roundwood:round_window_edge_left",
     "roundwood:round_window_edge_bottom",
     "roundwood:round_window_edge_right",
-    "roundwood:archway",
-    "roundwood:keyhole_archway",
+    "roundwood:arch_top_1x1",
+    "roundwood:arch_top_1x2",
+    "roundwood:arch_top_2x3",
+    "roundwood:keyhole_shoulder",
     "roundwood:round_trim",
     "roundwood:oak_round_door",
     "roundwood:spruce_round_door",
@@ -79,6 +81,8 @@
     "roundwood:round_window_edge_top_cross",
     "roundwood:round_window_edge_left_cross",
     "roundwood:round_window_edge_bottom_cross",
-    "roundwood:round_window_edge_right_cross"
+    "roundwood:round_window_edge_right_cross",
+    "roundwood:archway",
+    "roundwood:keyhole_archway"
   ]
 }

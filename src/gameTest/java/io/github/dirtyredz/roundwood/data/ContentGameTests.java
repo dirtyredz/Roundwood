@@ -1,6 +1,6 @@
 package io.github.dirtyredz.roundwood.data;
 
-import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
+import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
 import io.github.dirtyredz.roundwood.block.attachment.item.ArchSillTrimItem;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.Roundwood;
@@ -190,6 +190,11 @@ public final class ContentGameTests {
                     && !state.is(BlockTags.DOORS) && !state.is(ModTags.ROUND_DOORS) && !new ItemStack(archway).is(ItemTags.DOORS),
                     archway + " archway tags (never a door)");
         }
+        for (Block piece : ModBlocks.archPieces()) {
+            check(piece.defaultBlockState().is(ModTags.ARCH_PIECES) && new ItemStack(piece).is(ModTags.ARCH_PIECE_ITEMS)
+                    && piece.defaultBlockState().is(BlockTags.MINEABLE_WITH_AXE)
+                    && !piece.defaultBlockState().is(BlockTags.DOORS), "modular piece gameplay tags");
+        }
         for (Block alias : LegacyContent.blocks()) {
             if (io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility.isRetired(alias.defaultBlockState())) {
                 check(alias.defaultBlockState().is(ModTags.ROUND_WINDOWS) && new ItemStack(alias).is(ModTags.ROUND_WINDOW_ITEMS), "retired window lost gameplay tags");
@@ -225,7 +230,7 @@ public final class ContentGameTests {
                 "a painting recipe is still loaded");
         long count = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
                 .filter(r -> r.getId().getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(count == 20, "expected 20 roundwood crafting recipes, loaded " + count);
+        check(count == 22, "expected 22 roundwood crafting recipes, loaded " + count);
         ItemStack k = new ItemStack(Items.STICK);
         var ladder = find(level, grid(k, e, k, k, k, k, k, e, k)).orElseThrow();
         check(ladder.assemble(grid(k, e, k, k, k, k, k, e, k), level.registryAccess()).is(Items.LADDER), "beams collided with the vanilla ladder");
@@ -262,8 +267,14 @@ public final class ContentGameTests {
         expectShape(level, ModItems.ARCHED_DOOR.get(), " P ", "PNP", "PPP");
         expectShape(level, ModItems.CROSS_BEAMS.get(), " S ", "SSS", " S ");
         // 0.12.0
-        expectShape(level, ModItems.archway(ArchwayDesign.ORDINARY), "PPP", "P P", "P P");
-        expectShape(level, ModItems.archway(ArchwayDesign.KEYHOLE), "SPS", "P P", "P P");
+        expectShape(level, ModItems.archPiece(ArchPieceDesign.TOP_1X1), "PPP", "P P");
+        expectShape(level, ModItems.archPiece(ArchPieceDesign.TOP_1X2), "PPP", "P P", " S ");
+        expectShape(level, ModItems.archPiece(ArchPieceDesign.TOP_2X3), "PPP", "P P", "S S");
+        expectShape(level, ModItems.archPiece(ArchPieceDesign.KEYHOLE_SHOULDER), "PP", " P");
+        for (Item retired : ModItems.archways()) {
+            check(level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
+                    .noneMatch(recipe -> recipe.getResultItem(level.registryAccess()).is(retired)), "retired archway recipe remains");
+        }
         helper.succeed();
     }
 
@@ -430,6 +441,9 @@ public final class ContentGameTests {
     }
 
     private static void expect(ServerLevel level, TransientCraftingContainer grid, Item result, String what) {
+        var matches = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
+                .filter(candidate -> candidate.matches(grid, level)).toList();
+        check(matches.size() == 1, what + ": expected one matching recipe, got " + matches.stream().map(CraftingRecipe::getId).toList());
         Optional<CraftingRecipe> recipe = find(level, grid);
         check(recipe.isPresent(), what + ": no recipe matched");
         ItemStack out = recipe.get().assemble(grid, level.registryAccess());
