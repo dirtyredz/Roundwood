@@ -6,6 +6,13 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
+- `migration/conversion/ArchwayConversion` replaces historical assemblies atomically; `migration/item/ArchwayStacks`
+  plans lossless stack splits; `migration/ArchwayStackMigration` owns loaded-holder hooks and overflow.
+- `src/gameTest/java/io/github/dirtyredz/roundwood/migration/ArchwayMigrationGameTests.java` guards the historical
+  0.13.3 fixture, queued conversion, counts, looks, trims, refusal and idempotence.
+- `src/main/java/io/github/dirtyredz/roundwood/showcase/section/arch/` owns pieces/compositions;
+  `src/gameTest/java/io/github/dirtyredz/roundwood/showcase/section/arch/` checks them in every facing.
+
 - `src/main/java/io/github/dirtyredz/roundwood/data/client/arch/` emits modular empty world models and full-shape item geometry.
 
 - `src/main/java/io/github/dirtyredz/roundwood/block/arch/trim/` owns modular casing geometry, targeting and adapters over shared attachment storage/fitting.
@@ -29,7 +36,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `src/test/java/io/github/dirtyredz/roundwood/block/arch/assembly/` holds pure
   layout, rotation and targeting tests.
 - `src/gameTest/java/io/github/dirtyredz/roundwood/block/arch/` verifies modular
-  placement, lifecycle and historical fixture preservation. `fixture/ArchPieceFixtures`
+  placement, lifecycle and historical replacement migration and modular walking. `fixture/ArchPieceFixtures`
   supplies production-path hits; `fixture/assembly/ArchPieceFamily` adapts variable
   layouts without adding fixed-index assumptions to historical assembly tests.
 
@@ -52,8 +59,8 @@ src/main/java/.../roundwood/
   block/
     attachment/{storage,host,interaction,item}   face trims shared by every host, anchor entity
     assembly/{placement}                         multi-cell contract and services
-    door/ archway/ trim/ window/                 the families (each with its own subfolders)
-  client/{door,trim,window,archway,render,item,material,camouflage,compat/{emi,jei}}
+    door/ arch/ archway/ trim/ window/                 the families (each with its own subfolders)
+  client/{door,trim,window,arch,archway,render,item,material,camouflage,compat/{emi,jei}}
   data/{client,server}
 src/test/...      mirrors main (pure JUnit)
 src/gameTest/...  mirrors main (Forge GameTests; door/{lifecycle,placement}, window/{design,placement})
@@ -70,9 +77,9 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 - `src/main/java/io/github/dirtyredz/roundwood/migration/block/` — the deprecated alias block adapters (historical default, convert before integrity)
 - `src/main/java/io/github/dirtyredz/roundwood/migration/item/` — retired crossed-stack adapters and checked CrossWindowPlacement shared with the preview
 - `src/main/java/io/github/dirtyredz/roundwood/migration/conversion/` — the per-family conversions (door, frame, window), their shared cell rewrites (`LegacyCells`; windows use checked, lossless `WindowCellConversion` and `WindowCrossConversion`), and the 0.7.0 fitted-frame to door-trim conversion (`DoorTrimConversion`)
-- `src/main/java/io/github/dirtyredz/roundwood/registry/` — deferred registration: the 18 canonical blocks and 20 advertised items, block entities, creative tab, mod tags, the `trim_face` loot condition type
+- `src/main/java/io/github/dirtyredz/roundwood/registry/` — deferred registration: the 20 canonical/compatibility base blocks and 22 advertised items, block entities, creative tab, mod tags, the `trim_face` loot condition type
 - `src/main/java/io/github/dirtyredz/roundwood/block/` — the block families and what they share (grouping only, no code)
-- `src/main/java/io/github/dirtyredz/roundwood/block/archway/` — the archways (0.12.0): the Minecraft adapters (the block, its anchor entity, the item)
+- `src/main/java/io/github/dirtyredz/roundwood/block/archway/` — frozen archway migration sources (0.12.0): historical Minecraft adapters (the block, its anchor entity, the item)
 - `src/main/java/io/github/dirtyredz/roundwood/block/archway/assembly/` — the four-cell archway: part identity, its layout (the shared `Assembly` contract), placement policy and typed plans (integrity and removal are `block/assembly`'s)
 - `src/main/java/io/github/dirtyredz/roundwood/block/archway/geometry/` — the two designs' profiles (ordinary, keyhole), square-filled frame boxes, the cached per-cell shapes
 - `src/main/java/io/github/dirtyredz/roundwood/block/archway/appearance/` — the archway's look through its anchor, and its right-click router
@@ -106,13 +113,13 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 - `src/main/java/io/github/dirtyredz/roundwood/block/window/trim/` — the window as an attachment host: the trim payload and 0.7 adapter, the sill and singleton beam payloads, the shared WindowBeamFitPlan preview/fit decision and slot-aware host adapter and `trimmed` reconcile
 - `src/main/java/io/github/dirtyredz/roundwood/block/window/glass/` — glass colour: the versioned payload, window item stacks, the dye action
 - `src/main/java/io/github/dirtyredz/roundwood/block/window/placement/` — targeted placement: the face-zone classifier and its polygons (one authority), the use-context adapter, round position and arch pose
-- `src/main/java/io/github/dirtyredz/roundwood/showcase/` — the `/roundwood showcase` command, bounded builder, coordinate frame (88 x 6 x 26 content), canvas (samples, appearance placement, labels, wall signs, barrels), `ShowcaseSpacing` (the one gap and row rule, 0.13.1), the listed `ShowcaseWindow` and section registry
+- `src/main/java/io/github/dirtyredz/roundwood/showcase/` — the `/roundwood showcase` command, bounded builder, coordinate frame (88 x 6 x 38 content), canvas (samples, appearance placement, labels, wall signs, barrels), `ShowcaseSpacing` (the one gap and row rule, 0.13.1), the listed `ShowcaseWindow` and section registry
 - `src/main/java/io/github/dirtyredz/roundwood/showcase/section/` — the showcase sections outside the window and door families: the one-of-each pieces row (`PiecesSection`) and the materials wall (`MaterialsSection`, 0.13.1: planks and masonry blocks with wall signs, a dye barrel)
 - `src/main/java/io/github/dirtyredz/roundwood/showcase/section/door/` — the door-family attachment examples (one camouflaged round door, one lever-driven round door)
 - `src/main/java/io/github/dirtyredz/roundwood/showcase/section/window/` — the window configurations in oak (neighbour demos, positions, arches, corners, circle, edges) and the Universal Trim, Arch Sill and Cross Beams examples (`WindowTrimsSection`, `WindowSillsSection`, `WindowMuntinsSection`)
 - `src/main/java/io/github/dirtyredz/roundwood/geometry/` — pixel circles, boxes, the shared ring profile, the round-headed arched profile (`ArchedProfile`), a pixel mask's visible slab (`PixelSlab`), tile-normalised UVs (`FaceUv.tiled`), tiled and whole-assembly face UVs (rectangular mapping too), voxel-shape conversion (shared)
 - `src/main/java/io/github/dirtyredz/roundwood/client/` — client-only mod-bus wiring (`RoundwoodClient`)
-- `src/main/java/io/github/dirtyredz/roundwood/client/archway/` — the archway renderer, its baked frame, casing and item models (0.13.3: tiled donor artwork on every face), the placement preview
+- `src/main/java/io/github/dirtyredz/roundwood/client/archway/` — frozen-source fallback rendering and historical geometry models; retired items are excluded from placement preview
 - `src/main/java/io/github/dirtyredz/roundwood/client/door/` — the door leaf renderer, the door trim renderer, the per-design casing models, the placement preview, appearance leaf models, leaf model names, targeting events, highlight, particles
 - `src/main/java/io/github/dirtyredz/roundwood/client/trim/` — compatibility frame renderer; shared ring models and names live in `client/render/`.
 - `src/main/java/io/github/dirtyredz/roundwood/client/window/` — the appearance-aware window blockstate/item model (frame, glass and beams; WindowBeamModels composition and WindowBeamCulling snapshot coverage), the directly typed item-model cache, WindowBeamPreview and the placement preview/overlay
@@ -130,7 +137,7 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 - `src/main/java/io/github/dirtyredz/roundwood/data/client/window/` — the window models (pane-only visible-surface models per design, pose and combination), their blockstates and item models
 - `src/main/java/io/github/dirtyredz/roundwood/data/client/trim/` — the compatibility frame's blockstate and models, the attachment item models (square frame, sill bar)
 - `src/main/java/io/github/dirtyredz/roundwood/data/server/` — the recipe coordinator, loot (including the attachment loot pools) and tag providers
-- `src/main/java/io/github/dirtyredz/roundwood/data/server/recipe/` — recipe emission per family (door, windows, archways, attachments)
+- `src/main/java/io/github/dirtyredz/roundwood/data/server/recipe/` — recipe emission per family (door, windows, modular arch pieces, attachments)
 - `src/main/resources/` — mods.toml, pack.mcmeta, the generated original textures (checked in)
 - `src/generated/resources/` — datagen output, checked in and packaged (its `.cache/` is ignored and excluded)
 - `src/test/java/io/github/dirtyredz/roundwood/` — pure JUnit tests (`testsupport/` bootstrap shim, `appearance/`, `migration/`, `client/material/`, `geometry/`, `block/assembly/`, `block/attachment/`, `block/attachment/storage/`, `block/attachment/host/`, `block/archway/geometry/`, `block/archway/trim/`, `block/door/leaf/`, `block/door/selection/`, `block/door/camouflage/`, `block/door/trim/`, `block/trim/geometry/`, `block/window/geometry/`, `block/window/geometry/face/`, `block/window/geometry/trim/`, `block/window/interaction/`, `block/window/glass/`, `block/window/placement/`, `block/window/trim/`, `client/window/`, `data/`)
@@ -171,7 +178,7 @@ Per-family `appearance/` and `interaction/` folders (door, archway, window, trim
 | Archway rendering (0.12.0) | `client/archway/ArchwayRenderer`, `ArchwayModels`, `ArchwayPlacementPreview`, `client/render/PixelSlabModels` | The anchor BER drawing each cell's frame and casing pieces with world light; frame, casing and styled item models baked from the design's mask in a tiled donor look on every face (0.13.3: wood/masonry donor sprites or painted window boards; cache keyed by design, layer, cell, facing, look); the preview drawing the plan's frame outline and cells. `PixelSlabModels` is shared with `client/door/DoorTrimModels` |
 | Viewers | `client/compat/emi/*`, `client/compat/jei/*` | EMI/JEI: each item shown once; optional, annotation-discovered, never loaded without the viewer |
 | Showcase | `showcase/*`, `showcase/section/*`, `showcase/section/door/*`, `showcase/section/window/*` | Op-only command; the showcase is one of each piece, the materials wall (planks, masonry, a dye barrel), oak-only window configurations and one example per attachment, every sample four clear blocks from the next (`ShowcaseSpacing`); `ShowcaseSamples` (0.11.0) is the one sample set and sign label shared by canvas and GameTest checks; sections place canonical blocks through production paths with explicit appearances; `ShowcaseWindow` lists each window (design, pose, frame coordinates, looks) so building and the GameTest check read the same list |
-| Datagen | `data/**`, `data/client/door/*` (`DoorModelProvider`, `DoorItemModelProvider`: one leaf template per design and hinge), `data/client/window/*`, `data/client/trim/*` | Oak source models + empty world models, window models as visible surfaces (`WindowModelProvider`, `OrientedWindowModelProvider`, `WindowPaneModelWriter`, `GeometryModelWriter.addSurfaces`; 112 plain window block models (141 total, pinned by `GeneratedResourceManifestTest`), each state one complete model, no trimmed variants), item providers (`WindowItemModelProvider`, `trim/AttachmentItemModelProvider`), the frame (`trim/TrimModelProvider`), display transforms (`ItemModelTransforms`), alias models (`LegacyModelProvider`), alias compatibility resources, the archways' empty world models and geometry item models (`archway/ArchwayModelProvider`, `ArchwayItemModelProvider`, 0.12.0), 20 recipes (`recipe/DoorRecipes`, `WindowRecipes`, `ArchwayRecipes`, `TrimRecipes` under the `RoundwoodRecipeProvider` coordinator), loot (`AttachmentLootPools`: one pool per face and slot for windows, doors and archways), tags, names |
+| Datagen | `data/**`, `data/client/door/*` (`DoorModelProvider`, `DoorItemModelProvider`: one leaf template per design and hinge), `data/client/window/*`, `data/client/trim/*` | Oak source models + empty world models, window models as visible surfaces (`WindowModelProvider`, `OrientedWindowModelProvider`, `WindowPaneModelWriter`, `GeometryModelWriter.addSurfaces`; 112 plain window block models (141 total, pinned by `GeneratedResourceManifestTest`), each state one complete model, no trimmed variants), item providers (`WindowItemModelProvider`, `trim/AttachmentItemModelProvider`), the frame (`trim/TrimModelProvider`), display transforms (`ItemModelTransforms`), alias models (`LegacyModelProvider`), alias compatibility resources, the archways' empty world models and geometry item models (`archway/ArchwayModelProvider`, `ArchwayItemModelProvider`, 0.12.0), 22 recipes (`recipe/DoorRecipes`, `WindowRecipes`, `ArchPieceRecipes`, `TrimRecipes` under the `RoundwoodRecipeProvider` coordinator), loot (`AttachmentLootPools`: one pool per face and slot for windows, doors and archways), tags, names |
 | Texture tools | `tools/generate-textures.mjs`, `tools/textures/*` | Orchestrator plus artwork modules (palettes append only, so old bytes never change); `glass/stained-glass.mjs` writes the sixteen `window_glass_<dye>` textures, `masonry/radial-trims.mjs` the thin-mortar radial faces, `glass/window-glass.mjs` the historical and clearer glass (`clearWindowGlass`), `trim-marker.mjs` the source markers, `masonry/square-trims.mjs` the Universal Trim's square masonry face, `masonry/window-shape-trims.mjs` the 0.10.0 top-corner, single-edge and sill faces, `masonry/door-casings.mjs` the 0.11.0 arched door casing faces, `masonry/archways.mjs` the 0.12.0 archway faces (radial voussoirs, jamb courses, keyhole corbels), `tools/textures/mortar.mjs` the shared thin-mortar primitives (joint coverage, the one parameterised polar brick position, brick and mortar colours), `masonry/arch-window.mjs` the arched window face and its course mortar |
 
 ## Dependency direction

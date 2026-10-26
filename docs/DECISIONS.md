@@ -2,6 +2,24 @@
 
 Newest first.
 
+## 2026-10-25 - Replace, not retain (0.14.0)
+
+The owner's correction supersedes plan section 2 and the retention paragraph below: old archways
+are migration sources, not hidden working products. An ordinary 2x2 becomes an upper-row 1x2 top
+and air below; a keyhole also gets two mirrored lower shoulders. Facing and body look transfer;
+front/back casings transfer once to the top, while shoulders start bare. The deliberately removed
+thin posts are not refunded as a new product. Conversion runs through chunk discovery and the
+bounded migration queue, with guarded writes, validation and full assembly rollback.
+Unknown trim versions defer; unloaded and damaged assemblies follow existing integrity policy.
+
+Crossed-window stacks never had an inventory rewrite or overflow policy: they convert on placement.
+Archways therefore add a bounded loaded-container path and player/entity hooks. Each old item gives
+one top; keyholes additionally give two shoulders. Source metadata stays on the top; shoulders
+receive only the body look. Plan insertion before mutation, drop overflow at the holder, and keep
+the original if a drop is refused. No nested NBT or private mod-inventory traversal is implied.
+Retired IDs, historical geometry and fallback rendering remain for migration/fixtures; they have
+no placement, crafting or advertised entries. The former payload-custody task dk-ade471a7 is dropped.
+
 ## 2026-10-25 - Modular arch pieces (0.14.0)
 
 The approved products are height x width 1x1, 1x2 and 2x3 tops and one LEFT/RIGHT
@@ -11,7 +29,7 @@ The one- and three-wide tops therefore have ten pixels of upper fill; moving the
 spring line upward would add jambs and is rejected. Tops retain empty collision
 for crown clearance. The six-cell footprint reserves even the empty lower centre.
 
-Retain existing archways instead of splitting them: redistributing their geometry,
+**Superseded by "Replace, not retain" above.** The original choice was to retain existing archways instead of splitting them: redistributing their geometry,
 looks and whole-face trim ownership cannot preserve the complete old opening.
 Their 0.13.3 behaviour and donor artwork stay intact; later content work hides them
 from recipes, creative and viewers. Unknown-payload custody and a new installation

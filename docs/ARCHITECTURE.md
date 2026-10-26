@@ -1,8 +1,8 @@
 # Architecture - Roundwood
 
-## Modular arch geometry (0.14.0, staged implementation)
+## Modular arch geometry (0.14.0)
 
-`block/arch/geometry` is separate from the retained `block/archway` family.
+`block/arch/geometry` is separate from the frozen migration-source `block/archway` family.
 `ArchPieceDesign` names three tops and one mirrored shoulder. `ArchTopProfile`
 subtracts a semicircle at y=0 from the full rectangle; `KeyholeShoulderProfile`
 keeps only rows 8..15 of the historical transition. `ArchPieceGeometry` supplies
@@ -29,9 +29,10 @@ anchor carries the distinct `arch_piece` entity, extending shared appearance
 persistence. `ArchPieceAppearance` uses shared anchor lookup and appearance targets.
 The four registrations have separate `archPieces()` enumerations and replace the old
 archways in advertised lists. `archways()` remains the old two designs, registered
-through identity-only retired adapters and aggregated by `LegacyContent`. Their
-entity ID and all 0.13.3 callbacks remain unchanged; there is no automatic conversion
-or unknown-payload custody extension. Command-created cell states outside a product's dimensions are
+through retired adapters and aggregated by `LegacyContent`. Their entity ID and state schema
+remain readable. `ArchwayConversion` replaces the four cells atomically: a top above, plus two
+shoulders for keyholes or air for ordinary arches. Both casings transfer to the top. Scheduled
+ticks convert before integrity cleanup; unknown trims defer. Item placement and editing are refused. Command-created cell states outside a product's dimensions are
 inert and removed without looking up or tearing down a neighbouring assembly.
 
 `ArchPieceTargeting` projects a hit onto the facing's right axis; front/back and
@@ -64,6 +65,17 @@ into the complete icon. `ArchPieceItemGeometry` shifts the three-wide icon by -1
 pixels in X, shared by runtime and datagen, fitting the legal [-16,32] interval.
 The dimension-aware transform overload fits each product into the inventory slot;
 the historical two-argument overload keeps all existing transforms unchanged.
+
+## Archway stack migration
+
+`ArchwayStacks` plans complete container contents, preserving metadata on replacement tops and
+body looks on every output. Shoulders fill permitted storage slots; overflow is accepted before
+slots change. `ArchwayStackMigration` discovers block containers on chunk load, draining at most
+64 per level tick. Player and ender inventories scan every 20 ticks; container entities and dropped
+items queue on join and convert only after the join succeeds. Overflow drops at the holder; a
+refused spawn discards partial overflow and preserves the original. No recursive nested-stack scan.
+Unopened loot-table containers are left untouched so migration never rolls loot without the opening player.
+The old crossed-window and trim paths are unchanged (those stacks still convert only when used).
 
 ## Door assembly
 

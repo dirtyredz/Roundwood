@@ -1,5 +1,17 @@
 # Gotchas - Roundwood
 
+- **0.14.0 replaces archways.** Old 2x2 cells are migration sources, never placeable content. Tops
+  move to the upper row; ordinary jambs vanish; keyholes get two untrimmed shoulders. Both old
+  casings belong to the top. Unknown trim versions defer; never partially rewrite an assembly.
+- **Arch tops do not collide.** A 2x3 top still owns all six cells, including its empty lower centre.
+  Outside columns are ordinary blocks; putting full blocks below an opening reduces clearance.
+- **Shoulder overflow belongs at the holder.** Inventory conversion plans slots before committing;
+  armor slots are not spare storage. If spawning overflow is refused, retain the original stack.
+  Crossed windows have no inventory scan to reuse: their conversion remains placement-time.
+- **Modular icons use legal model coordinates.** The three-wide icon shifts by -16 in X to fit
+  [-16,32]. Keep generated and runtime translations identical. Loot decorates the exact body item,
+  never all TRIM-family items, or casing looks are overwritten.
+
 - **Three-wide icons cannot emit x=48.** Shift generated and runtime item geometry
   together through `ArchPieceItemGeometry`; translate vertices after baking to keep
   donor UVs. Scale with the dimension-aware display-transform overload.
