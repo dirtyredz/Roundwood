@@ -37,16 +37,17 @@ keyhole lower geometry is preserved. Both casings transfer to the top. Scheduled
 ticks convert before integrity cleanup; unknown trims defer. Item placement and editing are refused. Command-created cell states outside a product's dimensions are
 inert and removed without looking up or tearing down a neighbouring assembly.
 
-`ArchPieceTargeting` projects a hit onto the facing's right axis; front/back and
-up/down faces split at 0.5 with LEFT ties, and side-wall hits choose the touching
-edge. `ArchPiecePlacement.of` uses the context's landing cell as lower-left anchor,
+`ArchPieceTargeting` classifies four triangular face wedges (diagonal ties choose U).
+Floor/ceiling wedges select their world edge; wall U wedges select the horizontal edge,
+and lower/upper V wedges select touching/far edges. The result is an existing facing/side
+pair, so saved shoulder states are unchanged. The overlay draws the same wedge polygons. `ArchPiecePlacement.of` uses the context's landing cell as lower-left anchor,
 then the shared preflight checks every cell for world bounds, border, loaded state,
 fluid, replacement and player permission. Entity checks use the product's collision,
 without a floor predicate. `at` applies the same playerless checks. Item use recomputes
 the proposal and passes it to `AssemblyPlacement`; showcase-style placement uses
 the existing `AssemblyInstallation`. Neither shared installer signature changes.
 The modular overlay consumes this proposal and shares hand precedence. It outlines every owned cell,
-the complete silhouette, the landing face and the shoulder midpoint split. Without secondary use,
+the complete silhouette, the landing face and the four shoulder wedges. Without secondary use,
 it suppresses success on blocks overriding the use callback: those may consume the click first.
 Callback detection uses its parameter types, so mapped runtime names do not affect the guard.
 
@@ -79,9 +80,33 @@ refused spawn discards partial overflow and preserves the original. No recursive
 Unopened loot-table containers are left untouched so migration never rolls loot without the opening player.
 The old crossed-window and trim paths are unchanged (those stacks still convert only when used).
 
+## Aimed depths and double doors (0.15.0)
+
+`assembly/DoorDepth` owns the three saved depths and aimed-face bands. FRONT defaults to
+the historical slab 13..16; MIDDLE shifts by -6.5 pixels and BACK by -13. The round block
+extends its inherited default state; no existing identity value changes. Arched 1x2 doors
+retain their old schema. Depth participates in assembly membership, shape caches and placement.
+`Assembly.toAuthored` removes the shift before hit classification; collision shifts before
+cell clipping, selection shifts before facing rotation, and the renderer moves leaf,
+camouflage and casings together. Back-flush casing targets stay inside the cell.
+
+`DoubleArchedDoorBlock` has cell_x/cell_y 0..2 alongside vanilla door properties and depth.
+`DoorLayout.Part` retains the four historical enum entries first, then the five additional
+cells. Use columnIndex()/row() for geometry and Part.of(design) for traversal; the legacy
+column/half fields alone cannot identify a nine-cell part. Vanilla half remains a compatibility
+summary, while vertical survival uses the real row. Shared assembly services own installation,
+integrity, teardown, appearance and synchronized open/redstone state.
+
+The new profile is a square lower row plus the complement of TOP_2X3, translated up 16
+pixels. Each half is clipped at x=24, with its own outer pivot and full two-sided hardware.
+Rendering and swing outlines turn both halves; collision and target geometry use the same
+clipped envelopes. Leaf templates shift x/y by -16 to fit the legal model range;
+the renderer undoes that shift after swinging, and the item combines both halves. Board
+UVs span one square 48px image extent; casings use tiled donor/paint sprites.
+
 ## Door assembly
 
-There are two door designs (`leaf/DoorDesign`: ROUND, ARCHED; see "The arched door" below). This
+There are three door designs (`leaf/DoorDesign`: ROUND, ARCHED, DOUBLE_ARCHED). This
 section describes the round door's four-part assembly; the arched door is the two-part case.
 
 An assembly is four ordinary `DoorBlock` states of one block, 2 wide x 2 high x 1 deep, showing one

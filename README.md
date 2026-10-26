@@ -1,6 +1,6 @@
 # Roundwood
 
-Forge 1.20.1 mod: a round 2x2 wooden door and an arched 1x2 one, a round window with arch, corner and edge profiles with optional Cross Beams attachments, three modular arch tops and a mirrored keyhole shoulder, a Universal Trim for all of them and an Arch Sill, hobbit-hole style. Each is one item you
+Forge 1.20.1 mod: a round 2x2 wooden door, an arched 1x2 door and a double arched 3x3 door, a round window with arch, corner and edge profiles with optional Cross Beams attachments, three modular arch tops and a mirrored keyhole shoulder, a Universal Trim for all of them and an Arch Sill, hobbit-hole style. Each is one item you
 restyle in the world: any planks (vanilla or modded) set the wood, any of the 16 dyes paints it,
 and trims can also be faced with radial brick. Install on **both** the server and every client.
 Generic: not tied to any modpack.
@@ -15,17 +15,32 @@ Generic: not tied to any modpack.
 
 ## Content
 
-22 items: **Round Door**, **Arched Door**, thirteen plain window profiles
+23 items: **Round Door**, **Arched Door**, **Double Arched Door**, thirteen plain window profiles
 (**Round Window**, **Round Window Arch, Left** and **Right**, **Round Window Corner, Bottom Left**
 and **Bottom Right**, and since 0.10.0 **Round Window Arch, Bottom Left** and **Bottom Right**,
 **Round Window Corner, Top Left** and **Top Right**, and **Round Window Edge, Top**, **Left**,
 **Bottom** and **Right**), **Arch Top 1x1**, **Arch Top 1x2**, **Arch Top 2x3** and
 **Keyhole Shoulder** (0.14.0), the **Universal Trim**, **Arch Sill** and **Cross Beams**. Creative tab order: round
-door, arched door, then each plain window profile (round, arch left,
+door, arched door, double arched door, then each plain window profile (round, arch left,
 arch right, corner bottom left, corner bottom right, arch bottom left, arch bottom right, corner top
 left, corner top right, edge top, left, bottom, right), the three arch tops, keyhole shoulder, Universal Trim,
 Arch Sill, Cross Beams. They are crafted (and found in the creative tab) in oak;
 their look is changed once placed and travels with them when picked or broken.
+
+**Door depth targeting (0.15.0).** Round and double arched doors have front, middle and back
+positions. Aim along depth on a floor, ceiling or side wall; on a wall facing the door,
+aim at the lower/middle/upper third for back/middle/front. The bands and full leaf preview
+show the result. Hinge choice still follows across-width aim and neighbouring blocks.
+Existing round doors retain their original front position when loaded.
+
+**Double Arched Door (0.15.0).** One item reserves a dry, replaceable 3 wide x 3 high footprint
+with a solid floor beneath all three columns. Two leaves swing together on the outer hinges.
+The bottom is square; the crown exactly fills the 2x3 arch opening when that arch's bottom
+is one block above the door floor. Place the arch in the adjacent depth layer, flush against
+the door: assemblies cannot share occupied cells. The arch's eight-pixel apex band remains
+above the leaf. Each leaf has straps and a knob on both faces, with the existing wood/paint,
+camouflage, trims, redstone and projected-use behaviour. Recipe: `PNP / PPP / PNP`,
+where P is any planks and N is a gold nugget.
 
 **Round door** (one item places a 2 wide x 2 high assembly). One round leaf on one hinge, like a
 hobbit door: vertical boards running the full height of the door, brass straps on the hinge side
@@ -47,7 +62,8 @@ drawn from the same plan the server places from and shows nothing when placement
 - Use: clicking any part, a villager, or any mod calling `setOpen` moves the whole door. Redstone on
   any of the four cells opens it; removing the last signal closes it.
 - The open leaf's outer half sticks out one block in front of the hinge column. It is only drawn:
-  it does not collide, cannot be clicked, and can overlap whatever is there.
+  it does not collide and can overlap whatever is there. An unobstructed projected leaf can be
+  clicked to close the door; mining and picking still require an occupied cell.
 - Camouflage: the four square corners around the round leaf can take one block's look. Right-click
   a corner holding a full, ordinary block (stone, planks, bricks...) to fill all four; another block
   swaps it (you get the old one back); sneak-right-click a filled corner with both hands empty to
@@ -92,8 +108,9 @@ and no spring margin; the 2x3 retains eight pixels of fill above its apex.
 The shoulder extends a four-pixel-wide base down to the floor beneath the stepped transition (widths 4,3,3,2,2,1,1,0 in rows 8..15): the original keyhole corbel shifted two pixels outward to meet the flush arch spring.
 
 - Place with an ordinary click. The landing cell is the lower-left anchor; tops extend right
-  and up. Aim at the left or right half of a face to choose a shoulder side (an exact tie chooses
-  LEFT); side-wall hits choose the touching edge. The preview shows that same choice and every
+  and up. Shoulders use four aimed-face wedges: on floors/ceilings choose the corresponding edge;
+  on walls choose the left/right edge or lower = touching / upper = far edge. This reaches left,
+  right, front and back without sneaking. The preview shows that same choice and every
   occupied cell. The 2x3 top reserves all six cells, including its visually empty lower centre.
 - Every cell must be loaded, dry, replaceable, inside the border and editable. No supporting floor
   is required. Refused or cancelled placement keeps the item and restores the cells.
@@ -355,7 +372,7 @@ would be a bottom corner's recipe, so each piece has its own. Shaped recipes als
 the left and right edges differ by where the pane sits.
 
 Crafting always gives the oak object; restyle it in the world. With **EMI** and **JEI** each of the
-22 items (two doors, 13 plain windows, four arch pieces, Universal Trim, Arch Sill and Cross Beams) is
+23 items (three doors, 13 plain windows, four arch pieces, Universal Trim, Arch Sill and Cross Beams) is
 listed once, as its plain oak look, and nothing cycles; retired crossed windows and old archways stay hidden.
 Styled stacks in your inventory are told apart by their look (EMI comparison key, JEI subtype).
 Neither viewer is required.
@@ -421,6 +438,7 @@ node tools/generate-textures.mjs        # original textures (deterministic)
 node tools/generate-test-structures.mjs # GameTest templates incl. the 0.4.0 fixture
 ./gradlew runData                       # regenerate src/generated/resources (checked in)
 ./gradlew test build                    # unit tests + reobfuscated release jar
+./gradlew --offline runGameTestServer -PdoorTargets # bounded door/arch placement gate
 ./gradlew runGameTestServer             # headless Forge server GameTests (fresh world each run)
 git diff --check
 ```

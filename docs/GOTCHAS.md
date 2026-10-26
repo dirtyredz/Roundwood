@@ -347,3 +347,14 @@
 - **Modular arch profiles no longer match the old crowns (0.14.0 feedback).** Use radii 8/16/24
   with springs 8/0/0 for bodies, casings and mortar. The 1x1 has no lower fill or apex band.
   Shoulders have four-pixel bases to y=0 (the historical corbel thinned by 2 to match the flush spring); migration preserves the keyhole lower shape shifted 2 px outward, not crown pixels.
+
+- **Door geometry must include saved depth (0.15.0).** Translate before collision clipping and
+  before facing rotation; undo depth in authored hit coordinates. Shift the whole renderer,
+  including casings/camouflage, and keep back-flush casing targets in-cell. FRONT is the old-world
+  default. Do not change it to MIDDLE just because aim-at-centre now places in the middle.
+- **The double door owns nine cells.** Iterate assembly.parts() / Part.of(design), never
+  Part.values() for a historical round door. Its columnIndex()/row() are authoritative;
+  legacy column/half cannot identify the third column or row. Whole-door shape cache keys
+  must allow all nine cells without overlapping bit fields.
+- **A matching arch and door need adjacent depth layers.** The 3x3 door crown complements
+  the 2x3 arch at y+1, but the shared installer deliberately does not merge occupied cells.

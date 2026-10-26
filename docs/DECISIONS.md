@@ -2,6 +2,15 @@
 
 Newest first.
 
+## 2026-10-26 - Aimed depths and one paired-door assembly (0.15.0)
+
+Shoulder aim chooses an existing facing/side pair, retaining saved states. Round-door depths
+are a defaulted property: FRONT is the historical plane, not the new centre-aim result. The
+3x3 double door is one nine-cell assembly with one open state and two outer-hinged leaves;
+both move together through the existing lifecycle and projected-use transport. Its crown
+is the exact complement of the modular 2x3 top at y+1. Door and arch remain separate
+assemblies in adjacent depth layers. No sneak gesture or occupied-cell merging is added.
+
 ## 2026-10-25 - Flush arch springs and supported shoulders (0.14.0 owner feedback)
 
 Supersedes the original modular profile dimensions below. The 1x1 is the two corner
