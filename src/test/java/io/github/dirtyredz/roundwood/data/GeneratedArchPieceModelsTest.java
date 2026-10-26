@@ -27,7 +27,7 @@ class GeneratedArchPieceModelsTest {
                         if (faces.has("north")) back[x][y]++;
                     }
             }
-            int[] shoulderWidths = {6,6,6,6,6,6,6,6,6,5,5,4,4,3,3,2};
+            int[] shoulderWidths = {4,4,4,4,4,4,4,4,4,3,3,2,2,1,1,0};
             for (int x = 0; x < width; x++) for (int y = 0; y < height; y++) {
                 double dx = x + .5 - width / 2.0, dy = y + .5 - spring;
                 boolean solid = radius == 0 ? x < shoulderWidths[y] : y >= spring && dx * dx + dy * dy > radius * radius;

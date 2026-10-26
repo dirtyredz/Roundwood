@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
  */
 public final class ArchMasonryJoints {
     public static final double WIDTH = 0.25;
-    public static final List<Double> SHOULDER_LEVELS = List.of(0.0, 4.0, 8.0, 12.0, 16.0);
+    public static final List<Double> SHOULDER_LEVELS = List.of(0.0, 4.0, 8.0, 12.0);
 
     private ArchMasonryJoints() {}
 

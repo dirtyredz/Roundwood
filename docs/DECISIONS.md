@@ -11,14 +11,14 @@ The 1x2 and 2x3 use radii 16 and 24 at y=0. Removing the two-pixel bearing margi
 removes the projecting spring ledge beside full-block columns. The 2x3 still has
 eight pixels of upper fill and one continuous semicircle, never a flat middle.
 
-The shoulder retains widths 6,5,5,4,4,3,3,2 in rows 8..15, with width 6 all the
+Owner feedback 2: shoulders thinned by the two pixels the arch gained: widths 4,3,3,2,2,1,1,0 in rows 8..15, with width 4 all the
 way down to y=0. This supports the corbel instead of leaving it hanging mid-cell.
 Collision follows that full body; tops and casings remain non-colliding. Masonry
 keeps 5/9/13 centred sectors, clipped to the actual corner fill; the 1x1 and 1x2
 have no solid apex keystone band. Joints use the same spring offset and add base courses.
 Migration still produces a 1x2 top and optional shoulders, preserving looks, casings
-and ownership, but deliberately widens the crown. Keyhole lower pixels now match
-history completely; ordinary lower jambs are removed. Frozen source profiles stay unchanged.
+and ownership, but deliberately widens the crown. Keyhole lower pixels match
+history shifted two pixels outward (thinned shoulders); ordinary lower jambs are removed. Frozen source profiles stay unchanged.
 
 ## 2026-10-25 - Replace, not retain (0.14.0)
 
@@ -54,7 +54,7 @@ from recipes, creative and viewers. Unknown-payload custody and a new installati
 overload are explicitly deferred to dk-ade471a7, outside this release's arch work.
 
 Shoulders crop the old transition to rows 8..15, with solid widths
-6,5,5,4,4,3,3,2; rows 0..7 are entirely empty. RIGHT reflects LEFT.
+6,5,5,4,4,3,3,2 (later thinned by 2 to 4,3,3,2,2,1,1,0 and extended to y=0, see the 2026-10-25 entry above); RIGHT reflects LEFT.
 Together with a 1x2 top they preserve the old crown and transition, not its posts.
 Full-block columns belong outside the opening, never in its lower two cells.
 

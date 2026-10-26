@@ -5,7 +5,7 @@
 `block/arch/geometry` is separate from the frozen migration-source `block/archway` family.
 `ArchPieceDesign` names three tops and one mirrored shoulder. `ArchTopProfile`
 subtracts radius-8/16/24 semicircles above springs 8/0/0; rows below the spring are empty.
-`KeyholeShoulderProfile` keeps the historical transition and extends its six-pixel base to y=0.
+`KeyholeShoulderProfile` keeps the historical transition thinned by two pixels (widths 4,3,3,2,2,1,1,0) and extends its four-pixel base to y=0.
 `ArchPieceGeometry` supplies
 full-depth boxes and per-cell visible surfaces through the shared raster/slab
 helpers. Internal cell faces are omitted using the whole mask. All six cells of
@@ -14,7 +14,7 @@ Tops have empty collision; shoulder collision equals its full-height body.
 
 `ArchMasonryJoints` is the pure, continuous-coordinate layout for model
 baking: 5/9/13 equal-angle sectors, a radius-r..r+2 band, quarter-pixel joints,
-no bearing joints and shoulder levels 0/4/8/12/16, clipped to actual solid pixels.
+no bearing joints and shoulder levels 0/4/8/12 (the 16 level is a zero-width row), clipped to actual solid pixels.
 It supplies no material policy and no overlay faces. `ArchMasonryModels` partitions
 donor and mortar surfaces for bodies, casings and items from this same layout.
 Convex clipping subtracts each joint from the donor faces, then triangulates both

@@ -2,9 +2,12 @@ package io.github.dirtyredz.roundwood.block.arch.geometry;
 
 import net.minecraft.util.StringRepresentable;
 
-/** Historical corbel transition supported by its six-pixel-wide base down to the floor. */
+/**
+ * The historical corbel transition thinned by the two pixels the flush-spring arch gained: a four-pixel base
+ * to the floor, stepping to nothing at the seam (the top's bottom rows are zero-width there too).
+ */
 public final class KeyholeShoulderProfile {
-    private static final int[] WIDTHS = {6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 4, 4, 3, 3, 2};
+    private static final int[] WIDTHS = {4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 1, 1, 0};
 
     public enum Side implements StringRepresentable {
         LEFT, RIGHT;

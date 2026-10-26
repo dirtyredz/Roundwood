@@ -89,7 +89,7 @@ plus one Keyhole Shoulder item that can face LEFT or RIGHT. All are one block de
 have true semicircular openings, square upper corners and no lower posts. The 1x1 is only
 the two upper corners above a radius-8 round door opening, with nothing below y=8 or above its apex. The wider tops have radii 16 and 24
 and no spring margin; the 2x3 retains eight pixels of fill above its apex.
-The shoulder extends its six-pixel-wide base down to the floor beneath the stepped transition.
+The shoulder extends a four-pixel-wide base down to the floor beneath the stepped transition (widths 4,3,3,2,2,1,1,0 in rows 8..15): the original keyhole corbel shifted two pixels outward to meet the flush arch spring.
 
 - Place with an ordinary click. The landing cell is the lower-left anchor; tops extend right
   and up. Aim at the left or right half of a face to choose a shoulder side (an exact tie chooses
@@ -458,7 +458,7 @@ check in game (the client-side retexturing and rendering have no automated test)
 - [ ] Check old chest and player stacks, including a full inventory: counts and looks survive,
   with excess shoulders dropped at the holder. Old items cannot place an old opening.
 - [ ] Check the 1x1 behind/above a one-wide round-topped door: only upper corners, no crown band.
-- [ ] Check 1x2/2x3 beside full blocks: no two-pixel spring ledge; shoulders reach the floor.
+- [ ] Check 1x2/2x3 beside full blocks: no two-pixel spring ledge; shoulders reach the floor and their corbel steps continue the arch curve with no ledge or gap at the seam.
 - [ ] Build all three tops and both shoulder sides in all facings. Check preview, six-cell
   obstruction and ownership, ordinary/keyhole clearance, and taller outside-column compositions.
 - [ ] Check cherry and another wood, paint, all four masonry looks, front/back casings, reveals,

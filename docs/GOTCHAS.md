@@ -29,7 +29,7 @@
   but owned assembly space; placement and integrity must still check it. Tops do
   not collide, preserving crown clearance; shoulders collide through their full-height bases and stepped tops.
 - **Modular composition widens the crown.** A 1x2 top has radius 16 instead of the
-  historical 14; two full-height shoulders preserve the historical lower keyhole. Full-block columns go
+  historical 14; two full-height shoulders keep the historical lower keyhole shape, thinned by the 2 px the crown gained. Full-block columns go
   outside the opening; filling its two lower cells closes the passage.
 
 - **A window packet without a tag clears its trims.** The shared anchor reads a tagless packet as
@@ -346,4 +346,4 @@
 
 - **Modular arch profiles no longer match the old crowns (0.14.0 feedback).** Use radii 8/16/24
   with springs 8/0/0 for bodies, casings and mortar. The 1x1 has no lower fill or apex band.
-  Shoulders have six-pixel bases to y=0; migration preserves keyhole lower pixels, not crown pixels.
+  Shoulders have four-pixel bases to y=0 (the historical corbel thinned by 2 to match the flush spring); migration preserves the keyhole lower shape shifted 2 px outward, not crown pixels.

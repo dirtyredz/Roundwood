@@ -38,7 +38,7 @@ public final class ArchPieceWalkGameTests {
     /** Blocks the walk covers: from 1.2 in front of the front face to 1.8 past the back face. */
     private static final int STEPS = 40;
     private static final double STEP = 0.1;
-    /** Offsets across the passage, in blocks from the archway's left edge; the keyhole's lower passage runs 0.375 to 1.625. */
+    /** Offsets across the passage, in blocks from the archway's left edge; the keyhole's lower passage runs 0.25 to 1.75. */
     private static final double[] LATERAL = {0.8, 1.0, 1.2};
 
     private ArchPieceWalkGameTests() {

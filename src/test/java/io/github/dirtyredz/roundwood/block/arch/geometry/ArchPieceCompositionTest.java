@@ -12,17 +12,18 @@ class ArchPieceCompositionTest {
             boolean composed = y >= 16 ? ArchPieceDesign.TOP_1X2.top().contains(x, y - 16)
                     : old == ArchwayDesign.KEYHOLE && (KeyholeShoulderProfile.contains(LEFT, x, y)
                     || KeyholeShoulderProfile.contains(RIGHT, x - 16, y));
-            if (y < 16) assertEquals(old == ArchwayDesign.KEYHOLE && old.inFrame(x, y), composed);
+            // Shoulders are the historical lower keyhole thinned by the two pixels the crown gained.
+            if (y < 16) assertEquals(old == ArchwayDesign.KEYHOLE && (x < 16 ? old.inFrame(x + 2, y) : old.inFrame(x - 2, y)), composed);
             else {
                 int dx = 2 * x + 1 - 32, dy = 2 * (y - 16) + 1;
                 assertEquals(dx * dx + dy * dy > 32 * 32, composed);
             }
             assertFalse(composed && !old.inFrame(x, y), "no added pixels");
         }
-        // Narrowest paired shoulder opening: 20 pixels in two cells, 36 in three.
-        assertTrue(KeyholeShoulderProfile.contains(LEFT, 5, 8));
-        assertFalse(KeyholeShoulderProfile.contains(LEFT, 6, 8));
-        assertEquals(20, 32 - 2 * 6);
-        assertEquals(36, 48 - 2 * 6);
+        // Narrowest paired shoulder opening: 24 pixels in two cells, 40 in three.
+        assertTrue(KeyholeShoulderProfile.contains(LEFT, 3, 8));
+        assertFalse(KeyholeShoulderProfile.contains(LEFT, 4, 8));
+        assertEquals(24, 32 - 2 * 4);
+        assertEquals(40, 48 - 2 * 4);
     }
 }

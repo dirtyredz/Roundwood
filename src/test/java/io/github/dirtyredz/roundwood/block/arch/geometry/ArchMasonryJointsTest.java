@@ -42,7 +42,7 @@ class ArchMasonryJointsTest {
                 }
         }
         for (double y : ArchMasonryJoints.SHOULDER_LEVELS) {
-            assertTrue(ArchMasonryJoints.contains(ArchPieceDesign.KEYHOLE_SHOULDER, LEFT, 1, y == 16 ? y - .0625 : y + .0625));
+            assertTrue(ArchMasonryJoints.contains(ArchPieceDesign.KEYHOLE_SHOULDER, LEFT, 1, y + .0625));
             assertFalse(ArchMasonryJoints.contains(ArchPieceDesign.KEYHOLE_SHOULDER, LEFT, 1, y + .25));
         }
     }
