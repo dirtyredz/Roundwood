@@ -1,5 +1,22 @@
 # Architecture - Roundwood
 
+## Modular arch geometry (0.14.0, staged implementation)
+
+`block/arch/geometry` is separate from the retained `block/archway` family.
+`ArchPieceDesign` names three tops and one mirrored shoulder. `ArchTopProfile`
+subtracts a semicircle at y=0 from the full rectangle; `KeyholeShoulderProfile`
+keeps only rows 8..15 of the historical transition. `ArchPieceGeometry` supplies
+full-depth boxes and per-cell visible surfaces through the shared raster/slab
+helpers. Internal cell faces are omitted using the whole mask. All six cells of
+the three-wide top are owned even though its lower centre has no drawn pixels.
+Tops have empty collision; shoulder collision equals its cropped body.
+
+`ArchMasonryJoints` is the pure, continuous-coordinate layout for later model
+baking: 5/9/13 equal-angle sectors, a radius-r..r+2 band, quarter-pixel joints,
+bearing spring joints and shoulder levels 8/12/16, clipped to actual solid pixels.
+It supplies no material policy and no overlay faces. The later baker partitions
+donor and mortar surfaces for bodies, casings and items from this same layout.
+
 ## Door assembly
 
 There are two door designs (`leaf/DoorDesign`: ROUND, ARCHED; see "The arched door" below). This

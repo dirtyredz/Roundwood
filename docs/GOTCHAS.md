@@ -1,5 +1,12 @@
 # Gotchas - Roundwood
 
+- **Modular tops reserve empty cells.** The 2x3 top's lower centre is empty geometry
+  but owned assembly space; placement and integrity must still check it. Tops do
+  not collide, preserving crown clearance; shoulders collide only in rows 8..15.
+- **Modular composition removes posts.** A 1x2 top and two shoulders reproduce the
+  historical crown and transition, not its lower posts. Full-block columns go
+  outside the opening; filling its two lower cells closes the passage.
+
 - **A window packet without a tag clears its trims.** The shared anchor reads a tagless packet as
   every store explicitly empty. Read as "missing" instead, a window whose state says `trimmed=true`
   would get oak trims on both faces from its 0.7.0 legacy reading. `AnchorPersistenceGameTests` guards

@@ -13,29 +13,29 @@ import java.util.List;
 public final class ArchPieceGeometry {
     private ArchPieceGeometry() {}
 
-    public static List<Box> body(ArchPieceDesign design) {
-        return PixelCircle.rasterize(design.width(), design.height(), design.top()::contains)
+    public static List<Box> body(ArchPieceDesign design, KeyholeShoulderProfile.Side side) {
+        return PixelCircle.rasterize(design.width(), design.height(), (u, v) -> design.contains(side, u, v))
                 .stream().map(rect -> rect.extrude(0, 16)).toList();
     }
 
-    public static List<Box> cell(ArchPieceDesign design, int column, int row) {
+    public static List<Box> cell(ArchPieceDesign design, KeyholeShoulderProfile.Side side, int column, int row) {
         checkCell(design, column, row);
-        return PixelCircle.rasterize(16, 16, (u, v) -> design.top().contains(u + 16 * column, v + 16 * row))
+        return PixelCircle.rasterize(16, 16, (u, v) -> design.contains(side, u + 16 * column, v + 16 * row))
                 .stream().map(rect -> rect.extrude(0, 16)).toList();
     }
 
-    public static List<Surface> surfaces(ArchPieceDesign design, int column, int row, double back, double front, String texture) {
+    public static List<Surface> surfaces(ArchPieceDesign design, KeyholeShoulderProfile.Side side, int column, int row, double back, double front, String texture) {
         checkCell(design, column, row);
-        return List.copyOf(PixelSlab.cellFaces(design.top()::contains, 16 * column, 16 * row, back, front, texture));
+        return List.copyOf(PixelSlab.cellFaces((u, v) -> design.contains(side, u, v), 16 * column, 16 * row, back, front, texture));
     }
 
-    public static List<Box> collisionCell(ArchPieceDesign design, int column, int row) {
+    public static List<Box> collisionCell(ArchPieceDesign design, KeyholeShoulderProfile.Side side, int column, int row) {
         checkCell(design, column, row);
-        return List.of();
+        return design.shoulder() ? cell(design, side, column, row) : List.of();
     }
 
-    public static List<Box> placed(ArchPieceDesign design, Direction facing) {
-        return VoxelShapeFactory.rotate(body(design), VoxelShapeFactory.quarterTurns(facing));
+    public static List<Box> placed(ArchPieceDesign design, KeyholeShoulderProfile.Side side, Direction facing) {
+        return VoxelShapeFactory.rotate(body(design, side), VoxelShapeFactory.quarterTurns(facing));
     }
 
     public static Box footprint(ArchPieceDesign design, Direction facing) {
