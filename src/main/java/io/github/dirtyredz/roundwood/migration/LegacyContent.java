@@ -83,7 +83,7 @@ public final class LegacyContent {
 
     /** Every alias block: doors, windows, trims, each in 0.4.0 order. */
     public static List<Block> blocks() {
-        return Stream.of(doors(), windows(), trims(), CrossWindowCompatibility.blocks()).flatMap(List::stream).map(Block.class::cast).toList();
+        return Stream.of(doors(), windows(), trims(), CrossWindowCompatibility.blocks(), ArchwayCompatibility.blocks()).flatMap(List::stream).map(Block.class::cast).toList();
     }
 
     /** The 49 0.4.0 alias items, in the same order as {@link #blocks()}'s families. */
@@ -93,6 +93,6 @@ public final class LegacyContent {
 
     /** Every hidden compatibility item: the 49 aliases, then the window trim. */
     public static List<Item> items() {
-        return Stream.of(aliasItems(), List.of(windowTrim()), CrossWindowCompatibility.items()).flatMap(List::stream).toList();
+        return Stream.of(aliasItems(), List.of(windowTrim()), CrossWindowCompatibility.items(), ArchwayCompatibility.items()).flatMap(List::stream).toList();
     }
 }

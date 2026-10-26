@@ -29,6 +29,8 @@ class DependencyDirectionTest {
             }
         }
         assertEquals(Set.of(
+                "import io.github.dirtyredz.roundwood.migration.block.RetiredArchwayBlock;",
+                "import io.github.dirtyredz.roundwood.migration.item.RetiredArchwayItem;",
                 "import io.github.dirtyredz.roundwood.migration.block.RetiredRoundWindowBlock;",
                 "import io.github.dirtyredz.roundwood.migration.block.RetiredOrientedWindowBlock;",
                 "import io.github.dirtyredz.roundwood.migration.item.RetiredCrossWindowItem;"), imports);

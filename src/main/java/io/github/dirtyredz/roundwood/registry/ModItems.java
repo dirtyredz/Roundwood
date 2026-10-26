@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.migration.item.RetiredArchwayItem;
 import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceItem;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayItem;
@@ -27,10 +28,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Twenty advertised items: two doors, thirteen plain profiles, two archways and three attachments.
+ * Twenty-two advertised items: two doors, thirteen plain profiles, four arch pieces and three attachments.
  * The window map also retains the thirteen hidden crossed items. Frozen aliases and window_trim
- * remain registered by LegacyContent. Four modular products are registered separately until the
- * content batch advertises them. Looks travel in stack data.
+ * remain registered by LegacyContent. The two retired archways keep their original behavior.
+ * Looks travel in stack data.
  */
 public final class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Roundwood.MOD_ID);
@@ -69,7 +70,7 @@ public final class ModItems {
     private static Map<ArchwayDesign, RegistryObject<ArchwayItem>> registerArchways() {
         Map<ArchwayDesign, RegistryObject<ArchwayItem>> out = new LinkedHashMap<>();
         for (ArchwayDesign design : ArchwayDesign.values()) {
-            out.put(design, ITEMS.register(design.id(), () -> new ArchwayItem(ModBlocks.archway(design), new Item.Properties())));
+            out.put(design, ITEMS.register(design.id(), () -> new RetiredArchwayItem(ModBlocks.archway(design), new Item.Properties())));
         }
         return Collections.unmodifiableMap(out);
     }
@@ -104,13 +105,13 @@ public final class ModItems {
         return WINDOWS.entrySet().stream().filter(e -> e.getKey().pattern() == WindowPattern.PLAIN).map(e -> (Item) e.getValue().get()).toList();
     }
 
-    /** The advertised items: two doors, 13 windows, two archways and three attachments. */
+    /** The advertised items: two doors, 13 windows, four arch pieces and three attachments. */
     public static List<Item> all() {
         List<Item> out = new ArrayList<>();
         out.add(ROUND_DOOR.get());
         out.add(ARCHED_DOOR.get());
         out.addAll(windows());
-        out.addAll(archways());
+        out.addAll(archPieces());
         out.add(ROUND_TRIM.get());
         out.add(ARCH_SILL_TRIM.get());
         out.add(CROSS_BEAMS.get());

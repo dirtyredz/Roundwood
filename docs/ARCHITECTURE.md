@@ -27,9 +27,11 @@ side. `ArchPieceBlock` delegates lifecycle callbacks to `AssemblyIntegrity`,
 `AssemblyRemoval` and `AssemblyHarvest`; no external floor is required. Only the
 anchor carries the distinct `arch_piece` entity, extending shared appearance
 persistence. `ArchPieceAppearance` uses shared anchor lookup and appearance targets.
-The four registrations have separate `archPieces()` enumerations; part 3 switches
-advertised content when resources and recipes are ready. `archways()` remains the
-old two designs. Command-created cell states outside a product's dimensions are
+The four registrations have separate `archPieces()` enumerations and replace the old
+archways in advertised lists. `archways()` remains the old two designs, registered
+through identity-only retired adapters and aggregated by `LegacyContent`. Their
+entity ID and all 0.13.3 callbacks remain unchanged; there is no automatic conversion
+or unknown-payload custody extension. Command-created cell states outside a product's dimensions are
 inert and removed without looking up or tearing down a neighbouring assembly.
 
 `ArchPieceTargeting` projects a hit onto the facing's right axis; front/back and

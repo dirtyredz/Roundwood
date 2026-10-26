@@ -346,7 +346,7 @@ public final class ContentGameTests {
         expected.add("arch_sill_trim");
         expected.add("cross_beams");
         check(shown.stream().map(stack -> ForgeRegistries.ITEMS.getKey(stack.getItem()).getPath()).toList().equals(expected),
-                "tab is not the two doors, 13 plain windows, two archways, Universal Trim, Arch Sill and Cross Beams: " + shown);
+                "tab is not the two doors, 13 plain windows, four arch pieces, Universal Trim, Arch Sill and Cross Beams: " + shown);
         check(shown.stream().noneMatch(ItemStack::hasTag), "tab entries carry an appearance: " + shown);
         check(AppearanceStacks.read(shown.get(0)).equals(Appearance.DEFAULT), "the tab's door is not oak");
         helper.succeed();
@@ -354,7 +354,7 @@ public final class ContentGameTests {
 
     /** Viewer lists are built from the tab: each item once, as its oak default (the JEI "no subtype" key). */
     @GameTest(template = TEMPLATE)
-    public static void everyItemIncludingBothArchwaysIsListedOnceAsItsOakDefault(GameTestHelper helper) {
+    public static void everyAdvertisedItemIsListedOnceAsItsOakDefault(GameTestHelper helper) {
         CreativeModeTab tab = ModCreativeTab.ROUNDWOOD.get();
         tab.buildContents(new CreativeModeTab.ItemDisplayParameters(helper.getLevel().enabledFeatures(), false,
                 helper.getLevel().registryAccess()));
@@ -366,12 +366,14 @@ public final class ContentGameTests {
             check(!stack.hasTag() && AppearanceStacks.read(stack).equals(AppearanceDefaults.of(item))
                     && WindowGlassStacks.key(stack).equals(AppearanceDefaults.of(item).key()), item + " is not its plain default: " + stack);
         }
-        check(ModItems.all().size() == 20 && shown.size() == 20, "tab lists " + shown.size() + " items, not the 20 of 0.13.0");
+        check(ModItems.all().size() == 22 && shown.size() == 22, "tab lists " + shown.size() + " items, not the 22 of 0.14.0");
         check(shown.stream().anyMatch(stack -> stack.getItem() == ModItems.CROSS_BEAMS.get()), "Cross Beams is not listed");
         for (Item retired : io.github.dirtyredz.roundwood.migration.LegacyContent.items()) {
             check(shown.stream().noneMatch(stack -> stack.getItem() == retired), "hidden compatibility item " + retired + " is listed");
         }
         for (Item archway : ModItems.archways()) {
+            check(archway instanceof io.github.dirtyredz.roundwood.migration.item.RetiredArchwayItem
+                    && LegacyContent.items().contains(archway) && !ModItems.all().contains(archway), "retired archway visibility");
             check(AppearanceStacks.read(new ItemStack(archway)).equals(Appearance.DEFAULT), archway + " default is not oak");
         }
         helper.succeed();
@@ -383,7 +385,7 @@ public final class ContentGameTests {
             "round_window_top_left", "round_window_top_right",
             "round_window_edge_top", "round_window_edge_left",
             "round_window_edge_bottom", "round_window_edge_right",
-            "archway", "keyhole_archway", "round_trim");
+            "arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder", "round_trim");
 
     /** The canonical block of a family's 0.4.0 aliases (written out, not read from list positions). */
     private static Block canonicalBlock(io.github.dirtyredz.roundwood.appearance.AppearanceFamily family) {

@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.registry;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.migration.block.RetiredArchwayBlock;
 import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlock;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
@@ -74,7 +75,7 @@ public final class ModBlocks {
     private static Map<ArchwayDesign, RegistryObject<ArchwayBlock>> registerArchways() {
         Map<ArchwayDesign, RegistryObject<ArchwayBlock>> out = new LinkedHashMap<>();
         for (ArchwayDesign design : ArchwayDesign.values()) {
-            out.put(design, BLOCKS.register(design.id(), () -> new ArchwayBlock(archwayProperties(), design, ModBlockEntities::archway)));
+            out.put(design, BLOCKS.register(design.id(), () -> new RetiredArchwayBlock(archwayProperties(), design, ModBlockEntities::archway)));
         }
         return Collections.unmodifiableMap(out);
     }
