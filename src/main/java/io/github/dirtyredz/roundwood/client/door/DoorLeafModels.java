@@ -5,6 +5,8 @@ import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 
+import io.github.dirtyredz.roundwood.geometry.Box;
+
 /**
  * Names of the whole-leaf models, shared by the model generator and the renderer: one oak leaf per
  * design and hinge side ({@code block/round_door_leaf_left|right}, since 0.11.0 also
@@ -14,6 +16,20 @@ import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 public final class DoorLeafModels {
     /** The round door's id (its item and empty world model; the 0.4.0 aliases point at them). */
     public static final String DOOR_ID = DoorDesign.ROUND.id();
+
+    public static double modelYScale(DoorDesign design) { return Math.min(1, 48.0 / design.height()); }
+
+    public static Box modelBox(DoorDesign design, Box b) {
+        if (!design.doubleLeaf()) return b;
+        double scale = modelYScale(design);
+        return new Box(b.minX()-16, b.minY()*scale-16, b.minZ(), b.maxX()-16, b.maxY()*scale-16, b.maxZ());
+    }
+
+    public static Box authoredBox(DoorDesign design, Box b) {
+        if (!design.doubleLeaf()) return b;
+        double scale = modelYScale(design);
+        return new Box(b.minX()+16, (b.minY()+16)/scale, b.minZ(), b.maxX()+16, (b.maxY()+16)/scale, b.maxZ());
+    }
 
     private DoorLeafModels() {
     }

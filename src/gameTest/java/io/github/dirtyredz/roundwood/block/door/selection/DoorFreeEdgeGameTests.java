@@ -63,7 +63,7 @@ public final class DoorFreeEdgeGameTests {
     @GameTest(template = TEMPLATE)
     public static void freeEdgeClosesBothDesignsAndClosedLeafReopens(GameTestHelper helper) {
         floor(helper);
-        for (AssemblyDoorBlock door : new AssemblyDoorBlock[] {ModBlocks.roundDoor(), ModBlocks.archedDoor(), ModBlocks.doubleArchedDoor()}) {
+        for (AssemblyDoorBlock door : new AssemblyDoorBlock[] {ModBlocks.roundDoor(), ModBlocks.archedDoor(), ModBlocks.doubleArchedDoor(), ModBlocks.tallDoubleArchedDoor()}) {
             for (Direction facing : new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST}) {
                 for (var depth : door.defaultBlockState().hasProperty(io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.PROPERTY)
                         ? io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.values()

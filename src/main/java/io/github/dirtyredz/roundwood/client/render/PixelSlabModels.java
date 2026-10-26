@@ -92,12 +92,23 @@ public final class PixelSlabModels {
     static List<BakedQuad> quads(PixelCircle.PixelTest mask, int column, int row, double back, double front, int turns,
                                 boolean inPlace, TrimLooks.Look look, Extent extent,
                                 Function<ResourceLocation, TextureAtlasSprite> atlas) {
+        return quads(PixelSlab.cellFaces(mask, 16 * column, 16 * row, back, front, ""), column, row, turns, inPlace, look, extent, atlas);
+    }
+
+    /** Bake caller-owned visible surfaces, retaining the slab's material and UV policy. */
+    public static BakedModel cell(List<Surface> surfaces, int column, int row, Direction facing, TrimLooks.Look look, Extent extent) {
+        return model(quads(surfaces, column, row, VoxelShapeFactory.quarterTurns(facing), false, look, extent, DonorSprites::atlas),
+                look, ItemTransforms.NO_TRANSFORMS, true, false);
+    }
+
+    static List<BakedQuad> quads(List<Surface> surfaces, int column, int row, int turns, boolean inPlace,
+                                       TrimLooks.Look look, Extent extent, Function<ResourceLocation, TextureAtlasSprite> atlas) {
         TextureAtlasSprite faceSprite = atlas.apply(look.face());
         TextureAtlasSprite edgeSprite = atlas.apply(look.edge());
         int originX = 16 * column;
         int originY = 16 * row;
         List<BakedQuad> quads = new ArrayList<>();
-        for (Surface surface : PixelSlab.cellFaces(mask, originX, originY, back, front, "")) {
+        for (Surface surface : surfaces) {
             boolean planar = surface.face().getAxis() == Direction.Axis.Z;
             TextureAtlasSprite sprite = planar ? faceSprite : edgeSprite;
             Box box = inPlace ? surface.backing().translate(originX, originY, 0) : surface.backing().rotateY(turns);

@@ -20,9 +20,11 @@ public final class FaceUv {
      * never outside the sprite. A box spanning a tile boundary is refused (split it first).
      */
     public static float[] tiled(Box b, Direction face) {
-        double dx = shift(b.minX(), b.maxX());
-        double dy = shift(b.minY(), b.maxY());
-        double dz = shift(b.minZ(), b.maxZ());
+        // Only the two axes in this face affect its UVs. A render-only normal offset may
+        // carry the backing through a tile boundary without changing either texture axis.
+        double dx = face.getAxis() == Direction.Axis.X ? 0 : shift(b.minX(), b.maxX());
+        double dy = face.getAxis() == Direction.Axis.Y ? 0 : shift(b.minY(), b.maxY());
+        double dz = face.getAxis() == Direction.Axis.Z ? 0 : shift(b.minZ(), b.maxZ());
         return of(b.translate(-dx, -dy, -dz), face);
     }
 

@@ -12,6 +12,9 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+import io.github.dirtyredz.roundwood.geometry.PixelSlab;
+import io.github.dirtyredz.roundwood.geometry.Surface;
+
 /**
  * The door's trim attachment (0.8.0) in the door's authored frame (facing north; x across
  * 0..width, y up 0..32, z the depth with the front face, the placing player's side, at 16): a
@@ -53,9 +56,17 @@ public final class DoorTrimGeometry {
     public static boolean inCasing(DoorDesign design, int u, int v) {
         return switch (design) {
             case ROUND -> RingGeometry.inRing(u, v);
-            case DOUBLE_ARCHED -> design.inLeaf(u, v) && !new ArchedProfile(WIDTH, 48 - WIDTH, 16).contains(u, v);
+            case DOUBLE_ARCHED, TALL_DOUBLE_ARCHED -> design.inLeaf(u, v) && !new ArchedProfile(WIDTH, design.width() - WIDTH, design.height() - 32).contains(u, v);
             case ARCHED -> design.inLeaf(u, v) && !ARCHED_INNER.contains(u, v);
         };
+    }
+
+    /** The exact surfaces supplied to the casing model baker; targets retain the authored slab. */
+    public static List<Surface> surfaces(DoorDesign design, AttachmentFace face, int column, int row) {
+        Box slab = ring(design, face).get(0);
+        return PixelSlab.cellFaces((u,v) -> inCasing(design,u,v),
+                column * 16, row * 16, slab.minZ(), slab.maxZ(), "").stream()
+                .map(Surface::separated).toList();
     }
 
     /** The casing drawn on {@code face}. */

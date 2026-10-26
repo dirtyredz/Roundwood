@@ -66,8 +66,8 @@ public final class ContentGameTests {
     public static void canonicalEntriesAndFortyNineHiddenAliasesAreRegistered(GameTestHelper helper) {
         long blocks = ForgeRegistries.BLOCKS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         long items = ForgeRegistries.ITEMS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(blocks == 84, "expected 18 + 4 modular + 13 + 49 blocks, found " + blocks);
-        check(items == 87, "expected 18 + 4 modular + two attachments + 13 + 49 + the window trim items, found " + items);
+        check(blocks == 86, "expected 20 + 4 modular + 13 + 49 blocks, found " + blocks);
+        check(items == 89, "expected 20 + 4 modular + two attachments + 13 + 49 + the window trim items, found " + items);
         for (String id : List.of("arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder")) {
             Block block = ForgeRegistries.BLOCKS.getValue(id(id));
             Item item = ForgeRegistries.ITEMS.getValue(id(id));
@@ -230,7 +230,7 @@ public final class ContentGameTests {
                 "a painting recipe is still loaded");
         long count = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
                 .filter(r -> r.getId().getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(count == 23, "expected 23 roundwood crafting recipes, loaded " + count);
+        check(count == 24, "expected 24 roundwood crafting recipes, loaded " + count);
         ItemStack k = new ItemStack(Items.STICK);
         var ladder = find(level, grid(k, e, k, k, k, k, k, e, k)).orElseThrow();
         check(ladder.assemble(grid(k, e, k, k, k, k, k, e, k), level.registryAccess()).is(Items.LADDER), "beams collided with the vanilla ladder");
@@ -377,7 +377,7 @@ public final class ContentGameTests {
             check(!stack.hasTag() && AppearanceStacks.read(stack).equals(AppearanceDefaults.of(item))
                     && WindowGlassStacks.key(stack).equals(AppearanceDefaults.of(item).key()), item + " is not its plain default: " + stack);
         }
-        check(ModItems.all().size() == 23 && shown.size() == 23, "tab lists " + shown.size() + " items, not the 23 of 0.15.0");
+        check(ModItems.all().size() == 24 && shown.size() == 24, "tab lists " + shown.size() + " items, not the 24 of 0.15.0");
         check(shown.stream().anyMatch(stack -> stack.getItem() == ModItems.CROSS_BEAMS.get()), "Cross Beams is not listed");
         for (Item retired : io.github.dirtyredz.roundwood.migration.LegacyContent.items()) {
             check(shown.stream().noneMatch(stack -> stack.getItem() == retired), "hidden compatibility item " + retired + " is listed");
@@ -391,7 +391,7 @@ public final class ContentGameTests {
     }
 
     /** The 18 canonical blocks in creative order, written out. */
-    private static final List<String> CANONICAL_BLOCKS = List.of("round_door", "arched_door", "double_arched_door",
+    private static final List<String> CANONICAL_BLOCKS = List.of("round_door", "arched_door", "double_arched_door", "tall_double_arched_door",
             "round_window", "round_window_arch_left", "round_window_arch_right", "round_window_bottom_left", "round_window_bottom_right", "round_window_arch_bottom_left", "round_window_arch_bottom_right",
             "round_window_top_left", "round_window_top_right",
             "round_window_edge_top", "round_window_edge_left",

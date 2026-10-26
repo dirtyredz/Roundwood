@@ -11,15 +11,18 @@ import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import java.util.function.Supplier;
 
-/** Nine cells, two outer hinges, one shared assembly lifecycle and open state. */
+/** Nine or twelve cells, two outer hinges, one shared assembly lifecycle and open state. */
 public final class DoubleArchedDoorBlock extends AssemblyDoorBlock {
     public static final IntegerProperty CELL_X = IntegerProperty.create("cell_x", 0, 2);
-    public static final IntegerProperty CELL_Y = IntegerProperty.create("cell_y", 0, 2);
-    public DoubleArchedDoorBlock(Properties properties, BlockSetType type, Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType) {
+    public static final IntegerProperty CELL_Y = IntegerProperty.create("cell_y", 0, 3);
+    private final DoorDesign design;
+    public DoubleArchedDoorBlock(DoorDesign design, Properties properties, BlockSetType type, Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType) {
         super(properties, type, entityType);
+        if (!design.doubleLeaf()) throw new IllegalArgumentException("Paired door design required");
+        this.design = design;
         registerDefaultState(defaultBlockState().setValue(CELL_X, 0).setValue(CELL_Y, 0).setValue(DoorDepth.PROPERTY, DoorDepth.FRONT));
     }
-    @Override public DoorDesign design() { return DoorDesign.DOUBLE_ARCHED; }
+    @Override public DoorDesign design() { return design; }
     @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(CELL_X, CELL_Y, DoorDepth.PROPERTY);

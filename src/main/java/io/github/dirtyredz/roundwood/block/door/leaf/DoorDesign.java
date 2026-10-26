@@ -17,26 +17,22 @@ import java.util.List;
  * </ul>
  */
 public enum DoorDesign {
-    ROUND("round_door", 2, 4, 15) {
+    ROUND("round_door", 2, 32, 4, 15) {
         @Override
         public boolean inLeaf(int u, int v) {
             return PixelCircle.inDisc(WIDTH_ROUND, WIDTH_ROUND, u, v);
         }
     },
-    ARCHED("arched_door", 1, 2, 11) {
+    ARCHED("arched_door", 1, 32, 2, 11) {
         @Override
         public boolean inLeaf(int u, int v) {
             return u >= 0 && u < 16 && v >= 0 && v < HEIGHT && ARCH.contains(u, v);
         }
     },
-    DOUBLE_ARCHED("double_arched_door", 3, 2, 20) {
-        @Override public boolean inLeaf(int u, int v) {
-            return u >= 0 && u < 48 && v >= 0 && v < 48 && (v < 16 ||
-                    !io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.TOP_2X3.top().contains(u, v - 16));
-        }
-    };
+    DOUBLE_ARCHED("double_arched_door", 3, 48, 2, 20),
+    TALL_DOUBLE_ARCHED("tall_double_arched_door", 3, 64, 2, 20);
 
-    /** Every design is two blocks tall. */
+    /** Historical single-door height; paired designs carry their own height. */
     public static final int HEIGHT = 32;
     /** The arched leaf's crown starts here (its centre height). */
     public static final int ARCH_SPRING = 24;
@@ -48,33 +44,39 @@ public enum DoorDesign {
 
     private final String id;
     private final int columns;
+    private final int height;
     private final int strapFrom;
     private final int knobX;
     private List<PixelCircle.Rect> rects;
 
-    DoorDesign(String id, int columns, int strapFrom, int knobX) {
+    DoorDesign(String id, int columns, int height, int strapFrom, int knobX) {
         this.id = id;
         this.columns = columns;
+        this.height = height;
         this.strapFrom = strapFrom;
         this.knobX = knobX;
     }
 
     /** True when pixel (u, v) of the door's plane is leaf. */
-    public abstract boolean inLeaf(int u, int v);
+    public boolean inLeaf(int u, int v) {
+        int crown = height - 32;
+        return u >= 0 && u < width() && v >= 0 && v < height
+                && (v < crown || !io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.TOP_2X3.top().contains(u, v - crown));
+    }
 
     /** The block id the canonical door of this design is registered under (and its model names start with). */
     public String id() {
         return id;
     }
 
-    /** Columns of cells: 2 (round) or 1 (arched); every design has two rows. */
+    /** Columns of owned cells; height() determines the row count. */
     public int columns() {
         return columns;
     }
 
-    /** Width in pixels (16 per column). */
-    public int height() { return this == DOUBLE_ARCHED ? 48 : HEIGHT; }
-    public boolean doubleLeaf() { return this == DOUBLE_ARCHED; }
+    /** Height of the owned footprint in pixels. */
+    public int height() { return height; }
+    public boolean doubleLeaf() { return columns == 3; }
 
     public int width() {
         return 16 * columns;
@@ -90,7 +92,7 @@ public enum DoorDesign {
 
     /** The rows the hinge straps run along. */
     public int[] strapRows() {
-        return STRAP_ROWS.clone();
+        return doubleLeaf() ? new int[]{8, height - 25} : STRAP_ROWS.clone();
     }
 
     /** Where a left-hinge strap starts (x, pixels); it runs {@link #strapLength} towards the free edge. */

@@ -13,6 +13,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DoubleDoorGeometryTest {
     private static final DoorDesign DESIGN = DoorDesign.DOUBLE_ARCHED;
+    @Test void tallDoorAddsOneStraightRowAndKeepsTheExactArchCrown() {
+        var tall = DoorDesign.TALL_DOUBLE_ARCHED;
+        assertEquals(12, DoorLayout.Part.of(tall).size());
+        for (int x=0;x<48;x++) for (int y=0;y<64;y++) {
+            assertEquals(y<16 || DESIGN.inLeaf(x,y-16), tall.inLeaf(x,y), x+"/"+y);
+        }
+        for (var hinge : DoorHingeSide.values()) for (var piece : DoorGeometry.leaf(tall, hinge)) {
+            var model = io.github.dirtyredz.roundwood.client.door.DoorLeafModels.modelBox(tall, piece.box());
+            assertTrue(model.within(new Box(-16,-16,-16,32,32,32)));
+            assertEquals(piece.box(), io.github.dirtyredz.roundwood.client.door.DoorLeafModels.authoredBox(tall,model));
+        }
+        var open = DoorGeometry.placedEnvelope(tall, DoorHingeSide.LEFT, true);
+        assertTrue(open.stream().allMatch(b -> b.maxX() <= 3 || b.minX() >= 45));
+    }
     @Test void squareBottomAndRoundTopExactlyFillTheThreeWideArchOpening() {
         assertEquals(9, DoorLayout.Part.of(DESIGN).size());
         for (int x = 0; x < 48; x++) for (int y = 0; y < 48; y++) {
@@ -38,7 +52,7 @@ class DoubleDoorGeometryTest {
         assertTrue(open.stream().anyMatch(b -> b.minZ() < 0), "missing projected free edges");
     }
     @Test void everyDepthKeepsCollisionInsideCellsAndPreviewAtTheSavedPlane() {
-        for (var design : new DoorDesign[]{DoorDesign.ROUND, DESIGN}) for (var depth : DoorDepth.values()) for (var hinge : DoorHingeSide.values()) {
+        for (var design : DoorDesign.values()) for (var depth : DoorDepth.values()) for (var hinge : DoorHingeSide.values()) {
             var assembly = new DoorLayout.Assembly(BlockPos.ZERO, Direction.NORTH, hinge, design, depth);
             var outline = DoorPlacementOutline.silhouette(assembly, false);
             assertEquals(13 + depth.offset(), outline.stream().mapToDouble(e -> Math.min(e.z1(), e.z2())).min().orElseThrow(), 1e-9);

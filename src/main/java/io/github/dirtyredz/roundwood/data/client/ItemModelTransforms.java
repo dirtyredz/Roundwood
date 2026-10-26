@@ -22,15 +22,20 @@ public final class ItemModelTransforms {
 
     /** Scale the complete width/height into the same slot as the historical two-block assembly. */
     public static void assembly(ItemModelBuilder builder, Vector3f centre, float width, float height) {
+        assembly(builder, centre, width, height, 1);
+    }
+
+    /** Undo a model-only Y compression while fitting the authored dimensions. */
+    public static void assembly(ItemModelBuilder builder, Vector3f centre, float width, float height, float yStretch) {
         if (!Float.isFinite(width) || !Float.isFinite(height) || width <= 0 || height <= 0)
             throw new IllegalArgumentException("Positive finite item dimensions are required");
         float fit = 32 / Math.max(16, Math.max(width, height));
         builder.guiLight(BlockModel.GuiLight.FRONT);
-        display(builder, ItemDisplayContext.GUI, 0, 0, 0, 0.5F * fit, centre, 0, 0, 0);
-        display(builder, ItemDisplayContext.FIXED, 0, 180, 0, 0.375F * fit, centre, 0, 0, 0);
-        display(builder, ItemDisplayContext.GROUND, 0, 0, 0, 0.25F * fit, centre, 0, 3, 0);
-        display(builder, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, 75, 45, 0, 0.1875F * fit, centre, 0, 2.5F, 0);
-        display(builder, ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, 0, 45, 0, 0.2F * fit, centre, 0, 0, 0);
+        display(builder, ItemDisplayContext.GUI, 0, 0, 0, 0.5F * fit, yStretch, centre, 0, 0, 0);
+        display(builder, ItemDisplayContext.FIXED, 0, 180, 0, 0.375F * fit, yStretch, centre, 0, 0, 0);
+        display(builder, ItemDisplayContext.GROUND, 0, 0, 0, 0.25F * fit, yStretch, centre, 0, 3, 0);
+        display(builder, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, 75, 45, 0, 0.1875F * fit, yStretch, centre, 0, 2.5F, 0);
+        display(builder, ItemDisplayContext.FIRST_PERSON_RIGHT_HAND, 0, 45, 0, 0.2F * fit, yStretch, centre, 0, 0, 0);
     }
 
     /** A one-block model (window). */
@@ -50,13 +55,18 @@ public final class ItemModelTransforms {
      */
     private static void display(ItemModelBuilder builder, ItemDisplayContext context, float rx, float ry, float rz,
                                 float scale, Vector3f centre, float x, float y, float z) {
-        Vector3f offset = new Vector3f(centre).sub(8, 8, 8).mul(scale);
+        display(builder, context, rx, ry, rz, scale, 1, centre, x, y, z);
+    }
+
+    private static void display(ItemModelBuilder builder, ItemDisplayContext context, float rx, float ry, float rz,
+                                float scale, float yStretch, Vector3f centre, float x, float y, float z) {
+        Vector3f offset = new Vector3f(centre).sub(8, 8, 8).mul(scale, scale * yStretch, scale);
         new Quaternionf().rotationXYZ((float) Math.toRadians(rx), (float) Math.toRadians(ry), (float) Math.toRadians(rz))
                 .transform(offset);
         builder.transforms().transform(context)
                 .rotation(rx, ry, rz)
                 .translation(round(x - offset.x), round(y - offset.y), round(z - offset.z))
-                .scale(scale)
+                .scale(scale, scale * yStretch, scale)
                 .end().end();
     }
 

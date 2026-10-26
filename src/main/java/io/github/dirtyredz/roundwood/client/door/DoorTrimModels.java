@@ -4,7 +4,6 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
-import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimGeometry;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.MasonryStyles;
@@ -47,11 +46,8 @@ public final class DoorTrimModels {
     }
 
     private static BakedModel build(Key key) {
-        boolean front = key.face() == AttachmentFace.FRONT;
-        double back = front ? DoorGeometry.FRONT : DoorGeometry.BACK - AttachmentFace.PROUD;
-        double out = front ? DoorGeometry.FRONT + AttachmentFace.PROUD : DoorGeometry.BACK;
-        return PixelSlabModels.cell((u, v) -> DoorTrimGeometry.inCasing(key.design(), u, v), key.part().columnIndex(),
-                key.part().row(), back, out, key.facing(), key.look(),
+        return PixelSlabModels.cell(DoorTrimGeometry.surfaces(key.design(), key.face(), key.part().columnIndex(), key.part().row()),
+                key.part().columnIndex(), key.part().row(), key.facing(), key.look(),
                 new PixelSlabModels.Extent(key.design().width(), key.design().height(), Math.max(key.design().width(), key.design().height())));
     }
 }

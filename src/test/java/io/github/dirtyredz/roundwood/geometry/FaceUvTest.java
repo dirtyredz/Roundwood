@@ -11,6 +11,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * a block there would, never outside the sprite; in-tile boxes keep vanilla's default UVs.
  */
 class FaceUvTest {
+    @Test void normalSeparationDoesNotChangeUvTiles() {
+        var box = new Box(0,0,16,16,16,17);
+        for (var face : Direction.values()) {
+            var separated = new Surface(box, face, "").separated();
+            assertArrayEquals(FaceUv.tiled(box,face),FaceUv.tiled(separated.backing(),face));
+        }
+    }
+
     @Test
     void inTileBoxesAreUnchanged() {
         Box box = new Box(2, 3, 4, 6, 9, 5);

@@ -48,7 +48,7 @@ final class GeneratedFiles {
     static final List<String> ARCHWAYS = List.of("archway", "keyhole_archway");
     static final List<String> PLAIN_WINDOWS = WINDOWS.stream().filter(id -> !id.endsWith("_cross")).toList();
     static final List<String> RETIRED = WINDOWS.stream().filter(id -> id.endsWith("_cross")).toList();
-    static final List<String> CANONICAL = Stream.of(List.of("round_door", "arched_door", "double_arched_door"), PLAIN_WINDOWS, ARCH_PIECES, List.of("round_trim"))
+    static final List<String> CANONICAL = Stream.of(List.of("round_door", "arched_door", "double_arched_door", "tall_double_arched_door"), PLAIN_WINDOWS, ARCH_PIECES, List.of("round_trim"))
             .flatMap(List::stream).toList();
     /** window_trim is an item only. */
     static final String WINDOW_TRIM = "window_trim";
@@ -81,7 +81,7 @@ final class GeneratedFiles {
 
     /** The canonical block an id belongs to: itself, or the family of an alias. */
     static String family(String id) {
-        if (id.equals("arched_door") || id.equals("double_arched_door")) {
+        if (id.equals("arched_door") || (id.equals("double_arched_door") || id.equals("tall_double_arched_door"))) {
             return id;
         }
         if (id.endsWith("_round_door") || id.equals("round_door")) {

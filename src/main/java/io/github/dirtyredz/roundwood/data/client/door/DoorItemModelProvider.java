@@ -12,6 +12,14 @@ import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.joml.Vector3f;
 
+import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
+import io.github.dirtyredz.roundwood.data.client.GeometryModelWriter;
+import io.github.dirtyredz.roundwood.geometry.AssemblyFaceUv;
+import io.github.dirtyredz.roundwood.geometry.Box;
+import io.github.dirtyredz.roundwood.geometry.Piece;
+import java.util.ArrayList;
+import net.minecraft.core.Direction;
+
 /**
  * The doors' inventory models, one per design: the whole closed leaf (left hinge) face-on, from one
  * template per design carrying the display transforms (two blocks tall, so both draw at half a
@@ -39,22 +47,22 @@ public class DoorItemModelProvider extends ItemModelProvider {
             ItemModelBuilder template = getBuilder(template(design))
                     .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + DoorModelProvider.template(design, DoorHingeSide.LEFT))));
             if (design.doubleLeaf()) {
-                var pieces = new java.util.ArrayList<io.github.dirtyredz.roundwood.geometry.Piece>();
+                var pieces = new ArrayList<Piece>();
                 for (DoorHingeSide side : DoorHingeSide.values()) for (var p : DoorGeometry.leaf(design, side))
-                    pieces.add(new io.github.dirtyredz.roundwood.geometry.Piece(p.box().translate(-16, -16, 0), p.texture()));
+                    pieces.add(new Piece(DoorLeafModels.modelBox(design, p.box()), p.texture()));
                 template = getBuilder(template(design));
-                io.github.dirtyredz.roundwood.data.client.GeometryModelWriter.addPieces(template, pieces, false,
-                        new io.github.dirtyredz.roundwood.data.client.GeometryModelWriter.FaceStyle() {
-                            @Override public float[] uv(io.github.dirtyredz.roundwood.geometry.Piece piece,
-                                    io.github.dirtyredz.roundwood.geometry.Box part, net.minecraft.core.Direction face) {
-                                return DoorGeometry.PANEL.equals(piece.texture()) ? io.github.dirtyredz.roundwood.geometry.AssemblyFaceUv.of(
-                                        part.translate(16, 16, 0), face, 48) : null;
+                GeometryModelWriter.addPieces(template, pieces, false,
+                        new GeometryModelWriter.FaceStyle() {
+                            @Override public float[] uv(Piece piece,
+                                    Box part, Direction face) {
+                                return DoorGeometry.PANEL.equals(piece.texture()) ? AssemblyFaceUv.of(
+                                        DoorLeafModels.authoredBox(design, part), face, design.width(), design.height(), Math.max(design.width(), design.height())) : null;
                             }
                         });
             }
             // The leaf's middle, in model pixels.
-            ItemModelTransforms.assembly(template, new Vector3f(design.width() / 2F - (design.doubleLeaf() ? 16 : 0), design.height() / 2F - (design.doubleLeaf() ? 16 : 0),
-                    (float) DoorGeometry.PIVOT_Z), Math.max(32, design.width()), design.height());
+            ItemModelTransforms.assembly(template, new Vector3f(design.width() / 2F - (design.doubleLeaf() ? 16 : 0), (float)(design.height() * DoorLeafModels.modelYScale(design) / 2) - (design.doubleLeaf() ? 16 : 0),
+                    (float) DoorGeometry.PIVOT_Z), Math.max(32, design.width()), design.height(), (float)(1 / DoorLeafModels.modelYScale(design)));
             getBuilder(design.id()).parent(template)
                     .texture(DoorGeometry.PANEL, modLoc(DoorModelProvider.OAK_PANEL))
                     .texture(DoorGeometry.BRASS, modLoc("block/brass"))

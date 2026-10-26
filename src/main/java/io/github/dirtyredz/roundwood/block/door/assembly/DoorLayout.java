@@ -38,7 +38,7 @@ public final class DoorLayout {
         UPPER_LEFT(DoorColumn.LEFT, DoubleBlockHalf.UPPER),
         LOWER_RIGHT(DoorColumn.RIGHT, DoubleBlockHalf.LOWER),
         UPPER_RIGHT(DoorColumn.RIGHT, DoubleBlockHalf.UPPER),
-        TOP_LEFT(0, 2), TOP_MIDDLE(1, 2), LOWER_FAR_RIGHT(2, 0), MIDDLE_FAR_RIGHT(2, 1), TOP_FAR_RIGHT(2, 2);
+        TOP_LEFT(0, 2), TOP_MIDDLE(1, 2), LOWER_FAR_RIGHT(2, 0), MIDDLE_FAR_RIGHT(2, 1), TOP_FAR_RIGHT(2, 2), CROWN_LEFT(0, 3), CROWN_MIDDLE(1, 3), CROWN_RIGHT(2, 3);
 
         public final DoorColumn column;
         public final DoubleBlockHalf half;

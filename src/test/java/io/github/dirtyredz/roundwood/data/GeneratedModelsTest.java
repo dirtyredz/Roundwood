@@ -46,12 +46,15 @@ class GeneratedModelsTest {
      * texel per pixel of a 32-pixel image, its back mirrored within its own width.
      */
     static double[] assemblyUv(String face, double[] from, double[] to, double offsetX, double offsetY, double width) {
+        return assemblyUv(face, from, to, offsetX, offsetY, width, width == 48 ? 48 : 32, 1);
+    }
+
+    static double[] assemblyUv(String face, double[] from, double[] to, double offsetX, double offsetY, double width, double height, double yScale) {
         double x1 = from[0] + offsetX;
         double x2 = to[0] + offsetX;
-        double height = width == 48 ? 48 : 32;
         double scale = height / 16;
-        double v1 = (height - (to[1] + offsetY)) / scale;
-        double v2 = (height - (from[1] + offsetY)) / scale;
+        double v1 = (height - ((to[1] + offsetY) / yScale)) / scale;
+        double v2 = (height - ((from[1] + offsetY) / yScale)) / scale;
         return switch (face) {
             case "south" -> new double[] {x1 / scale, v1, x2 / scale, v2};
             case "north" -> new double[] {(width - x2) / scale, v1, (width - x1) / scale, v2};
@@ -72,6 +75,9 @@ class GeneratedModelsTest {
             return new Object[] {"#panel", 0.0, 0.0, 16.0};
         }
         if (id.startsWith("roundwood:block/template_double_arched_door_leaf_") || id.equals("roundwood:item/template_double_arched_door")) {
+            return new Object[] {"#panel", 16.0, 16.0, 48.0};
+        }
+        if (id.contains("template_tall_double_arched_door")) {
             return new Object[] {"#panel", 16.0, 16.0, 48.0};
         }
         String quarter = "roundwood:block/template_round_trim_whole_";
@@ -110,7 +116,9 @@ class GeneratedModelsTest {
                     JsonArray uv = f.has("uv") ? f.getAsJsonArray("uv") : array(defaultUv(face.getKey(), from, to));
                     double[] expected = defaultUv(face.getKey(), localFrom, localTo);
                     double[] whole = mapping != null && mapping[0].equals(f.get("texture").getAsString())
-                            ? assemblyUv(face.getKey(), from, to, (Double) mapping[1], (Double) mapping[2], (Double) mapping[3]) : null;
+                            ? (id.contains("tall_double_arched_door")
+                                ? assemblyUv(face.getKey(), from, to, 16, 16, 48, 64, .75)
+                                : assemblyUv(face.getKey(), from, to, (Double) mapping[1], (Double) mapping[2], (Double) mapping[3])) : null;
                     if (whole != null) {
                         expected = whole;
                         assembly++;

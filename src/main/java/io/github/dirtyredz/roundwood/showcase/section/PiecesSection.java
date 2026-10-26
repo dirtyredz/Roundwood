@@ -30,7 +30,8 @@ public final class PiecesSection implements ShowcaseSection {
     public static final int ROUND_DOOR_R = windowR(WindowProfile.values().length);
     public static final int ARCHED_DOOR_R = ROUND_DOOR_R + ShowcaseSpacing.pitch(2);
     public static final int DOUBLE_DOOR_R = ARCHED_DOOR_R + ShowcaseSpacing.pitch(1);
-    public static final int R_MAX = DOUBLE_DOOR_R + 2;
+    public static final int TALL_DOUBLE_DOOR_R = DOUBLE_DOOR_R + ShowcaseSpacing.pitch(3);
+    public static final int R_MAX = TALL_DOUBLE_DOOR_R + 2;
 
     @Override
     public String id() {
@@ -62,6 +63,8 @@ public final class PiecesSection implements ShowcaseSection {
         }
         canvas.sign(ROUND_DOOR_R, F, "Round door");
         canvas.door(oak, ROUND_DOOR_R, F, DoorHingeSide.LEFT, false);
+        canvas.sign(TALL_DOUBLE_DOOR_R, F, "Tall double door");
+        canvas.door(ModBlocks.tallDoubleArchedDoor(), oak, TALL_DOUBLE_DOOR_R, F, DoorHingeSide.LEFT, false);
         canvas.sign(DOUBLE_DOOR_R, F, "Double arched door");
         canvas.door(ModBlocks.doubleArchedDoor(), oak, DOUBLE_DOOR_R, F, DoorHingeSide.LEFT, false);
         canvas.sign(ARCHED_DOOR_R, F, "Arched door");

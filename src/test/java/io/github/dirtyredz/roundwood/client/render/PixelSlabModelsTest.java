@@ -25,6 +25,26 @@ class PixelSlabModelsTest {
     private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath("test", "planks");
     private static final PixelSlabModels.Extent EXTENT = new PixelSlabModels.Extent(32, 32, 32);
 
+    @Test void everySeparatedDoorCasingBakesWithoutLosingItsNormalSeparation() {
+        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16,16), new NativeImage(16,16,false), AnimationMetadataSection.EMPTY)) {
+            var sprite = new Sprite(contents);
+            for (var design : io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.values())
+                for (var face : AttachmentFace.values()) for (var part : io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.Part.of(design)) {
+                    var surfaces = io.github.dirtyredz.roundwood.block.door.trim.DoorTrimGeometry.surfaces(design,face,part.columnIndex(),part.row());
+                    for (int turns=0;turns<4;turns++) {
+                        var quads = PixelSlabModels.quads(surfaces,part.columnIndex(),part.row(),turns,false,TrimLooks.Look.tiled(TEXTURE),
+                                new PixelSlabModels.Extent(design.width(),design.height(),Math.max(design.width(),design.height())), id -> sprite);
+                        assertEquals(surfaces.size(),quads.size());
+                        for (var quad : quads) {
+                            int axis = quad.getDirection().getAxis().ordinal();
+                            double plane = Float.intBitsToFloat(quad.getVertices()[axis])*16;
+                            assertEquals(1.0/256,Math.abs(plane-Math.rint(plane)),1e-6,"separation lost in bake");
+                        }
+                    }
+                }
+        }
+    }
+
     /** Real sprite coordinates in a nonzero atlas region; no GL context or client is needed. */
     private static final class Sprite extends TextureAtlasSprite {
         Sprite(SpriteContents contents) { super(TEXTURE, contents, 256, 256, 32, 64); }

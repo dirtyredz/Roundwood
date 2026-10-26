@@ -56,14 +56,14 @@ class GeneratedRecipesTest {
 
     @Test
     void thereAreExactlyTheTwentyTwoRecipes() throws IOException {
-        assertEquals(new TreeSet<>(List.of("round_door", "arched_door", "double_arched_door", "round_window", "round_window_arch_left",
+        assertEquals(new TreeSet<>(List.of("round_door", "arched_door", "double_arched_door", "tall_double_arched_door", "round_window", "round_window_arch_left",
                 "round_window_arch_right", "round_window_bottom_left", "round_window_bottom_right",
                 "round_trim",
                 "round_window_arch_bottom_left", "round_window_arch_bottom_right", "round_window_top_left",
                 "round_window_top_right", "round_window_edge_top", "round_window_edge_left",
                 "round_window_edge_bottom", "round_window_edge_right", "arch_sill_trim", "cross_beams", "arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder")),
                 recipeNames());
-        assertEquals(23, recipeNames().size());
+        assertEquals(24, recipeNames().size());
     }
 
     @Test
@@ -71,6 +71,8 @@ class GeneratedRecipesTest {
         assertRecipe("cross_beams", "", List.of(" S ", "SSS", " S "), Map.of("S", STICK));
         assertRecipe("round_door", "roundwood:round_door", List.of("PPP", "PNP", "PPP"), Map.of("P", PLANKS, "N", NUGGET));
         assertRecipe("double_arched_door", "roundwood:double_arched_door", List.of("PNP", "PPP", "PNP"), Map.of("P", PLANKS, "N", NUGGET));
+        assertRecipe("tall_double_arched_door", "roundwood:tall_double_arched_door", List.of("PPP", "NDN", "PPP"),
+                Map.of("P", PLANKS, "N", NUGGET, "D", "{\"item\":\"roundwood:double_arched_door\"}"));
         assertRecipe("arched_door", "roundwood:arched_door", List.of(" P ", "PNP", "PPP"), Map.of("P", PLANKS, "N", NUGGET));
         assertRecipe("round_window", "roundwood:round_window", List.of(" P ", "PGP", " P "), Map.of("P", PLANKS, "G", PANE));
         assertRecipe("round_window_arch_left", "roundwood:round_window_arch", List.of("PP", "PG", "P "),
@@ -125,7 +127,7 @@ class GeneratedRecipesTest {
             }
             grids.put(name, placements);
         }
-        assertEquals(23, grids.size());
+        assertEquals(24, grids.size());
         assertTrue(java.util.Collections.disjoint(grids.get("cross_beams"),
                 placements(List.of("S S", "SSS", "S S"), JsonParser.parseString("{\"S\":" + STICK + "}").getAsJsonObject())),
                 "Cross Beams must not match the vanilla ladder");
@@ -149,7 +151,7 @@ class GeneratedRecipesTest {
                 for (Path file : files.toList()) {
                     String name = file.getFileName().toString().replace(".json", "");
                     assertTrue(seen.add(name), name + " appears in two categories");
-                    assertEquals(category.equals("redstone"), name.equals("round_door") || name.equals("arched_door") || name.equals("double_arched_door"), name + " in " + category);
+                    assertEquals(category.equals("redstone"), name.equals("round_door") || name.equals("arched_door") || (name.equals("double_arched_door") || name.equals("tall_double_arched_door")), name + " in " + category);
                     JsonObject advancement = json(file);
                     if (name.equals("cross_beams")) {
                         assertEquals("minecraft:stick", advancement.getAsJsonObject("criteria").getAsJsonObject("has_stick")

@@ -82,7 +82,10 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
         pose.translate(pivotX, 0, pivotZ);
         pose.mulPose(Axis.YP.rotationDegrees((float) DoorGeometry.swingDegrees(hinge, progress)));
         pose.translate(-pivotX, 0, -pivotZ);
-        if (design.doubleLeaf()) pose.translate(1, 1, 0); // Undo legal model-coordinate shift.
+        if (design.doubleLeaf()) {
+            pose.scale(1, (float)(1 / DoorLeafModels.modelYScale(design)), 1);
+            pose.translate(1, 1, 0);
+        } // Undo legal model-coordinate shift.
         blocks.getModelRenderer().renderModel(pose.last(), buffers.getBuffer(Sheets.solidBlockSheet()), state, model,
                 red, green, blue, light, overlay, ModelData.EMPTY, RenderType.solid());
         pose.popPose();

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Twenty-two advertised items: two doors, thirteen plain profiles, four arch pieces and three attachments.
+ * Twenty-two advertised items: four doors, thirteen plain profiles, four arch pieces and three attachments.
  * The window map also retains the thirteen hidden crossed items. Frozen aliases and window_trim
  * remain registered by LegacyContent. The two retired archways are non-placeable migration sources.
  * Looks travel in stack data.
@@ -40,6 +40,8 @@ public final class ModItems {
             () -> new RoundDoorItem(ModBlocks.roundDoor(), new Item.Properties()));
     public static final RegistryObject<RoundDoorItem> ARCHED_DOOR = ITEMS.register("arched_door",
             () -> new RoundDoorItem(ModBlocks.archedDoor(), new Item.Properties()));
+    public static final RegistryObject<RoundDoorItem> TALL_DOUBLE_ARCHED_DOOR = ITEMS.register("tall_double_arched_door",
+            () -> new RoundDoorItem(ModBlocks.tallDoubleArchedDoor(), new Item.Properties()));
     public static final RegistryObject<RoundDoorItem> DOUBLE_ARCHED_DOOR = ITEMS.register("double_arched_door",
             () -> new RoundDoorItem(ModBlocks.doubleArchedDoor(), new Item.Properties()));
     private static final Map<WindowDesign, RegistryObject<RoundWindowItem>> WINDOWS = registerWindows();
@@ -113,6 +115,7 @@ public final class ModItems {
         out.add(ROUND_DOOR.get());
         out.add(ARCHED_DOOR.get());
         out.add(DOUBLE_ARCHED_DOOR.get());
+        out.add(TALL_DOUBLE_ARCHED_DOOR.get());
         out.addAll(windows());
         out.addAll(archPieces());
         out.add(ROUND_TRIM.get());
