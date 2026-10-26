@@ -82,6 +82,16 @@ public final class AssemblyFamilies {
         return out;
     }
 
+    /** Modular products have variable row counts; dedicated tests avoid historical fixed part indices. */
+    public static List<Family> archPieces() {
+        List<Family> out = new ArrayList<>();
+        for (var design : io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.values()) {
+            out.add(new ArchPieceFamily(design, io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side.LEFT));
+            if (design.shoulder()) out.add(new ArchPieceFamily(design, io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side.RIGHT));
+        }
+        return List.copyOf(out);
+    }
+
     // ---- raw world access (no callbacks, no scheduled ticks, no block entity) ----
 
     /** Writes {@code state} straight into the chunk section, as a chunk load does. The chunk must be loaded. */

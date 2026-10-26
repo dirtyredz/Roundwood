@@ -20,6 +20,10 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
   anchor lookup and whole-piece appearance targets; fitting/routing follows in part 2.
 - `src/test/java/io/github/dirtyredz/roundwood/block/arch/assembly/` holds pure
   layout, rotation and targeting tests.
+- `src/gameTest/java/io/github/dirtyredz/roundwood/block/arch/` verifies modular
+  placement, lifecycle and historical fixture preservation. `fixture/ArchPieceFixtures`
+  supplies production-path hits; `fixture/assembly/ArchPieceFamily` adapts variable
+  layouts without adding fixed-index assumptions to historical assembly tests.
 
 - `.github/` - synced workflows and `actions/setup-mod-build/` Java/Gradle composite (checkout bootstraps it).
 - `.ci/` - per-mod `mod.json` plus synced Node `scripts/` for verification, assets, GameTest completion and publication.

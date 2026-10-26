@@ -28,6 +28,17 @@ advertised content when resources and recipes are ready. `archways()` remains th
 old two designs. Command-created cell states outside a product's dimensions are
 inert and removed without looking up or tearing down a neighbouring assembly.
 
+`ArchPieceTargeting` projects a hit onto the facing's right axis; front/back and
+up/down faces split at 0.5 with LEFT ties, and side-wall hits choose the touching
+edge. `ArchPiecePlacement.of` uses the context's landing cell as lower-left anchor,
+then the shared preflight checks every cell for world bounds, border, loaded state,
+fluid, replacement and player permission. Entity checks use the product's collision,
+without a floor predicate. `at` applies the same playerless checks. Item use recomputes
+the proposal and passes it to `AssemblyPlacement`; showcase-style placement uses
+the existing `AssemblyInstallation`. Neither shared installer signature changes.
+The overlay in the next batch must consume this proposal and respect hand precedence
+and interactive-target click consumption before presenting a successful placement.
+
 ## Door assembly
 
 There are two door designs (`leaf/DoorDesign`: ROUND, ARCHED; see "The arched door" below). This
