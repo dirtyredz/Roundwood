@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.data.server;
 
 import io.github.dirtyredz.roundwood.block.archway.trim.ArchwayTrimNbt;
+import io.github.dirtyredz.roundwood.block.arch.trim.ArchPieceTrimNbt;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimNbt;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowSillNbt;
@@ -48,6 +49,8 @@ public class RoundwoodBlockLoot extends BlockLootSubProvider {
         ModBlocks.windows().forEach(window -> add(window, window(window.asItem(), window.profile().takesSill())));
         ModBlocks.archways().forEach(archway -> add(archway,
                 withFaces(createSingleItemTable(archway.asItem()), TrimSlot.PERIMETER, ArchwayTrimNbt.TAG)));
+        ModBlocks.archPieces().forEach(piece -> add(piece,
+                withFaces(createSingleItemTable(piece.asItem()), TrimSlot.PERIMETER, ArchPieceTrimNbt.TAG)));
         CrossWindowCompatibility.blocks().forEach(block -> dropOther(block, ModItems.window(block.design())));
         LegacyContent.doors().forEach(block -> add(block, door(ModItems.ROUND_DOOR.get())));
         LegacyContent.windows().forEach(block -> add(block, window(ModItems.ROUND_WINDOW.get(), false)));
@@ -74,6 +77,6 @@ public class RoundwoodBlockLoot extends BlockLootSubProvider {
 
     @Override
     protected Iterable<Block> getKnownBlocks() {
-        return Stream.concat(ModBlocks.canonical().stream(), LegacyContent.blocks().stream()).toList();
+        return Stream.of(ModBlocks.canonical().stream(), ModBlocks.archPieces().stream(), LegacyContent.blocks().stream()).flatMap(stream -> stream).map(block -> (Block) block).toList();
     }
 }

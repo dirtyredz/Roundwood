@@ -79,7 +79,9 @@ class GeneratedResourceManifestTest {
         assertEquals(block, names(assets("models/block")));
         assertEquals(item, names(assets("models/item")));
         assertEquals(new TreeSet<>(BLOCKS), names(assets("blockstates")));
-        assertEquals(new TreeSet<>(BLOCKS), names(data("loot_tables/blocks")));
+        var lootBlocks = new TreeSet<>(BLOCKS);
+        lootBlocks.addAll(ARCH_PIECES);
+        assertEquals(lootBlocks, names(data("loot_tables/blocks")));
         Set<String> crafted = new TreeSet<>(CANONICAL);
         crafted.add("cross_beams");
         crafted.add(ARCH_SILL_TRIM); // crafted, but an item only
@@ -89,7 +91,7 @@ class GeneratedResourceManifestTest {
         assertEquals(29 + 112, allJson(assets("models/block")).size());
         assertEquals(85, allJson(assets("models/item")).size());
         assertEquals(20, allJson(data("recipes")).size());
-        assertEquals(80, allJson(data("loot_tables/blocks")).size());
+        assertEquals(84, allJson(data("loot_tables/blocks")).size());
         assertEquals(20, allJson(data("advancements/recipes")).size());
     }
 }

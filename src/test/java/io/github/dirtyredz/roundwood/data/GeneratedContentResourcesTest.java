@@ -28,6 +28,16 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static io.github.dirtyredz.roundwood.data.GeneratedFiles.*;
 
 class GeneratedContentResourcesTest {
+    @Test void modularArchLootKeepsThreeIndependentLooks() {
+        for (String id : ARCH_PIECES) {
+            var pools = json(data("loot_tables/blocks/" + id + ".json")).getAsJsonArray("pools");
+            assertEquals(3, pools.size());
+            assertEquals(JsonParser.parseString(ownItemPool("roundwood:" + id)), pools.get(0));
+            assertEquals(JsonParser.parseString(trimFacePool("front", "roundwood:round_trim", "ArchPieceTrim.Front")), pools.get(1));
+            assertEquals(JsonParser.parseString(trimFacePool("back", "roundwood:round_trim", "ArchPieceTrim.Back")), pools.get(2));
+        }
+    }
+
     @Test
     void windowTrimIsAnItemWithoutABlock() {
         assertTrue(Files.isRegularFile(assets("models/item/" + WINDOW_TRIM + ".json")), "item model");

@@ -1,5 +1,11 @@
 # Gotchas - Roundwood
 
+- **Modular arch loot uses the anchor and exact body item.** Both casings are TRIM-family
+  items too; family-wide decoration would overwrite their independent looks.
+- **Modular previews are conservative on interactive blocks.** Without secondary use,
+  a block overriding its use callback suppresses the successful placement preview.
+  The preview never invokes callbacks to discover whether they consume a click.
+
 - **Modular tops reserve empty cells.** The 2x3 top's lower centre is empty geometry
   but owned assembly space; placement and integrity must still check it. Tops do
   not collide, preserving crown clearance; shoulders collide only in rows 8..15.

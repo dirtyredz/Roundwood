@@ -41,6 +41,13 @@ the complete silhouette, the landing face and the shoulder midpoint split. Witho
 it suppresses success on blocks overriding the use callback: those may consume the click first.
 Callback detection uses its parameter types, so mapped runtime names do not affect the guard.
 
+The anchor declares `ArchPieceTrim` v1 with independent front/back TRIM appearances.
+The host adapter uses shared fitting, payment, shears refunds and permission checks.
+Face donors restyle an installed casing; reveal donors restyle the body. Sill and beams
+refuse with the existing hints. Loot evaluates against the anchor from any owned cell
+and decorates only the exact body item, keeping both casing looks independent.
+Casings cover the whole mask at z=-1..0 or 16..17 and never add collision.
+
 ## Door assembly
 
 There are two door designs (`leaf/DoorDesign`: ROUND, ARCHED; see "The arched door" below). This

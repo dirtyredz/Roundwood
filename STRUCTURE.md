@@ -6,6 +6,9 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
+- `src/main/java/io/github/dirtyredz/roundwood/block/arch/trim/` owns modular casing geometry, targeting and adapters over shared attachment storage/fitting.
+- `src/test/java/io/github/dirtyredz/roundwood/block/arch/trim/` guards whole-mask casing depth and coverage.
+
 - `src/main/java/io/github/dirtyredz/roundwood/client/arch/` owns modular arch preview and rendering.
 - `src/test/java/io/github/dirtyredz/roundwood/client/arch/` guards previews and baked models.
 
@@ -20,7 +23,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `src/main/java/io/github/dirtyredz/roundwood/block/arch/assembly/` owns variable
   cell identity, layouts, targeting and placement proposals over shared assembly services.
 - `src/main/java/io/github/dirtyredz/roundwood/block/arch/appearance/` adapts typed
-  anchor lookup and whole-piece appearance targets; fitting/routing follows in part 2.
+  anchor lookup, whole-piece appearance targets and face-versus-reveal gesture routing.
 - `src/test/java/io/github/dirtyredz/roundwood/block/arch/assembly/` holds pure
   layout, rotation and targeting tests.
 - `src/gameTest/java/io/github/dirtyredz/roundwood/block/arch/` verifies modular

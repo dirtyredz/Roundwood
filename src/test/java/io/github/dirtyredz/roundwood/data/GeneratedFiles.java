@@ -44,6 +44,7 @@ final class GeneratedFiles {
     /** The two designs that are plain round windows; the other 24 are oriented (arches, corners and edges). */
     static final List<String> ROUND_DESIGNS = List.of("round_window", "round_window_cross");
     /** The two archways (0.12.0): block entities with a front and back trim, like doors and windows. */
+    static final List<String> ARCH_PIECES = List.of("arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder");
     static final List<String> ARCHWAYS = List.of("archway", "keyhole_archway");
     static final List<String> PLAIN_WINDOWS = WINDOWS.stream().filter(id -> !id.endsWith("_cross")).toList();
     static final List<String> RETIRED = WINDOWS.stream().filter(id -> id.endsWith("_cross")).toList();

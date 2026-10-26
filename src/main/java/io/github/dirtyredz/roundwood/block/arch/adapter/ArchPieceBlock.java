@@ -39,11 +39,17 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceUseTarget;
+import io.github.dirtyredz.roundwood.block.arch.appearance.ArchPieceInteraction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import java.util.List;
 import java.util.function.Supplier;
 
 /** Minecraft callbacks only; assembly services own completeness, removal, harvesting and anchors. */
-public final class ArchPieceBlock extends Block implements EntityBlock, AppearanceDefaults {
+public final class ArchPieceBlock extends Block implements EntityBlock, AppearanceDefaults, AppearanceUseTarget {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<ArchPieceCell> CELL = EnumProperty.create("cell", ArchPieceCell.class);
     public static final EnumProperty<Side> SIDE = EnumProperty.create("side", Side.class);
@@ -104,7 +110,14 @@ public final class ArchPieceBlock extends Block implements EntityBlock, Appearan
     @Override public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity entity, ItemStack tool) {
         AssemblyHarvest.playerDestroy(level, pos, () -> super.playerDestroy(level, player, pos, state, entity, tool));
     }
+    @Override public boolean claimsUse(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return state.getValue(CELL).in(design) && ArchPieceInteraction.claims(state, level, pos, player, hand, hit);
+    }
+    @Override public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return state.getValue(CELL).in(design) ? ArchPieceInteraction.use(this, state, level, pos, player, hand, hit) : InteractionResult.PASS;
+    }
     @Override public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
+        ArchPieceAppearance.ANCHORS.forLoot(builder, state).ifPresent(anchor -> builder.withParameter(LootContextParams.BLOCK_ENTITY, anchor));
         return AppearanceDrops.decorate(super.getDrops(state, builder), asItem(), ArchPieceAppearance.forDrops(builder, state));
     }
     @Override public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
