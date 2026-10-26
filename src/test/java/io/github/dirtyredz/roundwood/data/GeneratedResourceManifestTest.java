@@ -64,6 +64,7 @@ class GeneratedResourceManifestTest {
                 "round_trim", WINDOW_TRIM,
                 ARCH_SILL_TRIM, "cross_beams", "archway", "keyhole_archway"));
         block.addAll(windowBlockModels());
+        block.addAll(ARCH_PIECES);
         item.addAll(WINDOWS);
         for (String part : PARTS) {
             block.add("template_round_trim_" + part);
@@ -73,12 +74,14 @@ class GeneratedResourceManifestTest {
         }
         item.addAll(ALIASES);
         assertEquals(112, windowBlockModels().size());
-        assertEquals(29 + 112, block.size()); // 22 before 0.11.0, the arched door adds 5; 0.12.0 the two archways
+        assertEquals(33 + 112, block.size()); // 22 before 0.11.0, the arched door adds 5; 0.12.0 the two archways
         assertEquals(85, item.size()); // 63 of 0.9.0, 16 new windows, arch_sill_trim; 0.11.0 the arched door and its template; 0.12.0 the two archways
         // Exact sets: no per-finish models remain; the 49 old ids are only item-model aliases.
         assertEquals(block, names(assets("models/block")));
         assertEquals(item, names(assets("models/item")));
-        assertEquals(new TreeSet<>(BLOCKS), names(assets("blockstates")));
+        var stateBlocks = new TreeSet<>(BLOCKS);
+        stateBlocks.addAll(ARCH_PIECES);
+        assertEquals(stateBlocks, names(assets("blockstates")));
         var lootBlocks = new TreeSet<>(BLOCKS);
         lootBlocks.addAll(ARCH_PIECES);
         assertEquals(lootBlocks, names(data("loot_tables/blocks")));
@@ -87,8 +90,8 @@ class GeneratedResourceManifestTest {
         crafted.add(ARCH_SILL_TRIM); // crafted, but an item only
         assertEquals(crafted, names(data("recipes")));
         assertEquals(crafted, names(data("advancements/recipes")));
-        assertEquals(80, allJson(assets("blockstates")).size());
-        assertEquals(29 + 112, allJson(assets("models/block")).size());
+        assertEquals(84, allJson(assets("blockstates")).size());
+        assertEquals(33 + 112, allJson(assets("models/block")).size());
         assertEquals(85, allJson(assets("models/item")).size());
         assertEquals(20, allJson(data("recipes")).size());
         assertEquals(84, allJson(data("loot_tables/blocks")).size());

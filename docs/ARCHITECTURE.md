@@ -48,6 +48,12 @@ refuse with the existing hints. Loot evaluates against the anchor from any owned
 and decorates only the exact body item, keeping both casing looks independent.
 Casings cover the whole mask at z=-1..0 or 16..17 and never add collision.
 
+`client/arch` draws body and casings from the anchor through `AssemblyCellRenderer`,
+with each owned cell's light and AO. Cached models key product, side, cell, facing,
+depth and look; resource rebakes clear them through `AppearanceModelCache`.
+Every face uses the donor sprite (or painted boards), with UV projection after rotation.
+Empty world models ensure that only the BER draws the body.
+
 ## Door assembly
 
 There are two door designs (`leaf/DoorDesign`: ROUND, ARCHED; see "The arched door" below). This

@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.client;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.client.archway.ArchwayRenderer;
+import io.github.dirtyredz.roundwood.client.arch.ArchPieceRenderer;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.client.door.DoorAppearanceModels;
@@ -50,6 +51,7 @@ public final class RoundwoodClient {
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_TRIM.get(), RoundTrimRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_WINDOW.get(), WindowTrimRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.ARCHWAY.get(), ArchwayRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.ARCH_PIECE.get(), ArchPieceRenderer::new);
     }
 
     @SubscribeEvent

@@ -54,6 +54,15 @@ class GeneratedBlockstatesTest {
         }
     }
 
+    @Test void modularArchStatesUseEmptyWorldModels() {
+        for (String id : GeneratedFiles.ARCH_PIECES) {
+            assertSingleVariant(id, "roundwood:block/" + id);
+            var model = GeneratedFiles.json(GeneratedFiles.assets("models/block/" + id + ".json"));
+            assertFalse(model.has("elements"), "BER must be the only body renderer");
+            assertEquals("minecraft:block/oak_planks", model.getAsJsonObject("textures").get("particle").getAsString());
+        }
+    }
+
     private static void assertSingleVariant(String id, String model) {
         JsonObject state = json(assets("blockstates/" + id + ".json"));
         assertFalse(state.has("multipart"), id);

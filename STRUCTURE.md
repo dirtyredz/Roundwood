@@ -6,6 +6,8 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
+- `src/main/java/io/github/dirtyredz/roundwood/data/client/arch/` emits modular empty world models and full-shape item geometry.
+
 - `src/main/java/io/github/dirtyredz/roundwood/block/arch/trim/` owns modular casing geometry, targeting and adapters over shared attachment storage/fitting.
 - `src/test/java/io/github/dirtyredz/roundwood/block/arch/trim/` guards whole-mask casing depth and coverage.
 
