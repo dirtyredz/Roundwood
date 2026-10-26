@@ -6,6 +6,9 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
+- `src/main/java/io/github/dirtyredz/roundwood/client/arch/` owns modular arch preview and rendering.
+- `src/test/java/io/github/dirtyredz/roundwood/client/arch/` guards previews and baked models.
+
 - `tools/structures/archways-v0133.mjs` pins historical archway IDs, parts and known
   appearance/trim payloads; `archways_v0133.nbt` is its generated GameTest fixture.
 - `src/test/java/io/github/dirtyredz/roundwood/block/arch/geometry/` holds independent

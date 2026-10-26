@@ -36,8 +36,10 @@ fluid, replacement and player permission. Entity checks use the product's collis
 without a floor predicate. `at` applies the same playerless checks. Item use recomputes
 the proposal and passes it to `AssemblyPlacement`; showcase-style placement uses
 the existing `AssemblyInstallation`. Neither shared installer signature changes.
-The overlay in the next batch must consume this proposal and respect hand precedence
-and interactive-target click consumption before presenting a successful placement.
+The modular overlay consumes this proposal and shares hand precedence. It outlines every owned cell,
+the complete silhouette, the landing face and the shoulder midpoint split. Without secondary use,
+it suppresses success on blocks overriding the use callback: those may consume the click first.
+Callback detection uses its parameter types, so mapped runtime names do not affect the guard.
 
 ## Door assembly
 
