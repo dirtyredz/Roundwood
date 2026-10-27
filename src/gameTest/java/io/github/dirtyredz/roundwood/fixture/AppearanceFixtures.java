@@ -84,10 +84,10 @@ public final class AppearanceFixtures {
         return use(helper, player, hit, sneaking);
     }
 
-    /** The middle of the door's front face: the leaf, closed or open (the open leaf still covers the hinge column). */
+    /** An unadorned panel point below the knob: body gestures must not target hardware. */
     public static BlockHitResult leaf(DoorLayout.Assembly door, boolean open) {
         return DoorFixtures.frontHit(door, open ? (door.hinge() == net.minecraft.world.level.block.state.properties.DoorHingeSide.LEFT
-                ? 0.08 : 1.92) : 1.0, 1.0);
+                ? 0.08 : 1.92) : 1.0, 0.8);
     }
 
     /** A static corner of the door's front face (lower left). */

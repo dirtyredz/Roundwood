@@ -9,7 +9,7 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   workspace. The owner checks visuals and client behaviour in game.
 - **Focused door targeting:** `./gradlew --offline runGameTestServer -PdoorTargets` compiles
   only fixtures, door depth/placement, fitted-arch transaction/lifecycle, thin acquisition, arch placement,
-  the bounded new showcase sections and environment checks. Full showcase/navigation/migration suites run on ANU.
+  the bounded new showcase sections, body/hand routing, anchor persistence, content custody and environment checks. Full showcase/navigation/migration suites run on ANU.
 - **Focused villager repeats:** `./gradlew --offline runGameTestServer -PnavigationRepeats=20`
   compiles only navigation tests, fixtures and environment checks, with 20 independent required
   copies of each of the seven walks (no retries or timeout changes). Omit the property for the

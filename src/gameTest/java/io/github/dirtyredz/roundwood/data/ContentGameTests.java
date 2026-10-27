@@ -326,14 +326,15 @@ public final class ContentGameTests {
             net.minecraft.world.level.block.state.BlockState state = window.defaultBlockState().setValue(WindowPaneBlock.TRIMMED, true);
             io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity entity = new io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity(
                     io.github.dirtyredz.roundwood.registry.ModBlockEntities.roundWindow(), pos, state);
-            entity.setTrims(io.github.dirtyredz.roundwood.block.attachment.FaceTrims.both(io.github.dirtyredz.roundwood.appearance.Appearance.DEFAULT));
+            boolean trim=((WindowPaneBlock)window).profile().takesTrim();
+            if(trim) check(entity.setTrims(io.github.dirtyredz.roundwood.block.attachment.FaceTrims.both(io.github.dirtyredz.roundwood.appearance.Appearance.DEFAULT)),"trim fixture");
             // an upper arch (0.10.0) with oak sills on both faces also drops one plain Arch Sill per face
             boolean sills = ((WindowPaneBlock) window).profile().takesSill();
             if (sills) {
                 entity.setTrims(TrimSlot.SILL, io.github.dirtyredz.roundwood.block.attachment.FaceTrims.both(Appearance.DEFAULT));
             }
             List<ItemStack> drops = Block.getDrops(state, helper.getLevel(), pos, entity);
-            check(drops.size() == (sills ? 5 : 3) && drops.stream().filter(d -> d.is(ModItems.ROUND_TRIM.get()) && !d.hasTag()).count() == 2
+            check(drops.size() == 1+(trim?2:0)+(sills?2:0) && drops.stream().filter(d -> d.is(ModItems.ROUND_TRIM.get()) && !d.hasTag()).count() == (trim?2:0)
                             && drops.stream().filter(d -> d.is(ModItems.ARCH_SILL_TRIM.get()) && !d.hasTag()).count() == (sills ? 2 : 0),
                     window + " trimmed loot is " + drops);
         }

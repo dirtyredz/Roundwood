@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 
 /**
  * One of each placeable piece, oak, default state, in a single row with a sign beside each:
- * the fourteen windows (one per profile), the round door, the arched door (both closed, hinge left)
+ * the thirteen framed windows (the frameless pane is demonstrated in WindowEdgesSection), the round door, the arched door (both closed, hinge left)
  * with modular arches in their own section. Each stands {@link ShowcaseSpacing#GAP} clear blocks from the
  * next, its sign two columns to its left in the same row. Occupies {@code r 0..R_MAX, f 1}; the
  * section's rectangle is checked to hold nothing else.
@@ -27,7 +27,7 @@ import java.util.stream.IntStream;
 public final class PiecesSection implements ShowcaseSection {
     public static final int F = ShowcaseSpacing.ROW_PIECES;
     private static final int WINDOW_PITCH = ShowcaseSpacing.pitch(1);
-    public static final int ROUND_DOOR_R = windowR(WindowProfile.values().length);
+    public static final int ROUND_DOOR_R = windowR(profiles().length);
     public static final int ARCHED_DOOR_R = ROUND_DOOR_R + ShowcaseSpacing.pitch(2);
     public static final int DOUBLE_DOOR_R = ARCHED_DOOR_R + ShowcaseSpacing.pitch(1);
     public static final int TALL_DOUBLE_DOOR_R = DOUBLE_DOOR_R + ShowcaseSpacing.pitch(3);
@@ -38,14 +38,16 @@ public final class PiecesSection implements ShowcaseSection {
         return "pieces";
     }
 
+    private static WindowProfile[] profiles(){return java.util.Arrays.stream(WindowProfile.values()).filter(WindowProfile::takesTrim).toArray(WindowProfile[]::new);}
+
     /** Frame {@code r} of window {@code index} (profile order). */
     public static int windowR(int index) {
         return ShowcaseSpacing.FIRST_R + WINDOW_PITCH * index;
     }
 
-    /** The fourteen windows, one per profile, centred: the round one across the builder's right, the rest front towards the builder. */
+    /** The framed windows, one per profile, centred: the round one across the builder's right, the rest front towards the builder. */
     public static List<ShowcaseWindow> windows(ShowcaseFrame frame) {
-        WindowProfile[] profiles = WindowProfile.values();
+        WindowProfile[] profiles = profiles();
         WindowPose oriented = WindowArchesSection.centred(frame.forward());
         WindowPose round = WindowPosition.CENTER.pose(frame.right().getAxis());
         return IntStream.range(0, profiles.length)

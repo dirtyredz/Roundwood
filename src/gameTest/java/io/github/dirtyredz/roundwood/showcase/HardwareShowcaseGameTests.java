@@ -22,11 +22,14 @@ public final class HardwareShowcaseGameTests {
         for(var pos:BlockPos.betweenClosed(bounds.minX(),frame.floorY(),bounds.minZ(),bounds.maxX(),frame.floorY(),bounds.maxZ()))
             level.setBlock(pos,Blocks.STONE.defaultBlockState(),Block.UPDATE_CLIENTS);
         var canvas=new ShowcaseCanvas(level,frame);
+        new io.github.dirtyredz.roundwood.showcase.section.PiecesSection().build(canvas);
         new DoorHardwareSection().build(canvas);new MaterialsSection().build(canvas);new WindowEdgesSection().build(canvas);canvas.verifyLabels();
         check(canvas.problems().isEmpty(),"feedback showcase problems: "+canvas.problems());
         HardwareShowcaseChecks.verify(level,frame);
         helper.runAfterDelay(3,()->{
             HardwareShowcaseChecks.verify(level,frame);
+            io.github.dirtyredz.roundwood.showcase.section.SectionChecks.verifyPieces(level,frame);
+            io.github.dirtyredz.roundwood.showcase.section.SectionChecks.verifyMaterials(level,frame);
             var centre=frame.pos(WindowEdgesSection.WIDE_R+1,1,WindowEdgesSection.ROW_F);
             check(level.getBlockState(centre).is(ModBlocks.window(WindowDesign.plain(WindowProfile.BLANK))),"frameless centre missing");
             var surfaces=ShowcaseSamples.surfaces(canvas.samples());check(surfaces.size()==14,"surface wall count");

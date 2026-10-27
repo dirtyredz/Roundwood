@@ -140,14 +140,14 @@ public final class AnchorPersistenceGameTests {
     public static void doorKeySetsDefaultAndStyled(GameTestHelper helper) {
         RoundDoorBlockEntity door = door(helper);
         assertKeys("untrimmed default door saved", door.saveWithoutMetadata());
-        assertKeys("untrimmed default door update", door.getUpdateTag(), io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
+        assertKeys("untrimmed default door update", door.getUpdateTag(), io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore.TAG, io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
         door.setAppearance(BLUE);
         assertKeys("painted door saved", door.saveWithoutMetadata(), AppearanceNbt.TAG);
-        assertKeys("painted door update", door.getUpdateTag(), io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, AppearanceNbt.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
+        assertKeys("painted door update", door.getUpdateTag(), io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore.TAG, io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, AppearanceNbt.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
         check(door.setTrims(front(BRICK)), "trims refused");
         door.setCamouflage(CamouflageData.free(Blocks.STONE.defaultBlockState()));
         assertKeys("styled door saved", door.saveWithoutMetadata(), AppearanceNbt.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
-        assertKeys("styled door update", door.getUpdateTag(), io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, AppearanceNbt.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
+        assertKeys("styled door update", door.getUpdateTag(), io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore.TAG, io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, AppearanceNbt.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
         helper.succeed();
     }
 

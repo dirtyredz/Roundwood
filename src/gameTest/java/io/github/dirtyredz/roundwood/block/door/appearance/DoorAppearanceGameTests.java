@@ -166,12 +166,9 @@ public final class DoorAppearanceGameTests {
             for (DoorHingeSide hinge : DoorHingeSide.values()) {
                 for (boolean openState : new boolean[] {false, true}) {
                     String what = facing + "/" + hinge + "/" + (openState ? "open" : "closed");
-                    DoorLayout.Assembly door = place(helper, facing, hinge, "all_" + facing + hinge);
+                    DoorLayout.Assembly door = new DoorLayout.Assembly(helper.absolutePos(ANCHOR),facing,hinge,io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND);
+                    check(io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement.placeAt(helper.getLevel(),oakDoor(),door,openState),"settled body fixture");
                     ServerPlayer player = player(helper, "all_" + facing + hinge, GameType.SURVIVAL, facing);
-                    if (openState) {
-                        use(helper, player, ItemStack.EMPTY, ItemStack.EMPTY, leaf(door, false), false);
-                        check(open(helper, door), what + ": a plain click did not open the door");
-                    }
                     ItemStack planks = new ItemStack(Items.SPRUCE_PLANKS, 2);
                     check(use(helper, player, planks, ItemStack.EMPTY, leaf(door, openState), true).consumesAction(), what + ": not handled");
                     check(doorLook(helper, door).equals(SPRUCE), what + ": door shows " + doorLook(helper, door));

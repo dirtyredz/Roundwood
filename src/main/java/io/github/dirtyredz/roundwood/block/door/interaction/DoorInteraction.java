@@ -55,7 +55,9 @@ public final class DoorInteraction {
         if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty()
                 && player.getOffhandItem().getItem() instanceof io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceItem) return InteractionResult.PASS;
         if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty()
-                && io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareDonors.of(player,InteractionHand.OFF_HAND).isPresent()) return InteractionResult.PASS;
+                && io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareDonors.of(player,InteractionHand.OFF_HAND).isPresent()
+                && (DoorHardwareTarget.of(level,player,InteractionHand.OFF_HAND,hit).isPresent()
+                    || anchor(level,pos,state,block).map(entity->entity.swing().moving(level.getGameTime())).orElse(false))) return InteractionResult.PASS;
         var hardware = DoorHardwareInteraction.use(level,player,hand,hit);
         if (hardware.isPresent()) return hardware.get();
         var frameHit = io.github.dirtyredz.roundwood.block.door.frame.DoorArchInteraction.hit(level, pos, state, hit);
