@@ -5,8 +5,9 @@
   `NoSuchMethodException: net.minecraftforge.network.NetworkEvent.<init>()`: this runner has no
   Forge event-class transformation. Without version detection it first fails with `Game version not set`.
   `MinecraftBootstrap.ensure()` deliberately swallows bootstrap errors for pure geometry tests;
-  it does not prove real AO/flat tessellation works. Establish a transformed headless lighting
-  harness before switching static geometry to chunk ownership; server GameTests do not prove client lighting.
+  it does not prove real AO/flat tessellation works. The owner accepted owning-cell lighting;
+  do not build a transformed lighting harness. Compare geometry/tint/flags headlessly and use
+  owner screenshots through `config/roundwood-client.toml` (`legacyStaticRendering`) for lighting acceptance.
 
 - Thin arch depth is resolved after shoulder orientation. Overlay regions must intersect wedges
   with bands in the resulting facing. Full arch IDs have no depth property and remain full-depth.

@@ -2,7 +2,7 @@
 id: dk-8e9ddbb7
 type: task
 created: 2026-10-27
-status: todo
+status: wip
 since: 2026-10-27
 area: rendering
 priority: P1
@@ -24,4 +24,4 @@ Slice 5 is deferred: leaves retain BER ownership for every pose. No bounded chun
 
 Owner approved vanilla owning-cell/host-state lighting on 2026-10-27, accepting documented proud/front-casing and camouflage shading differences while preserving geometry and donor tint. Static BER renderers must remain available behind a legacy client toggle until owner screenshot approval; chunk mode must submit zero static BER geometry and legacy mode must suppress corresponding chunk geometry. Acceptance still outstanding: zero static BER submissions in chunk mode, geometry preservation and owner-cell lighting validation, invalidation across sections, cached surviving hot paths, and owner in-game FPS verification.
 
-Chunk-bake preparation extracts DoorArchModels and its typed cache key without changing BER ownership. The strict headless lighting prerequisite failed after SharedConstants.tryDetectVersion(): NoSuchMethodException: net.minecraftforge.network.NetworkEvent.<init>() during Bootstrap.bootStrap(), because the ordinary JUnit runner lacks Forge event-class transformation. A transformed headless lighting harness remains required before switching ownership. Slices 2-4, the legacy/chunk toggle, section rebuild measurement and rendering compatibility validation remain unfinished. Existing BER rendering remains active.
+Second-attempt owner correction: drop the transformed lighting harness entirely. Plain JUnit checks geometry, tint and quad shade/AO flags; owner screenshots through the legacy toggle accept lighting. Continue from c43fe8c. Slice 2 implementation is in progress: immutable publication, satellite resolution, cached fitted/arch models and legacy toggle. Completion remains gated on focused lifecycle tests and the remaining slices.

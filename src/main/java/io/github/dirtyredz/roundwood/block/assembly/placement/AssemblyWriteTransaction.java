@@ -41,7 +41,14 @@ public final class AssemblyWriteTransaction {
             throw failure;
         }
         if (!installed) rollback(level, cells, before, mark);
+        refreshRendering(level, cells);
         return installed;
+    }
+    private static void refreshRendering(Level level, List<BlockPos> cells) {
+        for (var pos : cells) {
+            if (level.getBlockEntity(pos) instanceof io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity entity)
+                io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderUpdates.refresh(entity, false);
+        }
     }
     private static List<Captured> capture(Level level, List<BlockPos> cells) {
         List<Captured> captured = new ArrayList<>(cells.size());
@@ -79,6 +86,7 @@ public final class AssemblyWriteTransaction {
             level.captureBlockSnapshots = capturing;
             level.restoringBlockSnapshots = restoring;
         }
+        refreshRendering(level, cells);
         if (!capturing) {
             for (Captured cell : before) {
                 level.updateNeighborsAt(cell.pos(), cell.state().getBlock());

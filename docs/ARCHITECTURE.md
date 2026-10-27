@@ -1,5 +1,22 @@
 # Architecture - Roundwood
 
+## Static chunk publication (0.17.0)
+
+Fitted frames and standalone arches use immutable anchor snapshots. Publication precedes the anchor
+model-data refresh and every loaded cell's dirty notification, including the old/new footprint union.
+Transactions publish after commit or restoration. Packet/direct NBT loads publish after the complete
+payload; removal publishes unavailable. Chunk workers resolve the anchor through their supplied
+render region and validate the snapshot against that region, never against a live client world.
+Payload, load and removal changes are event-driven. A bounded client-tick check reads only registered
+assembly cells to catch satellite packet ordering, replacement and unload without adding satellite BEs.
+It rebuilds data only on change. World exit drops registrations; model rebake clears baked caches.
+
+World wrappers use Forge model APIs and cache quads by state, side, layer and snapshot. General
+quads retain proud bands and separation offsets. A client-only mixin replaces model data at Forge's
+six-argument breaking entry for marked models, so satellite cracks use current geometry.
+The `legacyStaticRendering` client option preserves the old path for screenshot comparisons;
+exit/reopen the world when changing it. Leaves retain BER ownership.
+
 ## Frameless pane
 
 The appended BLANK window profile has a full 16x16 opening and reuses oriented placement, recessed glass, tint persistence and the Cross Beams composition. It has no perimeter/sill host and its router refuses frame donors without payment. Runtime designs include blank-with-beams; `ModBlocks.WindowProducts` lists only registered products, preserving exactly thirteen historical crossed IDs. Loot includes the pane and optional beams only.

@@ -31,12 +31,15 @@ import java.util.Optional;
 public class ArchPieceRenderer implements BlockEntityRenderer<ArchPieceBlockEntity> {
     private final AssemblyCellRenderer renderer;
 
+    public ArchPieceRenderer(AssemblyCellRenderer renderer) { this.renderer = renderer; }
+
     public ArchPieceRenderer(BlockEntityRendererProvider.Context context) {
         this.renderer = new AssemblyCellRenderer(context.getBlockRenderDispatcher().getModelRenderer(), RandomSource.create());
     }
 
     @Override
     public void render(ArchPieceBlockEntity entity, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        if (!io.github.dirtyredz.roundwood.client.render.StaticRenderingConfig.legacy()) return;
         Level level = entity.getLevel();
         BlockState anchorState = entity.getBlockState();
         if (level == null || !(anchorState.getBlock() instanceof ArchPieceBlock block)

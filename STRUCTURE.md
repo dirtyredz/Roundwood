@@ -6,6 +6,9 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
+- `block/assembly/render/` owns immutable render snapshots and publication ordering for anchor-only assemblies. `client/render/assembly/` owns client membership validation and worker-safe model-data extraction.
+- `client/render/StaticWorldModel` wraps static assembly models and caches complete quad results. `client/arch/ArchPieceWorldModel` and `client/door/DoorStaticModel` compose the existing cell bakers. `client/mixin/BreakingModelDataMixin` resolves satellite data for Forge's breaking overload; `roundwood.mixins.json` is client-only. Legacy BERs remain available through `StaticRenderingConfig` pending owner screenshots.
+
 - `src/test/.../showcase/FeedbackShowcaseLayoutTest` guards the fixed arena bounds and new sample spacing. The pieces row retains thirteen framed profiles; the frameless pane is demonstrated in the assembled window, keeping every door on the existing floor. `-PshowcaseTargets` selects the complete showcase GameTest package and its environment guard for local reproduction.
 
 - `block/door/hardware/` owns typed spear/knob meshes, the two-slot value, strict versioned storage, checked stack custody and donor recognition. `block/door/interaction/DoorHardwareTarget` owns the shared endpoint proposal; `DoorHardwareInteraction` revalidates and pays. Selection acquires both ordinary and projected hardware surfaces.

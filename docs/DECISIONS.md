@@ -2,6 +2,21 @@
 
 Newest first.
 
+## 2026-10-27 - Owning-cell lighting and retained legacy comparison
+
+The owner accepted vanilla owning-cell/host-state lighting for chunk-baked static geometry.
+Proud bands remain outside the cell; front casings no longer borrow an adjacent lighting origin,
+depth shifts participate in final local vertices, and camouflage uses the host lighting context.
+Geometry, donor tint and quad shade/AO flags remain acceptance criteria. Exact legacy-lighting
+equivalence and a transformed headless lighting harness are explicitly excluded.
+
+Keep the legacy static BERs behind `legacyStaticRendering` until owner screenshots approve a proud
+casing, front door casing and camouflaged round-door corner. Change the option with the world closed.
+Do not add a missing-snapshot BER fallback: that can overlap an already uploaded chunk mesh.
+Satellite membership gets bounded tick validation because Forge has no public per-client-block-update
+event covering every packet; all payload/load/removal invalidation remains event-driven. A narrow
+client-only Forge breaking-overload adapter supplies satellite model data without persistent extra BEs.
+
 ## 2026-10-26 - Preserve fitted aim and acquire projected leaves
 
 Owner placement feedback supersedes the BACK-only fitting pose and thin swing-clearance gate. Full tops keep every aimed door depth. Thin tops also allow every depth, except an equal closed door/slab plane: refuse that combination with the shared red preview, rather than moving either component. This prevents coplanar faces while preserving aim. Swing clipping remains accepted. Ground and adjacent-face clicks discover the existing component from the normal landing cell; direct component clicks still work.

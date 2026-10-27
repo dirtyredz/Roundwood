@@ -19,6 +19,7 @@ public final class DoorArchRenderer {
     private final AssemblyCellRenderer renderer;
     public DoorArchRenderer(ModelBlockRenderer models) { renderer=new AssemblyCellRenderer(models,RandomSource.create()); }
     public void render(RoundDoorBlockEntity entity, DoorLayout.Assembly door, Level level, PoseStack pose, MultiBufferSource buffers) {
+        if (!io.github.dirtyredz.roundwood.client.render.StaticRenderingConfig.legacy()) return;
         var attachment=entity.arch(); if(attachment.isEmpty()) return; var frame=attachment.get();
         if(frame.product()!=DoorArchFitPlan.topFor(door.design())) return;
         for(var layer:DoorArchGeometry.Layer.values()) {

@@ -47,6 +47,7 @@ public final class RoundwoodClient {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        io.github.dirtyredz.roundwood.client.render.assembly.AssemblyRenderLifecycle.bind();
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_DOOR.get(), RoundDoorRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_TRIM.get(), RoundTrimRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_WINDOW.get(), WindowTrimRenderer::new);
@@ -72,6 +73,7 @@ public final class RoundwoodClient {
     public static void wrapModels(ModelEvent.ModifyBakingResult event) {
         Map<ResourceLocation, BakedModel> models = event.getModels();
         WindowAppearanceModel.wrapBlocks(models);
+        io.github.dirtyredz.roundwood.client.render.StaticWorldModel.wrapBlocks(models);
         for (Item item : Stream.of(ModItems.all().stream(), LegacyContent.items().stream()).flatMap(stream -> stream).distinct().toList()) {
             ModelResourceLocation location = new ModelResourceLocation(ForgeRegistries.ITEMS.getKey(item), "inventory");
             BakedModel model = models.get(location);

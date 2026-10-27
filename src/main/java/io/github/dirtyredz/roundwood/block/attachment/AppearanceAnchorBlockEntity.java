@@ -40,6 +40,21 @@ import java.util.Map;
  * </ul>
  */
 public abstract class AppearanceAnchorBlockEntity extends BlockEntity implements AppearanceAnchor {
+    private final io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderPublication<io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderSnapshot, BlockPos> staticRenderPublication = new io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderPublication<>();
+    public final io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderPublication<io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderSnapshot, BlockPos> staticRenderPublication() { return staticRenderPublication; }
+
+    @Override public void onLoad() {
+        super.onLoad();
+        io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderUpdates.loaded(this);
+    }
+    @Override public void setRemoved() {
+        super.setRemoved();
+        io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderUpdates.removed(this);
+    }
+    @Override public void onChunkUnloaded() {
+        io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderUpdates.removed(this);
+        super.onChunkUnloaded();
+    }
     private final AppearanceFamily family;
     private final Map<TrimSlot, FaceTrimStore> stores;
     /** Null: the block's default. */
@@ -109,6 +124,7 @@ public abstract class AppearanceAnchorBlockEntity extends BlockEntity implements
     /** Saves, and on the server tells the clients (a block update for this cell). */
     protected final void changed() {
         setChanged();
+        io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderUpdates.refresh(this, false);
         if (level != null && !level.isClientSide) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
         }
@@ -152,6 +168,7 @@ public abstract class AppearanceAnchorBlockEntity extends BlockEntity implements
         appearance = AppearanceNbt.read(tag).filter(family::accepts).orElse(null);
         stores.forEach((slot, store) -> store.load(tag, legacy(slot)));
         loadFamily(tag);
+        io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderUpdates.refresh(this, false);
     }
 
     /** The look (omitted when it is the default), always every store, and the family's update state. */

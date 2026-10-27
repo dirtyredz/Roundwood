@@ -39,12 +39,24 @@ class FittedCorpusTest {
             try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), AnimationMetadataSection.EMPTY)) {
                 var sprite = new Sprite(contents);
                 int total = 0, bodies = 0;
+                long started = System.nanoTime();
+                var chunkModels = new java.util.ArrayList<net.minecraft.client.resources.model.BakedModel>();
+                var legacyQuads = new java.util.ArrayList<net.minecraft.client.renderer.block.model.BakedQuad>();
                 for (var sample : cases) {
                     if (sample.layer == DoorArchGeometry.Layer.BODY) bodies++;
-                    total += ArchPieceModels.bakeSurfaces(DoorArchFitPlan.topFor(sample.design), sample.cell,
+                    var quads = ArchPieceModels.bakeSurfaces(DoorArchFitPlan.topFor(sample.design), sample.cell,
                             DoorArchModels.surfaces(sample.design, sample.thickness, sample.depth, sample.layer,
-                                    sample.cell.column, sample.cell.row), Direction.SOUTH, sprite, sample.masonry).size();
+                                    sample.cell.column, sample.cell.row), Direction.SOUTH, sprite, sample.masonry);
+                    total += quads.size();
+                    legacyQuads.addAll(quads);
+                    chunkModels.add(new io.github.dirtyredz.roundwood.testsupport.QuadModel(quads, sprite));
                 }
+                long baked = System.nanoTime();
+                var chunkQuads = io.github.dirtyredz.roundwood.client.render.StaticWorldModel.collect(chunkModels, null,
+                        net.minecraft.util.RandomSource.create(0), null);
+                assertEquals(legacyQuads, chunkQuads, "Chunk collection preserves vertices, UVs, sprites, normals, tint and shade/AO flags");
+                System.out.printf("Fitted synthetic section: %d models, %d quads; cold bake %.3f ms, cached-model collection %.3f ms%n",
+                        chunkModels.size(), chunkQuads.size(), (baked-started)/1e6, (System.nanoTime()-baked)/1e6);
                 assertEquals(45, bodies);
                 assertEquals(8622, total, "Extraction must preserve the captured fitted geometry exactly");
                 assertTrue(total <= 9000, "Fitted corpus emitted " + total + " quads; budget is 9000");
