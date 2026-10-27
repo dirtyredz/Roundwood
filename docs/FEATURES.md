@@ -24,3 +24,5 @@ Arched 1x2 uses Top 1x1 at y+1; Round 2x2 uses Top 1x2 at y+1. Double arched 3x3
 The Frameless Window Pane fills a full cell face with recessed glazing. Craft one from one vanilla glass pane; place it upright, on floors or ceilings with the existing aiming preview. Dye tints its glass and Cross Beams are optional. Perimeter trims, sills and invisible frame restyling are refused.
 
 Round doors accept lower-corner camouflage before or after fitting an arch. Fitting hides upper fill and preserves the existing donor and single refund; clearing the lower corners leaves the fitted frame unchanged.
+
+The paired doors now reach their assembly tops with the raised 2x3 crown. Every door has edge-contact spear straps on both faces and knobs centred one block above the floor. Existing saved assemblies adopt the geometry without replacement.

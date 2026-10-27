@@ -381,3 +381,5 @@ An empty arch collision shape still occupies its block positions. Only explicit 
 Frameless panes have no frame or perimeter/sill host. Refuse frame donors without payment; glass tint and Cross Beams remain available. Never use runtime WindowDesign.all() to discover registered items: blank-with-beams has no retired crossed ID.
 
 A fitted round arch does not erase or refund camouflage. Render and target only its lower corners; include CamouflageCoverage in corner/outline/model cache keys. Actual frame-surface hits still take precedence.
+
+Do not position hardware from assembly height or a fixed root X. Knobs are y15..17; spear roots follow each leaf row. Paired casing springs include the modular top spring offset. The historical 0.16.0 fixture deliberately contains the old saved schema, not generated current-state defaults.

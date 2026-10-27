@@ -30,7 +30,9 @@ class DoubleDoorGeometryTest {
     @Test void squareBottomAndRoundTopExactlyFillTheThreeWideArchOpening() {
         assertEquals(9, DoorLayout.Part.of(DESIGN).size());
         for (int x = 0; x < 48; x++) for (int y = 0; y < 48; y++) {
-            boolean expected = y < 16 || !ArchPieceDesign.TOP_2X3.top().contains(x, y - 16);
+            double dx=x+.5-24, dy=y+.5-24;
+            boolean expected = y < 24 || dx*dx+dy*dy<=24*24;
+            assertEquals(expected, y < 16 || !ArchPieceDesign.TOP_2X3.top().contains(x, y-16));
             assertEquals(expected, DESIGN.inLeaf(x, y), x + "/" + y);
             double px = x + .5, py = y + .5;
             long leaves = java.util.Arrays.stream(DoorHingeSide.values()).flatMap(side -> DoorGeometry.leaf(DESIGN, side).stream())
@@ -41,7 +43,7 @@ class DoubleDoorGeometryTest {
     @Test void bothLeavesHaveHardwareOnBothFacesAndTurnOnTheirOuterHinges() {
         for (var side : DoorHingeSide.values()) {
             var pieces = DoorGeometry.leaf(DESIGN, side);
-            assertEquals(6, pieces.stream().filter(p -> p.texture().equals(DoorGeometry.BRASS)).count());
+            assertEquals(2, pieces.stream().filter(p -> p.texture().equals(DoorGeometry.BRASS) && p.box().maxZ()-p.box().minZ()==2).count());
             for (var p : pieces) {
                 Box b = p.box().translate(-16, -16, 0);
                 assertTrue(b.within(new Box(-16, -16, -16, 32, 32, 32)), "illegal model bounds");

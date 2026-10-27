@@ -49,6 +49,7 @@ there is no band above the apex, so it frames a one-wide round-topped door.
 The 1x2 and 2x3 use radii 16 and 24 at y=0. Removing the two-pixel bearing margin
 removes the projecting spring ledge beside full-block columns. The 2x3 still has
 eight pixels of upper fill and one continuous semicircle, never a flat middle.
+The 0.17.0 crown decision below supersedes the 2x3 spring and upper fill only.
 
 Owner feedback 2: shoulders thinned by the two pixels the arch gained: widths 4,3,3,2,2,1,1,0 in rows 8..15, with width 4 all the
 way down to y=0. This supports the corbel instead of leaving it hanging mid-cell.
@@ -938,3 +939,7 @@ everything else references vanilla textures by resource location and never copie
 ## 2026-10-20 - No RedzCore dependency
 
 Nothing here is used by a second mod yet (workspace rule).
+
+## 0.17.0 crown and hardware geometry
+
+The owner approved raising only the 2x3 radius-24 crown by eight pixels (spring8), superseding its former apex fill. Existing IDs, fitted offsets and cell footprints stay intact. Paired casing springs derive from the top profile. Seven-pixel spear straps follow the actual staircase edge; all knobs share y15..17 regardless of door height. Hardware remains non-colliding.

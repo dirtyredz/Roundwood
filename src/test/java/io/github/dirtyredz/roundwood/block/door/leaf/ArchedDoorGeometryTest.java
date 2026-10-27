@@ -121,12 +121,12 @@ class ArchedDoorGeometryTest {
         List<Piece> left = DoorGeometry.leaf(ARCHED, DoorHingeSide.LEFT);
         List<Piece> right = DoorGeometry.leaf(ARCHED, DoorHingeSide.RIGHT);
         List<Box> brass = left.stream().filter(p -> p.texture().equals(DoorGeometry.BRASS)).map(Piece::box).toList();
-        assertEquals(6, brass.size(), "two straps and a knob on each face");
+        assertTrue(brass.size() > 6, "spear straps have stepped silhouettes");
         long front = brass.stream().filter(b -> b.minZ() >= DoorGeometry.FRONT - EPS).count();
         long back = brass.stream().filter(b -> b.maxZ() <= DoorGeometry.BACK + EPS).count();
-        assertEquals(3, front);
-        assertEquals(3, back);
-        for (Box strap : brass.stream().filter(b -> b.maxX() - b.minX() > DoorGeometry.KNOB_SIZE).toList()) {
+        assertEquals(brass.size()/2, front);
+        assertEquals(front, back);
+        for (Box strap : brass.stream().filter(b -> b.maxZ() - b.minZ() == .5).toList()) {
             assertTrue(strap.minX() < 4, "a left-hinge strap does not start at the hinge edge: " + strap);
         }
         for (Box box : brass) {

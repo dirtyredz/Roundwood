@@ -44,3 +44,7 @@ writeFileSync(join(outDir, 'window_cross_v0120.nbt'), windowCross0120());
 console.log('wrote window_cross_v0120.nbt 15x4x3');
 writeFileSync(join(outDir, 'archways_v0133.nbt'), archways0133());
 console.log('wrote archways_v0133.nbt 9x4x4');
+
+import { doors0160 } from './structures/doors-v0160.mjs';
+writeFileSync(join(outDir, 'doors_v0160.nbt'), doors0160());
+console.log('wrote doors_v0160.nbt 17x6x5');

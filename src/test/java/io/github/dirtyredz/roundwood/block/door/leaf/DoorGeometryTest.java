@@ -147,7 +147,7 @@ class DoorGeometryTest {
                     .mapToDouble(p -> (p.box().minX() + p.box().maxX()) / 2).average().orElseThrow();
             assertTrue(hinge == DoorHingeSide.LEFT ? strapCentre < 16 : strapCentre > 16, "straps not on the hinge side");
             long handles = leaf.stream().filter(p -> p.texture().equals(DoorGeometry.BRASS))
-                    .filter(p -> p.box().maxX() - p.box().minX() <= 3).count();
+                    .filter(p -> p.box().maxZ() - p.box().minZ() == 2).count();
             assertEquals(2, handles, "one handle on each face");
         }
         double left = DoorGeometry.leaf(DoorDesign.ROUND, DoorHingeSide.LEFT).stream().mapToDouble(p -> p.box().volume()).sum();
@@ -159,16 +159,16 @@ class DoorGeometryTest {
     void theKnobIsCentredOnBothFacesForBothHinges() {
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
             List<Box> knobs = DoorGeometry.leaf(DoorDesign.ROUND, hinge).stream().filter(p -> p.texture().equals(DoorGeometry.BRASS))
-                    .map(Piece::box).filter(b -> b.maxX() - b.minX() <= 3).toList();
+                    .map(Piece::box).filter(b -> b.maxZ() - b.minZ() == 2).toList();
             assertEquals(2, knobs.size(), hinge + ": one knob per face");
             boolean front = false;
             boolean back = false;
             for (Box knob : knobs) {
                 assertEquals(16, (knob.minX() + knob.maxX()) / 2, EPS, hinge + ": knob not centred across: " + knob);
                 assertEquals(16, (knob.minY() + knob.maxY()) / 2, EPS, hinge + ": knob not centred vertically: " + knob);
-                assertEquals(DoorGeometry.KNOB_SIZE, knob.maxX() - knob.minX(), EPS);
-                front |= knob.maxZ() == DoorGeometry.FRONT + DoorGeometry.KNOB_PROUD;
-                back |= knob.minZ() == DoorGeometry.BACK - DoorGeometry.KNOB_PROUD;
+                assertEquals(io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareGeometry.KNOB_SIZE, knob.maxX() - knob.minX(), EPS);
+                front |= knob.maxZ() == DoorGeometry.FRONT + io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareGeometry.KNOB_PROUD;
+                back |= knob.minZ() == DoorGeometry.BACK - io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareGeometry.KNOB_PROUD;
             }
             assertTrue(front && back, hinge + ": a knob on each face");
         }
@@ -201,29 +201,6 @@ class DoorGeometryTest {
                     assertEquals(inDisc ? 1 : 0, grid[u][v], hinge + ": panel coverage at " + u + "," + v);
                 }
             }
-        }
-    }
-
-    @Test
-    void theHardwareBoxesAreExactForBothHinges() {
-        List<Box> left = List.of(
-                new Box(4, 8, 16, 11, 9, 16.5), new Box(4, 8, 12.5, 11, 9, 13),
-                new Box(4, 23, 16, 11, 24, 16.5), new Box(4, 23, 12.5, 11, 24, 13),
-                new Box(15, 15, 16, 17, 17, 18), new Box(15, 15, 11, 17, 17, 13));
-        List<Box> right = List.of(
-                new Box(21, 8, 16, 28, 9, 16.5), new Box(21, 8, 12.5, 28, 9, 13),
-                new Box(21, 23, 16, 28, 24, 16.5), new Box(21, 23, 12.5, 28, 24, 13),
-                new Box(15, 15, 16, 17, 17, 18), new Box(15, 15, 11, 17, 17, 13));
-        assertHardware(left, DoorHingeSide.LEFT);
-        assertHardware(right, DoorHingeSide.RIGHT);
-    }
-
-    private static void assertHardware(List<Box> expected, DoorHingeSide hinge) {
-        List<Box> actual = DoorGeometry.leaf(DoorDesign.ROUND, hinge).stream().filter(p -> p.texture().equals(DoorGeometry.BRASS))
-                .map(Piece::box).toList();
-        assertEquals(expected.size(), actual.size(), hinge + ": brass piece count");
-        for (Box box : expected) {
-            assertTrue(actual.contains(box), hinge + ": missing brass box " + box + " in " + actual);
         }
     }
 

@@ -352,3 +352,5 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-ea090069 done: `PlacementHighlights` owns held-hand precedence and the live-client event guard; `AssemblyCellRenderer` owns per-cell tessellation and balanced poses.
 
 `block/door/camouflage/CamouflageCoverage` owns the effective ALL/LOWER/NONE mask used by corner volumes, hits, outlines and model caches. Fitted round doors retain only y<16; other fitted designs have no visible corners.
+
+`block/door/hardware/DoorHardwareGeometry` owns half-pixel spear straps and fixed-height knobs. `tools/structures/doors-v0160.mjs` records independent historical door states and possessions; DoorFeedbackUpgradeGameTests loads them without replacement.

@@ -4,7 +4,7 @@ package io.github.dirtyredz.roundwood.block.arch.geometry;
 public enum ArchPieceDesign {
     TOP_1X1("arch_top_1x1", 16, 16, 8, 8),
     TOP_1X2("arch_top_1x2", 32, 16, 16, 0),
-    TOP_2X3("arch_top_2x3", 48, 32, 24, 0),
+    TOP_2X3("arch_top_2x3", 48, 32, 24, 8),
     KEYHOLE_SHOULDER("keyhole_shoulder", 16, 16, 0, 0);
 
     private final String id;

@@ -39,7 +39,7 @@ if (project.hasProperty('navigationRepeats')) {
 
 // Bounded fitted-door gate for 0.16.0; includes only the new showcase sections, not the full showcase suite.
 if (project.hasProperty('doorTargets')) {
-    sourceSets.gameTest.java.include '**/fixture/**', '**/DoorTargetsGameTests.java', '**/FramelessWindowGameTests.java', '**/DoorArchCamouflageGameTests.java',
+    sourceSets.gameTest.java.include '**/fixture/**', '**/DoorTargetsGameTests.java', '**/FramelessWindowGameTests.java', '**/DoorArchCamouflageGameTests.java', '**/DoorFeedbackUpgradeGameTests.java',
             '**/ArchPiecePlacementGameTests.java', '**/ArchPieceTrimGameTests.java', '**/ArchThinningGameTests.java',
             '**/DoorFreeEdgeGameTests.java', '**/ArchedDoorPlacementGameTests.java', '**/FittedShowcaseGameTests.java', '**/ShowcaseChecks.java', '**/ArchSectionsChecks.java', '**/DoorArchPersistenceGameTests.java', '**/DoorArchFittingGameTests.java', '**/DoorArchLifecycleGameTests.java', '**/AssemblyPlacementGameTests.java', '**/TestWorldGameTests.java'
 }

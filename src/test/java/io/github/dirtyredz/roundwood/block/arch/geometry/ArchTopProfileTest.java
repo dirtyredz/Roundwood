@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ArchTopProfileTest {
     @Test
     void everyPixelMatchesIndependentIntegerCircleOracle() {
-        int[][] sizes = {{16, 16, 8, 8}, {32, 16, 16, 0}, {48, 32, 24, 0}};
+        int[][] sizes = {{16, 16, 8, 8}, {32, 16, 16, 0}, {48, 32, 24, 8}};
         for (int i = 0; i < sizes.length; i++) {
             ArchPieceDesign design = ArchPieceDesign.values()[i];
             int w = sizes[i][0], h = sizes[i][1], r = sizes[i][2], spring = sizes[i][3];

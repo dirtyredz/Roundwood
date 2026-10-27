@@ -33,11 +33,6 @@ public final class DoorGeometry {
     /** The swing axis runs through the middle of the leaf's thickness. */
     public static final double PIVOT_Z = (BACK + FRONT) / 2;
 
-    /** The knob is a 2 x 2 pixel stud on each face, standing {@link #KNOB_PROUD} proud of it. */
-    public static final double KNOB_SIZE = 2;
-    public static final double KNOB_PROUD = 2;
-    /** The hinge straps are half a pixel proud of the panel. */
-    public static final double STRAP_PROUD = 0.5;
     /**
      * How far, in pixels, the decorative hardware can reach outside the leaf's own slab and the cells
      * plus the projection, at any angle of the swing (the knob reaches 2): render bounds use it.
@@ -181,18 +176,9 @@ public final class DoorGeometry {
         for (PixelCircle.Rect rect : design.leafRects()) {
             pieces.add(new Piece(rect.extrude(BACK, FRONT), PANEL));
         }
-        // Left hinge: two straps reaching in from the west edge on both faces, one knob on each face.
-        // All brass stands proud of the panel.
-        int from = design.strapFrom();
-        int to = from + design.strapLength();
-        for (int v : design.strapRows()) {
-            pieces.add(new Piece(new Box(from, v, FRONT, to, v + 1, FRONT + STRAP_PROUD), BRASS));
-            pieces.add(new Piece(new Box(from, v, BACK - STRAP_PROUD, to, v + 1, BACK), BRASS));
+        for (Box box : io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareGeometry.left(design)) {
+            pieces.add(new Piece(box, BRASS));
         }
-        double kx = design.knobX();
-        double ky = design.knobY();
-        pieces.add(new Piece(new Box(kx, ky, FRONT, kx + KNOB_SIZE, ky + KNOB_SIZE, FRONT + KNOB_PROUD), BRASS));
-        pieces.add(new Piece(new Box(kx, ky, BACK - KNOB_PROUD, kx + KNOB_SIZE, ky + KNOB_SIZE, BACK), BRASS));
         return List.copyOf(pieces);
     }
 

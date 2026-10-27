@@ -56,8 +56,7 @@ Existing doors retain their original front position when depth is absent from sa
 with a solid floor beneath all three columns. Two leaves swing together on the outer hinges.
 The bottom is square; the crown exactly fills the 2x3 arch opening when that arch's bottom
 is one block above the door floor. Fit the matching arch with an ordinary click, or keep
-it independently placed in an adjacent depth layer. The arch's eight-pixel apex band remains
-above the leaf. Each leaf has straps and a knob on both faces, with the existing wood/paint,
+it independently placed in an adjacent depth layer. The 0.17.0 crown reaches the top of its assembly; the former eight-pixel apex band is gone. Each leaf has straps and a knob on both faces, with the existing wood/paint,
 camouflage, trims, redstone and projected-use behaviour. Recipe: `PNP / PPP / PNP`,
 where P is any planks and N is a gold nugget.
 
@@ -123,7 +122,7 @@ short animation; the knobs and straps do not collide.
 plus one Keyhole Shoulder item that can face LEFT or RIGHT. All are one block deep. The tops
 have true semicircular openings, square upper corners and no lower posts. The 1x1 is only
 the two upper corners above a radius-8 round door opening, with nothing below y=8 or above its apex. The wider tops have radii 16 and 24
-and no spring margin; the 2x3 retains eight pixels of fill above its apex.
+with spring heights 0 and 8 respectively. The 2x3 apex reaches the top of its footprint.
 The shoulder extends a four-pixel-wide base down to the floor beneath the stepped transition (widths 4,3,3,2,2,1,1,0 in rows 8..15): the original keyhole corbel shifted two pixels outward to meet the flush arch spring.
 
 - Place with an ordinary click. The landing cell is the lower-left anchor; tops extend right

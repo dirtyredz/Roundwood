@@ -35,7 +35,7 @@ refuse conversion. There is no reverse recipe.
 
 `block/arch/geometry` is separate from the frozen migration-source `block/archway` family.
 `ArchPieceDesign` names three tops and one mirrored shoulder. `ArchTopProfile`
-subtracts radius-8/16/24 semicircles above springs 8/0/0; rows below the spring are empty.
+subtracts radius-8/16/24 semicircles above springs 8/0/8; rows below the spring are empty.
 `KeyholeShoulderProfile` keeps the historical transition thinned by two pixels (widths 4,3,3,2,2,1,1,0) and extends its four-pixel base to y=0.
 `ArchPieceGeometry` supplies
 full-depth boxes and per-cell visible surfaces through the shared raster/slab
@@ -769,3 +769,5 @@ and computed centred transforms. Plus 20 recipes and their advancements, loot (a
 canonical item; windows and doors add one trim pool per face), tags and English names.
 
 Fitting retains camouflage donor/refund custody. The effective coverage mask hides upper fill, leaving the round door's two lower corners editable in either operation order. All other fitted designs expose no camouflage region. Selection and baked-model cache keys include coverage; the fitting transaction continues to snapshot and restore the entire anchor NBT.
+
+The 2x3 modular top uses radius24/spring8. Paired leaves complement that mask at their unchanged fitted offsets; casing springs derive from it. Hardware roots follow the actual leaf boundary, and every knob is centred 16 pixels above the assembly floor. Saved footprints and cell identities are unchanged.

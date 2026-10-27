@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /** Independent authored mask and display bounds, read from the generated oak models. */
 class GeneratedArchPieceModelsTest {
     @Test void oakIconsCoverExactlyTheirMasksInsideLegalBounds() {
-        int[] widths = {16,32,48,16}, heights = {16,16,32,16}, radii = {8,16,24,0}, springs = {8,0,0,0};
+        int[] widths = {16,32,48,16}, heights = {16,16,32,16}, radii = {8,16,24,0}, springs = {8,0,8,0};
         for (int product = 0; product < GeneratedFiles.ARCH_PIECES.size(); product++) {
             String id = GeneratedFiles.ARCH_PIECES.get(product);
             var model = resolve("roundwood:item/" + id);

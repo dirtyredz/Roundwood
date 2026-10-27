@@ -222,7 +222,7 @@ class GeneratedModelsTest {
                 }
                 double[] from = vec(element, "from");
                 double[] to = vec(element, "to");
-                if (to[0] - from[0] >= 3) {
+                if (to[2] - from[2] == .5) {
                     double centre = (from[0] + to[0]) / 2;
                     assertTrue(hinge.equals("left") ? centre < 16 : centre > 16, hinge + ": strap centre " + centre);
                     assertTrue((from[2] == 16 && to[2] == 16.5) || (from[2] == 12.5 && to[2] == 13),

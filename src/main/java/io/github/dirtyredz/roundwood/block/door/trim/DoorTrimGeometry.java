@@ -56,7 +56,7 @@ public final class DoorTrimGeometry {
     public static boolean inCasing(DoorDesign design, int u, int v) {
         return switch (design) {
             case ROUND -> RingGeometry.inRing(u, v);
-            case DOUBLE_ARCHED, TALL_DOUBLE_ARCHED -> design.inLeaf(u, v) && !new ArchedProfile(WIDTH, design.width() - WIDTH, design.height() - 32).contains(u, v);
+            case DOUBLE_ARCHED, TALL_DOUBLE_ARCHED -> design.inLeaf(u, v) && !new ArchedProfile(WIDTH, design.width() - WIDTH, design.height() - 32 + io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign.TOP_2X3.top().spring()).contains(u, v);
             case ARCHED -> design.inLeaf(u, v) && !ARCHED_INNER.contains(u, v);
         };
     }

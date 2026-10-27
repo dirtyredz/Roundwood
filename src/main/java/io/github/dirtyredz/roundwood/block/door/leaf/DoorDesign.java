@@ -17,20 +17,20 @@ import java.util.List;
  * </ul>
  */
 public enum DoorDesign {
-    ROUND("round_door", 2, 32, 4, 15) {
+    ROUND("round_door", 2, 32) {
         @Override
         public boolean inLeaf(int u, int v) {
             return PixelCircle.inDisc(WIDTH_ROUND, WIDTH_ROUND, u, v);
         }
     },
-    ARCHED("arched_door", 1, 32, 2, 11) {
+    ARCHED("arched_door", 1, 32) {
         @Override
         public boolean inLeaf(int u, int v) {
             return u >= 0 && u < 16 && v >= 0 && v < HEIGHT && ARCH.contains(u, v);
         }
     },
-    DOUBLE_ARCHED("double_arched_door", 3, 48, 2, 20),
-    TALL_DOUBLE_ARCHED("tall_double_arched_door", 3, 64, 2, 20);
+    DOUBLE_ARCHED("double_arched_door", 3, 48),
+    TALL_DOUBLE_ARCHED("tall_double_arched_door", 3, 64);
 
     /** Historical single-door height; paired designs carry their own height. */
     public static final int HEIGHT = 32;
@@ -38,23 +38,16 @@ public enum DoorDesign {
     public static final int ARCH_SPRING = 24;
     private static final int WIDTH_ROUND = 32;
     private static final ArchedProfile ARCH = new ArchedProfile(0, 16, ARCH_SPRING);
-    /** The rows the two hinge straps run along (both designs). */
-    private static final int[] STRAP_ROWS = {8, 23};
-    private static final int STRAP_LENGTH = 7;
 
     private final String id;
     private final int columns;
     private final int height;
-    private final int strapFrom;
-    private final int knobX;
     private List<PixelCircle.Rect> rects;
 
-    DoorDesign(String id, int columns, int height, int strapFrom, int knobX) {
+    DoorDesign(String id, int columns, int height) {
         this.id = id;
         this.columns = columns;
         this.height = height;
-        this.strapFrom = strapFrom;
-        this.knobX = knobX;
     }
 
     /** True when pixel (u, v) of the door's plane is leaf. */
@@ -90,27 +83,4 @@ public enum DoorDesign {
         return rects;
     }
 
-    /** The rows the hinge straps run along. */
-    public int[] strapRows() {
-        return doubleLeaf() ? new int[]{8, height - 25} : STRAP_ROWS.clone();
-    }
-
-    /** Where a left-hinge strap starts (x, pixels); it runs {@link #strapLength} towards the free edge. */
-    public int strapFrom() {
-        return strapFrom;
-    }
-
-    public int strapLength() {
-        return STRAP_LENGTH;
-    }
-
-    /** The left edge of the 2 x 2 knob for a left hinge (the round door's sits in the middle, the arched one's near the free edge). */
-    public int knobX() {
-        return knobX;
-    }
-
-    /** The bottom edge of the knob: mid-height on both designs. */
-    public int knobY() {
-        return height() / 2 - 1;
-    }
 }
