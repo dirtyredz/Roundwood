@@ -45,8 +45,8 @@ public final class SectionChecks {
     public static void verifyPieces(ServerLevel level, ShowcaseFrame frame) {
         Set<BlockPos> owned = new HashSet<>();
         List<ShowcaseWindow> windows = PiecesSection.windows(frame);
-        check(windows.size() == 13, "expected the thirteen windows, have " + windows.size());
-        check(windows.stream().map(w -> w.design().id()).distinct().count() == 13, "the pieces row repeats a window");
+        check(windows.size() == 14, "expected the fourteen windows, have " + windows.size());
+        check(windows.stream().map(w -> w.design().id()).distinct().count() == 14, "the pieces row repeats a window");
         for (ShowcaseWindow window : windows) {
             owned.add(frame.pos(window.r(), window.y(), window.f()));
             owned.add(sign(level, frame, window.r(), PiecesSection.F, "Window"));

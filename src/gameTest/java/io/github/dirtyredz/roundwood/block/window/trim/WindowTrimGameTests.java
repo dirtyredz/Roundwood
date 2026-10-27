@@ -83,6 +83,7 @@ public final class WindowTrimGameTests {
     /** A pixel centre on {@code profile}'s trim band. */
     static double[] band(WindowProfile profile) {
         return switch (profile) {
+            case BLANK -> throw new IllegalArgumentException("No trim band on blank pane");
             case ROUND -> new double[] {8.5, 0.5};
             case ARCH_LEFT -> new double[] {1.5, 1.5};
             case ARCH_RIGHT -> new double[] {14.5, 1.5};
@@ -134,7 +135,8 @@ public final class WindowTrimGameTests {
     @GameTest(template = TEMPLATE, timeoutTicks = 400)
     public static void everyDesignInEveryPoseTakesIndependentFaceTrims(GameTestHelper helper) {
         ServerPlayer player = player(helper, "trim_faces", GameType.SURVIVAL, Direction.NORTH);
-        for (WindowDesign design : WindowDesign.all()) {
+        for (WindowDesign design : io.github.dirtyredz.roundwood.registry.ModBlocks.WindowProducts.all()) {
+            if (!design.profile().takesTrim()) continue;
             if (design.pattern() == io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern.CROSS) {
                 continue; // retired: converted to a plain pane plus Cross Beams, never a live host
             }

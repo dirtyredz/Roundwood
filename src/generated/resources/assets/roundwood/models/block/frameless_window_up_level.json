@@ -1,0 +1,116 @@
+{
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "texture": "#glass"
+        }
+      },
+      "from": [
+        0,
+        7.5,
+        0
+      ],
+      "to": [
+        16,
+        8,
+        16
+      ]
+    },
+    {
+      "faces": {
+        "up": {
+          "texture": "#glass"
+        }
+      },
+      "from": [
+        0,
+        8,
+        0
+      ],
+      "to": [
+        16,
+        8.5,
+        16
+      ]
+    },
+    {
+      "faces": {
+        "north": {
+          "cullface": "north",
+          "texture": "#glass"
+        }
+      },
+      "from": [
+        0,
+        7.5,
+        0
+      ],
+      "to": [
+        16,
+        8.5,
+        0.5
+      ]
+    },
+    {
+      "faces": {
+        "south": {
+          "cullface": "south",
+          "texture": "#glass"
+        }
+      },
+      "from": [
+        0,
+        7.5,
+        15.5
+      ],
+      "to": [
+        16,
+        8.5,
+        16
+      ]
+    },
+    {
+      "faces": {
+        "west": {
+          "cullface": "west",
+          "texture": "#glass"
+        }
+      },
+      "from": [
+        0,
+        7.5,
+        0
+      ],
+      "to": [
+        0.5,
+        8.5,
+        16
+      ]
+    },
+    {
+      "faces": {
+        "east": {
+          "cullface": "east",
+          "texture": "#glass"
+        }
+      },
+      "from": [
+        15.5,
+        7.5,
+        0
+      ],
+      "to": [
+        16,
+        8.5,
+        16
+      ]
+    }
+  ],
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "frame": "minecraft:block/oak_planks",
+    "glass": "roundwood:block/window_glass_clear",
+    "particle": "minecraft:block/oak_planks"
+  }
+}

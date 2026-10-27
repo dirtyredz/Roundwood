@@ -64,7 +64,7 @@ class GeneratedWindowPaneModelsTest {
 
     @Test
     void everyStateDrawsExactlyItsVisibleSurfaces() throws IOException {
-        for (WindowDesign design : WindowDesign.all()) {
+        for (WindowDesign design : io.github.dirtyredz.roundwood.registry.ModBlocks.WindowProducts.all()) {
             JsonArray parts = multipart(design.id());
             if (!design.profile().oriented()) {
                 for (WindowPosition position : WindowPosition.values()) {
@@ -187,7 +187,7 @@ class GeneratedWindowPaneModelsTest {
      */
     @Test
     void windowItemsShowTheirUprightPieceInOak() {
-        for (WindowDesign design : WindowDesign.all()) {
+        for (WindowDesign design : io.github.dirtyredz.roundwood.registry.ModBlocks.WindowProducts.all()) {
             Resolved item = resolve("roundwood:item/" + design.id());
             assertEquals(ModelExpectations.OAK_PLANKS, item.texture("#frame"), design.id());
             assertEquals(ModelExpectations.GLASS, item.texture("#glass"), design.id());
@@ -223,6 +223,7 @@ class GeneratedWindowPaneModelsTest {
             case EDGE_LEFT -> u >= 2;
             case EDGE_BOTTOM -> v >= 2;
             case EDGE_RIGHT -> u < 14;
+            case BLANK -> true;
         };
         boolean beam = design.pattern().name().equals("CROSS") && (hu == 15 || hu == 16 || hv == 15 || hv == 16);
         return opening && !beam;

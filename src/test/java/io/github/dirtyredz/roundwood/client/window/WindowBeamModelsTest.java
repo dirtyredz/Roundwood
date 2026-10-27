@@ -39,7 +39,7 @@ class WindowBeamModelsTest {
             var pane = new WindowPaneState.Snapshot(new WindowDesign(profile, WindowPattern.CROSS),
                     WindowPose.upright(Direction.SOUTH, WindowDepth.CENTER));
             var surfaces = WindowBeamModels.surfaces(pane);
-            assertEquals(Set.of("frame", "beam", "glass"), surfaces.stream().map(s -> s.texture()).collect(java.util.stream.Collectors.toSet()));
+            assertEquals(profile == WindowProfile.BLANK ? Set.of("beam", "glass") : Set.of("frame", "beam", "glass"), surfaces.stream().map(s -> s.texture()).collect(java.util.stream.Collectors.toSet()));
             for (var surface : surfaces) {
                 for (float uv : FaceUv.tiled(surface.backing(), surface.face())) assertTrue(uv >= 0 && uv <= 16);
                 if (surface.texture().equals("glass") && surface.face().getAxis() == Direction.Axis.Z

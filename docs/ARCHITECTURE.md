@@ -1,5 +1,9 @@
 # Architecture - Roundwood
 
+## Frameless pane
+
+The appended BLANK window profile has a full 16x16 opening and reuses oriented placement, recessed glass, tint persistence and the Cross Beams composition. It has no perimeter/sill host and its router refuses frame donors without payment. Runtime designs include blank-with-beams; `ModBlocks.WindowProducts` lists only registered products, preserving exactly thirteen historical crossed IDs. Loot includes the pane and optional beams only.
+
 ## Fitted arch ownership (0.16.0)
 
 Fitted-top geometry preserves the door depth and uses a top anchored at y+1 (arched, round, double) or y+2 (tall double). Full tops are geometrically identical to the standalone full arch (no rear rebate; the swinging leaf may clip through them, owner-accepted 2026-10-26). Thin slabs support all depths except the same closed plane as the door; that fit is refused without moving either component. Swing clipping is accepted for both thicknesses. The door anchor has an independent versioned `DoorArch` store; missing means absent, explicit empty updates clear clients, and unknown payloads remain opaque and refuse edits. Arched doors now default the existing depth property to FRONT.

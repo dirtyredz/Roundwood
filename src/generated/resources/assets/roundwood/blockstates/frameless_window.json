@@ -1,0 +1,355 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window",
+        "y": 180
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "north"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_front",
+        "y": 180
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "north"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_back",
+        "y": 180
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "north"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window",
+        "y": 270
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "east"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_back",
+        "y": 270
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "east"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_front",
+        "y": 270
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "east"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window"
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "south"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_back"
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "south"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_front"
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "south"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window",
+        "y": 90
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "west"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_front",
+        "y": 90
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "west"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_back",
+        "y": 90
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "west"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_level"
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "up_north"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_floor"
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "up_north"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_ceiling"
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "up_north"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_level",
+        "y": 90
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "up_east"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_floor",
+        "y": 90
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "up_east"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_ceiling",
+        "y": 90
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "up_east"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_level",
+        "y": 180
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "up_south"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_floor",
+        "y": 180
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "up_south"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_ceiling",
+        "y": 180
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "up_south"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_level",
+        "y": 270
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "up_west"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_floor",
+        "y": 270
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "up_west"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_up_ceiling",
+        "y": 270
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "up_west"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_level"
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "down_north"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_floor"
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "down_north"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_ceiling"
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "down_north"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_level",
+        "y": 90
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "down_east"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_floor",
+        "y": 90
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "down_east"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_ceiling",
+        "y": 90
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "down_east"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_level",
+        "y": 180
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "down_south"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_floor",
+        "y": 180
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "down_south"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_ceiling",
+        "y": 180
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "down_south"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_level",
+        "y": 270
+      },
+      "when": {
+        "depth": "center",
+        "orientation": "down_west"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_floor",
+        "y": 270
+      },
+      "when": {
+        "depth": "negative",
+        "orientation": "down_west"
+      }
+    },
+    {
+      "apply": {
+        "model": "roundwood:block/frameless_window_down_ceiling",
+        "y": 270
+      },
+      "when": {
+        "depth": "positive",
+        "orientation": "down_west"
+      }
+    }
+  ]
+}

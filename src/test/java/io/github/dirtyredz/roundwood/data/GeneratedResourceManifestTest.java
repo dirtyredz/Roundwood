@@ -34,12 +34,12 @@ class GeneratedResourceManifestTest {
         assertEquals(15, ModelExpectations.aliasWindows().size());
         assertEquals(19, ModelExpectations.aliasTrims().size());
         assertEquals(49, ALIASES.size());
-        assertEquals(26, CANONICAL.size());
-        assertEquals(26, WINDOWS.size());
-        assertEquals(13, PLAIN_WINDOWS.size());
+        assertEquals(27, CANONICAL.size());
+        assertEquals(27, WINDOWS.size());
+        assertEquals(14, PLAIN_WINDOWS.size());
         assertEquals(13, RETIRED.size());
-        assertEquals(90, BLOCKS.size());
-        assertEquals(90, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
+        assertEquals(91, BLOCKS.size());
+        assertEquals(91, new HashSet<>(BLOCKS).size(), "identifiers must be unique");
     }
 
     @Test
@@ -80,9 +80,9 @@ class GeneratedResourceManifestTest {
             block.add("round_trim_whole_" + part);
         }
         item.addAll(ALIASES);
-        assertEquals(112, windowBlockModels().size());
-        assertEquals(47 + 112, block.size()); // 22 before 0.11.0, the arched door adds 5; 0.12.0 the two archways
-        assertEquals(97, item.size()); // 63 of 0.9.0, 16 new windows, arch_sill_trim; 0.11.0 the arched door and its template; 0.12.0 the two archways
+        assertEquals(121, windowBlockModels().size());
+        assertEquals(47 + 121, block.size()); // 22 before 0.11.0, the arched door adds 5; 0.12.0 the two archways
+        assertEquals(98, item.size()); // 63 of 0.9.0, 16 new windows, arch_sill_trim; 0.11.0 the arched door and its template; 0.12.0 the two archways
         // Exact sets: no per-finish models remain; the 49 old ids are only item-model aliases.
         assertEquals(block, names(assets("models/block")));
         assertEquals(item, names(assets("models/item")));
@@ -97,11 +97,11 @@ class GeneratedResourceManifestTest {
         crafted.add(ARCH_SILL_TRIM); // crafted, but an item only
         assertEquals(crafted, names(data("recipes")));
         assertEquals(crafted, names(data("advancements/recipes")));
-        assertEquals(90, allJson(assets("blockstates")).size());
-        assertEquals(47 + 112, allJson(assets("models/block")).size());
-        assertEquals(97, allJson(assets("models/item")).size());
-        assertEquals(28, allJson(data("recipes")).size());
-        assertEquals(90, allJson(data("loot_tables/blocks")).size());
-        assertEquals(28, allJson(data("advancements/recipes")).size());
+        assertEquals(91, allJson(assets("blockstates")).size());
+        assertEquals(47 + 121, allJson(assets("models/block")).size());
+        assertEquals(98, allJson(assets("models/item")).size());
+        assertEquals(29, allJson(data("recipes")).size());
+        assertEquals(91, allJson(data("loot_tables/blocks")).size());
+        assertEquals(29, allJson(data("advancements/recipes")).size());
     }
 }

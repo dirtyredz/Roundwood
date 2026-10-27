@@ -377,3 +377,5 @@
 Fitting must not move the door depth. Full tops accept every door depth; thin tops refuse only an equal closed plane. Both thicknesses may clip during the swing. Ground fitting must inspect the expected top above the normal landing cell, not only the clicked block. Unknown `DoorArch` payloads must round-trip unchanged; clients receive a locked marker rather than inventing an editable empty frame.
 
 An empty arch collision shape still occupies its block positions. Only explicit compatible fitted-top conversion may replace those positions. Both fitting orders take precedence over toggle/camouflage; unsupported fits are refused with a hint and a red preview. Vanilla/other-mod doors remain separate-cell placements, and shoulders cannot become fitted tops.
+
+Frameless panes have no frame or perimeter/sill host. Refuse frame donors without payment; glass tint and Cross Beams remain available. Never use runtime WindowDesign.all() to discover registered items: blank-with-beams has no retired crossed ID.

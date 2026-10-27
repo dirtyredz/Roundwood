@@ -66,8 +66,8 @@ public final class ContentGameTests {
     public static void canonicalEntriesAndFortyNineHiddenAliasesAreRegistered(GameTestHelper helper) {
         long blocks = ForgeRegistries.BLOCKS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         long items = ForgeRegistries.ITEMS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(blocks == 90, "expected 20 + 8 modular (4 full, 4 thin) + 13 + 49 blocks, found " + blocks);
-        check(items == 93, "expected 20 + 8 modular + two attachments + 13 + 49 + the window trim items, found " + items);
+        check(blocks == 91, "expected 20 + 8 modular (4 full, 4 thin) + 13 + 49 blocks, found " + blocks);
+        check(items == 94, "expected 20 + 8 modular + two attachments + 13 + 49 + the window trim items, found " + items);
         for (String id : List.of("arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder")) {
             Block block = ForgeRegistries.BLOCKS.getValue(id(id));
             Item item = ForgeRegistries.ITEMS.getValue(id(id));
@@ -135,7 +135,7 @@ public final class ContentGameTests {
         List<Block> windows = new java.util.ArrayList<>(ModBlocks.windows());
         windows.addAll(LegacyContent.windows());
         windows.addAll(io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility.blocks());
-        check(windows.size() == 41, "expected 26 + 15 window blocks, found " + windows.size());
+        check(windows.size() == 42, "expected 27 + 15 window blocks, found " + windows.size());
         for (Block window : windows) {
             check(ModBlockEntities.roundWindow().isValid(window.defaultBlockState()), window + " cannot carry the window entity");
             check(!ModBlockEntities.roundDoor().isValid(window.defaultBlockState()), window + " valid for the door entity");
@@ -230,7 +230,7 @@ public final class ContentGameTests {
                 "a painting recipe is still loaded");
         long count = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
                 .filter(r -> r.getId().getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(count == 28, "expected 28 roundwood crafting recipes, loaded " + count);
+        check(count == 29, "expected 29 roundwood crafting recipes, loaded " + count);
         ItemStack k = new ItemStack(Items.STICK);
         var ladder = find(level, grid(k, e, k, k, k, k, k, e, k)).orElseThrow();
         check(ladder.assemble(grid(k, e, k, k, k, k, k, e, k), level.registryAccess()).is(Items.LADDER), "beams collided with the vanilla ladder");
@@ -377,7 +377,7 @@ public final class ContentGameTests {
             check(!stack.hasTag() && AppearanceStacks.read(stack).equals(AppearanceDefaults.of(item))
                     && WindowGlassStacks.key(stack).equals(AppearanceDefaults.of(item).key()), item + " is not its plain default: " + stack);
         }
-        check(ModItems.all().size() == 28 && shown.size() == 28, "tab lists " + shown.size() + " items, not the 28 of 0.16.0");
+        check(ModItems.all().size() == 29 && shown.size() == 29, "tab lists " + shown.size() + " items, not the 29 of 0.17.0");
         check(shown.stream().anyMatch(stack -> stack.getItem() == ModItems.CROSS_BEAMS.get()), "Cross Beams is not listed");
         for (Item retired : io.github.dirtyredz.roundwood.migration.LegacyContent.items()) {
             check(shown.stream().noneMatch(stack -> stack.getItem() == retired), "hidden compatibility item " + retired + " is listed");
@@ -395,7 +395,7 @@ public final class ContentGameTests {
             "round_window", "round_window_arch_left", "round_window_arch_right", "round_window_bottom_left", "round_window_bottom_right", "round_window_arch_bottom_left", "round_window_arch_bottom_right",
             "round_window_top_left", "round_window_top_right",
             "round_window_edge_top", "round_window_edge_left",
-            "round_window_edge_bottom", "round_window_edge_right",
+            "round_window_edge_bottom", "round_window_edge_right", "frameless_window",
             "arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder",
             "arch_top_1x1_thin", "arch_top_1x2_thin", "arch_top_2x3_thin", "keyhole_shoulder_thin", "round_trim");
 

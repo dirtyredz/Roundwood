@@ -38,6 +38,11 @@ public final class WindowRecipes {
     }
 
     public static void build(Consumer<FinishedRecipe> writer, InventoryChangeTrigger.TriggerInstance unlock) {
+        net.minecraft.data.recipes.ShapelessRecipeBuilder.shapeless(RecipeCategory.DECORATIONS,
+                ModItems.window(WindowDesign.plain(WindowProfile.BLANK)))
+                .requires(Items.GLASS_PANE)
+                .unlockedBy("has_glass_pane", InventoryChangeTrigger.TriggerInstance.hasItems(Items.GLASS_PANE))
+                .save(writer);
         window(writer, unlock, WindowProfile.ROUND, WindowPattern.PLAIN, "round_window", " P ", "PGP", " P ");
         window(writer, unlock, WindowProfile.ARCH_LEFT, WindowPattern.PLAIN, "round_window_arch", "PP", "PG", "P ");
         window(writer, unlock, WindowProfile.ARCH_RIGHT, WindowPattern.PLAIN, "round_window_arch", "PPP", " G ", " P ");

@@ -66,7 +66,7 @@ public final class ModItems {
 
     private static Map<WindowDesign, RegistryObject<RoundWindowItem>> registerWindows() {
         Map<WindowDesign, RegistryObject<RoundWindowItem>> out = new LinkedHashMap<>();
-        for (WindowDesign design : WindowDesign.all()) {
+        for (WindowDesign design : ModBlocks.WindowProducts.all()) {
             out.put(design, ITEMS.register(design.id(), () -> design.pattern() == WindowPattern.CROSS
                     ? new RetiredCrossWindowItem(design, new Item.Properties())
                     : new RoundWindowItem(ModBlocks.window(design), new Item.Properties())));

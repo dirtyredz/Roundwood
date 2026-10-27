@@ -50,7 +50,7 @@ public final class WindowMuntinGameTests {
         ServerPlayer player = player(helper, "cross_place", GameType.SURVIVAL, Direction.NORTH);
         BlockPos at = new BlockPos(4, 1, 4);
         Appearance look = AppearanceFixtures.oakPainted(DyeColor.PURPLE);
-        for (WindowDesign design : WindowDesign.all()) {
+        for (WindowDesign design : io.github.dirtyredz.roundwood.registry.ModBlocks.WindowProducts.all()) {
             if (design.pattern() != WindowPattern.CROSS) {
                 continue;
             }

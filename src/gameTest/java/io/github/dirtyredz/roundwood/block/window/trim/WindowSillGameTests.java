@@ -166,7 +166,7 @@ public final class WindowSillGameTests {
     @GameTest(template = TEMPLATE, timeoutTicks = 200)
     public static void otherWindowsRefuseTheSill(GameTestHelper helper) {
         ServerPlayer player = player(helper, "sill_refused", GameType.SURVIVAL, Direction.NORTH);
-        for (WindowDesign design : WindowDesign.all()) {
+        for (WindowDesign design : io.github.dirtyredz.roundwood.registry.ModBlocks.WindowProducts.all()) {
             if (design.profile().takesSill() || design.pattern() == io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern.CROSS) {
                 continue;
             }

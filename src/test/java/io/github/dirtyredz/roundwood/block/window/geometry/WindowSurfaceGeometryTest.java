@@ -104,7 +104,8 @@ class WindowSurfaceGeometryTest {
             List<Surface> surfaces = surfaces(design, CENTRED);
             long reveals = surfaces.stream().filter(s -> s.texture().equals(WindowPaneGeometry.FRAME)
                     && s.face().getAxis() != Direction.Axis.Z).count();
-            assertTrue(reveals > 0, design.id() + ": no reveal");
+            assertEquals(design.profile() != io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile.BLANK,
+                    reveals > 0, design.id() + ": frame reveal presence");
             if (design.pattern().name().equals("CROSS")) {
                 // the vertical beam's two sides face east and west at x 7.5 and 8.5
                 assertTrue(surfaces.stream().anyMatch(s -> s.face() == Direction.WEST && s.backing().minX() == 7.5

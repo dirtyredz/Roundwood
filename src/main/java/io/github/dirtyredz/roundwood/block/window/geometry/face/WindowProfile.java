@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.block.window.geometry.face;
 import io.github.dirtyredz.roundwood.geometry.PixelCircle;
 
 /**
- * The thirteen single-cell window faces: which pixels of a square wooden pane are glazed. The round
+ * The single-cell window faces (including the full-opening blank pane): which pixels of a square wooden pane are glazed. The round
  * window is a centred 12-pixel circle; the upper arches are the two halves of an upper semicircle
  * ({@link WindowArchGeometry}); the bottom corners complete them into a 2 x 2 arched-top window
  * ({@link WindowCornerGeometry}). 0.10.0 adds explicit reflections and edges: the lower arches (the
@@ -27,7 +27,8 @@ public enum WindowProfile {
     EDGE_TOP("round_window_edge_top", 0, 0),
     EDGE_LEFT("round_window_edge_left", 0, 0),
     EDGE_BOTTOM("round_window_edge_bottom", 0, 0),
-    EDGE_RIGHT("round_window_edge_right", 0, 0);
+    EDGE_RIGHT("round_window_edge_right", 0, 0),
+    BLANK("frameless_window", 0, 0);
 
     public static final int SIZE = 16;
     /** The round window's opening (unchanged since 0.3). */
@@ -68,7 +69,12 @@ public enum WindowProfile {
 
     /** True for the pieces of the 2 x 2 window (arches and corners), which share one 32-pixel artwork. */
     public boolean inAssembly() {
-        return this != ROUND && edge() == null;
+        return this != ROUND && this != BLANK && edge() == null;
+    }
+
+    /** A blank glazed pane has no perimeter frame to trim. */
+    public boolean takesTrim() {
+        return this != BLANK;
     }
 
     /**
@@ -96,6 +102,7 @@ public enum WindowProfile {
 
     public boolean inOpening(int u, int v) {
         return switch (this) {
+            case BLANK -> u >= 0 && u < SIZE && v >= 0 && v < SIZE;
             case ROUND -> PixelCircle.inDisc(SIZE, ROUND_OPENING, u, v);
             case ARCH_LEFT -> WindowArchGeometry.inOpening(false, u, v);
             case ARCH_RIGHT -> WindowArchGeometry.inOpening(true, u, v);

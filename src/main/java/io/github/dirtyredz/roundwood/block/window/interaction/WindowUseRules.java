@@ -30,7 +30,7 @@ public final class WindowUseRules {
     }
 
     public enum Action {
-        FIT_TRIM, FIT_SILL, FIT_BEAMS, RESTYLE_TRIM, REMOVE_TRIM, RESTYLE_FRAME, TINT_GLASS, REFUSE_MASONRY, REFUSE_SILL,
+        FIT_TRIM, FIT_SILL, FIT_BEAMS, RESTYLE_TRIM, REMOVE_TRIM, RESTYLE_FRAME, TINT_GLASS, REFUSE_MASONRY, REFUSE_SILL, REFUSE_FRAME,
         /** Not the window's business: the item's own use proceeds. */
         PASS
     }
@@ -42,6 +42,12 @@ public final class WindowUseRules {
      * @param takesSill whether the clicked window's profile carries an arch sill
      */
     public static Action decide(Item item, WindowHitRegions.Region region, boolean takesSill) {
+        return decide(item, region, takesSill, true);
+    }
+
+    public static Action decide(Item item, WindowHitRegions.Region region, boolean takesSill, boolean hasFrame) {
+        if (!hasFrame && (item == Item.UNIVERSAL_TRIM
+                || item == Item.PLANKS && region.slot() == null)) return Action.REFUSE_FRAME;
         if (region == WindowHitRegions.Region.NONE) {
             return item == Item.MASONRY ? Action.REFUSE_MASONRY : Action.PASS;
         }

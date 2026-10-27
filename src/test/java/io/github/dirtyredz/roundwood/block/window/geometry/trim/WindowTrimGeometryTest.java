@@ -44,7 +44,7 @@ class WindowTrimGeometryTest {
                     assertEquals(expectedBand(profile, u, v), band, profile + " band at " + u + "," + v);
                 }
             }
-            assertTrue(count > 0, profile + ": empty band");
+            assertEquals(profile != WindowProfile.BLANK, count > 0, profile + ": band presence");
         }
     }
 
@@ -76,6 +76,7 @@ class WindowTrimGeometryTest {
             case EDGE_LEFT -> u < 2;
             case EDGE_BOTTOM -> v < 2;
             case EDGE_RIGHT -> u >= 14;
+            case BLANK -> false;
         };
     }
 
@@ -108,7 +109,7 @@ class WindowTrimGeometryTest {
                         : new double[] {pose.depth().slabMin() - 1, pose.depth().slabMin()};
                 for (WindowProfile profile : WindowProfile.values()) {
                     List<Piece> pieces = WindowTrimGeometry.pieces(profile, pose, side);
-                    assertFalse(pieces.isEmpty(), profile + " " + pose + " " + side + ": empty band");
+                    assertEquals(profile == WindowProfile.BLANK, pieces.isEmpty(), profile + " " + pose + " " + side + ": band presence");
                     for (Piece piece : pieces) {
                         double[] n = range(piece.box(), pose.normal());
                         if (n[0] != expected[0] || n[1] != expected[1]) {
@@ -132,7 +133,7 @@ class WindowTrimGeometryTest {
                 assertEquals(collision, WindowShapes.selectionBoxes(design, pose, Set.of(), Set.of()));
                 for (Direction side : sides(pose)) {
                     List<Box> selection = WindowShapes.selectionBoxes(design, pose, Set.of(side), Set.of());
-                    boolean inCell = range(WindowTrimGeometry.pieces(design.profile(), pose, side).get(0).box(), pose.normal())[0] >= 0
+                    boolean inCell = design.profile() != WindowProfile.BLANK && range(WindowTrimGeometry.pieces(design.profile(), pose, side).get(0).box(), pose.normal())[0] >= 0
                             && range(WindowTrimGeometry.pieces(design.profile(), pose, side).get(0).box(), pose.normal())[1] <= 16;
                     if (inCell != (selection.size() > collision.size())) {
                         fail(design.id() + " " + pose + " " + side + ": in-cell " + inCell + " but selection " + selection.size());

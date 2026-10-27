@@ -28,6 +28,7 @@ public enum WindowTrimLayout {
             return SILL;
         }
         return switch (profile) {
+            case BLANK -> throw new IllegalArgumentException("Frameless panes have no face-trim layout");
             case ROUND -> ROUND;
             case ARCH_LEFT, ARCH_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT -> ARCH;
             case ARCH_BOTTOM_LEFT, ARCH_BOTTOM_RIGHT -> CIRCLE;

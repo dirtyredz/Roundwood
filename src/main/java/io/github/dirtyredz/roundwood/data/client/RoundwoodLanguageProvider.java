@@ -33,7 +33,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add(ModBlocks.archedDoor(), "Arched Door");
         add(ModBlocks.doubleArchedDoor(), "Double Arched Door");
         add(ModBlocks.tallDoubleArchedDoor(), "Tall Double Arched Door");
-        for (WindowDesign design : WindowDesign.all()) {
+        for (WindowDesign design : ModBlocks.WindowProducts.all()) {
             add(ModBlocks.window(design), windowName(design));
         }
         add(ModBlocks.archway(ArchwayDesign.ORDINARY), "Archway");
@@ -77,6 +77,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("message.roundwood.masonry_trim_only", "Aim at a trim or cross beam to apply masonry");
         add("tooltip.roundwood.arch_sill_trim",
                 "Fits under the clicked face of an upper window arch; restyle with planks, masonry or dye, remove with shears");
+        add("message.roundwood.frameless_no_frame", "This pane has no frame or perimeter trim; use dye on glass or fit Cross Beams");
         add("message.roundwood.beams_window_only", "Cross Beams fit only a window pane");
         add("message.roundwood.sill_upper_arch_only", "An arch sill fits only an upper window arch");
     }
@@ -85,6 +86,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
     static String windowName(WindowDesign design) {
         String beams = design.pattern() == WindowPattern.CROSS ? " with Cross Beams" : "";
         return switch (design.profile()) {
+            case BLANK -> "Frameless Window Pane" + beams;
             case ROUND -> "Round Window" + beams;
             case ARCH_LEFT -> "Round Window Arch" + beams + ", Left";
             case ARCH_RIGHT -> "Round Window Arch" + beams + ", Right";

@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 
 /**
  * One of each placeable piece, oak, default state, in a single row with a sign beside each:
- * the thirteen windows (one per profile), the round door, the arched door (both closed, hinge left)
+ * the fourteen windows (one per profile), the round door, the arched door (both closed, hinge left)
  * with modular arches in their own section. Each stands {@link ShowcaseSpacing#GAP} clear blocks from the
  * next, its sign two columns to its left in the same row. Occupies {@code r 0..R_MAX, f 1}; the
  * section's rectangle is checked to hold nothing else.
@@ -43,7 +43,7 @@ public final class PiecesSection implements ShowcaseSection {
         return ShowcaseSpacing.FIRST_R + WINDOW_PITCH * index;
     }
 
-    /** The thirteen windows, one per profile, centred: the round one across the builder's right, the rest front towards the builder. */
+    /** The fourteen windows, one per profile, centred: the round one across the builder's right, the rest front towards the builder. */
     public static List<ShowcaseWindow> windows(ShowcaseFrame frame) {
         WindowProfile[] profiles = WindowProfile.values();
         WindowPose oriented = WindowArchesSection.centred(frame.forward());

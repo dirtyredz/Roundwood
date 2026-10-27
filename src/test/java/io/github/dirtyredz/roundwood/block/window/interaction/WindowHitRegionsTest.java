@@ -82,6 +82,7 @@ class WindowHitRegionsTest {
         boolean opening;
         boolean band;
         switch (design.profile()) {
+            case BLANK -> { opening = true; band = false; }
             case ROUND -> {
                 double d = (cu - 8) * (cu - 8) + (cv - 8) * (cv - 8);
                 opening = d <= 36;

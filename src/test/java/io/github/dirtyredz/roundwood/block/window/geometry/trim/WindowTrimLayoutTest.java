@@ -37,8 +37,10 @@ class WindowTrimLayoutTest {
 
     @Test
     void everyProfileAndSlotHasItsLayout() {
-        assertEquals(WindowProfile.values().length, PERIMETER.size());
-        for (WindowProfile profile : WindowProfile.values()) {
+        assertEquals(WindowProfile.values().length - 1, PERIMETER.size());
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> WindowTrimLayout.of(TrimSlot.PERIMETER, WindowProfile.BLANK));
+        for (WindowProfile profile : PERIMETER.keySet()) {
             assertEquals(PERIMETER.get(profile), WindowTrimLayout.of(TrimSlot.PERIMETER, profile), profile.id());
             assertEquals(WindowTrimLayout.SILL, WindowTrimLayout.of(TrimSlot.SILL, profile), profile.id());
         }

@@ -55,11 +55,11 @@ public final class CrossWindowCompatibility {
     }
 
     public static List<WindowPaneBlock> blocks() {
-        return WindowDesign.all().stream().filter(d -> d.pattern() == WindowPattern.CROSS).map(ModBlocks::window).toList();
+        return ModBlocks.WindowProducts.all().stream().filter(d -> d.pattern() == WindowPattern.CROSS).map(ModBlocks::window).toList();
     }
 
     public static List<Item> items() {
-        return WindowDesign.all().stream().filter(d -> d.pattern() == WindowPattern.CROSS).map(ModItems::window).map(Item.class::cast).toList();
+        return ModBlocks.WindowProducts.all().stream().filter(d -> d.pattern() == WindowPattern.CROSS).map(ModItems::window).map(Item.class::cast).toList();
     }
 
     /** Historical stack contents may live in BlockEntityTag; explicit stack values take precedence. */

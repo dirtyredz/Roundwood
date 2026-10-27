@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.data.client.window;
 
+import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.data.client.ItemModelTransforms;
@@ -29,7 +30,7 @@ public class WindowItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        for (WindowDesign design : WindowDesign.all()) {
+        for (WindowDesign design : ModBlocks.WindowProducts.all()) {
             ItemModelBuilder item = getBuilder(design.id())
                     .parent(new ModelFile.UncheckedModelFile(modLoc("block/" + WindowDesign.plain(design.profile()).id())));
             ItemModelTransforms.block(item, CENTRE);

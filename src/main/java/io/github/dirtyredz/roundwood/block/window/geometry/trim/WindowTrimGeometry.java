@@ -52,6 +52,7 @@ public final class WindowTrimGeometry {
     /** True when pixel (u, v) of {@code profile}'s face is under the perimeter trim band. */
     public static boolean inBand(WindowProfile profile, int u, int v) {
         return switch (profile) {
+            case BLANK -> false;
             case ROUND -> PixelCircle.inDisc(SIZE, SIZE, u, v) && !PixelCircle.inDisc(SIZE, WindowProfile.ROUND_OPENING, u, v);
             case ARCH_LEFT, ARCH_RIGHT -> inArchRing(u + profile.assemblyU(), v);
             case ARCH_BOTTOM_LEFT, ARCH_BOTTOM_RIGHT -> inArchRing(u + profile.assemblyU(), SIZE - 1 - v);
@@ -70,7 +71,7 @@ public final class WindowTrimGeometry {
 
     /** True when {@code profile} can carry anything in {@code slot}. */
     public static boolean supports(TrimSlot slot, WindowProfile profile) {
-        return slot == TrimSlot.PERIMETER || slot == TrimSlot.SILL && profile.takesSill();
+        return slot == TrimSlot.PERIMETER && profile.takesTrim() || slot == TrimSlot.SILL && profile.takesSill();
     }
 
     /** Pixel (cu, v) of the upper 32 x 16 arch face lies in the 32/28 ring around the arch circle. */

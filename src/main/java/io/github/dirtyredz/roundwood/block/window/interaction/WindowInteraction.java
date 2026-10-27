@@ -74,6 +74,7 @@ public final class WindowInteraction {
                     ? WindowGlassActions.tint(level, pos, player, stack, dye.getDyeColor()) : InteractionResult.PASS;
             case REMOVE_TRIM -> WindowTrimActions.remove(level, pos, player, hand, stack, target.region().slot(), target.face());
             case REFUSE_MASONRY -> AppearanceActions.refuse(level, player, "message.roundwood.masonry_trim_only");
+            case REFUSE_FRAME -> AppearanceActions.refuse(level, player, "message.roundwood.frameless_no_frame");
             case REFUSE_SILL -> AppearanceActions.refuse(level, player, "message.roundwood.sill_upper_arch_only");
         };
     }
@@ -101,7 +102,8 @@ public final class WindowInteraction {
         FaceTrims sills = window != null ? window.trims(TrimSlot.SILL) : FaceTrims.NONE;
         boolean takesSill = state.getBlock() instanceof WindowPaneBlock block && block.profile().takesSill();
         return WindowHitTarget.of(state, pos, hit.getLocation(), hit.getDirection(), player.getEyePosition(), trims, sills, WindowPaneState.design(state, window))
-                .map(target -> new Plan(WindowUseRules.decide(item, target.region(), takesSill), target));
+                .map(target -> new Plan(WindowUseRules.decide(item, target.region(), takesSill,
+                        !(state.getBlock() instanceof WindowPaneBlock block) || block.profile().takesTrim()), target));
     }
 
     /**

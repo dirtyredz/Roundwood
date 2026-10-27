@@ -40,7 +40,7 @@ final class GeneratedFiles {
             "round_window_top_left", "round_window_top_left_cross", "round_window_top_right",
             "round_window_top_right_cross", "round_window_edge_top", "round_window_edge_top_cross",
             "round_window_edge_left", "round_window_edge_left_cross", "round_window_edge_bottom",
-            "round_window_edge_bottom_cross", "round_window_edge_right", "round_window_edge_right_cross");
+            "round_window_edge_bottom_cross", "round_window_edge_right", "round_window_edge_right_cross", "frameless_window");
     /** The two designs that are plain round windows; the other 24 are oriented (arches, corners and edges). */
     static final List<String> ROUND_DESIGNS = List.of("round_window", "round_window_cross");
     /** The two archways (0.12.0): block entities with a front and back trim, like doors and windows. */

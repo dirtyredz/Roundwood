@@ -68,9 +68,18 @@ public final class ModBlocks {
     private ModBlocks() {
     }
 
+    /** Registered products: plain profiles and only the thirteen historical crossed IDs. */
+    public static final class WindowProducts {
+        private WindowProducts() {}
+        public static List<WindowDesign> all() {
+            return WindowDesign.all().stream().filter(d -> d.profile() != WindowProfile.BLANK
+                    || d.pattern() == WindowPattern.PLAIN).toList();
+        }
+    }
+
     private static Map<WindowDesign, RegistryObject<WindowPaneBlock>> registerWindows() {
         Map<WindowDesign, RegistryObject<WindowPaneBlock>> out = new LinkedHashMap<>();
-        for (WindowDesign design : WindowDesign.all()) {
+        for (WindowDesign design : ModBlocks.WindowProducts.all()) {
             out.put(design, BLOCKS.register(design.id(), () -> design.pattern() == WindowPattern.CROSS
                     ? (design.profile().oriented() ? new RetiredOrientedWindowBlock(windowProperties(), design, ModBlockEntities::roundWindow)
                         : new RetiredRoundWindowBlock(windowProperties(), ModBlockEntities::roundWindow))

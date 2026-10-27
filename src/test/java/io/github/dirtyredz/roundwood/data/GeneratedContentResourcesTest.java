@@ -102,7 +102,7 @@ class GeneratedContentResourcesTest {
             assertEquals(Set.of("roundwood:round_door", "roundwood:arched_door", "roundwood:double_arched_door", "roundwood:tall_double_arched_door"), tagValues(tags.resolve(kind + "/round_doors.json")), kind);
             Set<String> windows = new TreeSet<>();
             WINDOWS.forEach(w -> windows.add("roundwood:" + w));
-            assertEquals(26, windows.size());
+            assertEquals(27, windows.size());
             assertEquals(windows, tagValues(tags.resolve(kind + "/round_windows.json")), kind);
         }
         for (String kind : List.of("blocks", "items")) {
@@ -134,9 +134,9 @@ class GeneratedContentResourcesTest {
             boolean piece = ARCH_PIECES.contains(block);
             boolean archway = ARCHWAYS.contains(block) || piece;
             boolean upperArch = UPPER_ARCHES.contains(block);
-            assertEquals(upperArch ? 6 : window ? 4 : door || archway ? 3 : 1, pools.size(), block);
+            assertEquals(block.equals("frameless_window") ? 2 : upperArch ? 6 : window ? 4 : door || archway ? 3 : 1, pools.size(), block);
             assertEquals(JsonParser.parseString(ownItemPool("roundwood:" + family(block))), pools.get(0), block);
-            if (window || door || archway) {
+            if ((window || door || archway) && !block.equals("frameless_window")) {
                 String item = "roundwood:round_trim";
                 String tag = piece ? "ArchPieceTrim" : archway ? "ArchwayTrim" : window ? "WindowTrim" : "DoorTrim";
                 assertEquals(JsonParser.parseString(trimFacePool("front", item, tag + ".Front")), pools.get(1), block + ": front trim pool");
@@ -185,7 +185,7 @@ class GeneratedContentResourcesTest {
                 "Round Window Edge, Top", "Round Window Edge with Cross Beams, Top",
                 "Round Window Edge, Left", "Round Window Edge with Cross Beams, Left",
                 "Round Window Edge, Bottom", "Round Window Edge with Cross Beams, Bottom",
-                "Round Window Edge, Right", "Round Window Edge with Cross Beams, Right");
+                "Round Window Edge, Right", "Round Window Edge with Cross Beams, Right", "Frameless Window Pane");
         assertEquals(WINDOWS.size(), windowNames.size());
         for (int i = 0; i < WINDOWS.size(); i++) {
             assertEquals(windowNames.get(i), lang.get("block.roundwood." + WINDOWS.get(i)).getAsString(), WINDOWS.get(i));

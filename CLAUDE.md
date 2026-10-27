@@ -16,13 +16,13 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   normal suite and fast gate; Gradle recompiles the complete GameTest source set.
 - **Generated resources are source.** Change a provider, run `./gradlew runData`, commit the
   regenerated `src/generated/resources/` with the code. Never hand-edit generated JSON.
-- **Separate authorities, no catalogue.** Content is 26 canonical/compatibility base blocks and 28 advertised items in
-  three appearance families (door = round, arched, double arched and tall double arched doors; window family = 13 plain profiles; trim = eight full/thin modular arch pieces,
+- **Separate authorities, no catalogue.** Content is 27 canonical/compatibility base blocks and 29 advertised items in
+  three appearance families (door = round, arched, double arched and tall double arched doors; window family = 14 plain profiles; trim = eight full/thin modular arch pieces,
   the Universal Trim, Arch Sill and Cross Beams attachment items); looks are data. `round_trim` stays a registered compatibility block (frames from older
   saves) while its item, the Universal Trim, attaches to window, door and archway faces; `window_trim` is
   a hidden compatibility item that behaves the same. The Arch Sill is the second attachment slot
   (`TrimSlot.SILL`, upper arches only). Cross Beams is the whole-pane third slot (`CROSS_BEAMS`):
-  one canonical Front address, independent TRIM look, all 13 profiles. Old archways convert into modular tops/shoulders on chunk load; old stacks convert in loaded holders. Their IDs are non-placeable migration sources. The 13 retired `_cross` blocks
+  one canonical Front address, independent TRIM look, all 14 profiles. Old archways convert into modular tops/shoulders on chunk load; old stacks convert in loaded holders. Their IDs are non-placeable migration sources. The 13 retired `_cross` blocks
   and items remain hidden alongside the 49 frozen aliases; world and stack placement migrate fail closed. Trim attachments go through
   `block/attachment` (`storage/FaceTrimStore`, `host/TrimFitting`, `host/TrimHost`, `TrimSlot`; anchor persistence in
   `block/attachment/AppearanceAnchorBlockEntity`, held items in `interaction/HeldTrimTool`), never a host copy.

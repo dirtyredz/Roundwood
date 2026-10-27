@@ -42,7 +42,7 @@ class WindowSillGeometryTest {
         for (WindowProfile profile : WindowProfile.values()) {
             assertEquals(profile == WindowProfile.ARCH_LEFT || profile == WindowProfile.ARCH_RIGHT, profile.takesSill(), profile.id());
             assertEquals(profile.takesSill(), WindowTrimGeometry.supports(TrimSlot.SILL, profile));
-            assertTrue(WindowTrimGeometry.supports(TrimSlot.PERIMETER, profile));
+            assertEquals(profile != WindowProfile.BLANK, WindowTrimGeometry.supports(TrimSlot.PERIMETER, profile));
             int count = 0;
             for (int u = 0; u < 16; u++) {
                 for (int v = 0; v < 16; v++) {

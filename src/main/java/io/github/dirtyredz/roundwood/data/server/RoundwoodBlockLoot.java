@@ -48,20 +48,21 @@ public class RoundwoodBlockLoot extends BlockLootSubProvider {
         add(ModBlocks.doubleArchedDoor(), door(ModItems.DOUBLE_ARCHED_DOOR.get()));
         add(ModBlocks.tallDoubleArchedDoor(), door(ModItems.TALL_DOUBLE_ARCHED_DOOR.get()));
         dropSelf(ModBlocks.roundTrim());
-        ModBlocks.windows().forEach(window -> add(window, window(window.asItem(), window.profile().takesSill())));
+        ModBlocks.windows().forEach(window -> add(window, window(window.asItem(), window.profile().takesSill(), window.profile().takesTrim())));
         ModBlocks.archways().forEach(archway -> add(archway,
                 withFaces(createSingleItemTable(archway.asItem()), TrimSlot.PERIMETER, ArchwayTrimNbt.TAG)));
         ModBlocks.archPieces().forEach(piece -> add(piece,
                 withFaces(createSingleItemTable(piece.asItem()), TrimSlot.PERIMETER, ArchPieceTrimNbt.TAG)));
         CrossWindowCompatibility.blocks().forEach(block -> dropOther(block, ModItems.window(block.design())));
         LegacyContent.doors().forEach(block -> add(block, door(ModItems.ROUND_DOOR.get())));
-        LegacyContent.windows().forEach(block -> add(block, window(ModItems.ROUND_WINDOW.get(), false)));
+        LegacyContent.windows().forEach(block -> add(block, window(ModItems.ROUND_WINDOW.get(), false, true)));
         LegacyContent.trims().forEach(block -> dropOther(block, ModItems.ROUND_TRIM.get()));
     }
 
     /** The window's item, plus a Universal Trim per trimmed face and, on an upper arch, an Arch Sill per silled face. */
-    private LootTable.Builder window(Item pane, boolean sills) {
-        LootTable.Builder table = withFaces(createSingleItemTable(pane), TrimSlot.PERIMETER, WindowTrimNbt.TAG);
+    private LootTable.Builder window(Item pane, boolean sills, boolean trims) {
+        LootTable.Builder table = createSingleItemTable(pane);
+        if (trims) table = withFaces(table, TrimSlot.PERIMETER, WindowTrimNbt.TAG);
         if (sills) table = withFaces(table, TrimSlot.SILL, WindowSillNbt.TAG);
         return withFaces(table, TrimSlot.CROSS_BEAMS, WindowBeamNbt.TAG);
     }

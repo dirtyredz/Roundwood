@@ -15,7 +15,7 @@ Generic: not tied to any modpack.
 
 ## Content
 
-28 items: **Round Door**, **Arched Door**, **Double Arched Door**, **Tall Double Arched Door**, thirteen plain window profiles
+29 items: **Round Door**, **Arched Door**, **Double Arched Door**, **Tall Double Arched Door**, fourteen plain window profiles
 (**Round Window**, **Round Window Arch, Left** and **Right**, **Round Window Corner, Bottom Left**
 and **Bottom Right**, and since 0.10.0 **Round Window Arch, Bottom Left** and **Bottom Right**,
 **Round Window Corner, Top Left** and **Top Right**, and **Round Window Edge, Top**, **Left**,
@@ -193,7 +193,7 @@ two-pixel border on the named side. Runs of them, between the corner pieces, mak
 width or height: a 3 x 2 window is bottom left corner, bottom edge, bottom right corner under top
 left corner, top edge, top right corner.
 
-**Cross Beams** (`cross_beams`, 0.13.0). One attachment fits any of the thirteen window profiles.
+**Cross Beams** (`cross_beams`, 0.13.0). One attachment fits any of the fourteen window profiles.
 Hold it and aim at a pane to preview the clipped cross; click to fit it. One item spans the whole
 pane, visible and removable from either side. Every pane in a larger window has its own cross.
 Beams have their own wood, paint or masonry look: aim at a beam with planks, dye or one of the four
@@ -336,7 +336,7 @@ floor, so use it on open ground; it refuses if the box would leave the build lim
 or loaded chunks, and never touches blocks outside it. The layout is one of each thing, not every
 combination. From the front row to the back:
 
-- **One of each placeable piece**, oak, default state: the thirteen windows, the round door, the arched
+- **One of each placeable piece**, oak, default state: the fourteen windows, the round door, the arched
   door (both closed), in a single row.
 - **The materials wall** (0.13.1; it was a row of one archway per look): the actual restyling source
   blocks, each with a wall sign on its front face, for you to take and use. The bottom row is the planks
@@ -526,7 +526,7 @@ check in game (the client-side retexturing and rendering have no automated test)
   looks as before and the crown is still outlined.
 
 *0.13.0, Cross Beams*
-- [ ] Fit preview equals the result on all 13 profiles and placement families, from either side.
+- [ ] Fit preview equals the result on all 14 profiles and placement families, from either side.
 - [ ] Beam wood/paint/masonry stays independent of frame and tint; sills win overlapping targets.
 - [ ] Mixed fitted/plain neighbours have no seams or missing beam ends, including chunk edges,
   save/reload, F3+T and a second client.
@@ -583,3 +583,5 @@ and gotchas.
 ## License
 
 MIT. Textures under `src/main/resources` are original; vanilla textures are referenced, never copied.
+
+The **Frameless Window Pane** (`frameless_window`) fills the centre of a larger window without a wooden border. Craft one from one glass pane. It supports the usual aimed placement, glass dyes and optional Cross Beams, but no perimeter trim or sill.
