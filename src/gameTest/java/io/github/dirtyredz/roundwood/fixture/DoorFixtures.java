@@ -106,6 +106,10 @@ public final class DoorFixtures {
         player.setItemInHand(InteractionHand.MAIN_HAND, stack);
         BlockPos abs = helper.absolutePos(clicked);
         Vec3 hit = Vec3.atCenterOf(abs).relative(face, 0.5);
+        if (face == Direction.UP) {
+            // Aimed door depth: a floor click toward the player's side of the cell is FRONT (as placeDoor does).
+            hit = hit.relative(player.getDirection().getOpposite(), .375);
+        }
         return stack.useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, new BlockHitResult(hit, face, abs, false)));
     }
 
