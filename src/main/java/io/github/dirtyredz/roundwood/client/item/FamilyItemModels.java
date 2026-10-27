@@ -28,7 +28,7 @@ public final class FamilyItemModels {
             return AppearanceItemOverrides.wrap(model, (oak, look) -> ArchwayModels.item(archway.archway().design(), oak, look));
         }
         if (item instanceof RoundDoorItem door) {
-            return AppearanceItemOverrides.wrap(model, (oak, look) -> DoorAppearanceModels.item(door.door().design(), oak, look));
+            return AppearanceItemOverrides.wrapStack(model, (oak, stack) -> DoorAppearanceModels.item(door.door().design(), oak, stack));
         }
         AppearanceFamily family = item instanceof AppearanceDefaults defaults ? defaults.appearanceFamily() : null;
         if (family == AppearanceFamily.DOOR) {

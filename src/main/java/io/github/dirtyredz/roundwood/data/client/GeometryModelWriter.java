@@ -52,6 +52,8 @@ public final class GeometryModelWriter {
          * @param part one tile-split part of the piece, in model coordinates
          * @return {u1, v1, u2, v2} within 0..16, or null for the tiled default
          */
+        default int tintIndex(Piece piece, Direction face) { return -1; }
+
         default float[] uv(Piece piece, Box part, Direction face) {
             return null;
         }
@@ -85,6 +87,8 @@ public final class GeometryModelWriter {
                     float[] uv = explicit != null ? explicit : FaceUv.of(local, direction);
                     ModelBuilder<T>.ElementBuilder.FaceBuilder face = element.face(direction)
                             .texture("#" + style.texture(piece, direction)).uvs(uv[0], uv[1], uv[2], uv[3]);
+                    int marker = style.tintIndex(piece,direction);
+                    if (marker >= 0) face.tintindex(marker);
                     if (cullBlockFaces && onCellBoundary(part, direction)) {
                         face.cullface(direction);
                     }
@@ -137,7 +141,7 @@ public final class GeometryModelWriter {
     }
 
     /** Cuts a box at every multiple of 16 strictly inside it, on all three axes. */
-    static List<Box> splitAtTiles(Box box) {
+    public static List<Box> splitAtTiles(Box box) {
         List<Box> out = new ArrayList<>();
         for (double[] x : cuts(box.minX(), box.maxX())) {
             for (double[] y : cuts(box.minY(), box.maxY())) {

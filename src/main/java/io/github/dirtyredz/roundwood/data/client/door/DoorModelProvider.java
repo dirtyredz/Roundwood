@@ -57,7 +57,8 @@ public class DoorModelProvider extends BlockStateProvider {
                 BlockModelBuilder template = template(design, hinge, panelFaces(design));
                 models().getBuilder(DoorLeafModels.path(design, hinge)).parent(template)
                         .texture(DoorGeometry.PANEL, modLoc(OAK_PANEL))
-                        .texture(DoorGeometry.BRASS, modLoc("block/brass"))
+                        .texture("hinges", modLoc("block/brass"))
+                    .texture("knobs", modLoc("block/brass"))
                         .texture("particle", modLoc(OAK_PANEL));
             }
         }
@@ -75,10 +76,11 @@ public class DoorModelProvider extends BlockStateProvider {
     /** Panel faces front and back: one board image across the whole leaf, at one texel per pixel. */
     private static GeometryModelWriter.FaceStyle panelFaces(DoorDesign design) {
         return new GeometryModelWriter.FaceStyle() {
+            @Override public int tintIndex(Piece piece, Direction face) { return io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareSlot.marker(piece.texture()); }
             @Override
             public float[] uv(Piece piece, Box part, Direction face) {
                 return DoorGeometry.PANEL.equals(piece.texture())
-                        ? AssemblyFaceUv.of(DoorLeafModels.authoredBox(design, part), face, design.width(), design.height(), Math.max(32, Math.max(design.width(), design.height()))) : null;
+                        ? AssemblyFaceUv.of(DoorLeafModels.authoredBox(design, part), face, design.width(), design.height(), Math.max(32, Math.max(design.width(), design.height()))) : io.github.dirtyredz.roundwood.geometry.FaceUv.tiled(DoorLeafModels.authoredBox(design, part), face);
             }
         };
     }
@@ -86,6 +88,6 @@ public class DoorModelProvider extends BlockStateProvider {
     private BlockModelBuilder template(DoorDesign design, DoorHingeSide hinge, GeometryModelWriter.FaceStyle faces) {
         BlockModelBuilder builder = models().getBuilder(template(design, hinge));
         builder.texture("particle", "#" + DoorGeometry.PANEL);
-        return GeometryModelWriter.addPieces(builder, DoorGeometry.leaf(design, hinge).stream().map(p -> new Piece(DoorLeafModels.modelBox(design, p.box()), p.texture())).toList(), false, faces);
+        return GeometryModelWriter.addPieces(builder, DoorGeometry.leaf(design, hinge).stream().flatMap(p -> GeometryModelWriter.splitAtTiles(p.box()).stream().map(box -> new Piece(DoorLeafModels.modelBox(design, box), p.texture()))).toList(), false, faces);
     }
 }

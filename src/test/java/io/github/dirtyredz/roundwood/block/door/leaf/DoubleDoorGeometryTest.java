@@ -43,7 +43,7 @@ class DoubleDoorGeometryTest {
     @Test void bothLeavesHaveHardwareOnBothFacesAndTurnOnTheirOuterHinges() {
         for (var side : DoorHingeSide.values()) {
             var pieces = DoorGeometry.leaf(DESIGN, side);
-            assertEquals(2, pieces.stream().filter(p -> p.texture().equals(DoorGeometry.BRASS) && p.box().maxZ()-p.box().minZ()==2).count());
+            assertEquals(2, pieces.stream().filter(p -> !p.texture().equals(DoorGeometry.PANEL) && p.box().maxZ()-p.box().minZ()==2).count());
             for (var p : pieces) {
                 Box b = p.box().translate(-16, -16, 0);
                 assertTrue(b.within(new Box(-16, -16, -16, 32, 32, 32)), "illegal model bounds");

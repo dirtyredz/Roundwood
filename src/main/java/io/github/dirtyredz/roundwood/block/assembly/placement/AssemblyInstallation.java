@@ -33,16 +33,20 @@ public final class AssemblyInstallation {
     private AssemblyInstallation() {}
     public static <P> boolean install(Level level, AssemblyPlacementPlan<P, ? extends Assembly<P>> plan, Appearance appearance,
                                       Class<? extends AppearanceAnchor> anchorType) {
+        return install(level,plan,appearance,anchorType,entity -> true);
+    }
+    public static <P> boolean install(Level level, AssemblyPlacementPlan<P, ? extends Assembly<P>> plan, Appearance appearance,
+                                      Class<? extends AppearanceAnchor> anchorType, java.util.function.Predicate<AppearanceAnchor> extra) {
         var states = new java.util.LinkedHashMap<BlockPos, BlockState>();
         for (P part : plan.assembly().parts()) states.put(plan.assembly().pos(part), plan.states().get(part));
         return AssemblyWriteTransaction.write(level, states, false,
-                () -> installAppearance(level, plan.assembly().anchor(), appearance, anchorType), () -> true);
+                () -> installAppearance(level, plan.assembly().anchor(), appearance, anchorType, extra), () -> true);
     }
     private static boolean installAppearance(Level level, BlockPos anchor, Appearance appearance,
-                                             Class<? extends AppearanceAnchor> anchorType) {
+                                             Class<? extends AppearanceAnchor> anchorType, java.util.function.Predicate<AppearanceAnchor> extra) {
         if (level.getBlockEntity(anchor) instanceof AppearanceAnchor entity && anchorType.isInstance(entity)) {
             entity.setAppearance(appearance);
-            return true;
+            return extra.test(entity);
         }
         return false;
     }

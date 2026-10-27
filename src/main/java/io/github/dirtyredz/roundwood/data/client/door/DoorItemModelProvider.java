@@ -49,14 +49,15 @@ public class DoorItemModelProvider extends ItemModelProvider {
             if (design.doubleLeaf()) {
                 var pieces = new ArrayList<Piece>();
                 for (DoorHingeSide side : DoorHingeSide.values()) for (var p : DoorGeometry.leaf(design, side))
-                    pieces.add(new Piece(DoorLeafModels.modelBox(design, p.box()), p.texture()));
+                    for (var box : GeometryModelWriter.splitAtTiles(p.box())) pieces.add(new Piece(DoorLeafModels.modelBox(design, box), p.texture()));
                 template = getBuilder(template(design));
                 GeometryModelWriter.addPieces(template, pieces, false,
                         new GeometryModelWriter.FaceStyle() {
+            @Override public int tintIndex(Piece piece, Direction face) { return io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareSlot.marker(piece.texture()); }
                             @Override public float[] uv(Piece piece,
                                     Box part, Direction face) {
                                 return DoorGeometry.PANEL.equals(piece.texture()) ? AssemblyFaceUv.of(
-                                        DoorLeafModels.authoredBox(design, part), face, design.width(), design.height(), Math.max(design.width(), design.height())) : null;
+                                        DoorLeafModels.authoredBox(design, part), face, design.width(), design.height(), Math.max(design.width(), design.height())) : io.github.dirtyredz.roundwood.geometry.FaceUv.tiled(DoorLeafModels.authoredBox(design, part), face);
                             }
                         });
             }
@@ -65,7 +66,8 @@ public class DoorItemModelProvider extends ItemModelProvider {
                     (float) DoorGeometry.PIVOT_Z), Math.max(32, design.width()), design.height(), (float)(1 / DoorLeafModels.modelYScale(design)));
             getBuilder(design.id()).parent(template)
                     .texture(DoorGeometry.PANEL, modLoc(DoorModelProvider.OAK_PANEL))
-                    .texture(DoorGeometry.BRASS, modLoc("block/brass"))
+                    .texture("hinges", modLoc("block/brass"))
+                    .texture("knobs", modLoc("block/brass"))
                     .texture("particle", modLoc(DoorModelProvider.OAK_PANEL));
         }
     }

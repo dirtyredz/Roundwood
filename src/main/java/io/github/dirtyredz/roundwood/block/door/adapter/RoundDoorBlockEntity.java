@@ -37,6 +37,15 @@ import java.util.Optional;
 public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements TrimAttachmentSource {
     private final DoorSwing swing;
     private final DoorArchStore arch = new DoorArchStore();
+    private final io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore hardware = new io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore();
+    public io.github.dirtyredz.roundwood.block.door.hardware.DoorHardware hardware() { return hardware.value(); }
+    public boolean hardwareEditable() { return hardware.editable(); }
+    public boolean setHardware(io.github.dirtyredz.roundwood.block.door.hardware.DoorHardware value) {
+        if (!hardware.set(value)) return false;
+        changed(); return true;
+    }
+    public void writeHardware(CompoundTag parent) { hardware.save(parent); }
+    public void loadHardware(CompoundTag parent) { hardware.load(parent); changed(); }
 
     public Optional<DoorArchAttachment> arch() { return arch.attachment(); }
     public boolean archEditable() { return arch.editable(); }
@@ -82,6 +91,7 @@ public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements
     @Override
     protected void saveFamily(CompoundTag tag) {
         arch.save(tag);
+        hardware.save(tag);
         if (camouflage != null) {
             tag.put(CamouflageData.TAG, camouflage.write(true));
         }
@@ -91,12 +101,14 @@ public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements
     @Override
     protected void writeFamilyUpdate(CompoundTag tag) {
         arch.writeUpdate(tag);
+        hardware.writeUpdate(tag);
         tag.put(CamouflageData.TAG, camouflage == null ? new CompoundTag() : camouflage.write(false));
     }
 
     @Override
     protected void loadFamily(CompoundTag tag) {
         arch.load(tag);
+        hardware.load(tag);
         camouflage = CamouflageData.read(tag).orElse(null);
     }
 
@@ -107,7 +119,7 @@ public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements
         boolean was = open(getBlockState());
         super.setBlockState(state);
         boolean now = open(state);
-        if (level != null && level.isClientSide && now != was) {
+        if (level != null && now != was) {
             swing.retarget(now, level.getGameTime());
         }
     }

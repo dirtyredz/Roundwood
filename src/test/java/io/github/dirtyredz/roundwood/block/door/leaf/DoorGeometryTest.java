@@ -142,11 +142,11 @@ class DoorGeometryTest {
                         ? new Box(0, 0, 13, 32, 32, 16) : new Box(0, 0, 11, 32, 32, 18);
                 assertTrue(piece.box().within(bounds), "leaf piece outside its bounds: " + piece);
             }
-            double strapCentre = leaf.stream().filter(p -> p.texture().equals(DoorGeometry.BRASS))
+            double strapCentre = leaf.stream().filter(p -> !p.texture().equals(DoorGeometry.PANEL))
                     .filter(p -> p.box().maxX() - p.box().minX() > 3) // straps are long, the handle is 2 wide
                     .mapToDouble(p -> (p.box().minX() + p.box().maxX()) / 2).average().orElseThrow();
             assertTrue(hinge == DoorHingeSide.LEFT ? strapCentre < 16 : strapCentre > 16, "straps not on the hinge side");
-            long handles = leaf.stream().filter(p -> p.texture().equals(DoorGeometry.BRASS))
+            long handles = leaf.stream().filter(p -> !p.texture().equals(DoorGeometry.PANEL))
                     .filter(p -> p.box().maxZ() - p.box().minZ() == 2).count();
             assertEquals(2, handles, "one handle on each face");
         }
@@ -158,7 +158,7 @@ class DoorGeometryTest {
     @Test
     void theKnobIsCentredOnBothFacesForBothHinges() {
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
-            List<Box> knobs = DoorGeometry.leaf(DoorDesign.ROUND, hinge).stream().filter(p -> p.texture().equals(DoorGeometry.BRASS))
+            List<Box> knobs = DoorGeometry.leaf(DoorDesign.ROUND, hinge).stream().filter(p -> !p.texture().equals(DoorGeometry.PANEL))
                     .map(Piece::box).filter(b -> b.maxZ() - b.minZ() == 2).toList();
             assertEquals(2, knobs.size(), hinge + ": one knob per face");
             boolean front = false;
@@ -179,7 +179,7 @@ class DoorGeometryTest {
         for (DoorHingeSide hinge : DoorHingeSide.values()) {
             int[][] grid = new int[32][32];
             for (Piece piece : DoorGeometry.leaf(DoorDesign.ROUND, hinge)) {
-                assertTrue(piece.texture().equals(DoorGeometry.PANEL) || piece.texture().equals(DoorGeometry.BRASS),
+                assertTrue(java.util.Set.of("panel","hinges","knobs").contains(piece.texture()),
                         "unexpected texture: " + piece);
                 if (!piece.texture().equals(DoorGeometry.PANEL)) {
                     continue;

@@ -54,6 +54,10 @@ public final class DoorInteraction {
         if (io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.claims(fitContext)) return io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.use(fitContext);
         if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty()
                 && player.getOffhandItem().getItem() instanceof io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceItem) return InteractionResult.PASS;
+        if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty()
+                && io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareDonors.of(player,InteractionHand.OFF_HAND).isPresent()) return InteractionResult.PASS;
+        var hardware = DoorHardwareInteraction.use(level,player,hand,hit);
+        if (hardware.isPresent()) return hardware.get();
         var frameHit = io.github.dirtyredz.roundwood.block.door.frame.DoorArchInteraction.hit(level, pos, state, hit);
         if (frameHit.isPresent()) return io.github.dirtyredz.roundwood.block.door.frame.DoorArchInteraction.use(frameHit.get(), level, pos, player, hand);
         HeldTrimTool tool = HeldTrimTool.of(player, hand);
@@ -67,6 +71,8 @@ public final class DoorInteraction {
         if (ring.isPresent()) {
             return ring.get();
         }
+        if (io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareDonors.of(player,hand).isPresent()
+                && anchor(level,pos,state,block).map(entity -> entity.swing().moving(level.getGameTime())).orElse(false)) return InteractionResult.CONSUME;
         DoorHitRegion.Region region = DoorHitRegion.classify(state, pos, hit,
                 io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageCoverage.of(block.design(),
                         anchor(level, pos, state, block).flatMap(RoundDoorBlockEntity::arch).isPresent()));
@@ -91,6 +97,7 @@ public final class DoorInteraction {
                                  BlockHitResult hit) {
         if (io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.claims(new net.minecraft.world.item.context.UseOnContext(player, hand, hit))) return true;
         if (io.github.dirtyredz.roundwood.block.door.frame.DoorArchInteraction.hit(level, pos, state, hit).isPresent()) return true;
+        if (io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareDonors.of(player,hand).isPresent()) return true;
         HeldTrimTool tool = HeldTrimTool.of(player, hand);
         if (tool.is(HeldTrimTool.Kind.ATTACHMENT)) {
             return fitFace(state, pos, tool, hit).isPresent();

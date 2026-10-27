@@ -115,6 +115,12 @@ class GeneratedModelsTest {
                     // Forge omits a uv equal to the vanilla default (taken from absolute coordinates).
                     JsonArray uv = f.has("uv") ? f.getAsJsonArray("uv") : array(defaultUv(face.getKey(), from, to));
                     double[] expected = defaultUv(face.getKey(), localFrom, localTo);
+                    if(id.contains("tall_double_arched_door") && (f.get("texture").getAsString().equals("#hinges") || f.get("texture").getAsString().equals("#knobs"))) {
+                        double[] authoredFrom={from[0]+16,(from[1]+16)/.75,from[2]};
+                        double[] authoredTo={to[0]+16,(to[1]+16)/.75,to[2]};
+                        for(int axis=0;axis<3;axis++){double tile=Math.floor(authoredFrom[axis]/16)*16;authoredFrom[axis]-=tile;authoredTo[axis]-=tile;}
+                        expected=defaultUv(face.getKey(),authoredFrom,authoredTo);
+                    }
                     double[] whole = mapping != null && mapping[0].equals(f.get("texture").getAsString())
                             ? (id.contains("tall_double_arched_door")
                                 ? assemblyUv(face.getKey(), from, to, 16, 16, 48, 64, .75)
@@ -143,7 +149,7 @@ class GeneratedModelsTest {
         Resolved item = resolve("roundwood:item/round_door");
         assertEquals(PANEL_OAK, item.texture("#panel"));
         assertNull(item.texture("#trim"), "the door has no built-in trim since 0.4.0");
-        assertEquals(BRASS, item.texture("#brass"));
+        assertEquals(BRASS, item.texture("#hinges"));
         assertEquals(PANEL_OAK, item.texture("#particle"));
         for (int u = 0; u < 32; u++) {
             for (int v = 0; v < 32; v++) {
@@ -163,7 +169,7 @@ class GeneratedModelsTest {
     void archedDoorItemIsTheWholeClosedArchedLeaf() {
         Resolved item = resolve("roundwood:item/arched_door");
         assertEquals(PANEL_OAK, item.texture("#panel"));
-        assertEquals(BRASS, item.texture("#brass"));
+        assertEquals(BRASS, item.texture("#hinges"));
         for (int u = 0; u < 20; u++) {
             for (int v = 0; v < 32; v++) {
                 double dx = u + 0.5 - 8;
@@ -194,7 +200,7 @@ class GeneratedModelsTest {
                 boolean brass = usesBrass(leaf, element);
                 for (Map.Entry<String, JsonElement> face : element.getAsJsonObject("faces").entrySet()) {
                     String texture = face.getValue().getAsJsonObject().get("texture").getAsString();
-                    assertTrue(brass ? texture.equals("#brass") : texture.equals("#panel"), hinge + ": unexpected " + texture);
+                    assertTrue(brass ? (texture.equals("#hinges") || texture.equals("#knobs")) : texture.equals("#panel"), hinge + ": unexpected " + texture);
                 }
                 if (!brass) {
                     assertEquals(13, vec(element, "from")[2], 1e-9, hinge + ": panel back");
@@ -277,7 +283,7 @@ class GeneratedModelsTest {
         for (Map.Entry<String, JsonElement> face : element.getAsJsonObject("faces").entrySet()) {
             // Templates leave the variable unbound; finish models bind it to roundwood:block/brass.
             String texture = face.getValue().getAsJsonObject().get("texture").getAsString();
-            if ("#brass".equals(texture) || BRASS.equals(model.texture(texture))) {
+            if (("#hinges".equals(texture) || "#knobs".equals(texture)) || BRASS.equals(model.texture(texture))) {
                 return true;
             }
         }
@@ -295,7 +301,7 @@ class GeneratedModelsTest {
             Resolved leaf = resolve("roundwood:block/round_door_leaf_" + hinge);
             assertFalse(leaf.elements().isEmpty(), hinge + " leaf has no geometry");
             assertEquals(PANEL_OAK, leaf.texture("#panel"), hinge);
-            assertEquals(BRASS, leaf.texture("#brass"), hinge);
+            assertEquals(BRASS, leaf.texture("#hinges"), hinge);
             assertNull(leaf.texture("#trim"), hinge + ": no trim binding since 0.4.0");
         }
     }
@@ -306,7 +312,7 @@ class GeneratedModelsTest {
         for (String hinge : List.of("left", "right")) {
             Resolved template = resolve("roundwood:block/template_round_door_leaf_" + hinge);
             assertNull(template.texture("#panel"), hinge + ": template must not pick a panel");
-            assertNull(template.texture("#brass"), hinge + ": brass is bound by the leaf model");
+            assertNull(template.texture("#hinges"), hinge + ": brass is bound by the leaf model");
         }
     }
 }

@@ -60,12 +60,18 @@ public final class DoorHitResolver {
         if (ownsLoadedCell.test(cell)) {
             return Optional.of(hit.withPosition(cell));
         }
-        if (open && onLeaf(assembly, hit)) {
+        if (open && onLeaf(assembly, hit) || onHardware(assembly,open,hit)) {
             return assembly.positions().stream().filter(ownsLoadedCell)
                     .min(Comparator.comparingDouble(pos -> Vec3.atCenterOf(pos).distanceToSqr(hit.getLocation())))
                     .map(hit::withPosition);
         }
         return Optional.empty();
+    }
+
+    static boolean onHardware(DoorLayout.Assembly assembly,boolean open,BlockHitResult hit) {
+        var point=assembly.toAuthored(insidePoint(hit));
+        return io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareGeometry.placed(assembly.design(),assembly.hinge(),open).stream()
+                .anyMatch(p -> p.box().containsStrictly(point.x,point.y,point.z));
     }
 
     /** Only a genuine resting open leaf may claim space outside its occupied cells. */
@@ -81,7 +87,8 @@ public final class DoorHitResolver {
     /** A resolved leaf hit outside the assembly cells, requiring the projected-use transport. */
     public static boolean projected(Level level, BlockHitResult hit) {
         BlockState state = level.getBlockState(hit.getBlockPos());
-        return state.getBlock() instanceof AssemblyDoorBlock && state.getValue(DoorBlock.OPEN)
+        return state.getBlock() instanceof AssemblyDoorBlock
+                && (state.getValue(DoorBlock.OPEN) || onHardware(DoorLayout.of(hit.getBlockPos(),state),false,hit))
                 && !DoorLayout.of(hit.getBlockPos(), state).positions().contains(containingCell(hit));
     }
 

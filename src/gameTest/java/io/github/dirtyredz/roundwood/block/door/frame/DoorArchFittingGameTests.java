@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.frame;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.door.hardware.*;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceLayout;
 import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPiecePlacement;
@@ -128,8 +129,10 @@ public final class DoorArchFittingGameTests {
                     var archBlock = ModBlocks.archPiece(arch.design(), thickness);
                     if (intoArch) check(ArchPiecePlacement.placeAt(level, archBlock, arch, AppearanceFixtures.BRICKS), "arch fixture");
                     else check(io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement.placeAt(level, doorBlock, door, false, AppearanceFixtures.WARPED), "door fixture");
+                    if (!intoArch) anchorEntity(helper,door).setHardware(anchorEntity(helper,door).hardware().with(DoorHardwareSlot.HINGES,java.util.Optional.of(AppearanceFixtures.SPRUCE)));
                     var player = player(helper, "fit_orders", GameType.SURVIVAL, facing);
                     var stack = styled(intoArch ? doorBlock.asItem() : archBlock.asItem(), intoArch ? AppearanceFixtures.WARPED : AppearanceFixtures.BRICKS); stack.setCount(2);
+                    if(intoArch) stack.getOrCreateTag().put(DoorHardwareStore.TAG,DoorHardwareStore.encode(DoorHardware.DEFAULT.with(DoorHardwareSlot.HINGES,java.util.Optional.of(AppearanceFixtures.SPRUCE))));
                     var hit = intoArch ? new BlockHitResult(Vec3.atCenterOf(arch.anchor()).relative(facing.getOpposite(), .5).add(0,-.375,0), facing.getOpposite(),arch.anchor(),false)
                             : frontHit(door, .5, depth == io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.MIDDLE ? .5 : .875);
                     boolean offhand = facing == Direction.SOUTH;
@@ -141,6 +144,7 @@ public final class DoorArchFittingGameTests {
                     check(stack.getCount()==1,"one payment");
                     for(var entry : preview.states().entrySet()) check(level.getBlockState(entry.getKey()).equals(entry.getValue()),"preview != result");
                     var entity=anchorEntity(helper,preview.fit().door());
+                    check(entity.hardware().hinges().equals(java.util.Optional.of(AppearanceFixtures.SPRUCE)),"fitting lost hardware");
                     check(entity.appearance().equals(AppearanceFixtures.WARPED) && entity.arch().orElseThrow().appearance().equals(AppearanceFixtures.BRICKS),"independent looks");
                     check(preview.fit().door().depth()==io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.BACK,"fitted pose");
                     level.removeBlock(door.anchor(),false); clearDrops(helper);
@@ -161,15 +165,18 @@ public final class DoorArchFittingGameTests {
             else check(io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement.placeAt(level,ModBlocks.archedDoor(),door,false,AppearanceFixtures.WARPED),"fixture");
             if (!intoArch) anchorEntity(helper, door).setCamouflage(io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData.paid(
                     net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), new ItemStack(net.minecraft.world.item.Items.STONE)));
+            if(!intoArch) anchorEntity(helper,door).setHardware(anchorEntity(helper,door).hardware().with(DoorHardwareSlot.KNOBS,java.util.Optional.of(AppearanceFixtures.BIRCH)));
             var owner=intoArch?arch.anchor():door.anchor(); var before=level.getBlockEntity(owner).saveWithFullMetadata();
             var states=door.positions().stream().map(level::getBlockState).toList();
             var player=player(helper,"cancelled",GameType.SURVIVAL,Direction.NORTH);
             var stack=new ItemStack(intoArch?ModBlocks.archedDoor().asItem():ModBlocks.archPiece(arch.design()).asItem(),2);
+            if(intoArch) stack.getOrCreateTag().put(DoorHardwareStore.TAG,DoorHardwareStore.encode(DoorHardware.DEFAULT.with(DoorHardwareSlot.KNOBS,java.util.Optional.of(AppearanceFixtures.BIRCH))));
+            var stackBefore=stack.copy();
             var hit=new BlockHitResult(Vec3.atLowerCornerOf(owner).add(.03,.95,1),Direction.SOUTH,owner,false);
             int events=io.github.dirtyredz.roundwood.fixture.PlacementCanceller.multiPlaceEvents();
             AppearanceFixtures.use(helper,player,stack,ItemStack.EMPTY,hit,false);
             check(io.github.dirtyredz.roundwood.fixture.PlacementCanceller.multiPlaceEvents()==events+1,"expected one cancellable event: intoArch="+intoArch+" before="+events+" after="+io.github.dirtyredz.roundwood.fixture.PlacementCanceller.multiPlaceEvents());
-            check(stack.getCount()==2,"cancelled payment");
+            check(ItemStack.matches(stack,stackBefore),"cancelled hardware/payment");
             check(level.getBlockEntity(owner).saveWithFullMetadata().equals(before),"full NBT rollback");
             check(door.positions().stream().map(level::getBlockState).toList().equals(states),"state rollback");
             level.removeBlock(owner,false); clearDrops(helper);

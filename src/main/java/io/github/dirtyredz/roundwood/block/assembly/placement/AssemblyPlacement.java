@@ -33,6 +33,10 @@ public final class AssemblyPlacement {
 
     public static <P, A extends Assembly<P>> InteractionResult place(BlockPlaceContext context, Optional<AssemblyPlacementPlan<P, A>> plan,
                                               Class<? extends AppearanceAnchor> anchorType) {
+        return place(context,plan,anchorType,entity -> true);
+    }
+    public static <P, A extends Assembly<P>> InteractionResult place(BlockPlaceContext context, Optional<AssemblyPlacementPlan<P,A>> plan,
+            Class<? extends AppearanceAnchor> anchorType, java.util.function.Predicate<AppearanceAnchor> extra) {
         if (plan.isEmpty()) {
             return InteractionResult.FAIL;
         }
@@ -41,7 +45,7 @@ public final class AssemblyPlacement {
             return InteractionResult.SUCCESS; // the server writes the cells; nothing is predicted
         }
         ItemStack stack = context.getItemInHand();
-        if (!AssemblyInstallation.install(level, plan.get(), AppearanceStacks.read(stack), anchorType)) {
+        if (!AssemblyInstallation.install(level, plan.get(), AppearanceStacks.read(stack), anchorType, extra)) {
             return InteractionResult.FAIL;
         }
         BlockPos anchor = plan.get().assembly().anchor();

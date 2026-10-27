@@ -1,9 +1,9 @@
 package io.github.dirtyredz.roundwood.block.door.leaf;
 
 /**
- * The visual swing of one leaf on the client, as a function of time in ticks. Plain Java so the
- * maths is unit-tested; the server never animates (blockstate {@code open} and collision switch
- * instantly).
+ * The swing timeline shared by rendering and server hardware eligibility, in ticks. Plain Java so the
+ * maths is unit-tested; blockstate {@code open} and collision still switch
+ * instantly.
  *
  * <p>Progress runs from 0 (closed) to 1 (open). A full swing takes {@link #FULL_SWING_TICKS} with
  * a sine ease-in-out. Retargeting mid-swing starts from the current progress, so a reversal turns

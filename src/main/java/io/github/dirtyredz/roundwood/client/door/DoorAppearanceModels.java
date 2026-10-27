@@ -29,7 +29,7 @@ import java.util.Optional;
 
 /**
  * Door leaves (and door items) in an appearance. The oak leaf model is the template; only its panel
- * quads change sprite, the brass hardware never does (it is never tinted either). Looks:
+ * quads use the panel look; typed hardware groups use independent untinted finishes. Looks:
  * <ul>
  *     <li>vanilla woods: their own 0.4.0 full-height board panels, untinted (the plain oak door is the
  *     baked leaf itself, so its texture and lighting are exactly 0.4.0's);</li>
@@ -51,8 +51,8 @@ public final class DoorAppearanceModels {
         }
     }
 
-    /** Design-keyed (0.11.0): two door shapes share looks, so a look alone would hand one door the other's model. */
-    private record Key(Look look, DoorDesign design, String variant) {
+    /** Design-keyed (0.11.0): four door shapes share looks, so a look alone would hand one door the other's model. */
+    private record Key(Look look, DoorDesign design, String variant, io.github.dirtyredz.roundwood.block.door.hardware.DoorHardware hardware) {
     }
 
     private static final AppearanceModelCache<Key, BakedModel> MODELS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
@@ -84,23 +84,26 @@ public final class DoorAppearanceModels {
     }
 
     /** The baked leaf of {@code design} for {@code hinge} in {@code look}. */
-    public static BakedModel leaf(Look look, DoorDesign design, DoorHingeSide hinge) {
+    public static BakedModel leaf(Look look, DoorDesign design, DoorHingeSide hinge, io.github.dirtyredz.roundwood.block.door.hardware.DoorHardware hardware) {
         BakedModel oak = Minecraft.getInstance().getModelManager().getModel(DoorLeafModels.location(design, hinge));
-        return look.isOakTemplate() ? oak
-                : MODELS.get(new Key(look, design, hinge.getSerializedName()), key -> retexture(oak, look, design, hinge, false));
+        return MODELS.get(new Key(look, design, hinge.getSerializedName(),hardware), key -> retexture(oak, look, design, hinge, false, hardware));
     }
 
     /** {@code oakItem} ({@code design}'s item model) in {@code appearance}. */
-    public static BakedModel item(DoorDesign design, BakedModel oakItem, Appearance appearance) {
-        Look look = look(appearance);
-        return look.isOakTemplate() ? oakItem : MODELS.get(new Key(look, design, "item"), key -> retexture(oakItem, look, design, DoorHingeSide.LEFT, true));
+    public static BakedModel item(DoorDesign design, BakedModel oakItem, net.minecraft.world.item.ItemStack stack) {
+        Look look = look(AppearanceStacks.read(stack));
+        var hardware = io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.read(stack);
+        return MODELS.get(new Key(look, design, "item",hardware), key -> retexture(oakItem, look, design, DoorHingeSide.LEFT, true, hardware));
     }
 
-    private static BakedModel retexture(BakedModel oak, Look look, DoorDesign design, DoorHingeSide hinge, boolean item) {
+    private static BakedModel retexture(BakedModel oak, Look look, DoorDesign design, DoorHingeSide hinge, boolean item, io.github.dirtyredz.roundwood.block.door.hardware.DoorHardware hardware) {
         TextureAtlasSprite panel = DonorSprites.atlas(look.panel());
-        if (look.tiled()) return DoorSurfaceModels.replacePanel(oak,design,hinge,item,panel,DoorAppearanceModels::isPanel);
+        if (look.tiled()) {
+            var surface = DoorSurfaceModels.replacePanel(oak,design,hinge,item,panel,DoorAppearanceModels::isPanel);
+            return ModelRetexturing.map(surface, quad -> DoorHardwareModels.retexture(quad,hardware), side -> side);
+        }
         int tint = look.tint() >= 0 ? PANEL_TINT : -1;
-        return ModelRetexturing.map(oak, quad -> isPanel(quad) ? ModelRetexturing.retexture(quad, panel, tint) : quad, side -> side);
+        return ModelRetexturing.map(oak, quad -> isPanel(quad) ? ModelRetexturing.retexture(quad, panel, tint) : DoorHardwareModels.retexture(quad,hardware), side -> side);
     }
 
     private static boolean isPanel(BakedQuad quad) {

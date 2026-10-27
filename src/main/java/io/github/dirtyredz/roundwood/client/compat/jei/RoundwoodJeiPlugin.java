@@ -35,7 +35,8 @@ public final class RoundwoodJeiPlugin implements IModPlugin {
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
         IIngredientSubtypeInterpreter<ItemStack> byAppearance = (stack, context) -> {
-            String key = WindowGlassStacks.key(stack);
+            String key = stack.getItem() instanceof io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorItem
+                    ? io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.key(stack) : WindowGlassStacks.key(stack);
             return key.equals(AppearanceDefaults.of(stack.getItem()).key()) ? IIngredientSubtypeInterpreter.NONE : key;
         };
         for (Item item : ModItems.all()) {

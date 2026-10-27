@@ -176,6 +176,8 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
         Appearance appearance = DoorAppearance.forDrops(builder, state);
         DoorAppearance.ANCHORS.forLoot(builder, state).ifPresent(anchor -> builder.withParameter(LootContextParams.BLOCK_ENTITY, anchor));
         var ordinary = AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.DOOR, appearance);
+        DoorAppearance.ANCHORS.forLoot(builder,state).ifPresent(anchor -> ordinary.stream().filter(stack -> stack.getItem()==familyItem())
+                .forEach(stack -> io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.decorate(stack,anchor)));
         return DoorAppearance.ANCHORS.forLoot(builder, state).map(anchor ->
                 io.github.dirtyredz.roundwood.block.door.frame.DoorArchLoot.append(ordinary, anchor, this, builder)).orElse(ordinary);
     }
@@ -183,7 +185,9 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
     /** Picking any part gives the door in its appearance. */
     @Override
     public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
-        return AppearanceStacks.create(familyItem(), DoorAppearance.of(level, pos, state));
+        var stack = AppearanceStacks.create(familyItem(), DoorAppearance.of(level, pos, state));
+        DoorAppearance.ANCHORS.anchor(level,pos,state).ifPresent(entity -> io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.decorate(stack,entity));
+        return stack;
     }
 
     @Override

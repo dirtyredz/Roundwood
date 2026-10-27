@@ -386,3 +386,10 @@ A fitted round arch does not erase or refund camouflage. Render and target only 
 Do not position hardware from assembly height or a fixed root X. Knobs are y15..17; spear roots follow each leaf row. Paired casing springs include the modular top spring offset. The historical 0.16.0 fixture deliberately contains the old saved schema, not generated current-state defaults.
 
 Non-wood does not mean masonry: BLOCK_SURFACE must use donor sprites without mortar or painting. Waxed copper donors normalize to the corresponding unwaxed full block; cut copper, stairs and slabs are excluded. Tiling after tall-door Y compression stretches textures; bake tiles first, compress positions afterwards.
+
+- Hardware acquisition is donor-dependent and includes surfaces outside occupied door cells. Keep DoorRaycast and projected server validation on the same shapes. A shared endpoint proposal supplies both preview and action; do not infer a slot from the brass sprite or trust a packet slot/angle.
+- Track swing changes on the server too. Moving hardware is not editable, including immediate reversal. Static frame/trim actions retain their existing precedence when those surfaces are actually nearest.
+- Preserve opaque DoorHardware payloads through save, pick and harvest; refuse placement and edits rather than dropping unknown fields. Explicit empty update payloads clear old client slots. Hardware must be installed inside AssemblyWriteTransaction.
+- Door model cache keys include design, panel look, leaf/item variant and both hardware slots. Stack viewer keys include raw hardware custody. Resource reload clears model and donor caches.
+
+- Donor acquisition first tests visible surfaces for hardware, then falls back to empty camouflage targets. Otherwise an invisible far corner can mask an open hinge. Buried hardware is subtracted against installed static geometry so casing targets keep ownership. Check both world interaction and item-use permission for every assembly cell.

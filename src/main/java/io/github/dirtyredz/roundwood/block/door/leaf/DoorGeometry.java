@@ -40,7 +40,6 @@ public final class DoorGeometry {
     public static final double SWEEP_MARGIN = 3;
 
     public static final String PANEL = "panel";
-    public static final String BRASS = "brass";
 
     private record Leaf(List<Piece> left, List<Piece> right, List<Box> envelope) {
     }
@@ -176,8 +175,8 @@ public final class DoorGeometry {
         for (PixelCircle.Rect rect : design.leafRects()) {
             pieces.add(new Piece(rect.extrude(BACK, FRONT), PANEL));
         }
-        for (Box box : io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareGeometry.left(design)) {
-            pieces.add(new Piece(box, BRASS));
+        for (var hardware : io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareGeometry.left(design)) {
+            pieces.add(new Piece(hardware.box(), hardware.slot().mesh()));
         }
         return List.copyOf(pieces);
     }

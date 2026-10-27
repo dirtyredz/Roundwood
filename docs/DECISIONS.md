@@ -943,3 +943,7 @@ Nothing here is used by a second mod yet (workspace rule).
 ## 0.17.0 crown and hardware geometry
 
 The owner approved raising only the 2x3 radius-24 crown by eight pixels (spring8), superseding its former apex fill. Existing IDs, fitted offsets and cell footprints stay intact. Paired casing springs derive from the top profile. Seven-pixel spear straps follow the actual staircase edge; all knobs share y15..17 regardless of door height. Hardware remains non-colliding.
+
+## 0.17.0 independent hardware
+
+Hinges and knobs are two assembly-wide finish groups. Ordinary donor clicks select actual surfaces on either face/leaf; sneaking has the same result. Only settled endpoints are editable: the shared server/client swing timeline gates the preview and application, avoiding an animated-angle protocol. Mesh markers survive baking even while both slots share default brass. One donor pays for a changed slot; unchanged, creative and refused actions are free. The door item retains finishes, with no raw donor refund. Versioned unknown payloads remain opaque and cannot be placed lossily.

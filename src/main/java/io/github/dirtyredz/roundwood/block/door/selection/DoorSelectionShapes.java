@@ -55,9 +55,22 @@ public final class DoorSelectionShapes {
 
     /** What rays hit: the leaf, the corners when filled or while a block item is held, and ring targets. */
     public static VoxelShape target(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+        return target(state,level,pos,context,true);
+    }
+
+    static VoxelShape target(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context, boolean emptyCorners) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
         int rings = holdsDoorTrim(context) ? 3 : installed(level, assembly);
-        return Shapes.or(shape(state, holdsBlockItem(context) || filled(level, assembly), rings, true, coverage(level, assembly)), frame(state, level, pos, true));
+        var base = Shapes.or(shape(state, emptyCorners && holdsBlockItem(context) || filled(level, assembly), rings, true, coverage(level, assembly)), frame(state, level, pos, true));
+        if (player(context).map(io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareDonors::held).orElse(false)) {
+            var hardware = io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareGeometry.placed(assembly.design(),assembly.hinge(),state.getValue(DoorBlock.OPEN));
+            var boxes = hardware.stream().map(p -> p.box().translate(0,0,assembly.depth().offset())).toList();
+            var part = DoorLayout.partOf(state);
+            var shape = VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes,part.columnIndex(),part.row()),VoxelShapeFactory.quarterTurns(assembly.facing())));
+            // Hidden hardware must not steal the existing in-cell casing/frame target.
+            return Shapes.or(base,Shapes.join(shape,visibleStatic(state,level,pos),net.minecraft.world.phys.shapes.BooleanOp.ONLY_FIRST));
+        }
+        return base;
     }
 
     /** What is there to highlight: the leaf at rest, plus the filled corners and the installed rings. */

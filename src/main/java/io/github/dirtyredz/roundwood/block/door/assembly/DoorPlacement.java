@@ -38,7 +38,7 @@ public final class DoorPlacement {
 
     /** The plan for using a door item in {@code context}, or empty when the click would place nothing. */
     public static Optional<AssemblyPlacementPlan<DoorLayout.Part, DoorLayout.Assembly>> of(AssemblyDoorBlock block, BlockPlaceContext context) {
-        if (!context.canPlace()) {
+        if (!context.canPlace() || !io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.readable(context.getItemInHand())) {
             return Optional.empty();
         }
         Direction facing = context.getHorizontalDirection();
@@ -79,7 +79,12 @@ public final class DoorPlacement {
 
     public static InteractionResult place(RoundDoorItem item, BlockPlaceContext context) {
         return AssemblyPlacement.place(context, of(item.door(), context),
-                RoundDoorBlockEntity.class);
+                RoundDoorBlockEntity.class, anchor -> {
+                    var data = new net.minecraft.nbt.CompoundTag();
+                    io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.copy(context.getItemInHand(),data);
+                    ((RoundDoorBlockEntity)anchor).loadHardware(data);
+                    return true;
+                });
     }
 
     /**

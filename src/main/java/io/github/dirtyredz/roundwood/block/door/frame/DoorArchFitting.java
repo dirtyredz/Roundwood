@@ -56,7 +56,7 @@ public final class DoorArchFitting {
     public static Optional<Proposal> propose(UseOnContext context) {
         Level level = context.getLevel(); var player = context.getPlayer();
         if (!level.isLoaded(context.getClickedPos()) || player != null && (!player.mayBuild() || player.isSpectator())
-                || !readable(context.getItemInHand())) return Optional.empty();
+                || !io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.readable(context.getItemInHand())) return Optional.empty();
         var sourcePos = sourcePos(context);
         if (sourcePos.isEmpty()) return Optional.empty();
         var source = level.getBlockState(sourcePos.get());
@@ -82,6 +82,7 @@ public final class DoorArchFitting {
             fit = candidate.get();
             attachment = new DoorArchAttachment(arch.design(), arch.thickness(), arch.depth(), entity.appearance(), entity.trims());
             data = new CompoundTag(); AppearanceNbt.write(data, AppearanceStacks.read(context.getItemInHand()));
+            io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.copy(context.getItemInHand(),data);
             powered = fit.door().positions().stream().filter(level::isLoaded).anyMatch(level::hasNeighborSignal); open = powered; intoArch = true;
         } else if (context.getItemInHand().getItem() instanceof ArchPieceItem item && source.getBlock() instanceof AssemblyDoorBlock doorBlock) {
             var door = DoorLayout.of(sourcePos.get(), source); block = doorBlock;
@@ -113,15 +114,6 @@ public final class DoorArchFitting {
         }
         data.put(DoorArchStore.TAG, DoorArchStore.encode(attachment));
         return Optional.of(new Proposal(fit, block, attachment, Collections.unmodifiableMap(states), data, intoArch));
-    }
-    private static boolean readable(ItemStack stack) {
-        if (stack.isEmpty()) return false;
-        var all = stack.serializeNBT();
-        if (all.contains("ForgeCaps") && !all.getCompound("ForgeCaps").isEmpty()) return false;
-        var tag = stack.getTag(); if (tag == null) return true;
-        if (!Set.of(AppearanceNbt.TAG).containsAll(tag.getAllKeys())) return false;
-        return !tag.contains(AppearanceNbt.TAG) || AppearanceNbt.decode(tag.getCompound(AppearanceNbt.TAG))
-                .map(a -> a.equals(AppearanceStacks.read(stack)) && AppearanceNbt.encode(a).equals(tag.get(AppearanceNbt.TAG))).orElse(false);
     }
     private static boolean knownArchEntity(ArchPieceBlockEntity entity) {
         return Set.of(AppearanceNbt.TAG, ArchPieceTrimNbt.TAG).containsAll(entity.saveWithoutMetadata().getAllKeys());

@@ -68,7 +68,7 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
         for (DoorHingeSide hinge : door.design().doubleLeaf() ? DoorHingeSide.values() : new DoorHingeSide[]{state.getValue(DoorBlock.HINGE)}) {
         DoorAppearanceModels.Look look = DoorAppearanceModels.look(entity.appearance());
         DoorDesign design = door.design();
-        BakedModel model = DoorAppearanceModels.leaf(look, design, hinge);
+        BakedModel model = DoorAppearanceModels.leaf(look, design, hinge, entity.hardware());
         float red = look.tint() < 0 ? 1F : ((look.tint() >> 16) & 0xFF) / 255F;
         float green = look.tint() < 0 ? 1F : ((look.tint() >> 8) & 0xFF) / 255F;
         float blue = look.tint() < 0 ? 1F : (look.tint() & 0xFF) / 255F;

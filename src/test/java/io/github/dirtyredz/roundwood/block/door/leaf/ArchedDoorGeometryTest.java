@@ -120,7 +120,7 @@ class ArchedDoorGeometryTest {
     void hardwareIsOnTheHingeSideOfBothFacesAndMirrors() {
         List<Piece> left = DoorGeometry.leaf(ARCHED, DoorHingeSide.LEFT);
         List<Piece> right = DoorGeometry.leaf(ARCHED, DoorHingeSide.RIGHT);
-        List<Box> brass = left.stream().filter(p -> p.texture().equals(DoorGeometry.BRASS)).map(Piece::box).toList();
+        List<Box> brass = left.stream().filter(p -> !p.texture().equals(DoorGeometry.PANEL)).map(Piece::box).toList();
         assertTrue(brass.size() > 6, "spear straps have stepped silhouettes");
         long front = brass.stream().filter(b -> b.minZ() >= DoorGeometry.FRONT - EPS).count();
         long back = brass.stream().filter(b -> b.maxZ() <= DoorGeometry.BACK + EPS).count();

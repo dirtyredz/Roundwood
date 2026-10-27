@@ -30,6 +30,7 @@ public final class RoundwoodEmiPlugin implements EmiPlugin {
     }
 
     private static String appearanceKey(EmiStack stack) {
-        return WindowGlassStacks.key(stack.getItemStack());
+        return stack.getItemStack().getItem() instanceof io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorItem
+                ? io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.key(stack.getItemStack()) : WindowGlassStacks.key(stack.getItemStack());
     }
 }
