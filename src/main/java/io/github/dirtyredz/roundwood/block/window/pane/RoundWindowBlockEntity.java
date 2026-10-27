@@ -137,7 +137,7 @@ public class RoundWindowBlockEntity extends AppearanceAnchorBlockEntity implemen
 
     /** Client: the loaded look is handed to the chunk model and the section redrawn. */
     @Override
-    protected void afterClientUpdate() {
+    protected void afterLoad() {
         if (level != null && level.isClientSide) {
             WindowPaneState.refreshAround(level, worldPosition);
         }
@@ -154,7 +154,7 @@ public class RoundWindowBlockEntity extends AppearanceAnchorBlockEntity implemen
         if (level == null || !(getBlockState().getBlock() instanceof WindowPaneBlock)) return;
         renderData = ModelData.builder().with(WindowAppearanceData.PROPERTY,
                 new WindowAppearanceData(appearance(), glass(), WindowPaneState.beams(getBlockState(), this),
-                        WindowPaneState.neighbours(level, worldPosition))).build();
+                        WindowPaneState.neighbours(level, worldPosition), trims(), trims(TrimSlot.SILL))).build();
         requestModelDataUpdate();
         level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_ALL_IMMEDIATE);
     }

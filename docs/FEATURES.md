@@ -4,7 +4,7 @@ The complete content and controls are in [README](../README.md).
 
 ## Static rendering trial
 
-Fitted frames and standalone arches use cached chunk geometry. The old renderers remain behind
+Static frames, casings, camouflage, windows' attachments and compatibility pieces use cached chunk geometry. The old renderers remain behind
 `legacyStaticRendering` in `config/roundwood-client.toml` for owner screenshot comparisons; change
 the option with the world closed. Chunk geometry takes owning-cell lighting, including proud bands.
 Mining cracks resolve satellite model data. Door leaves continue to animate through their renderer.

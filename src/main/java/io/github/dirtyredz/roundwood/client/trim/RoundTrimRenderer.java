@@ -27,6 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class RoundTrimRenderer implements BlockEntityRenderer<RoundTrimBlockEntity> {
     private final AssemblyCellRenderer renderer;
+    public RoundTrimRenderer(AssemblyCellRenderer renderer) { this.renderer = renderer; }
 
     public RoundTrimRenderer(BlockEntityRendererProvider.Context context) {
         this.renderer = new AssemblyCellRenderer(context.getBlockRenderDispatcher().getModelRenderer(), RandomSource.create());
@@ -35,6 +36,7 @@ public class RoundTrimRenderer implements BlockEntityRenderer<RoundTrimBlockEnti
     @Override
     public void render(RoundTrimBlockEntity entity, float partialTick, PoseStack pose, MultiBufferSource buffers,
                        int light, int overlay) {
+        if (!io.github.dirtyredz.roundwood.client.render.StaticRenderingConfig.legacy()) return;
         Level level = entity.getLevel();
         BlockState anchorState = entity.getBlockState();
         if (level == null || !(anchorState.getBlock() instanceof RoundTrimBlock block)

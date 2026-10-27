@@ -18,6 +18,21 @@ public final class DoorStaticModel {
         var models = new ArrayList<BakedModel>();
         var door = (DoorLayout.Assembly) snapshot.assembly();
         var part = DoorLayout.partOf(state);
+        double shift = door.depth().offset() / 16;
+        for (var face : AttachmentFace.values()) snapshot.trims().get(face).ifPresent(look -> {
+            var casing = DoorTrimModels.casing(door.design(), face, part, door.facing(), DoorTrimModels.look(door.design(), look));
+            models.add(io.github.dirtyredz.roundwood.client.material.ModelRetexturing.map(casing, quad ->
+                    io.github.dirtyredz.roundwood.client.render.StaticQuadTransform.translate(quad,
+                            -door.facing().getStepX()*shift, 0, -door.facing().getStepZ()*shift, quad.getTintIndex()), side -> side));
+        });
+        snapshot.camouflage().ifPresent(donor -> {
+            var corners = io.github.dirtyredz.roundwood.client.camouflage.CamouflageModels.quarter(donor, door.design(), door.facing(), part,
+                    io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageCoverage.of(door.design(), snapshot.frame().isPresent()));
+            models.add(io.github.dirtyredz.roundwood.client.material.ModelRetexturing.map(corners, quad ->
+                    io.github.dirtyredz.roundwood.client.render.StaticQuadTransform.translate(quad,
+                            -door.facing().getStepX()*shift, 0, -door.facing().getStepZ()*shift,
+                            io.github.dirtyredz.roundwood.client.material.StaticBlockColors.bind(donor, quad.getTintIndex())), side -> side));
+        });
         int row = part.row() - DoorArchFitPlan.topOffset(door.design());
         if (snapshot.frame().isEmpty() || row < 0) return models;
         var frame = snapshot.frame().get();

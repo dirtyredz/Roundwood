@@ -22,6 +22,10 @@ public final class AssemblyRenderUpdates {
     public static void bind(BiConsumer<AppearanceAnchorBlockEntity, Boolean> listener) { lifecycle = listener; }
 
     public static Assembly<?> layout(BlockPos pos, BlockState state) {
+        if (state.getBlock() instanceof io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock)
+            return io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout.of(pos, state);
+        if (state.getBlock() instanceof io.github.dirtyredz.roundwood.block.archway.ArchwayBlock)
+            return io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout.of(pos, state);
         if (state.getBlock() instanceof AssemblyDoorBlock) return DoorLayout.of(pos, state);
         if (state.getBlock() instanceof ArchPieceBlock block
                 && state.getValue(ArchPieceBlock.CELL).in(block.design())) return ArchPieceLayout.of(pos, state);

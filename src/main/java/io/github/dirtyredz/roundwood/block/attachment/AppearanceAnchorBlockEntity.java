@@ -151,6 +151,10 @@ public abstract class AppearanceAnchorBlockEntity extends BlockEntity implements
     protected void afterClientUpdate() {
     }
 
+    /** Complete direct loads also need to refresh derived window data. */
+    protected void afterLoad() {
+    }
+
     @Override
     protected final void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
@@ -169,6 +173,7 @@ public abstract class AppearanceAnchorBlockEntity extends BlockEntity implements
         stores.forEach((slot, store) -> store.load(tag, legacy(slot)));
         loadFamily(tag);
         io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderUpdates.refresh(this, false);
+        afterLoad();
     }
 
     /** The look (omitted when it is the default), always every store, and the family's update state. */

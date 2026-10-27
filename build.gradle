@@ -47,6 +47,8 @@ if (project.hasProperty('doorTargets')) {
 // Focused full-showcase reproduction; all section checks share the showcase package.
 if (project.hasProperty('renderingTargets')) {
     sourceSets.gameTest.java.include '**/fixture/**', '**/StaticRenderLifecycleGameTests.java',
+            '**/WindowTrimGameTests.java', '**/WindowSillGameTests.java', '**/WindowBeamGameTests.java',
+            '**/WindowAppearanceGameTests.java', '**/TrimAppearanceGameTests.java',
             '**/AnchorPersistenceGameTests.java', '**/DoorArchPersistenceGameTests.java',
             '**/DoorArchFittingGameTests.java', '**/DoorArchLifecycleGameTests.java',
             '**/ArchPiecePlacementGameTests.java', '**/ArchPieceTrimGameTests.java', '**/TestWorldGameTests.java'
@@ -168,6 +170,17 @@ test {
     useJUnitPlatform()
     // GeneratedResourcesTest reads the checked-in generated tree relative to the project.
     workingDir = projectDir
+}
+
+// Optional compatibility check uses an existing local jar; never resolves or downloads a mod.
+tasks.register('checkEmbeddium', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.github.dirtyredz.roundwood.testsupport.EmbeddiumClassLoad'
+    doFirst {
+        if (!project.hasProperty('embeddiumJar')) throw new GradleException('Supply -PembeddiumJar=<local jar>')
+        args project.property('embeddiumJar')
+    }
 }
 
 tasks.named('processResources', ProcessResources).configure {

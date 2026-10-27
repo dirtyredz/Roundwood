@@ -4,6 +4,8 @@ Newest first.
 
 ## 2026-10-27 - Owning-cell lighting and retained legacy comparison
 
+This supersedes the preparation checkpoint's transformed-pipeline prerequisite at the end of this document.
+
 The owner accepted vanilla owning-cell/host-state lighting for chunk-baked static geometry.
 Proud bands remain outside the cell; front casings no longer borrow an adjacent lighting origin,
 depth shifts participate in final local vertices, and camouflage uses the host lighting context.

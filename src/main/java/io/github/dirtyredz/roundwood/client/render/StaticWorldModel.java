@@ -32,7 +32,10 @@ public final class StaticWorldModel extends BakedModelWrapper<BakedModel> {
     public static void wrapBlocks(Map<ResourceLocation, BakedModel> models) {
         var blocks = new ArrayList<>(ModBlocks.canonical());
         blocks.addAll(LegacyContent.blocks());
-        for (var block : blocks) if (block instanceof AssemblyDoorBlock || block instanceof ArchPieceBlock) {
+        blocks.addAll(ModBlocks.archways());
+        for (var block : blocks) if (block instanceof AssemblyDoorBlock || block instanceof ArchPieceBlock
+                || block instanceof io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock
+                || block instanceof io.github.dirtyredz.roundwood.block.archway.ArchwayBlock) {
             for (var state : block.getStateDefinition().getPossibleStates()) {
                 var location = BlockModelShaper.stateToModelLocation(state);
                 var model = models.get(location);
@@ -47,10 +50,14 @@ public final class StaticWorldModel extends BakedModelWrapper<BakedModel> {
         return ChunkRenderTypeSet.of(RenderType.solid());
     }
     @Override public List<BakedQuad> getQuads(BlockState state, Direction side, RandomSource random, ModelData data, RenderType layer) {
-        if (StaticRenderingConfig.legacy() || side != null || layer != null && layer != RenderType.solid()) return List.of();
+        if (StaticRenderingConfig.legacy() || layer != null && layer != RenderType.solid()) return List.of();
         var snapshot = data.get(AssemblyModelData.PROPERTY);
         if (state == null || snapshot == null || !snapshot.available()) return List.of();
         return QUADS.get(new Key(state, side, layer, snapshot), key -> {
+            if (state.getBlock() instanceof io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock)
+                return List.copyOf(io.github.dirtyredz.roundwood.client.trim.TrimWorldModel.model(state, snapshot)
+                        .getQuads(state, side, random, ModelData.EMPTY, layer));
+            if (side != null) return List.of();
             return collect(models(state, snapshot), state, random, layer);
         });
     }
@@ -63,11 +70,20 @@ public final class StaticWorldModel extends BakedModelWrapper<BakedModel> {
             return List.copyOf(out);
     }
     private static List<BakedModel> models(BlockState state, AssemblyRenderSnapshot snapshot) {
+        if (state.getBlock() instanceof io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock)
+            return List.of(io.github.dirtyredz.roundwood.client.trim.TrimWorldModel.model(state, snapshot));
+        if (state.getBlock() instanceof io.github.dirtyredz.roundwood.block.archway.ArchwayBlock)
+            return io.github.dirtyredz.roundwood.client.archway.ArchwayWorldModel.models(state, snapshot);
         return state.getBlock() instanceof ArchPieceBlock ? ArchPieceWorldModel.models(state, snapshot) : DoorStaticModel.models(state, snapshot);
     }
     @Override public TextureAtlasSprite getParticleIcon(ModelData data) {
         var snapshot = data.get(AssemblyModelData.PROPERTY);
         if (snapshot != null) {
+            if (snapshot.assembly() instanceof io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.Assembly) {
+                var appearance = snapshot.frame().map(value -> value.appearance()).orElse(snapshot.appearance());
+                return io.github.dirtyredz.roundwood.client.material.DonorSprites.atlas(
+                        io.github.dirtyredz.roundwood.client.material.AppearanceLooks.planks(appearance));
+            }
             var state = snapshot.members().get(snapshot.assembly().anchor());
             if (state != null) {
                 var models = models(state, snapshot);

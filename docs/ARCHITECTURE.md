@@ -2,7 +2,7 @@
 
 ## Static chunk publication (0.17.0)
 
-Fitted frames and standalone arches use immutable anchor snapshots. Publication precedes the anchor
+Doors' static pieces, standalone arches, compatibility frames and archways use immutable anchor snapshots. Publication precedes the anchor
 model-data refresh and every loaded cell's dirty notification, including the old/new footprint union.
 Transactions publish after commit or restoration. Packet/direct NBT loads publish after the complete
 payload; removal publishes unavailable. Chunk workers resolve the anchor through their supplied
@@ -16,6 +16,14 @@ quads retain proud bands and separation offsets. A client-only mixin replaces mo
 six-argument breaking entry for marked models, so satellite cracks use current geometry.
 The `legacyStaticRendering` client option preserves the old path for screenshot comparisons;
 exit/reopen the world when changing it. Leaves retain BER ownership.
+
+Window snapshots also carry perimeter/sill looks. Their wrapper preserves the original translucent
+pane/glass/beam pass and adds opaque attachments only in the solid pass (both for null-layer cracks).
+Compatibility frames preserve their directional cull lists; other static attachments are general quads.
+Door depth is applied to casing/camouflage vertices, never fitted-frame vertices. Camouflage tint
+indices bind to immutable donor-state/original-index pairs for the session; the host BlockColors
+handler delegates at the owning position. Bindings are not recycled on resource reload because
+retained compiled meshes may still use them. No color lookup reads a block entity.
 
 ## Frameless pane
 

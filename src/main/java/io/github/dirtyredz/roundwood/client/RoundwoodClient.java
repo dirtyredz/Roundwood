@@ -90,6 +90,10 @@ public final class RoundwoodClient {
         DoorAppearanceModels.registerItemColors(event);
     }
 
+    @SubscribeEvent public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+        io.github.dirtyredz.roundwood.client.material.StaticBlockColors.register(event);
+    }
+
     @SubscribeEvent
     public static void onModelsBaked(ModelEvent.BakingCompleted event) {
         AppearanceModelCache.clearAll();

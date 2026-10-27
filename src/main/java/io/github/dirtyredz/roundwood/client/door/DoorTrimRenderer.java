@@ -29,6 +29,7 @@ public final class DoorTrimRenderer {
 
     public void render(RoundDoorBlockEntity anchor, DoorLayout.Assembly assembly, Level level, PoseStack pose,
                        MultiBufferSource buffers) {
+        if (!io.github.dirtyredz.roundwood.client.render.StaticRenderingConfig.legacy()) return;
         if (!anchor.trims().any()) {
             return;
         }

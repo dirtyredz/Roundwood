@@ -35,6 +35,7 @@ import java.util.Optional;
  */
 public class WindowTrimRenderer implements BlockEntityRenderer<RoundWindowBlockEntity> {
     private final ModelBlockRenderer renderer;
+    public WindowTrimRenderer(ModelBlockRenderer renderer) { this.renderer = renderer; }
     private final RandomSource random = RandomSource.create();
 
     public WindowTrimRenderer(BlockEntityRendererProvider.Context context) {
@@ -44,6 +45,7 @@ public class WindowTrimRenderer implements BlockEntityRenderer<RoundWindowBlockE
     @Override
     public void render(RoundWindowBlockEntity entity, float partialTick, PoseStack pose, MultiBufferSource buffers,
                        int light, int overlay) {
+        if (!io.github.dirtyredz.roundwood.client.render.StaticRenderingConfig.legacy()) return;
         Level level = entity.getLevel();
         BlockState state = entity.getBlockState();
         if (level == null || !entity.anyAttachment() || !(state.getBlock() instanceof WindowPaneBlock block)) {

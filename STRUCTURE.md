@@ -7,6 +7,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 ## Layout
 
 - `block/assembly/render/` owns immutable render snapshots and publication ordering for anchor-only assemblies. `client/render/assembly/` owns client membership validation and worker-safe model-data extraction.
+- `client/material/StaticBlockColors` and `TintBindings` own stable donor tint routing; `client/render/StaticQuadTransform` moves BER depth poses into quad vertices. `client/{trim,archway}/*WorldModel` preserve compatibility geometry/culling; `client/window/trim/WindowStaticModels` composes perimeter and sill geometry into the window's separate solid pass.
 - `client/render/StaticWorldModel` wraps static assembly models and caches complete quad results. `client/arch/ArchPieceWorldModel` and `client/door/DoorStaticModel` compose the existing cell bakers. `client/mixin/BreakingModelDataMixin` resolves satellite data for Forge's breaking overload; `roundwood.mixins.json` is client-only. Legacy BERs remain available through `StaticRenderingConfig` pending owner screenshots.
 
 - `src/test/.../showcase/FeedbackShowcaseLayoutTest` guards the fixed arena bounds and new sample spacing. The pieces row retains thirteen framed profiles; the frameless pane is demonstrated in the assembled window, keeping every door on the existing floor. `-PshowcaseTargets` selects the complete showcase GameTest package and its environment guard for local reproduction.

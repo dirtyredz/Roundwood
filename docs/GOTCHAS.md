@@ -1,5 +1,16 @@
 # Gotchas - Roundwood
 
+- **Static rendering ownership is exclusive.** `legacyStaticRendering=false` suppresses every static
+  BER entry; true suppresses the corresponding chunk attachments. Change with the world closed.
+  All BER registrations remain for owner screenshot acceptance; do not delete them yet.
+- **Keep camouflage tint bindings stable across resource reloads.** Their host indices resolve the
+  donor state and original index at the owning cell, including synthetic biome-colored donors.
+  Ordinary paint remains untinted. Camouflage retains quad shade/AO flags with host-state lighting;
+  owner screenshots, not headless timing, decide whether flat-light corners are needed.
+- **Embeddium uses Forge's five-argument `getQuads`.** The static model path uses that public API,
+  `getModelData` and render types, not vanilla tessellator internals. The separate mining-crack
+  adapter targets Forge's dispatcher overload. A class-load check is not a client rendering test.
+
 - **Plain JUnit is not a Forge lighting harness.** With version detection enabled, strict
   `Bootstrap.bootStrap()` fails in network initialization with
   `NoSuchMethodException: net.minecraftforge.network.NetworkEvent.<init>()`: this runner has no

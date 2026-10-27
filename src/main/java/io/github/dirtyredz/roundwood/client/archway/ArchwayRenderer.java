@@ -31,6 +31,7 @@ import java.util.Optional;
  */
 public class ArchwayRenderer implements BlockEntityRenderer<ArchwayBlockEntity> {
     private final AssemblyCellRenderer renderer;
+    public ArchwayRenderer(AssemblyCellRenderer renderer) { this.renderer = renderer; }
 
     public ArchwayRenderer(BlockEntityRendererProvider.Context context) {
         this.renderer = new AssemblyCellRenderer(context.getBlockRenderDispatcher().getModelRenderer(), RandomSource.create());
@@ -38,6 +39,7 @@ public class ArchwayRenderer implements BlockEntityRenderer<ArchwayBlockEntity> 
 
     @Override
     public void render(ArchwayBlockEntity entity, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
+        if (!io.github.dirtyredz.roundwood.client.render.StaticRenderingConfig.legacy()) return;
         Level level = entity.getLevel();
         BlockState anchorState = entity.getBlockState();
         if (level == null || !(anchorState.getBlock() instanceof ArchwayBlock block)

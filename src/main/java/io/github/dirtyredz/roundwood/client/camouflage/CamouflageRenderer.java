@@ -32,6 +32,7 @@ public final class CamouflageRenderer {
     /** {@code pose} is at the anchor cell's origin, before any facing or swing transform. */
     public static void render(RoundDoorBlockEntity entity, DoorLayout.Assembly assembly, Level level, PoseStack pose,
                               MultiBufferSource buffers) {
+        if (!io.github.dirtyredz.roundwood.client.render.StaticRenderingConfig.legacy()) return;
         Optional<CamouflageData> camouflage = entity.camouflage();
         if (camouflage.isEmpty()) {
             return;

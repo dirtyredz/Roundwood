@@ -79,6 +79,17 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
         super(original);
     }
 
+    private record WorldKey(BlockState state, Direction side, RenderType layer, WindowAppearanceData snapshot, boolean legacy) {}
+    private static final AppearanceModelCache<WorldKey, List<BakedQuad>> WORLD = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
+
+    @Override public net.minecraftforge.client.ChunkRenderTypeSet getRenderTypes(BlockState state, RandomSource random, ModelData data) {
+        var base = super.getRenderTypes(state, random, data);
+        var snapshot = data.get(WindowAppearanceData.PROPERTY);
+        if (io.github.dirtyredz.roundwood.client.render.StaticRenderingConfig.legacy() || snapshot == null
+                || !snapshot.trims().any() && !snapshot.sills().any()) return base;
+        return net.minecraftforge.client.ChunkRenderTypeSet.union(base, net.minecraftforge.client.ChunkRenderTypeSet.of(RenderType.solid()));
+    }
+
     /** The frame's artwork for {@code appearance}: its plank sprite, its paint, or oak when unavailable. */
     public static ResourceLocation wood(Appearance appearance) {
         return AppearanceLooks.planks(appearance);
@@ -86,6 +97,22 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
 
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource random, ModelData data,
+                                    @Nullable RenderType renderType) {
+        boolean legacy = io.github.dirtyredz.roundwood.client.render.StaticRenderingConfig.legacy();
+        var snapshot = data.get(WindowAppearanceData.PROPERTY);
+        if (state == null) return paneQuads(state, side, random, data, renderType);
+        return WORLD.get(new WorldKey(state, side, renderType, snapshot, legacy), key -> {
+            var out = new ArrayList<BakedQuad>();
+            if (renderType == null || super.getRenderTypes(state, random, data).contains(renderType))
+                out.addAll(paneQuads(state, side, random, data, renderType));
+            if (!legacy && side == null && (renderType == null || renderType == RenderType.solid()))
+                out.addAll(io.github.dirtyredz.roundwood.client.render.StaticWorldModel.collect(
+                        io.github.dirtyredz.roundwood.client.window.trim.WindowStaticModels.models(state, snapshot), state, random, renderType));
+            return List.copyOf(out);
+        });
+    }
+
+    private List<BakedQuad> paneQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource random, ModelData data,
                                     @Nullable RenderType renderType) {
         WindowAppearanceData snapshot = data.get(WindowAppearanceData.PROPERTY);
         if (state != null && state.getBlock() instanceof WindowPaneBlock pane

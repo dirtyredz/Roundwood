@@ -12,6 +12,11 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   the bounded new showcase sections, body/hand routing, anchor persistence, content custody and environment checks. Full showcase/navigation/migration suites run on ANU.
 - **Focused showcase:** `./gradlew --offline runGameTestServer -PshowcaseTargets` compiles the showcase
   suite, its shared checks and fixtures, plus the test-world environment guard.
+- **Focused static rendering:** `./gradlew --offline runGameTestServer -PrenderingTargets` selects
+  assembly snapshot lifecycle, fitting/persistence, arch and window attachments, and environment checks.
+  Combine with `-PdoorTargets` after shared transaction or leaf changes.
+- **Optional local Embeddium check:** `./gradlew --offline checkEmbeddium -PembeddiumJar=<existing jar>`
+  class-loads its block renderer and Roundwood's wrapper without initialization. It never starts a client.
 - **Focused villager repeats:** `./gradlew --offline runGameTestServer -PnavigationRepeats=20`
   compiles only navigation tests, fixtures and environment checks, with 20 independent required
   copies of each of the seven walks (no retries or timeout changes). Omit the property for the
