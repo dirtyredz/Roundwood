@@ -80,9 +80,15 @@ public final class ArchPieceModels {
     }
     static List<BakedQuad> quads(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front,
                                   Direction facing, TextureAtlasSprite sprite, boolean masonry, Layer layer) {
-        return bakeSurfaces(design, cell, layer == Layer.BODY
+        return bakeSurfaces(design, cell, renderSurfaces(design, side, cell, back, front, layer), facing, sprite, masonry);
+    }
+
+    public static List<io.github.dirtyredz.roundwood.geometry.Surface> renderSurfaces(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front, Layer layer) {
+        var raw = layer == Layer.BODY
                 ? ArchPieceGeometry.surfaces(design, side, cell.column, cell.row, back, front, "")
-                : ArchPieceTrimGeometry.surfaces(design, side, cell.column, cell.row, back, front, ""), facing, sprite, masonry);
+                : ArchPieceTrimGeometry.surfaces(design, side, cell.column, cell.row, back, front, "");
+        return (layer == Layer.BODY ? io.github.dirtyredz.roundwood.client.render.SurfaceSeparation.ARCH_BODY
+                : io.github.dirtyredz.roundwood.client.render.SurfaceSeparation.ARCH_CASING).apply(raw);
     }
 
     /** Shared donor/masonry bake for standalone and fitted volumes. */

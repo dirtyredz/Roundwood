@@ -80,7 +80,7 @@ public final class DoorArchGeometry {
         }
         var surface = new Surface(new Box(x - key.column * 16, y - key.row * 16, back,
                 x - key.column * 16 + 1, y - key.row * 16 + 1, front), face, "");
-        out.add(key.layer == Layer.BODY ? surface : surface.separated());
+        out.add(surface);
     }
 
     /** Whole static frame in door coordinates; target proxies remain in occupied depth cells. */

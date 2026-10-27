@@ -32,7 +32,7 @@ class FramedDoorFacesTest {
                     leaf.add(new Surface(box.translate(0,0,depth.offset()), normal, piece.texture()));
                 }
                 for (var part : DoorLayout.Part.of(design)) {
-                    for (var surface : DoorTrimGeometry.surfaces(design, face, part.columnIndex(), part.row())) {
+                    for (var surface : io.github.dirtyredz.roundwood.client.door.DoorTrimModels.surfaces(design, face, part.columnIndex(), part.row())) {
                         var placed = new Surface(surface.backing().translate(part.columnIndex()*16, part.row()*16, depth.offset()), surface.face(), "trim");
                         for (var other : leaf) assertFalse(overlap(placed, other), () -> design+" "+face+" "+depth+" "+placed+" / "+other);
                     }
@@ -59,7 +59,7 @@ class FramedDoorFacesTest {
                 }
                 var doorFaces = new ArrayList<Surface>();
                 for (var part : DoorLayout.Part.of(design)) for (var face : AttachmentFace.values())
-                    for (var s : DoorTrimGeometry.surfaces(design,face,part.columnIndex(),part.row()))
+                    for (var s : io.github.dirtyredz.roundwood.client.door.DoorTrimModels.surfaces(design,face,part.columnIndex(),part.row()))
                         doorFaces.add(new Surface(s.backing().translate(part.columnIndex()*16,part.row()*16,depth.offset()),s.face(),s.texture()));
                 for (var a : doorFaces) for (var b : archFaces)
                     assertFalse(overlap(a,b), () -> design+" "+depth+" layer "+layer+" "+a+" / "+b);
@@ -71,7 +71,7 @@ class FramedDoorFacesTest {
         var raw = PixelSlab.cellFaces((u,v) -> DoorTrimGeometry.inCasing(design,u,v),0,0,16,17,"");
         var strap = new Surface(new Box(2,8,16,9,9,16.5),Direction.WEST,"brass");
         assertTrue(raw.stream().anyMatch(s -> overlap(s,strap)), "old jamb x=2 must reproduce the screenshot's strap overlap");
-        assertFalse(DoorTrimGeometry.surfaces(design,AttachmentFace.FRONT,0,0).stream().anyMatch(s -> overlap(s,strap)));
+        assertFalse(io.github.dirtyredz.roundwood.client.door.DoorTrimModels.surfaces(design,AttachmentFace.FRONT,0,0).stream().anyMatch(s -> overlap(s,strap)));
     }
 
     @Test void guardRejectsOppositeNormalsAndIgnoresTouchingEdges() {
@@ -89,7 +89,7 @@ class FramedDoorFacesTest {
                 var frames=new ArrayList<Surface>();
                 for(var layer:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.values())
                     for(int col=0;col<top.columns();col++) for(int row=0;row<top.rows();row++)
-                        for(var surface:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.surfaces(design,thickness,depth,layer,col,row))
+                        for(var surface:io.github.dirtyredz.roundwood.client.door.DoorArchRenderer.surfaces(design,thickness,depth,layer,col,row))
                             frames.add(new Surface(surface.backing().translate(col*16,row*16+16*io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topOffset(design),0),surface.face(),layer.name()));
                 var doors=new ArrayList<Surface>();
                 // Swing clipping is accepted. Opposed jamb faces are hidden contact; closed visible faces must not overlap.
@@ -98,9 +98,9 @@ class FramedDoorFacesTest {
                         doors.add(new Surface(piece.box().translate(0,0,leafDepth.offset()),side,"leaf"));
                     }
                 for(var part:DoorLayout.Part.of(design)) for(var face:AttachmentFace.values())
-                    for(var surface:DoorTrimGeometry.surfaces(design,face,part.columnIndex(),part.row()))
+                    for(var surface:io.github.dirtyredz.roundwood.client.door.DoorTrimModels.surfaces(design,face,part.columnIndex(),part.row()))
                         doors.add(new Surface(surface.backing().translate(part.columnIndex()*16,part.row()*16,leafDepth.offset()),surface.face(),"door casing"));
-                for(var frame:frames) for(var door:doors) assertFalse(frame.face()!=door.face().getOpposite() && overlap(frame,door),()->design+" "+thickness+" "+depth+" "+frame+" / "+door);
+                for(var frame:frames) for(var door:doors) assertFalse(overlap(frame,door),()->design+" "+thickness+" "+depth+" "+frame+" / "+door);
             }
     }
 

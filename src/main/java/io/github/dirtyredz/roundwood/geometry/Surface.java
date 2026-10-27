@@ -9,9 +9,4 @@ import net.minecraft.core.Direction;
  * part of a volume's side without overlaying coplanar faces.
  */
 public record Surface(Box backing, Direction face, String texture) {
-    /** Render-only normal separation: prevents attached skins sharing host/hardware planes. */
-    public Surface separated() {
-        double gap = 1.0 / 256;
-        return new Surface(backing.translate(face.getStepX() * gap, face.getStepY() * gap, face.getStepZ() * gap), face, texture);
-    }
 }

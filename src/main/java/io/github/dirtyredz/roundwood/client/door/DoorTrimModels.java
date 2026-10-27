@@ -45,8 +45,12 @@ public final class DoorTrimModels {
         return MODELS.get(new Key(design, face, part, facing, look), DoorTrimModels::build);
     }
 
+    public static java.util.List<io.github.dirtyredz.roundwood.geometry.Surface> surfaces(DoorDesign design, AttachmentFace face, int column, int row) {
+        return io.github.dirtyredz.roundwood.client.render.SurfaceSeparation.DOOR_CASING.apply(DoorTrimGeometry.surfaces(design,face,column,row));
+    }
+
     private static BakedModel build(Key key) {
-        return PixelSlabModels.cell(DoorTrimGeometry.surfaces(key.design(), key.face(), key.part().columnIndex(), key.part().row()),
+        return PixelSlabModels.cell(surfaces(key.design(), key.face(), key.part().columnIndex(), key.part().row()),
                 key.part().columnIndex(), key.part().row(), key.facing(), key.look(),
                 new PixelSlabModels.Extent(key.design().width(), key.design().height(), Math.max(key.design().width(), key.design().height())));
     }

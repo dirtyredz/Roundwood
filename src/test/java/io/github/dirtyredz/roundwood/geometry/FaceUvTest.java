@@ -14,7 +14,7 @@ class FaceUvTest {
     @Test void normalSeparationDoesNotChangeUvTiles() {
         var box = new Box(0,0,16,16,16,17);
         for (var face : Direction.values()) {
-            var separated = new Surface(box, face, "").separated();
+            var separated = io.github.dirtyredz.roundwood.client.render.SurfaceSeparation.DOOR_CASING.apply(new Surface(box, face, ""));
             assertArrayEquals(FaceUv.tiled(box,face),FaceUv.tiled(separated.backing(),face));
         }
     }

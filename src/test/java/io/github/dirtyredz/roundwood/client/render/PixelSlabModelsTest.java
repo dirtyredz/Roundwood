@@ -30,7 +30,7 @@ class PixelSlabModelsTest {
             var sprite = new Sprite(contents);
             for (var design : io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.values())
                 for (var face : AttachmentFace.values()) for (var part : io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.Part.of(design)) {
-                    var surfaces = io.github.dirtyredz.roundwood.block.door.trim.DoorTrimGeometry.surfaces(design,face,part.columnIndex(),part.row());
+                    var surfaces = io.github.dirtyredz.roundwood.client.door.DoorTrimModels.surfaces(design,face,part.columnIndex(),part.row());
                     for (int turns=0;turns<4;turns++) {
                         var quads = PixelSlabModels.quads(surfaces,part.columnIndex(),part.row(),turns,false,TrimLooks.Look.tiled(TEXTURE),
                                 new PixelSlabModels.Extent(design.width(),design.height(),Math.max(design.width(),design.height())), id -> sprite);
@@ -38,7 +38,7 @@ class PixelSlabModelsTest {
                         for (var quad : quads) {
                             int axis = quad.getDirection().getAxis().ordinal();
                             double plane = Float.intBitsToFloat(quad.getVertices()[axis])*16;
-                            assertEquals(1.0/256,Math.abs(plane-Math.rint(plane)),1e-6,"separation lost in bake");
+                            assertEquals(3.0/256,Math.abs(plane-Math.rint(plane)),1e-6,"separation lost in bake");
                         }
                     }
                 }

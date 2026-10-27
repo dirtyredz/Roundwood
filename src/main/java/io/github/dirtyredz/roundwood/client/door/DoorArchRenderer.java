@@ -24,6 +24,15 @@ public final class DoorArchRenderer {
     private static final AppearanceModelCache<List<Object>, BakedModel> MODELS=new AppearanceModelCache<>(AppearanceModelCache.MODELS);
     private final AssemblyCellRenderer renderer;
     public DoorArchRenderer(ModelBlockRenderer models) { renderer=new AssemblyCellRenderer(models,RandomSource.create()); }
+    public static java.util.List<io.github.dirtyredz.roundwood.geometry.Surface> surfaces(
+            io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign design,
+            io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness thickness,
+            io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth depth,
+            DoorArchGeometry.Layer layer, int column, int row) {
+        return (layer == DoorArchGeometry.Layer.BODY ? io.github.dirtyredz.roundwood.client.render.SurfaceSeparation.ARCH_BODY
+                : io.github.dirtyredz.roundwood.client.render.SurfaceSeparation.ARCH_CASING)
+                .apply(DoorArchGeometry.surfaces(design,thickness,depth,layer,column,row));
+    }
     public void render(RoundDoorBlockEntity entity, DoorLayout.Assembly door, Level level, PoseStack pose, MultiBufferSource buffers) {
         var attachment=entity.arch(); if(attachment.isEmpty()) return; var frame=attachment.get();
         if(frame.product()!=DoorArchFitPlan.topFor(door.design())) return;
@@ -37,7 +46,7 @@ public final class DoorArchRenderer {
                 var model=MODELS.get(key,k->{
                     var sprite=DonorSprites.atlas(material.texture());
                     return GeneralQuadModels.world(ArchPieceModels.bakeSurfaces(frame.product(),cell,
-                            DoorArchGeometry.surfaces(door.design(),frame.thickness(),frame.depth(),layer,cell.column,cell.row),
+                            surfaces(door.design(),frame.thickness(),frame.depth(),layer,cell.column,cell.row),
                             door.facing(),sprite,material.masonry()),sprite);
                 });
                 var pos=door.anchor().above(DoorArchFitPlan.topOffset(door.design())+cell.row).relative(door.facing().getClockWise(),cell.column);

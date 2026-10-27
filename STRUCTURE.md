@@ -354,3 +354,5 @@ The first full review found no correctness problems. The debt is tracked in Dock
 `block/door/camouflage/CamouflageCoverage` owns the effective ALL/LOWER/NONE mask used by corner volumes, hits, outlines and model caches. Fitted round doors retain only y<16; other fitted designs have no visible corners.
 
 `block/door/hardware/DoorHardwareGeometry` owns half-pixel spear straps and fixed-height knobs. `tools/structures/doors-v0160.mjs` records independent historical door states and possessions; DoorFeedbackUpgradeGameTests loads them without replacement.
+
+`client/render/SurfaceSeparation` owns the three render offsets. DoorTrimModels, DoorArchRenderer and ArchPieceModels expose their render surfaces; geometry classes return authored surfaces. `client/door/DoorArchBakedFacesTest` and `testsupport/BakedCoplanarity` inspect generated leaf and production frame vertices across the supported pose matrix.

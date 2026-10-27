@@ -368,7 +368,8 @@
 
 - **Separate casing surfaces, not only front/back depths (0.15.0).** The old casing contact faces
   coincided with the closed leaf at z=13/16; jamb faces also coincided with hinge straps. Use
-  Surface.separated on every rendered door/arch casing face (1/256 pixel normal offset).
+  client/render/SurfaceSeparation once on raw surfaces: arch body 1/256, arch casing 2/256,
+  door casing 3/256 pixel along every normal. Never offset logical masks or selection.
   Keep targeting/collision slabs exact. A depth-only offset leaves coplanar side faces in arches.
 - **Four-block door models exceed vanilla's legal element range.** The tall leaf compresses Y
   by 3/4 before the shared -16 shift. Renderer and item display transforms restore Y; board UVs

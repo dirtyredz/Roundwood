@@ -65,8 +65,7 @@ public final class DoorTrimGeometry {
     public static List<Surface> surfaces(DoorDesign design, AttachmentFace face, int column, int row) {
         Box slab = ring(design, face).get(0);
         return PixelSlab.cellFaces((u,v) -> inCasing(design,u,v),
-                column * 16, row * 16, slab.minZ(), slab.maxZ(), "").stream()
-                .map(Surface::separated).toList();
+                column * 16, row * 16, slab.minZ(), slab.maxZ(), "");
     }
 
     /** The casing drawn on {@code face}. */

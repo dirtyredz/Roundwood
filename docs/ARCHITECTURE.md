@@ -134,11 +134,14 @@ clipped envelopes. Leaf templates shift x/y by -16 to fit the legal model range;
 the renderer and item transforms undo the Y compression, and the renderer undoes that shift after swinging, and the item combines both halves. Board
 UVs span one square 48px/64px image extent; casings use tiled donor/paint sprites.
 
-Door casing models all consume DoorTrimGeometry.surfaces through PixelSlabModels.
-Surface.separated moves each render face 1/256 pixel along its normal, including hidden
-contact faces and jamb/reveal edges. Modular arch casings use the same separation; body,
-collision and targeting geometry remain exact. This avoids coplanar frame/panel/hardware
-and frame/arch faces while retaining rear faces visible when a door opens.
+Door casing models consume authored surfaces through DoorTrimModels and PixelSlabModels.
+The render-only SurfaceSeparation policy offsets arch body, arch casing and door casing
+faces by 1/256, 2/256 and 3/256 pixel along all six normals. Leaf/hardware planes stay
+unchanged. Both fitted and standalone paths apply it once; collision, selection and
+full-depth volumes remain exact. Rear faces remain visible after opening.
+The baked-float guard proves invariant horizontal-plane separation and checks positive-area
+overlap at vertical-normal parallelism roots (0/90 degrees), including opposing normals.
+It rejects non-axis-aligned geometry; this does not prove counter-swinging leaf self-intersections.
 
 ## Door assembly
 

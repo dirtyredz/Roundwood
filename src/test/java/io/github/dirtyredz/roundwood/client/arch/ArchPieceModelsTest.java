@@ -38,7 +38,7 @@ class ArchPieceModelsTest {
                         for(var layer:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.values()) for(var cell:ArchPieceCell.of(top))
                             for(var facing:Direction.Plane.HORIZONTAL) for(boolean masonry:new boolean[]{false,true}) {
                                 var quads=ArchPieceModels.bakeSurfaces(top,cell,
-                                        io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.surfaces(door,thickness,depth,layer,cell.column,cell.row),facing,sprite,masonry);
+                                        io.github.dirtyredz.roundwood.client.door.DoorArchRenderer.surfaces(door,thickness,depth,layer,cell.column,cell.row),facing,sprite,masonry);
                                 for(var quad:quads) {if(masonry) checkUvDeltas(quad,sprite);else checkQuad(quad,sprite);}
                                 area(quads);
                             }
@@ -126,7 +126,7 @@ class ArchPieceModelsTest {
                         assertEquals(expectedX, Float.intBitsToFloat(after[i]), 1e-6);
                         assertEquals(Float.intBitsToFloat(before[i + 1]) + cell.row, Float.intBitsToFloat(after[i + 1]), 1e-6);
                         for (int j = 2; j < stride; j++) assertEquals(before[i + j], after[i + j], "only XY positions may move");
-                        for (int j = 0; j < 3; j++) assertTrue(Float.intBitsToFloat(after[i + j]) >= -1 && Float.intBitsToFloat(after[i + j]) <= 2);
+                        for (int j = 0; j < 3; j++) assertTrue(Float.intBitsToFloat(after[i + j]) >= -1-1.0/4096 && Float.intBitsToFloat(after[i + j]) <= 2+1.0/4096);
                     }
                 }
                 assertEquals(item.size(), index);

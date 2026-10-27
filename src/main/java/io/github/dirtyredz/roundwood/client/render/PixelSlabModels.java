@@ -101,7 +101,7 @@ public final class PixelSlabModels {
                 look, ItemTransforms.NO_TRANSFORMS, true, false);
     }
 
-    static List<BakedQuad> quads(List<Surface> surfaces, int column, int row, int turns, boolean inPlace,
+    public static List<BakedQuad> quads(List<Surface> surfaces, int column, int row, int turns, boolean inPlace,
                                        TrimLooks.Look look, Extent extent, Function<ResourceLocation, TextureAtlasSprite> atlas) {
         TextureAtlasSprite faceSprite = atlas.apply(look.face());
         TextureAtlasSprite edgeSprite = atlas.apply(look.edge());

@@ -24,8 +24,7 @@ public final class ArchPieceTrimGeometry {
 
     public static List<Surface> surfaces(ArchPieceDesign design, Side side,
             int column, int row, double back, double front, String texture) {
-        return ArchPieceGeometry.surfaces(design, side, column, row, back, front, texture).stream()
-                .map(Surface::separated).toList();
+        return ArchPieceGeometry.surfaces(design, side, column, row, back, front, texture);
     }
 
     public static List<Box> casing(ArchPieceDesign design, Side side, AttachmentFace face) {
