@@ -969,6 +969,20 @@ proven bounded handoff to swinging geometry. Neither static nor idle-leaf BER re
 Benchmark recipe: replay the captured census with the stage-2 FpsMicrobenchTest harness from
 fps-diag, JDK 17.0.20.1, -Xms512m -Xmx512m, four 150 ms warmups and seven >=200 ms batches.
 For the 0.17.0 paired run, retain the pre-merge DoorArchGeometry as FpsBaselineGeometry and apply
-the current SurfaceSeparation to both paths; the candidate calls production DoorArchRenderer.surfaces.
+the current SurfaceSeparation to both paths; the candidate calls production DoorArchModels.surfaces.
 Use a separate output/class directory, never Gradle's build/classes/java/test (test discovery scans it).
 Coverage and baked area by normal/colour must match before recording timings. No client FPS is inferred.
+
+## Static chunk migration acceptance (2026-10-27)
+
+The owner accepts vanilla owning-cell/host-state lighting, including the front casing's
+changed sampling cell, final depth coordinates and camouflage's host-state AO. Geometry and
+donor tint must remain intact. This supersedes the earlier exact-lighting requirement, not
+the requirement to test the actual pipeline. Static BER removal requires owner screenshots
+of a proud casing, front door casing and camouflaged round-door corner; a completed migration
+must retain an exclusive legacy/chunk client toggle until then.
+
+Only preparation landed here: DoorArchModels extracts the fitted surface and model cache with
+a typed key. The strict lighting prerequisite failed under ordinary JUnit at Forge network
+event initialization, before tessellation. No chunk ownership, toggle, crack adapter or
+snapshot lifecycle is shipped; all static BER paths remain active. Slices 2-4 remain outstanding.

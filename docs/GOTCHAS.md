@@ -1,5 +1,13 @@
 # Gotchas - Roundwood
 
+- **Plain JUnit is not a Forge lighting harness.** With version detection enabled, strict
+  `Bootstrap.bootStrap()` fails in network initialization with
+  `NoSuchMethodException: net.minecraftforge.network.NetworkEvent.<init>()`: this runner has no
+  Forge event-class transformation. Without version detection it first fails with `Game version not set`.
+  `MinecraftBootstrap.ensure()` deliberately swallows bootstrap errors for pure geometry tests;
+  it does not prove real AO/flat tessellation works. Establish a transformed headless lighting
+  harness before switching static geometry to chunk ownership; server GameTests do not prove client lighting.
+
 - Thin arch depth is resolved after shoulder orientation. Overlay regions must intersect wedges
   with bands in the resulting facing. Full arch IDs have no depth property and remain full-depth.
 - Arch model layers must be explicit: `back == 0 && front == 16` cannot distinguish bodies from

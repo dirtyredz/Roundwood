@@ -96,7 +96,7 @@ class DoorArchBakedFacesTest {
         var top=DoorArchFitPlan.topFor(design); var out=new ArrayList<Rect>();
         for(var cell:ArchPieceCell.of(top)) for(var layer:DoorArchGeometry.Layer.values()) {
             List<Surface> surfaces;
-            if(adjacent==0) surfaces=DoorArchRenderer.surfaces(design,thickness,depth,layer,cell.column,cell.row);
+            if(adjacent==0) surfaces=DoorArchModels.surfaces(design,thickness,depth,layer,cell.column,cell.row);
             else if(layer==DoorArchGeometry.Layer.BODY) surfaces=ArchPieceModels.renderSurfaces(top,KeyholeShoulderProfile.Side.LEFT,cell,0,16,ArchPieceModels.Layer.BODY);
             else {
                 var band=ArchPieceTrimGeometry.depth(layer==DoorArchGeometry.Layer.FRONT_CASING?AttachmentFace.FRONT:AttachmentFace.BACK);

@@ -8,7 +8,7 @@ import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness;
 import io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan;
 import io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
-import io.github.dirtyredz.roundwood.client.door.DoorArchRenderer;
+import io.github.dirtyredz.roundwood.client.door.DoorArchModels;
 import io.github.dirtyredz.roundwood.testsupport.MinecraftBootstrap;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -42,10 +42,11 @@ class FittedCorpusTest {
                 for (var sample : cases) {
                     if (sample.layer == DoorArchGeometry.Layer.BODY) bodies++;
                     total += ArchPieceModels.bakeSurfaces(DoorArchFitPlan.topFor(sample.design), sample.cell,
-                            DoorArchRenderer.surfaces(sample.design, sample.thickness, sample.depth, sample.layer,
+                            DoorArchModels.surfaces(sample.design, sample.thickness, sample.depth, sample.layer,
                                     sample.cell.column, sample.cell.row), Direction.SOUTH, sprite, sample.masonry).size();
                 }
                 assertEquals(45, bodies);
+                assertEquals(8622, total, "Extraction must preserve the captured fitted geometry exactly");
                 assertTrue(total <= 9000, "Fitted corpus emitted " + total + " quads; budget is 9000");
             }
         }

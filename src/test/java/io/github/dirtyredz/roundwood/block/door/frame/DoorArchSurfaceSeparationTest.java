@@ -14,7 +14,7 @@ class DoorArchSurfaceSeparationTest {
         var design=DoorDesign.ROUND;
         var top=DoorArchFitPlan.topFor(design);
         for(int column=0;column<top.columns();column++) for(int row=0;row<top.rows();row++)
-            for(var s:io.github.dirtyredz.roundwood.client.door.DoorArchRenderer.surfaces(design,ArchPieceThickness.FULL,ArchPieceDepth.FRONT,DoorArchGeometry.Layer.BODY,column,row)) {
+            for(var s:io.github.dirtyredz.roundwood.client.door.DoorArchModels.surfaces(design,ArchPieceThickness.FULL,ArchPieceDepth.FRONT,DoorArchGeometry.Layer.BODY,column,row)) {
                 var frame=new Surface(s.backing().translate(column*16,row*16+16,0),s.face(),"");
                 for(var piece:DoorGeometry.leaf(design,DoorHingeSide.LEFT)) for(var face:Direction.values())
                     assertFalse(overlap(frame,new Surface(piece.box(),face,"")),"opposed leaf/frame step is coplanar: "+frame);

@@ -89,7 +89,7 @@ class FramedDoorFacesTest {
                 var frames=new ArrayList<Surface>();
                 for(var layer:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.values())
                     for(int col=0;col<top.columns();col++) for(int row=0;row<top.rows();row++)
-                        for(var surface:io.github.dirtyredz.roundwood.client.door.DoorArchRenderer.surfaces(design,thickness,depth,layer,col,row))
+                        for(var surface:io.github.dirtyredz.roundwood.client.door.DoorArchModels.surfaces(design,thickness,depth,layer,col,row))
                             frames.add(new Surface(surface.backing().translate(col*16,row*16+16*io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topOffset(design),0),surface.face(),layer.name()));
                 var doors=new ArrayList<Surface>();
                 // Swing clipping is accepted. Opposed jamb faces are hidden contact; closed visible faces must not overlap.

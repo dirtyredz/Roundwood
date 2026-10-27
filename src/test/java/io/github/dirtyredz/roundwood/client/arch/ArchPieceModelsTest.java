@@ -38,7 +38,7 @@ class ArchPieceModelsTest {
                         for(var layer:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.values()) for(var cell:ArchPieceCell.of(top))
                             for(var facing:Direction.Plane.HORIZONTAL) for(boolean masonry:new boolean[]{false,true}) {
                                 var quads=ArchPieceModels.bakeSurfaces(top,cell,
-                                        io.github.dirtyredz.roundwood.client.door.DoorArchRenderer.surfaces(door,thickness,depth,layer,cell.column,cell.row),facing,sprite,masonry);
+                                        io.github.dirtyredz.roundwood.client.door.DoorArchModels.surfaces(door,thickness,depth,layer,cell.column,cell.row),facing,sprite,masonry);
                                 for(var quad:quads) {if(masonry) checkUvDeltas(quad,sprite);else checkQuad(quad,sprite);}
                                 area(quads);
                             }

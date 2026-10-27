@@ -17,7 +17,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `block/door/frame/` owns the fitted-top compatibility table, immutable attachment, strict versioned store, closed-plane compatibility and fitted volumes/surfaces. The same fit proposal drives ordinary clicks, playerless showcase construction and preview.
 - `block/assembly/placement/AssemblyWriteTransaction` owns full-NBT rollback for installation and fitting, including unchanged-state cells. `block/arch/fitting/ArchDoorFitting` is the narrow bootstrap-bound port; arch adapters never import the door fitting implementation. `client/door/DoorArchPlacementPreview` draws the shared proposal and refusals.
 - `block/door/selection/DoorRaycast` owns nearest world/open-leaf acquisition, shared by client picking and projected server validation. Its bounded scan reads loaded cells only and deduplicates assemblies.
-- `client/door/DoorArchRenderer` draws fitted tops as static cell models, using the arch donor/masonry baker. `DoorArchInteraction` owns frame hit routing and independent trim hosts; `DoorArchLoot` appends component refunds during ordinary loot evaluation.
+- `client/door/DoorArchModels` owns fitted surfaces and typed, reload-aware cell-model caches over the arch donor/masonry baker. `DoorArchRenderer` submits those models through the existing BER path. `DoorArchInteraction` owns frame hit routing and independent trim hosts; `DoorArchLoot` appends component refunds during ordinary loot evaluation.
 - `showcase/section/arch/ArchCompositionsSection` includes all twelve fitted samples; `FittedShowcaseGameTests` is the bounded section gate.
 
 - `block/arch/geometry/ArchPieceThickness` and `block/arch/assembly/ArchPieceDepth` own full/thin slab dimensions and thin poses.
@@ -361,7 +361,7 @@ The first full review found no correctness problems. The debt is tracked in Dock
 
 `block/door/hardware/DoorHardwareGeometry` owns half-pixel spear straps and fixed-height knobs. `tools/structures/doors-v0160.mjs` records independent historical door states and possessions; DoorFeedbackUpgradeGameTests loads them without replacement.
 
-`client/render/SurfaceSeparation` owns the three render offsets. DoorTrimModels, DoorArchRenderer and ArchPieceModels expose their render surfaces; geometry classes return authored surfaces. `client/door/DoorArchBakedFacesTest` and `testsupport/BakedCoplanarity` inspect generated leaf and production frame vertices across the supported pose matrix.
+`client/render/SurfaceSeparation` owns the three render offsets. DoorTrimModels, DoorArchModels and ArchPieceModels expose their render surfaces; geometry classes return authored surfaces. `client/door/DoorArchBakedFacesTest` and `testsupport/BakedCoplanarity` inspect generated leaf and production frame vertices across the supported pose matrix.
 
 `appearance/material/SurfaceMaterials` owns the exact block-finish allowlist and wax normalization. `client/door/DoorSurfaceModels` tiles donor panels before tall-model compression. SurfaceMaterialsTest, DoorSurfaceModelsTest and SurfaceFinishGameTests cover kind compatibility, UVs, cache distinction and payment.
 
