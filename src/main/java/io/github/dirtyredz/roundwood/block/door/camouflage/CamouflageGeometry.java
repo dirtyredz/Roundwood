@@ -59,14 +59,25 @@ public final class CamouflageGeometry {
 
     /** All the design's corners as assembly-coordinate boxes. */
     public static List<Box> corners(DoorDesign design) {
-        return CORNERS.get(design);
+        return corners(design, CamouflageCoverage.ALL);
+    }
+
+    public static List<Box> corners(DoorDesign design, CamouflageCoverage coverage) {
+        if (coverage == CamouflageCoverage.NONE) return List.of();
+        if (coverage == CamouflageCoverage.ALL) return CORNERS.get(design);
+        Box lower = new Box(0, 0, BACK, design.width(), 16, FRONT);
+        return CORNERS.get(design).stream().flatMap(b -> b.intersect(lower).stream()).toList();
     }
 
     /** The corner pieces inside one cell (column, row 0..1), cell-local (0..16), still facing north. */
     public static List<Box> quarter(DoorDesign design, int column, int row) {
+        return quarter(design, column, row, CamouflageCoverage.ALL);
+    }
+
+    public static List<Box> quarter(DoorDesign design, int column, int row, CamouflageCoverage coverage) {
         Box cell = cell(column, row);
         List<Box> out = new ArrayList<>();
-        for (Box box : corners(design)) {
+        for (Box box : corners(design, coverage)) {
             box.intersect(cell).map(b -> b.translate(-16 * column, -16 * row, 0)).ifPresent(out::add);
         }
         return out;
@@ -78,8 +89,12 @@ public final class CamouflageGeometry {
      * rectangle). Cell-local, facing north. Internal faces between merged pieces are never emitted.
      */
     public static List<Face> exposedFaces(DoorDesign design, int column, int row) {
+        return exposedFaces(design, column, row, CamouflageCoverage.ALL);
+    }
+
+    public static List<Face> exposedFaces(DoorDesign design, int column, int row, CamouflageCoverage coverage) {
         List<Face> faces = new ArrayList<>();
-        for (Surface surface : PixelSlab.cellFaces((u, v) -> inCorner(design, u, v), 16 * column, 16 * row, BACK, FRONT, "")) {
+        for (Surface surface : PixelSlab.cellFaces((u, v) -> coverage.contains(design, u, v), 16 * column, 16 * row, BACK, FRONT, "")) {
             faces.add(new Face(surface.backing(), side(surface.face())));
         }
         return faces;
@@ -90,7 +105,11 @@ public final class CamouflageGeometry {
      * region at the closed leaf's depth, minus whatever the leaf in its current pose covers.
      */
     public static boolean isCornerHit(DoorDesign design, DoorHingeSide hinge, boolean open, double x, double y, double z) {
-        if (z < BACK - EDGE || z > FRONT + EDGE || !inCorner(design, (int) Math.floor(x), (int) Math.floor(y))) {
+        return isCornerHit(design, hinge, open, x, y, z, CamouflageCoverage.ALL);
+    }
+
+    public static boolean isCornerHit(DoorDesign design, DoorHingeSide hinge, boolean open, double x, double y, double z, CamouflageCoverage coverage) {
+        if (z < BACK - EDGE || z > FRONT + EDGE || !coverage.contains(design, (int) Math.floor(x), (int) Math.floor(y))) {
             return false;
         }
         for (Box box : DoorGeometry.placedEnvelope(design, hinge, open)) {

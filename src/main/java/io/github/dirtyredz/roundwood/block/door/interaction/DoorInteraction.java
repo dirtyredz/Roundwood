@@ -67,7 +67,9 @@ public final class DoorInteraction {
         if (ring.isPresent()) {
             return ring.get();
         }
-        DoorHitRegion.Region region = DoorHitRegion.classify(state, pos, hit);
+        DoorHitRegion.Region region = DoorHitRegion.classify(state, pos, hit,
+                io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageCoverage.of(block.design(),
+                        anchor(level, pos, state, block).flatMap(RoundDoorBlockEntity::arch).isPresent()));
         Optional<AppearanceGestures.Gesture> gesture = AppearanceGestures.of(AppearanceFamily.DOOR, player, hand);
         if (gesture.isPresent()) {
             if (region == DoorHitRegion.Region.CORNER) {

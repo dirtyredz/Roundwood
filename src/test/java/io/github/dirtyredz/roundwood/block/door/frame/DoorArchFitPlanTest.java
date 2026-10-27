@@ -24,7 +24,7 @@ class DoorArchFitPlanTest {
             assertEquals(door.anchor().above(design == DoorDesign.TALL_DOUBLE_ARCHED ? 2 : 1), fitted.arch().anchor());
             assertEquals(depth, fitted.door().depth());
             assertEquals(fitted, DoorArchFitPlan.fromArch(design, fitted.arch(), hinge, depth).orElseThrow());
-            assertTrue(DoorArchFitPlan.of(door, fitted.arch(), true).isEmpty());
+            assertEquals(fitted, DoorArchFitPlan.of(door, fitted.arch(), true).orElseThrow());
             assertTrue(DoorArchFitPlan.of(door, new ArchPieceLayout.Assembly(fitted.arch().anchor().above(), facing, expected, Side.LEFT), false).isEmpty());
             assertTrue(DoorArchFitPlan.of(door, new ArchPieceLayout.Assembly(fitted.arch().anchor(), facing.getOpposite(), expected, Side.LEFT), false).isEmpty());
             assertTrue(DoorArchFitPlan.of(door, new ArchPieceLayout.Assembly(fitted.arch().anchor(), facing, ArchPieceDesign.KEYHOLE_SHOULDER, Side.LEFT), false).isEmpty());

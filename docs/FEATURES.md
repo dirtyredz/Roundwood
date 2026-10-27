@@ -22,3 +22,5 @@ Roundwood doors fit matching arch tops with an ordinary click in either placemen
 Arched 1x2 uses Top 1x1 at y+1; Round 2x2 uses Top 1x2 at y+1. Double arched 3x3 uses Top 2x3 at y+1, and tall double arched 3x4 uses it at y+2. Shoulders and vanilla/other-mod same-cell doors are unsupported. The showcase contains twelve fitted full/thin examples spanning all three leaf depths. Visible middle/free-edge clicks toggle open and closed leaves, including their out-of-cell projection; a nearer frame or block still takes the ray.
 
 The Frameless Window Pane fills a full cell face with recessed glazing. Craft one from one vanilla glass pane; place it upright, on floors or ceilings with the existing aiming preview. Dye tints its glass and Cross Beams are optional. Perimeter trims, sills and invisible frame restyling are refused.
+
+Round doors accept lower-corner camouflage before or after fitting an arch. Fitting hides upper fill and preserves the existing donor and single refund; clearing the lower corners leaves the fitted frame unchanged.

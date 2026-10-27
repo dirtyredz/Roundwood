@@ -21,8 +21,9 @@ public record DoorArchFitPlan(DoorLayout.Assembly door, ArchPieceLayout.Assembly
         };
     }
     public static int topOffset(DoorDesign design) { return design == DoorDesign.TALL_DOUBLE_ARCHED ? 2 : 1; }
+    /** Existing camouflage is retained in custody; effective coverage hides the fitted upper region. */
     public static Optional<DoorArchFitPlan> of(DoorLayout.Assembly door, ArchPieceLayout.Assembly arch, boolean camouflage) {
-        if (camouflage || arch.design() != topFor(door.design()) || arch.facing() != door.facing()
+        if (arch.design() != topFor(door.design()) || arch.facing() != door.facing()
                 || !arch.anchor().equals(door.anchor().above(topOffset(door.design())))
                 || !DoorArchClearance.accepts(arch.thickness(), arch.depth(), door.depth())) return Optional.empty();
         return Optional.of(new DoorArchFitPlan(door, arch));

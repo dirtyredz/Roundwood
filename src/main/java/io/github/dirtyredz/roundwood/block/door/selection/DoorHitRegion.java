@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.door.selection;
 
+import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageCoverage;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageGeometry;
 import net.minecraft.core.BlockPos;
@@ -22,10 +23,14 @@ public final class DoorHitRegion {
     }
 
     public static Region classify(BlockState state, BlockPos pos, BlockHitResult hit) {
+        return classify(state, pos, hit, CamouflageCoverage.ALL);
+    }
+
+    public static Region classify(BlockState state, BlockPos pos, BlockHitResult hit, CamouflageCoverage coverage) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
         Vec3 local = assembly.toAuthored(DoorHitResolver.insidePoint(hit));
         boolean corner = CamouflageGeometry.isCornerHit(assembly.design(), state.getValue(DoorBlock.HINGE), state.getValue(DoorBlock.OPEN),
-                local.x, local.y, local.z);
+                local.x, local.y, local.z, coverage);
         return corner ? Region.CORNER : Region.LEAF;
     }
 }

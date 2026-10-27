@@ -379,3 +379,5 @@ Fitting must not move the door depth. Full tops accept every door depth; thin to
 An empty arch collision shape still occupies its block positions. Only explicit compatible fitted-top conversion may replace those positions. Both fitting orders take precedence over toggle/camouflage; unsupported fits are refused with a hint and a red preview. Vanilla/other-mod doors remain separate-cell placements, and shoulders cannot become fitted tops.
 
 Frameless panes have no frame or perimeter/sill host. Refuse frame donors without payment; glass tint and Cross Beams remain available. Never use runtime WindowDesign.all() to discover registered items: blank-with-beams has no retired crossed ID.
+
+A fitted round arch does not erase or refund camouflage. Render and target only its lower corners; include CamouflageCoverage in corner/outline/model cache keys. Actual frame-surface hits still take precedence.

@@ -767,3 +767,5 @@ whole-image), oak source quarters per family, one empty world model and a single
 over the canonical models and item models parenting the canonical items. Items carry front GUI light
 and computed centred transforms. Plus 20 recipes and their advancements, loot (aliases drop the
 canonical item; windows and doors add one trim pool per face), tags and English names.
+
+Fitting retains camouflage donor/refund custody. The effective coverage mask hides upper fill, leaving the round door's two lower corners editable in either operation order. All other fitted designs expose no camouflage region. Selection and baked-model cache keys include coverage; the fitting transaction continues to snapshot and restore the entire anchor NBT.

@@ -350,3 +350,5 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-d1d87975 done: `appearance/AppearanceAnchor`, typed `AssemblyPlacementPlan<P,A>`, per-family `AssemblyAnchors.Lookup` constants and typed item binding replace forwarding facades; window wrapping lives with its model.
 
 - dk-ea090069 done: `PlacementHighlights` owns held-hand precedence and the live-client event guard; `AssemblyCellRenderer` owns per-cell tessellation and balanced poses.
+
+`block/door/camouflage/CamouflageCoverage` owns the effective ALL/LOWER/NONE mask used by corner volumes, hits, outlines and model caches. Fitted round doors retain only y<16; other fitted designs have no visible corners.

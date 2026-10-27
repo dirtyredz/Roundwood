@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.camouflage;
 
+import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageCoverage;
 import io.github.dirtyredz.roundwood.client.render.AssemblyCellRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -41,7 +42,7 @@ public final class CamouflageRenderer {
         BlockPos anchor = assembly.anchor();
         for (DoorLayout.Part part : assembly.parts()) {
             BlockPos cell = assembly.pos(part);
-            renderer.draw(level, anchor, cell, CamouflageModels.quarter(donor, assembly.design(), assembly.facing(), part),
+            renderer.draw(level, anchor, cell, CamouflageModels.quarter(donor, assembly.design(), assembly.facing(), part, CamouflageCoverage.of(assembly.design(), entity.arch().isPresent())),
                     donor, pose, consumer, false);
         }
     }

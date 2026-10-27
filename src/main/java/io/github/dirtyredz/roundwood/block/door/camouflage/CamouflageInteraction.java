@@ -72,7 +72,7 @@ public final class CamouflageInteraction {
 
     private static InteractionResult apply(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
                                            ItemStack stack) {
-        if (anchorEntity(block, state, level, pos).map(e -> e.arch().isPresent() || !e.archEditable()).orElse(false)) return InteractionResult.CONSUME;
+        if (anchorEntity(block, state, level, pos).map(e -> CamouflageCoverage.of(block.design(), e.arch().isPresent()) == CamouflageCoverage.NONE || !e.archEditable()).orElse(false)) return InteractionResult.CONSUME;
         Optional<BlockState> material = CamouflageMaterial.fromStack(stack);
         if (material.isEmpty()) {
             return InteractionResult.CONSUME; // refused: no toggle, nothing consumed or placed

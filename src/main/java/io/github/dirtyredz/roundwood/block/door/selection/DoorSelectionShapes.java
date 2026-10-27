@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.door.selection;
 
+import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageCoverage;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
@@ -56,13 +57,13 @@ public final class DoorSelectionShapes {
     public static VoxelShape target(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
         int rings = holdsDoorTrim(context) ? 3 : installed(level, assembly);
-        return Shapes.or(shape(state, (holdsBlockItem(context) && anchor(level, assembly).flatMap(RoundDoorBlockEntity::arch).isEmpty()) || filled(level, assembly), rings, true), frame(state, level, pos, true));
+        return Shapes.or(shape(state, holdsBlockItem(context) || filled(level, assembly), rings, true, coverage(level, assembly)), frame(state, level, pos, true));
     }
 
     /** What is there to highlight: the leaf at rest, plus the filled corners and the installed rings. */
     public static VoxelShape visible(BlockState state, BlockGetter level, BlockPos pos) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
-        return Shapes.or(shape(state, filled(level, assembly), installed(level, assembly), false), frame(state, level, pos, false));
+        return Shapes.or(shape(state, filled(level, assembly), installed(level, assembly), false, coverage(level, assembly)), frame(state, level, pos, false));
     }
 
     /**
@@ -81,9 +82,10 @@ public final class DoorSelectionShapes {
         DoorLayout.Part part = DoorLayout.partOf(state);
         int column = part.columnIndex();
         int row = part.row();
-        var key = java.util.List.<Object>of(design, turns, part, corners, rings, assembly.depth());
+        var coverage = coverage(level, assembly);
+        var key = java.util.List.<Object>of(design, turns, part, corners, rings, assembly.depth(), coverage);
         return Shapes.or(frame(state, level, pos, false), STATIC.computeIfAbsent(key, k -> {
-            List<Box> boxes = new ArrayList<>(corners ? CamouflageGeometry.corners(design) : List.of());
+            List<Box> boxes = new ArrayList<>(corners ? CamouflageGeometry.corners(design, coverage) : List.of());
             addRings(boxes, design, rings, false, assembly.depth().offset());
             return VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes.stream().map(b -> b.translate(0, 0, assembly.depth().offset())).toList(), column, row), turns));
         }));
@@ -96,9 +98,9 @@ public final class DoorSelectionShapes {
                         .move(door.anchor().getX()-pos.getX(), door.anchor().getY()-pos.getY(), door.anchor().getZ()-pos.getZ())).orElse(Shapes.empty());
     }
 
-    private static VoxelShape shape(BlockState state, boolean corners, int rings, boolean target) {
+    private static VoxelShape shape(BlockState state, boolean corners, int rings, boolean target, CamouflageCoverage coverage) {
         return shape(DoorLayout.designOf(state), state.getValue(DoorBlock.FACING), state.getValue(DoorBlock.HINGE),
-                DoorLayout.partOf(state), state.getValue(DoorBlock.OPEN), corners, rings, target, DoorLayout.depthOf(state).offset());
+                DoorLayout.partOf(state), state.getValue(DoorBlock.OPEN), corners, rings, target, DoorLayout.depthOf(state).offset(), coverage);
     }
 
     /**
@@ -112,12 +114,17 @@ public final class DoorSelectionShapes {
 
     public static VoxelShape shape(DoorDesign design, Direction facing, DoorHingeSide hinge, DoorLayout.Part part, boolean open,
                                    boolean corners, int rings, boolean target, double depth) {
+        return shape(design, facing, hinge, part, open, corners, rings, target, depth, CamouflageCoverage.ALL);
+    }
+
+    public static VoxelShape shape(DoorDesign design, Direction facing, DoorHingeSide hinge, DoorLayout.Part part, boolean open,
+                                   boolean corners, int rings, boolean target, double depth, CamouflageCoverage coverage) {
         int turns = VoxelShapeFactory.quarterTurns(facing);
         int column = part.columnIndex();
         int row = part.row();
-        var key = java.util.List.<Object>of(design, turns, hinge, part, open, corners, rings, target, depth);
+        var key = java.util.List.<Object>of(design, turns, hinge, part, open, corners, rings, target, depth, coverage);
         return SHAPES.computeIfAbsent(key, k -> {
-            List<Box> boxes = new ArrayList<>(DoorOutlineGeometry.outline(design, hinge, open, corners));
+            List<Box> boxes = new ArrayList<>(DoorOutlineGeometry.outline(design, hinge, open, corners, coverage));
             addRings(boxes, design, rings, target, depth);
             return VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes.stream().map(b -> b.translate(0, 0, depth)).toList(), column, row), turns));
         });
@@ -152,6 +159,10 @@ public final class DoorSelectionShapes {
     }
 
     /** Filled corners are always selectable. Only a live level's loaded anchor is asked (never worldgen regions). */
+    private static CamouflageCoverage coverage(BlockGetter level, DoorLayout.Assembly assembly) {
+        return CamouflageCoverage.of(assembly.design(), anchor(level, assembly).flatMap(RoundDoorBlockEntity::arch).isPresent());
+    }
+
     private static boolean filled(BlockGetter level, DoorLayout.Assembly assembly) {
         return anchor(level, assembly).map(entity -> entity.camouflage().isPresent()).orElse(false);
     }

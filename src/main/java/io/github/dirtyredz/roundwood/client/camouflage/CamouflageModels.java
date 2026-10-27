@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.camouflage;
 
+import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageCoverage;
 import io.github.dirtyredz.roundwood.client.render.GeneralQuadModels;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
@@ -36,7 +37,7 @@ public final class CamouflageModels {
     private static final ResourceLocation NAME = ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, "camouflage");
     private static final FaceBakery BAKERY = new FaceBakery();
 
-    private record Key(BlockState donor, DoorDesign design, Direction facing, DoorLayout.Part part) {
+    private record Key(BlockState donor, DoorDesign design, Direction facing, DoorLayout.Part part, CamouflageCoverage coverage) {
     }
 
     private static final AppearanceModelCache<Key, BakedModel> CACHE = new AppearanceModelCache<>(MAX_MODELS);
@@ -45,14 +46,14 @@ public final class CamouflageModels {
     }
 
     /** The corner model for {@code part} of a door facing {@code facing}, in {@code donor}'s materials. */
-    public static BakedModel quarter(BlockState donor, DoorDesign design, Direction facing, DoorLayout.Part part) {
-        return CACHE.get(new Key(donor, design, facing, part), CamouflageModels::build);
+    public static BakedModel quarter(BlockState donor, DoorDesign design, Direction facing, DoorLayout.Part part, CamouflageCoverage coverage) {
+        return CACHE.get(new Key(donor, design, facing, part, coverage), CamouflageModels::build);
     }
 
     private static BakedModel build(Key key) {
         int turns = VoxelShapeFactory.quarterTurns(key.facing());
         List<BakedQuad> quads = new ArrayList<>();
-        for (CamouflageGeometry.Face face : CamouflageGeometry.exposedFaces(key.design(), key.part().columnIndex(), key.part().row())) {
+        for (CamouflageGeometry.Face face : CamouflageGeometry.exposedFaces(key.design(), key.part().columnIndex(), key.part().row(), key.coverage())) {
             Box box = face.box().rotateY(turns);
             Direction side = VoxelShapeFactory.turn(direction(face.side()), turns);
             DonorSprites.FaceMaterial material = DonorSprites.face(key.donor(), side);

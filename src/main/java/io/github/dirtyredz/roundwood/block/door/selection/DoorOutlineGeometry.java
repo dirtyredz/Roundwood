@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.door.selection;
 
+import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageCoverage;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageGeometry;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
@@ -22,9 +23,13 @@ public final class DoorOutlineGeometry {
 
     /** The whole outline in assembly coordinates: the leaf at rest, and the corners if asked for. */
     public static List<Box> outline(DoorDesign design, DoorHingeSide hinge, boolean open, boolean corners) {
+        return outline(design, hinge, open, corners, CamouflageCoverage.ALL);
+    }
+
+    public static List<Box> outline(DoorDesign design, DoorHingeSide hinge, boolean open, boolean corners, CamouflageCoverage coverage) {
         List<Box> boxes = new ArrayList<>(DoorGeometry.placedEnvelope(design, hinge, open));
         if (corners) {
-            boxes.addAll(CamouflageGeometry.corners(design));
+            boxes.addAll(CamouflageGeometry.corners(design, coverage));
         }
         return boxes;
     }

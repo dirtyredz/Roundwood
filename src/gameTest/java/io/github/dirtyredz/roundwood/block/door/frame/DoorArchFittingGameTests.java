@@ -159,6 +159,8 @@ public final class DoorArchFittingGameTests {
                     io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.FRONT,false).orElseThrow().arch();
             if(intoArch) check(ArchPiecePlacement.placeAt(level,ModBlocks.archPiece(arch.design()),arch,AppearanceFixtures.BRICKS),"fixture");
             else check(io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement.placeAt(level,ModBlocks.archedDoor(),door,false,AppearanceFixtures.WARPED),"fixture");
+            if (!intoArch) anchorEntity(helper, door).setCamouflage(io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData.paid(
+                    net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), new ItemStack(net.minecraft.world.item.Items.STONE)));
             var owner=intoArch?arch.anchor():door.anchor(); var before=level.getBlockEntity(owner).saveWithFullMetadata();
             var states=door.positions().stream().map(level::getBlockState).toList();
             var player=player(helper,"cancelled",GameType.SURVIVAL,Direction.NORTH);
