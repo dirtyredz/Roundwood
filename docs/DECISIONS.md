@@ -1003,3 +1003,23 @@ Only preparation landed here: DoorArchModels extracts the fitted surface and mod
 a typed key. The strict lighting prerequisite failed under ordinary JUnit at Forge network
 event initialization, before tessellation. No chunk ownership, toggle, crack adapter or
 snapshot lifecycle is shipped; all static BER paths remain active. Slices 2-4 remain outstanding.
+
+## Chunk-build regression repair (2026-10-27)
+
+The preceding preparation-only status is historical: slices 2-4 shipped in a4fdd8c with an exclusive
+legacy toggle. Owner feedback then exposed arch gaps and open/donor-held targeting cost.
+Independent face-normal offsets open even a cuboid, so arch layers now translate their connected
+XY silhouette (expanding outer minimum boundaries rather than retreating from adjacent blocks)
+and expand the shared Z interval. Authored UVs/mortar stay unchanged. Complete-layer
+edge repair runs after mortar clipping, splits T-junctions across cells, and merges only strictly
+convex triangle pairs. Logical volumes, depth rules and accepted swing clipping remain unchanged.
+
+This supersedes the old 9,000-quad fitted budget: the 135-case corpus needs 13,410 watertight quads
+(14,000 guard), versus 8,622 with unmatched edges, 22,194 for a rejected full-grid repair and 25,686
+before the original consolidation. More vertices are an explicit correctness cost; no client FPS
+claim follows from these counts. Topology is cached per complete layer and cleared on resource reload.
+
+Settled envelopes/hardware and shape Boolean operations are cached. Client ray/proposal memos
+include target, hands, camera and payload; a tick boundary conservatively invalidates unrelated
+obstruction/permission changes. Actual input and server use always validate immediately. This
+deliberately favors fresh interaction over caching an eligible preview indefinitely.

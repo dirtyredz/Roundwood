@@ -1,13 +1,22 @@
 # Gotchas - Roundwood
 
+- **Independent face-normal offsets open the arch mesh.** Even a single cuboid acquires gaps.
+  Keep an arch layer's XY displacement connected, expand exterior minimum boundaries and the shared Z interval, then restore
+  shared edge vertices after masonry clipping. A rectangle-only watertightness check misses the
+  extra vertices introduced by mortar. Preserve authored UVs before render displacement.
+- **Settled targeting is a render hot path.** Open envelope transforms, hardware shapes, fitted
+  frame unions and hardware-minus-static Boolean operations must be cached. A donor triggers
+  the nearby-door scan even when aiming at an arch; window previews do not build door geometry.
+  Render memos are valid for at most one tick; input/server use must still revalidate immediately.
+
 - **Invalid anchor identity must retire its old footprint.** A state packet can turn an anchor into
   a satellite without replacing its block entity. Publish an unavailable revision and dirty the old
   owned cells; retain current member states so later restoration is detected without repeated rebuilds.
   The bounded membership poll registers assembly anchors only, not ordinary windows.
 
 - **Rebuild timing is not FPS.** `ChunkSectionRebuildTest` replays the captured static census into actual
-  owning sections with synthetic sprites and current geometry; it times raw quad baking without world
-  light, GPU upload or other mods. The separate fitted aggregate pins 8,622 quads. Leaf allocation
+  owning sections with synthetic sprites and current geometry; repeated passes reuse the topology cache, without world
+  light, GPU upload or other mods. The separate fitted aggregate pins 13,410 conforming quads. Leaf allocation
   measurements cover warmed input/model/bounds lookup, not vanilla vertex emission.
 
 - **Static rendering ownership is exclusive.** `legacyStaticRendering=false` suppresses every static
@@ -398,8 +407,8 @@
 
 - **Separate casing surfaces, not only front/back depths (0.15.0).** The old casing contact faces
   coincided with the closed leaf at z=13/16; jamb faces also coincided with hinge straps. Use
-  client/render/SurfaceSeparation once on raw surfaces: arch body 1/256, arch casing 2/256,
-  door casing 3/256 pixel along every normal. Never offset logical masks or selection.
+  client/render/SurfaceSeparation for door casing normals (3/256 pixel). Arch bodies/casings use
+  connected 1/256 and 2/256 pixel layer offsets after edge repair. Never offset logical masks or selection.
   Keep targeting/collision slabs exact. A depth-only offset leaves coplanar side faces in arches.
 - **Four-block door models exceed vanilla's legal element range.** The tall leaf compresses Y
   by 3/4 before the shared -16 shift. Renderer and item display transforms restore Y; board UVs
@@ -425,6 +434,6 @@ Non-wood does not mean masonry: BLOCK_SURFACE must use donor sprites without mor
 - Donor acquisition first tests visible surfaces for hardware, then falls back to empty camouflage targets. Otherwise an invisible far corner can mask an open hinge. Buried hardware is subtracted against installed static geometry so casing targets keep ownership. Check both world interaction and item-use permission for every assembly cell.
 
 - Fitted surfaces must share ArchPieceGeometry's merged cell faces. Do not restore per-pixel
-  front/back polygons: masonry clipping amplifies them. Apply normal separation after merging;
+  front/back polygons: masonry clipping amplifies them. Repair shared edges after masonry and apply connected layer separation;
   never change selection volumes to solve a render-plane problem. Historical FPS census numbers
   must name the geometry revision: the 0.17.0 raised crown changes the baseline substantially.

@@ -22,6 +22,9 @@ import java.util.Optional;
  */
 @Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public final class DoorTargetingEvents {
+    private record RayKey(Object level,Object player,long tick,Object eye,Object end,Object main,Object mainTag,
+                          Object off,Object offTag,boolean secondary,Object targetState,Object targetRevision) {}
+    private static final DoorPreviewMemo<RayKey,BlockHitResult> RAYS=new DoorPreviewMemo<>();
     private DoorTargetingEvents() {
     }
 
@@ -29,15 +32,32 @@ public final class DoorTargetingEvents {
     @SubscribeEvent
     public static void onWorldRender(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
-        acquire(Minecraft.getInstance(), event.getPartialTick());
+        acquire(Minecraft.getInstance(), event.getPartialTick(),false);
     }
 
-    private static void acquire(Minecraft minecraft, float partialTick) {
+    @SubscribeEvent
+    public static void unload(net.minecraftforge.event.level.LevelEvent.Unload event){if(event.getLevel().isClientSide())RAYS.clear();}
+
+    private static void acquire(Minecraft minecraft, float partialTick,boolean fresh) {
         if (minecraft.level == null || minecraft.player == null || minecraft.gameMode == null
                 || minecraft.getCameraEntity() != minecraft.player) return;
         var eye = minecraft.player.getEyePosition(partialTick);
         var end = eye.add(minecraft.player.getViewVector(partialTick).scale(minecraft.gameMode.getPickRange()));
-        var hit = io.github.dirtyredz.roundwood.block.door.selection.DoorRaycast.clip(minecraft.level, minecraft.player, eye, end);
+        var main=minecraft.player.getMainHandItem();var off=minecraft.player.getOffhandItem();
+        Object targetState=null,targetRevision=null;
+        if(minecraft.hitResult instanceof BlockHitResult previous) {
+            var state=minecraft.level.getBlockState(previous.getBlockPos());targetState=state;
+            if(state.getBlock() instanceof io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock) {
+                var door=io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.of(previous.getBlockPos(),state);
+                if(minecraft.level.getBlockEntity(door.anchor()) instanceof io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity entity)
+                    targetRevision=entity.staticRenderPublication().current();
+            }
+        }
+        var key=new RayKey(minecraft.level,minecraft.player,minecraft.level.getGameTime(),eye,end,
+                main.getItem(),main.getTag()==null?null:main.getTag().copy(),off.getItem(),off.getTag()==null?null:off.getTag().copy(),
+                minecraft.player.isSecondaryUseActive(),targetState,targetRevision);
+        if(fresh)RAYS.clear(); // input always validates the live world, even inside a rendered tick
+        var hit = RAYS.get(key,()->io.github.dirtyredz.roundwood.block.door.selection.DoorRaycast.clip(minecraft.level, minecraft.player, eye, end));
         if (minecraft.hitResult != null && minecraft.hitResult.getType() == HitResult.Type.ENTITY
                 && minecraft.hitResult.getLocation().distanceToSqr(eye) <= hit.getLocation().distanceToSqr(eye)) return;
         boolean doorHit = hit.getType() == HitResult.Type.BLOCK && minecraft.level.getBlockState(hit.getBlockPos()).getBlock()
@@ -54,7 +74,7 @@ public final class DoorTargetingEvents {
     public static void onInteraction(InputEvent.InteractionKeyMappingTriggered event) {
         Minecraft minecraft = Minecraft.getInstance();
         // Minecraft picks again at the start of each tick, overwriting the render-time target.
-        acquire(minecraft, 1.0F);
+        acquire(minecraft, 1.0F,true);
         if (minecraft.level == null || !(minecraft.hitResult instanceof BlockHitResult hit)
                 || hit.getType() != HitResult.Type.BLOCK) {
             return;

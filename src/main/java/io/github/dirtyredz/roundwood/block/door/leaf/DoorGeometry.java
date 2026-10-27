@@ -45,6 +45,8 @@ public final class DoorGeometry {
     }
 
     private static final Map<DoorDesign, Leaf> LEAVES = new EnumMap<>(DoorDesign.class);
+    private record Pose(DoorDesign design, DoorHingeSide hinge, boolean open) {}
+    private static final Map<Pose, List<Box>> ENVELOPES = new java.util.concurrent.ConcurrentHashMap<>();
 
     static {
         for (DoorDesign design : DoorDesign.values()) {
@@ -145,6 +147,10 @@ public final class DoorGeometry {
 
     /** The whole leaf, open or closed, as one list of assembly-coordinate boxes (for tests and bounds). */
     public static List<Box> placedEnvelope(DoorDesign design, DoorHingeSide hinge, boolean open) {
+        return ENVELOPES.computeIfAbsent(new Pose(design, hinge, open), key -> buildEnvelope(design, hinge, open));
+    }
+
+    private static List<Box> buildEnvelope(DoorDesign design, DoorHingeSide hinge, boolean open) {
         if (design.doubleLeaf() && open) {
             List<Box> boxes = new ArrayList<>();
             for (DoorHingeSide side : DoorHingeSide.values()) for (Box box : envelope(design)) {

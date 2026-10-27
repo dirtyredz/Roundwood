@@ -14,16 +14,16 @@ import net.minecraftforge.fml.common.Mod;
 /** Shows the complete assembly-wide slot that the shared server proposal would change. */
 @Mod.EventBusSubscriber(modid=Roundwood.MOD_ID,bus=Mod.EventBusSubscriber.Bus.FORGE,value=Dist.CLIENT)
 public final class DoorHardwarePreview {
+    private static final DoorHardwarePreviewCache CACHE=new DoorHardwarePreviewCache();
     private DoorHardwarePreview() {}
+    @SubscribeEvent
+    public static void unload(net.minecraftforge.event.level.LevelEvent.Unload event){if(event.getLevel().isClientSide())CACHE.clear();}
     @SubscribeEvent(receiveCanceled=true)
     public static void highlight(RenderHighlightEvent.Block event){
-        PlacementHighlights.draw(event,(player,level,hit)->{
-            var hand=DoorHardwareDonors.of(player,InteractionHand.MAIN_HAND).isPresent()?InteractionHand.MAIN_HAND:InteractionHand.OFF_HAND;
-            return DoorHardwareTarget.of(level,player,hand,hit).filter(DoorHardwareTarget.Proposal::eligible);
-        },(client,proposal)->{
-            var camera=event.getCamera().getPosition();var pos=proposal.door().anchor();
+        PlacementHighlights.draw(event,CACHE::of,(client,preview)->{
+            var camera=event.getCamera().getPosition();var pos=preview.proposal().door().anchor();
             OutlineLines.edges(event.getPoseStack(),event.getMultiBufferSource().getBuffer(RenderType.lines()),
-                    DoorHardwareTarget.shape(proposal),pos.getX()-camera.x,pos.getY()-camera.y,pos.getZ()-camera.z,.3F,1F,.6F,.95F);
+                    preview.shape(),pos.getX()-camera.x,pos.getY()-camera.y,pos.getZ()-camera.z,.3F,1F,.6F,.95F);
         });
     }
 }

@@ -44,6 +44,18 @@ public final class AssemblyRenderUpdates {
         if (entity.getLevel() != null && entity.getLevel().isClientSide) lifecycle.accept(entity, false);
     }
 
+    /** Bounded member-state poll. A settled pose must not publish or dirty any chunk. */
+    public static void refreshMembers(AppearanceAnchorBlockEntity entity) {
+        var snapshot=entity.staticRenderPublication().current();
+        var level=entity.getLevel();
+        if(level==null)return;
+        if(snapshot==null){refresh(entity,false);return;}
+        for(var part:entity.staticRenderPublication().footprint()) {
+            var current=level.isLoaded(part)?level.getBlockState(part):null;
+            if(snapshot.members().get(part)!=current){refresh(entity,false);return;}
+        }
+    }
+
     public static void refresh(AppearanceAnchorBlockEntity entity, boolean removed) {
         var level = entity.getLevel();
         if (level == null || !removed && (AssemblyMutationBatch.isMutating(level, entity.getBlockPos()) || level.restoringBlockSnapshots)) return;

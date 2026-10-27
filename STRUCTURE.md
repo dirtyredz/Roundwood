@@ -6,6 +6,13 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
+- `client/arch/ArchMeshModels` bakes complete layers before returning owning-cell quads;
+  `ArchMeshTopology` inserts shared edge vertices after mortar clipping. `ArchWatertightTest`
+  checks baked edge pairing across cells, thicknesses, depths, facings and materials.
+- `block/door/selection/DoorTargetShapes` bounds cached hardware/Boolean selection geometry.
+  `client/door/DoorPreviewMemo` retains the current ray/proposal, and `DoorHardwarePreviewCache`
+  keys hardware previews on target, hands, payload, camera and a conservative tick revision.
+
 - `block/assembly/render/` owns immutable render snapshots and publication ordering for anchor-only assemblies. `client/render/assembly/` owns client membership validation and worker-safe model-data extraction.
 - `client/door/DoorLeafRenderState` caches leaf inputs, membership positions and models by payload/reload generation; the anchor caches layout and sweep bounds. `src/test/.../client/arch/ChunkSectionRebuildTest` replays `src/test/resources/fps/static-census.json` into owning sections without lighting or upload. Leaf allocation tests live beside the leaf cache.
 - `client/material/StaticBlockColors` and `TintBindings` own stable donor tint routing; `client/render/StaticQuadTransform` moves BER depth poses into quad vertices. `client/{trim,archway}/*WorldModel` preserve compatibility geometry/culling; `client/window/trim/WindowStaticModels` composes perimeter and sill geometry into the window's separate solid pass.

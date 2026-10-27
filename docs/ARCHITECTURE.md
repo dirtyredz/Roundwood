@@ -2,6 +2,21 @@
 
 ## Static chunk publication (0.17.0)
 
+Arch layers share a connected render displacement: shared XY coordinates move together, outer
+minimum boundaries move outward to retain contact with neighboring blocks, and
+the depth interval expands at both ends. Logical geometry stays exact. Texture coordinates and
+mortar are baked in authored coordinates first. Complete-layer topology inserts existing vertices
+where an edge otherwise meets a T-junction, including mortar intersections and neighboring cells;
+only affected polygons are triangulated. Models retain their original cell ownership. A bounded,
+reload-cleared cache retains the complete layer topology.
+
+Settled open/closed envelopes and hardware meshes share finite pose caches. Selection caches retain
+whole frame unions, exposed hardware, relative frame moves and in-cell clipping. Keys contain
+geometry values, never a level. Render-time projected rays and hardware proposals reuse an unchanged
+target within a game tick; camera, hand and target revision changes invalidate immediately. The tick
+boundary conservatively rechecks other-world obstruction and permissions. Input always reacquires
+the live ray and server actions always revalidate. World unload clears the client memos.
+
 Doors' static pieces, standalone arches, compatibility frames and archways use immutable anchor snapshots. Publication precedes the anchor
 model-data refresh and every loaded cell's dirty notification, including the old/new footprint union.
 Transactions publish after commit or restoration. Packet/direct NBT loads publish after the complete
@@ -811,6 +826,6 @@ A donor-mode ray acquires actual endpoint hardware. DoorHardwareTarget checks ne
 DoorHardware Version 1 stores two independently optional appearances. Missing means brass; updates explicitly clear absent slots. Unknown versions, fields and nested data remain opaque on disk and on harvested door items. Checked stacks refuse lossy placement. The shared installer initializes hardware within its rollback transaction, including door-into-arch fitting. Pick and loot decorate only the door item; hardware has no raw donor refund.
 
 Fitted bodies/casings now use the standalone merged surface builder (0.17.0). The render-only
-normal offsets still apply afterward. Both chunk and legacy paths reuse those surfaces; static
+connected layer offsets apply after topology repair. Both chunk and legacy paths reuse that mesh; static
 chunk snapshots invalidate their full owned footprints across sections. Leaves remain on
 the BER in every pose, preserving animation ownership while chunk uploads can be delayed.

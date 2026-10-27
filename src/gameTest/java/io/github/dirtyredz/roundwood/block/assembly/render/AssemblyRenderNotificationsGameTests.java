@@ -21,6 +21,28 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 @PrefixGameTestTemplate(false)
 public final class AssemblyRenderNotificationsGameTests {
     @GameTest(template = "empty")
+    public static void settledOpenAndClosedPosesNeverRequestRebuilds(GameTestHelper helper) {
+        io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor(helper);
+        var level=helper.getLevel();
+        for(boolean open:new boolean[]{false,true}) {
+            var block=ModBlocks.doubleArchedDoor();
+            var door=new DoorLayout.Assembly(helper.absolutePos(new BlockPos(3,1,3)),Direction.NORTH,DoorHingeSide.LEFT,block.design(),DoorDepth.BACK);
+            check(DoorPlacement.placeAt(level,block,door,open),"settled fixture");
+            var entity=(RoundDoorBlockEntity)level.getBlockEntity(door.anchor());
+            AssemblyRenderUpdates.refreshMembers(entity);
+            var snapshot=entity.staticRenderPublication().current();
+            int[] notifications={0};var previous=AssemblyRenderUpdates.notificationProbe;
+            AssemblyRenderUpdates.notificationProbe=(source,pos)->{if(source==entity)notifications[0]++;};
+            try {
+                for(int tick=0;tick<1000;tick++)AssemblyRenderUpdates.refreshMembers(entity);
+                check(notifications[0]==0,"settled open="+open+" sent rebuild notifications: "+notifications[0]);
+                check(snapshot==entity.staticRenderPublication().current(),"settled pose republished");
+            } finally {AssemblyRenderUpdates.notificationProbe=previous;}
+            level.removeBlock(door.anchor(),false);
+        }
+        helper.succeed();
+    }
+    @GameTest(template = "empty")
     public static void editFitClearAndBreakNotifyEveryCellAcrossSectionBorders(GameTestHelper helper) {
         var level = helper.getLevel();
         var origin = helper.absolutePos(BlockPos.ZERO);

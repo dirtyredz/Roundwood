@@ -12,8 +12,14 @@ public final class DoorHardwareGeometry {
     private DoorHardwareGeometry() {}
 
     public record Part(DoorHardwareSlot slot, Box box) {}
+    private record Pose(DoorDesign design, net.minecraft.world.level.block.state.properties.DoorHingeSide hinge, boolean open) {}
+    private static final java.util.Map<Pose,List<Part>> PLACED = new java.util.concurrent.ConcurrentHashMap<>();
 
     public static List<Part> placed(DoorDesign design, net.minecraft.world.level.block.state.properties.DoorHingeSide hinge, boolean open) {
+        return PLACED.computeIfAbsent(new Pose(design,hinge,open), key -> buildPlaced(design,hinge,open));
+    }
+
+    private static List<Part> buildPlaced(DoorDesign design, net.minecraft.world.level.block.state.properties.DoorHingeSide hinge, boolean open) {
         var out=new ArrayList<Part>();
         for(var side:design.doubleLeaf()?net.minecraft.world.level.block.state.properties.DoorHingeSide.values()
                 :new net.minecraft.world.level.block.state.properties.DoorHingeSide[]{hinge})

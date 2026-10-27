@@ -24,6 +24,22 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.*;
 @PrefixGameTestTemplate(false)
 public final class DoorHardwareGameTests {
     @GameTest(template=TEMPLATE)
+    public static void donorTargetReusesCompleteShapeAcrossFrames(GameTestHelper helper) {
+        floor(helper);var level=helper.getLevel();
+        var door=placeOakDoor(helper,new BlockPos(3,1,3),Direction.NORTH,DoorHingeSide.LEFT,"cached_target");
+        var player=player(helper,"cached_donor",GameType.SURVIVAL,Direction.NORTH);
+        hold(player,new ItemStack(Items.IRON_BLOCK),ItemStack.EMPTY);
+        var context=net.minecraft.world.phys.shapes.CollisionContext.of(player);
+        var state=level.getBlockState(door.anchor());
+        var first=DoorSelectionShapes.target(state,level,door.anchor(),context);
+        for(int frame=0;frame<1000;frame++)check(first==DoorSelectionShapes.target(state,level,door.anchor(),context),"donor rebuilt target shape");
+        anchorEntity(helper,door).setTrims(io.github.dirtyredz.roundwood.block.attachment.FaceTrims.both(AppearanceFixtures.SPRUCE));
+        var changed=DoorSelectionShapes.target(state,level,door.anchor(),context);
+        check(first!=changed,"trim edit retained stale target");
+        for(int frame=0;frame<1000;frame++)check(changed==DoorSelectionShapes.target(state,level,door.anchor(),context),"edited target rebuilt");
+        helper.succeed();
+    }
+    @GameTest(template=TEMPLATE)
     public static void unknownHardwarePayloadSurvivesReload(GameTestHelper helper) {
         floor(helper);
         var door=placeOakDoor(helper,new BlockPos(3,1,3),Direction.NORTH,DoorHingeSide.LEFT,"opaque_hardware");

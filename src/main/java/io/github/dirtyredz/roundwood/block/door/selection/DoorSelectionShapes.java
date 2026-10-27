@@ -61,14 +61,12 @@ public final class DoorSelectionShapes {
     static VoxelShape target(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context, boolean emptyCorners) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
         int rings = holdsDoorTrim(context) ? 3 : installed(level, assembly);
-        var base = Shapes.or(shape(state, emptyCorners && holdsBlockItem(context) || filled(level, assembly), rings, true, coverage(level, assembly)), frame(state, level, pos, true));
+        var base = DoorTargetShapes.union(shape(state, emptyCorners && holdsBlockItem(context) || filled(level, assembly), rings, true, coverage(level, assembly)), frame(state, level, pos, true));
         if (player(context).map(io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareDonors::held).orElse(false)) {
-            var hardware = io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareGeometry.placed(assembly.design(),assembly.hinge(),state.getValue(DoorBlock.OPEN));
-            var boxes = hardware.stream().map(p -> p.box().translate(0,0,assembly.depth().offset())).toList();
             var part = DoorLayout.partOf(state);
-            var shape = VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes,part.columnIndex(),part.row()),VoxelShapeFactory.quarterTurns(assembly.facing())));
+            var shape = DoorTargetShapes.hardware(assembly,part,state.getValue(DoorBlock.OPEN));
             // Hidden hardware must not steal the existing in-cell casing/frame target.
-            return Shapes.or(base,Shapes.join(shape,visibleStatic(state,level,pos),net.minecraft.world.phys.shapes.BooleanOp.ONLY_FIRST));
+            return DoorTargetShapes.union(base,DoorTargetShapes.exposed(shape,visibleStatic(state,level,pos)));
         }
         return base;
     }
@@ -76,7 +74,7 @@ public final class DoorSelectionShapes {
     /** What is there to highlight: the leaf at rest, plus the filled corners and the installed rings. */
     public static VoxelShape visible(BlockState state, BlockGetter level, BlockPos pos) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
-        return Shapes.or(shape(state, filled(level, assembly), installed(level, assembly), false, coverage(level, assembly)), frame(state, level, pos, false));
+        return DoorTargetShapes.union(shape(state, filled(level, assembly), installed(level, assembly), false, coverage(level, assembly)), frame(state, level, pos, false));
     }
 
     /**
@@ -97,7 +95,7 @@ public final class DoorSelectionShapes {
         int row = part.row();
         var coverage = coverage(level, assembly);
         var key = java.util.List.<Object>of(design, turns, part, corners, rings, assembly.depth(), coverage);
-        return Shapes.or(frame(state, level, pos, false), STATIC.computeIfAbsent(key, k -> {
+        return DoorTargetShapes.union(frame(state, level, pos, false), STATIC.computeIfAbsent(key, k -> {
             List<Box> boxes = new ArrayList<>(corners ? CamouflageGeometry.corners(design, coverage) : List.of());
             addRings(boxes, design, rings, false, assembly.depth().offset());
             return VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes.stream().map(b -> b.translate(0, 0, assembly.depth().offset())).toList(), column, row), turns));
@@ -107,8 +105,8 @@ public final class DoorSelectionShapes {
     private static VoxelShape frame(BlockState state, BlockGetter level, BlockPos pos, boolean target) {
         var door = DoorLayout.of(pos, state);
         return anchor(level, door).flatMap(RoundDoorBlockEntity::arch).map(frame ->
-                io.github.dirtyredz.roundwood.block.door.frame.DoorArchShapes.of(door, frame, target)
-                        .move(door.anchor().getX()-pos.getX(), door.anchor().getY()-pos.getY(), door.anchor().getZ()-pos.getZ())).orElse(Shapes.empty());
+                DoorTargetShapes.move(io.github.dirtyredz.roundwood.block.door.frame.DoorArchShapes.of(door, frame, target),
+                        door.anchor().getX()-pos.getX(), door.anchor().getY()-pos.getY(), door.anchor().getZ()-pos.getZ())).orElse(Shapes.empty());
     }
 
     private static VoxelShape shape(BlockState state, boolean corners, int rings, boolean target, CamouflageCoverage coverage) {

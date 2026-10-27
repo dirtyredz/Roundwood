@@ -23,14 +23,7 @@ public final class AssemblyRenderLifecycle {
     @SubscribeEvent public static void tick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         for (var entity : ANCHORS) {
-            var snapshot = entity.staticRenderPublication().current();
-            var level = entity.getLevel();
-            if (level == null) continue;
-            if (snapshot == null) { AssemblyRenderUpdates.refresh(entity, false); continue; }
-            for (var part : entity.staticRenderPublication().footprint()) {
-                var current = level.isLoaded(part) ? level.getBlockState(part) : null;
-                if (snapshot.members().get(part) != current) { AssemblyRenderUpdates.refresh(entity, false); break; }
-            }
+            AssemblyRenderUpdates.refreshMembers(entity);
         }
     }
     @SubscribeEvent public static void unload(LevelEvent.Unload event) {

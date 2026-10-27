@@ -42,18 +42,19 @@ public final class DoorRaycast {
             @Override public VoxelShape getBlockShape(BlockState state, BlockGetter world, BlockPos pos) {
                 var shape = state.getBlock() instanceof AssemblyDoorBlock
                         ? DoorSelectionShapes.target(state,world,pos,CollisionContext.of(player),emptyCorners) : super.getBlockShape(state, world, pos);
-                return state.getBlock() instanceof AssemblyDoorBlock ? Shapes.join(shape, Shapes.block(), BooleanOp.AND) : shape;
+                return state.getBlock() instanceof AssemblyDoorBlock ? DoorTargetShapes.cell(shape) : shape;
             }
         });
         double distance = nearest.getType() == HitResult.Type.MISS ? eye.distanceToSqr(end)
                 : eye.distanceToSqr(nearest.getLocation());
         var visited = new HashSet<BlockPos>();
+        boolean hardware = io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareDonors.held(player);
         var min = BlockPos.containing(Math.min(eye.x, end.x) - PROJECTION, Math.min(eye.y, end.y), Math.min(eye.z, end.z) - PROJECTION);
         var max = BlockPos.containing(Math.max(eye.x, end.x) + PROJECTION, Math.max(eye.y, end.y), Math.max(eye.z, end.z) + PROJECTION);
         for (var pos : BlockPos.betweenClosed(min, max)) {
             if (!level.isLoaded(pos)) continue;
             var state = level.getBlockState(pos);
-            if (!(state.getBlock() instanceof AssemblyDoorBlock block) || !state.getValue(DoorBlock.OPEN) && !io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareDonors.held(player)) continue;
+            if (!(state.getBlock() instanceof AssemblyDoorBlock block) || !state.getValue(DoorBlock.OPEN) && !hardware) continue;
             var door = DoorLayout.of(pos, state);
             if (!visited.add(door.anchor()) || !door.loaded(level) || !door.complete(level, block)) continue;
             // betweenClosed reuses a mutable cursor; BlockHitResult retains its supplied position.
