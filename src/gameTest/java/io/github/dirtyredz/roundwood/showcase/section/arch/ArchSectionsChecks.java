@@ -76,7 +76,7 @@ public final class ArchSectionsChecks {
                 var block = blocks.get(index); var pos = frame.pos(r, 0, f); var state = level.getBlockState(pos);
                 check(state.is(block), "missing fitted showcase door");
                 var door = io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.of(pos, state);
-                check(door.depth() == io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.BACK && door.complete(level, block), "fitted showcase pose/completeness");
+                check(door.depth() == ArchCompositionsSection.leafDepth(pose) && door.complete(level, block), "fitted showcase pose/completeness");
                 var entity = (io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity) level.getBlockEntity(pos);
                 var attachment = entity.arch().orElseThrow();
                 check(attachment.product() == io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topFor(block.design())

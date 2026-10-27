@@ -25,6 +25,73 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.*;
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class DoorArchFittingGameTests {
+    @GameTest(template = TEMPLATE, timeoutTicks = 200)
+    public static void thinGroundFitsRefuseOnlyTheEqualClosedPlaneInBothOrders(GameTestHelper helper) {
+        floor(helper);
+        var level = helper.getLevel();
+        var thickness = io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.THIN;
+        for (var block : ModBlocks.doors()) for (var leafDepth : io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.values())
+            for (var slabDepth : io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.values())
+                for (boolean intoArch : new boolean[]{true, false}) {
+            var anchor = helper.absolutePos(new BlockPos(3, 1, 3));
+            var door = new io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.Assembly(anchor, Direction.NORTH,
+                    net.minecraft.world.level.block.state.properties.DoorHingeSide.LEFT, block.design(), leafDepth);
+            var arch = new ArchPieceLayout.Assembly(anchor.above(DoorArchFitPlan.topOffset(block.design())), Direction.NORTH,
+                    DoorArchFitPlan.topFor(block.design()), Side.LEFT, thickness, slabDepth);
+            var archBlock = ModBlocks.archPiece(arch.design(), thickness);
+            if (intoArch) check(ArchPiecePlacement.placeAt(level, archBlock, arch, Appearance.DEFAULT), "thin fixture");
+            else check(io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement.placeAt(level, block, door, false), "door fixture");
+            var player = player(helper, "thin_ground", GameType.SURVIVAL, Direction.NORTH);
+            var stack = new ItemStack(intoArch ? block.asItem() : archBlock.asItem(), 2);
+            int band = intoArch ? leafDepth.ordinal() : slabDepth.ordinal();
+            var hit = new BlockHitResult(point(door, .5, 0, .125 + band * .375), Direction.UP, anchor.below(), false);
+            hold(player, stack, ItemStack.EMPTY);
+            var context = new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+            check(DoorArchFitting.claims(context), "thin ground discovery");
+            var preview = DoorArchFitting.propose(context);
+            boolean allowed = !leafDepth.name().equals(slabDepth.name());
+            check(preview.isPresent() == allowed, "thin preview must refuse exactly the equal plane");
+            AppearanceFixtures.use(helper, player, stack, ItemStack.EMPTY, hit, false);
+            check(stack.getCount() == (allowed ? 1 : 2), "thin payment/refusal");
+            if (allowed) {
+                check(preview.get().fit().door().depth() == leafDepth, "thin fit moved leaf");
+                for (var entry : preview.get().states().entrySet()) check(level.getBlockState(entry.getKey()).equals(entry.getValue()), "thin preview != result");
+            } else check(intoArch ? arch.complete(level, archBlock) : door.complete(level, block), "refused thin fit mutated source");
+            level.removeBlock(intoArch && !allowed ? arch.anchor() : anchor, false); clearDrops(helper);
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE, timeoutTicks = 200)
+    public static void groundClickDiscoversTopAndPreservesPreviewDepth(GameTestHelper helper) {
+        floor(helper);
+        var level = helper.getLevel();
+        for (var block : ModBlocks.doors()) for (var facing : Direction.Plane.HORIZONTAL)
+            for (var depth : io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.values())
+                for (boolean intoArch : new boolean[]{true, false}) {
+            var anchor = helper.absolutePos(new BlockPos(4, 1, 4));
+            var door = new io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.Assembly(anchor, facing,
+                    net.minecraft.world.level.block.state.properties.DoorHingeSide.LEFT, block.design(), depth);
+            var top = DoorArchFitPlan.fromDoor(door, io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL,
+                    io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.FRONT, false).orElseThrow().arch();
+            if (intoArch) check(ArchPiecePlacement.placeAt(level, ModBlocks.archPiece(top.design()), top, Appearance.DEFAULT), "top fixture");
+            else check(io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement.placeAt(level, block, door, false), "door fixture");
+            var player = player(helper, "ground_fit", GameType.SURVIVAL, facing);
+            var stack = new ItemStack(intoArch ? block.asItem() : ModBlocks.archPiece(top.design()).asItem(), 2);
+            var hit = new BlockHitResult(point(door, .5, 0, .125 + depth.ordinal() * .375), Direction.UP, anchor.below(), false);
+            hold(player, stack, ItemStack.EMPTY);
+            var context = new net.minecraft.world.item.context.UseOnContext(player, net.minecraft.world.InteractionHand.MAIN_HAND, hit);
+            check(DoorArchFitting.claims(context), block.design() + ": ground fit not claimed");
+            var preview = DoorArchFitting.propose(context).orElseThrow();
+            check(preview.fit().door().depth() == depth, "ground aim changed");
+            AppearanceFixtures.use(helper, player, stack, ItemStack.EMPTY, hit, false);
+            for (var entry : preview.states().entrySet()) check(level.getBlockState(entry.getKey()).equals(entry.getValue()), "ground preview != result");
+            check(stack.getCount() == 1, "ground payment");
+            level.removeBlock(anchor, false); clearDrops(helper);
+        }
+        helper.succeed();
+    }
+
     @GameTest(template = TEMPLATE)
     public static void doorFitsExistingTopDespiteOccupiedNoncollidingCell(GameTestHelper helper) {
         floor(helper);
@@ -53,17 +120,17 @@ public final class DoorArchFittingGameTests {
         floor(helper); var level = helper.getLevel();
         for (var doorBlock : ModBlocks.doors()) for (var thickness : io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.values())
             for (var depth : io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.values()) {
-                if (!DoorArchClearance.accepts(doorBlock.design(), thickness, depth)) continue;
+                if (!DoorArchClearance.accepts(thickness, depth, io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.BACK)) continue;
                 for (var facing : Direction.Plane.HORIZONTAL) for (boolean intoArch : new boolean[]{true,false}) {
                     var door = new io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.Assembly(helper.absolutePos(new BlockPos(4,1,4)), facing,
-                            net.minecraft.world.level.block.state.properties.DoorHingeSide.LEFT, doorBlock.design());
+                            net.minecraft.world.level.block.state.properties.DoorHingeSide.LEFT, doorBlock.design(), io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.BACK);
                     var fit = DoorArchFitPlan.fromDoor(door, thickness, depth, false).orElseThrow(); var arch = fit.arch();
                     var archBlock = ModBlocks.archPiece(arch.design(), thickness);
                     if (intoArch) check(ArchPiecePlacement.placeAt(level, archBlock, arch, AppearanceFixtures.BRICKS), "arch fixture");
                     else check(io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement.placeAt(level, doorBlock, door, false, AppearanceFixtures.WARPED), "door fixture");
                     var player = player(helper, "fit_orders", GameType.SURVIVAL, facing);
                     var stack = styled(intoArch ? doorBlock.asItem() : archBlock.asItem(), intoArch ? AppearanceFixtures.WARPED : AppearanceFixtures.BRICKS); stack.setCount(2);
-                    var hit = intoArch ? new BlockHitResult(Vec3.atCenterOf(arch.anchor()).relative(facing.getOpposite(), .5).add(0,.45,0), facing.getOpposite(),arch.anchor(),false)
+                    var hit = intoArch ? new BlockHitResult(Vec3.atCenterOf(arch.anchor()).relative(facing.getOpposite(), .5).add(0,-.375,0), facing.getOpposite(),arch.anchor(),false)
                             : frontHit(door, .5, depth == io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.MIDDLE ? .5 : .875);
                     boolean offhand = facing == Direction.SOUTH;
                     var hand = offhand ? net.minecraft.world.InteractionHand.OFF_HAND : net.minecraft.world.InteractionHand.MAIN_HAND;
@@ -109,7 +176,7 @@ public final class DoorArchFittingGameTests {
     }
 
     @GameTest(template = TEMPLATE)
-    public static void refusedPermissionsUnknownPayloadAndBackDepthLeaveEverythingUntouched(GameTestHelper helper) {
+    public static void refusedPermissionsUnknownPayloadAndCoplanarDepthLeaveEverythingUntouched(GameTestHelper helper) {
         floor(helper); var level=helper.getLevel();
         var door=new io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.Assembly(helper.absolutePos(new BlockPos(3,1,3)),Direction.NORTH,
                 net.minecraft.world.level.block.state.properties.DoorHingeSide.LEFT,io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND);
@@ -124,8 +191,8 @@ public final class DoorArchFittingGameTests {
         }
         var player=player(helper,"fit_refuse",GameType.SURVIVAL,Direction.NORTH);
         var thin=new ItemStack(ModBlocks.archPiece(ArchPieceDesign.TOP_1X2,io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.THIN).asItem(),2);
-        AppearanceFixtures.use(helper,player,thin,ItemStack.EMPTY,frontHit(door,1,.2),false);
-        check(thin.getCount()==2 && entity.arch().isEmpty(),"BACK fit accepted");
+        AppearanceFixtures.use(helper,player,thin,ItemStack.EMPTY,frontHit(door,1,.875),false);
+        check(thin.getCount()==2 && entity.arch().isEmpty(),"coplanar fit accepted");
         var unknown=entity.saveWithFullMetadata(); var payload=new net.minecraft.nbt.CompoundTag();payload.putInt("Version",99);payload.putString("Unknown","kept");unknown.put(DoorArchStore.TAG,payload);entity.load(unknown);
         var full=new ItemStack(ModBlocks.archPiece(ArchPieceDesign.TOP_1X2).asItem(),2);
         AppearanceFixtures.use(helper,player,full,ItemStack.EMPTY,frontHit(door,1,.8),false);

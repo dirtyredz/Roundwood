@@ -82,8 +82,9 @@ class FramedDoorFacesTest {
 
     @Test void fittedFrameSurfacesDoNotFightLeafHardwareOrDoorCasings() {
         for(var design:DoorDesign.values()) for(var thickness:io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.values())
-            for(var depth:io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.values()) {
-                if(!io.github.dirtyredz.roundwood.block.door.frame.DoorArchClearance.accepts(design,thickness,depth)) continue;
+            for(var depth:io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.values())
+                for(var leafDepth:io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.values()) {
+                if(!io.github.dirtyredz.roundwood.block.door.frame.DoorArchClearance.accepts(thickness,depth,leafDepth)) continue;
                 var top=io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topFor(design);
                 var frames=new ArrayList<Surface>();
                 for(var layer:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.values())
@@ -91,17 +92,15 @@ class FramedDoorFacesTest {
                         for(var surface:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.surfaces(design,thickness,depth,layer,col,row))
                             frames.add(new Surface(surface.backing().translate(col*16,row*16+16*io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topOffset(design),0),surface.face(),layer.name()));
                 var doors=new ArrayList<Surface>();
-                // Full frames match the standalone arch, so the swinging leaf may pass through them (owner-accepted); only the closed leaf is guarded, and back-to-back opposed faces at the jamb are hidden contact, not z-fighting.
-                for(var hinge:DoorHingeSide.values()) for(boolean open:thickness==io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL?new boolean[]{false}:new boolean[]{false,true})
+                // Swing clipping is accepted. Opposed jamb faces are hidden contact; closed visible faces must not overlap.
+                for(var hinge:DoorHingeSide.values())
                     for(var piece:DoorGeometry.leaf(design,hinge)) for(var side:Direction.values()) {
-                        var box=open?DoorGeometry.swing(design,piece.box(),hinge):piece.box();
-                        var normal=!open||side.getAxis()==Direction.Axis.Y?side:hinge==DoorHingeSide.LEFT?side.getCounterClockWise():side.getClockWise();
-                        doors.add(new Surface(box.translate(0,0,-13),normal,"leaf"));
+                        doors.add(new Surface(piece.box().translate(0,0,leafDepth.offset()),side,"leaf"));
                     }
                 for(var part:DoorLayout.Part.of(design)) for(var face:AttachmentFace.values())
                     for(var surface:DoorTrimGeometry.surfaces(design,face,part.columnIndex(),part.row()))
-                        doors.add(new Surface(surface.backing().translate(part.columnIndex()*16,part.row()*16,-13),surface.face(),"door casing"));
-                for(var frame:frames) for(var door:doors) assertFalse(thickness==io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL&&frame.face()==door.face().getOpposite()?false:overlap(frame,door),()->design+" "+thickness+" "+depth+" "+frame+" / "+door);
+                        doors.add(new Surface(surface.backing().translate(part.columnIndex()*16,part.row()*16,leafDepth.offset()),surface.face(),"door casing"));
+                for(var frame:frames) for(var door:doors) assertFalse(frame.face()!=door.face().getOpposite() && overlap(frame,door),()->design+" "+thickness+" "+depth+" "+frame+" / "+door);
             }
     }
 

@@ -142,10 +142,44 @@ public final class DoorFreeEdgeGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = TEMPLATE, timeoutTicks = 200)
+    public static void fittedLeafMiddleAndFreeEdgeToggleEverySize(GameTestHelper helper) {
+        floor(helper);
+        var level = helper.getLevel();
+        for (var block : ModBlocks.doors()) for (var facing : Direction.Plane.HORIZONTAL)
+            for (var hinge : DoorHingeSide.values())
+                for (var depth : io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.values()) {
+            var anchor = helper.absolutePos(ANCHOR);
+            var assembly = new DoorLayout.Assembly(anchor, facing, hinge, block.design(), depth);
+            check(io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement.placeAt(level, block, assembly, false), "leaf fixture");
+            check(io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.fitAt(level, anchor,
+                    io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL,
+                    io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.FRONT,
+                    io.github.dirtyredz.roundwood.appearance.Appearance.DEFAULT), "fit fixture");
+            var player = player(helper, "fitted_leaf", GameType.SURVIVAL, facing);
+            hold(player, ItemStack.EMPTY, ItemStack.EMPTY);
+            double width = block.design().width() / 16.0;
+            double leaf = block.design().doubleLeaf() ? width / 2 : width;
+            for (boolean open : new boolean[]{true, false}) for (double fraction : new double[]{.5, .85}) {
+                block.setOpen(null, level, level.getBlockState(anchor), anchor, open);
+                Vec3 eye = open ? point(assembly, hinge == DoorHingeSide.LEFT ? width + .5 : -.5, .9, leaf * fraction - depth.offset() / 16)
+                        : point(assembly, leaf * fraction, .9, -1);
+                Vec3 target = open ? point(assembly, hinge == DoorHingeSide.LEFT ? .09375 : width - .09375, .9, leaf * fraction - depth.offset() / 16)
+                        : point(assembly, leaf * fraction, .9, 1.25);
+                var hit = aim(helper, player, eye, target);
+                var result = DoorHitResolver.projected(level, hit) ? ProjectedDoorUse.use(player, hit) : use(helper, player, hit);
+                check(result.consumesAction() && level.getBlockState(anchor).getValue(DoorBlock.OPEN) != open,
+                        block.design() + " " + facing + " " + hinge + " " + depth + " open=" + open + " fraction=" + fraction + ": visible leaf did not toggle");
+            }
+            level.removeBlock(anchor, false); clearDrops(helper);
+        }
+        helper.succeed();
+    }
+
     private static BlockHitResult aim(GameTestHelper helper, ServerPlayer player, Vec3 eye, Vec3 target) {
         player.setPos(eye.x, eye.y - player.getEyeHeight(), eye.z);
         Vec3 end = target.add(target.subtract(eye).scale(0.1));
-        BlockHitResult raw = helper.getLevel().clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+        BlockHitResult raw = DoorRaycast.clip(helper.getLevel(), player, eye, end);
         check(raw.getType() == HitResult.Type.BLOCK, "ray missed leaf");
         return DoorHitResolver.resolve(helper.getLevel(), raw).orElseThrow();
     }

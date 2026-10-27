@@ -43,7 +43,7 @@ public final class ProjectedDoorUse {
                 && obstruction.getLocation().distanceToSqr(eye) + 1e-6 < requested.getLocation().distanceToSqr(eye)) {
             return InteractionResult.FAIL;
         }
-        BlockHitResult ray = level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+        BlockHitResult ray = io.github.dirtyredz.roundwood.block.door.selection.DoorRaycast.clip(level, player, eye, end);
         // The face of a projected point is an artefact of which part box the ray crossed (it differs
         // between the client's full-reach ray and this short one), so only the point is compared and
         // the server's own face is used for dispatch.

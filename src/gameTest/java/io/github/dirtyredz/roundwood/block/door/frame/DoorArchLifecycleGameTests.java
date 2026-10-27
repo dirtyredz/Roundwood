@@ -21,7 +21,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.*;
 @PrefixGameTestTemplate(false)
 public final class DoorArchLifecycleGameTests {
     private static DoorLayout.Assembly fitted(GameTestHelper helper,AssemblyDoorBlock block,ArchPieceThickness thickness,ArchPieceDepth depth) {
-        var door=new DoorLayout.Assembly(helper.absolutePos(new BlockPos(3,1,3)),Direction.NORTH,DoorHingeSide.LEFT,block.design());
+        var door=new DoorLayout.Assembly(helper.absolutePos(new BlockPos(3,1,3)),Direction.NORTH,DoorHingeSide.LEFT,block.design(),DoorDepth.BACK);
         check(DoorPlacement.placeAt(helper.getLevel(),block,door,false,AppearanceFixtures.WARPED),"door fixture");
         var player=player(helper,"lifecycle_fit",GameType.SURVIVAL,Direction.NORTH);
         var arch=ModBlocks.archPiece(DoorArchFitPlan.topFor(block.design()),thickness);
@@ -39,7 +39,7 @@ public final class DoorArchLifecycleGameTests {
     public static void everyOwnedCellDropsComponentsOnceWithIndependentStyles(GameTestHelper helper) {
         floor(helper);
         for(var block:ModBlocks.doors()) for(var thickness:ArchPieceThickness.values()) for(var depth:ArchPieceDepth.values()) {
-            if(!DoorArchClearance.accepts(block.design(),thickness,depth)) continue;
+            if(!DoorArchClearance.accepts(thickness,depth,io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.BACK)) continue;
             for(var part:DoorLayout.Part.of(block.design())) {
                 var door=fitted(helper,block,thickness,depth);
                 var entity=anchorEntity(helper,door);

@@ -33,22 +33,38 @@ public final class DoorArchFitting {
     public record Proposal(DoorArchFitPlan fit, AssemblyDoorBlock block, DoorArchAttachment attachment,
                            Map<BlockPos, BlockState> states, CompoundTag anchorData, boolean intoArch) {}
     private DoorArchFitting() {}
-    public static boolean claims(UseOnContext context) {
-        if (!context.getLevel().isLoaded(context.getClickedPos())) return false;
-        var state = context.getLevel().getBlockState(context.getClickedPos());
-        return context.getItemInHand().getItem() instanceof RoundDoorItem && state.getBlock() instanceof ArchPieceBlock
-                || context.getItemInHand().getItem() instanceof ArchPieceItem && state.getBlock() instanceof AssemblyDoorBlock;
+    /** Discover from the normal landing cell as well as an explicit component click. */
+    private static Optional<BlockPos> sourcePos(UseOnContext context) {
+        var level = context.getLevel();
+        var clicked = context.getClickedPos();
+        if (!level.isLoaded(clicked)) return Optional.empty();
+        var source = level.getBlockState(clicked).getBlock();
+        var item = context.getItemInHand().getItem();
+        if (item instanceof RoundDoorItem && source instanceof ArchPieceBlock
+                || item instanceof ArchPieceItem && source instanceof AssemblyDoorBlock) return Optional.of(clicked);
+        var landing = new BlockPlaceContext(context).getClickedPos();
+        if (item instanceof RoundDoorItem door) {
+            var top = landing.above(DoorArchFitPlan.topOffset(door.door().design()));
+            if (level.isLoaded(top) && level.getBlockState(top).getBlock() instanceof ArchPieceBlock) return Optional.of(top);
+        } else if (item instanceof ArchPieceItem && level.isLoaded(landing)
+                && level.getBlockState(landing).getBlock() instanceof AssemblyDoorBlock) {
+            return Optional.of(landing);
+        }
+        return Optional.empty();
     }
+    public static boolean claims(UseOnContext context) { return sourcePos(context).isPresent(); }
     public static Optional<Proposal> propose(UseOnContext context) {
         Level level = context.getLevel(); var player = context.getPlayer();
         if (!level.isLoaded(context.getClickedPos()) || player != null && (!player.mayBuild() || player.isSpectator())
                 || !readable(context.getItemInHand())) return Optional.empty();
-        var source = level.getBlockState(context.getClickedPos());
+        var sourcePos = sourcePos(context);
+        if (sourcePos.isEmpty()) return Optional.empty();
+        var source = level.getBlockState(sourcePos.get());
         DoorArchFitPlan fit; AssemblyDoorBlock block; DoorArchAttachment attachment; CompoundTag data;
         boolean intoArch; boolean open; boolean powered;
         if (context.getItemInHand().getItem() instanceof RoundDoorItem item && source.getBlock() instanceof ArchPieceBlock archBlock) {
             if (archBlock.design().shoulder() || !source.getValue(ArchPieceBlock.CELL).in(archBlock.design())) return Optional.empty();
-            var arch = ArchPieceLayout.of(context.getClickedPos(), source);
+            var arch = ArchPieceLayout.of(sourcePos.get(), source);
             if (!arch.loaded(level) || !arch.complete(level, archBlock) || context.getHorizontalDirection() != arch.facing()
                     || !(level.getBlockEntity(arch.anchor()) instanceof ArchPieceBlockEntity entity) || !entity.trimsEditable()) return Optional.empty();
             block = item.door();
@@ -56,18 +72,25 @@ public final class DoorArchFitting {
             for (var edge : List.of(anchor.relative(arch.facing().getCounterClockWise()), anchor.relative(arch.facing().getClockWise(), block.design().columns())))
                 if (!level.isLoaded(edge) || !level.isLoaded(edge.above())) return Optional.empty();
             var hinge = DoorHingePlacement.choose(block, new BlockPlaceContext(context), anchor, arch.facing(), block.design().columns());
-            var candidate = DoorArchFitPlan.fromArch(block.design(), arch, hinge);
+            var landing = new BlockPlaceContext(context).getClickedPos();
+            if (!sourcePos.get().equals(context.getClickedPos()) && !anchor.equals(landing)) return Optional.empty();
+            var targetCell = sourcePos.get().equals(context.getClickedPos()) ? context.getClickedPos() : landing;
+            var local = context.getClickLocation().subtract(net.minecraft.world.phys.Vec3.atLowerCornerOf(targetCell));
+            var depth = DoorDepth.target(arch.facing(), context.getClickedFace(), local.x, local.y, local.z);
+            var candidate = DoorArchFitPlan.fromArch(block.design(), arch, hinge, depth);
             if (candidate.isEmpty() || !knownArchEntity(entity)) return Optional.empty();
             fit = candidate.get();
             attachment = new DoorArchAttachment(arch.design(), arch.thickness(), arch.depth(), entity.appearance(), entity.trims());
             data = new CompoundTag(); AppearanceNbt.write(data, AppearanceStacks.read(context.getItemInHand()));
             powered = fit.door().positions().stream().filter(level::isLoaded).anyMatch(level::hasNeighborSignal); open = powered; intoArch = true;
         } else if (context.getItemInHand().getItem() instanceof ArchPieceItem item && source.getBlock() instanceof AssemblyDoorBlock doorBlock) {
-            var door = DoorLayout.of(context.getClickedPos(), source); block = doorBlock;
+            var door = DoorLayout.of(sourcePos.get(), source); block = doorBlock;
             if (item.piece().design() != DoorArchFitPlan.topFor(block.design()) || !door.loaded(level) || !door.complete(level, block)
                     || !(level.getBlockEntity(door.anchor()) instanceof RoundDoorBlockEntity entity)
                     || !entity.archEditable() || entity.arch().isPresent() || !entity.trimsEditable()) return Optional.empty();
-            var local = context.getClickLocation().subtract(net.minecraft.world.phys.Vec3.atLowerCornerOf(context.getClickedPos()));
+            var targetCell = sourcePos.get().equals(context.getClickedPos()) ? context.getClickedPos()
+                    : new BlockPlaceContext(context).getClickedPos();
+            var local = context.getClickLocation().subtract(net.minecraft.world.phys.Vec3.atLowerCornerOf(targetCell));
             var depth = item.piece().thickness() == ArchPieceThickness.FULL ? ArchPieceDepth.FRONT
                     : ArchPieceDepth.target(door.facing(), context.getClickedFace(), local.x, local.y, local.z);
             var candidate = DoorArchFitPlan.fromDoor(door, item.piece().thickness(), depth, entity.camouflage().isPresent());
@@ -106,12 +129,11 @@ public final class DoorArchFitting {
     /** Showcase/commands use the same proposal and write transaction, silently and without an item charge. */
     public static boolean fitAt(Level level, BlockPos pos, ArchPieceThickness thickness, ArchPieceDepth depth,
                                 io.github.dirtyredz.roundwood.appearance.Appearance appearance) {
-        if (level.isClientSide || !level.isLoaded(pos) || !(level.getBlockState(pos).getBlock() instanceof AssemblyDoorBlock block)
-                || !DoorArchClearance.accepts(block.design(), thickness, depth)) return false;
+        if (level.isClientSide || !level.isLoaded(pos) || !(level.getBlockState(pos).getBlock() instanceof AssemblyDoorBlock block)) return false;
         var door = DoorLayout.of(pos, level.getBlockState(pos));
         var item = io.github.dirtyredz.roundwood.registry.ModBlocks.archPiece(DoorArchFitPlan.topFor(block.design()), thickness).asItem();
         var stack = AppearanceStacks.create(item, appearance);
-        var point = net.minecraft.world.phys.Vec3.atLowerCornerOf(door.anchor()).add(.5, depth == ArchPieceDepth.MIDDLE ? .5 : .875, .5)
+        var point = net.minecraft.world.phys.Vec3.atLowerCornerOf(door.anchor()).add(.5, depth == ArchPieceDepth.MIDDLE ? .5 : depth == ArchPieceDepth.BACK ? .125 : .875, .5)
                 .relative(door.facing().getOpposite(), .5);
         var hit = new net.minecraft.world.phys.BlockHitResult(point, door.facing().getOpposite(), door.anchor(), false);
         var context = new UseOnContext(level, null, net.minecraft.world.InteractionHand.MAIN_HAND, stack, hit) {};

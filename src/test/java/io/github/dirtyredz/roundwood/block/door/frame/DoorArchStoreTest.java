@@ -12,14 +12,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DoorArchStoreTest {
     @Test void knownDataRoundTripsAndExplicitEmptyUpdatesClearIt() {
-        var attachment = new DoorArchAttachment(ArchPieceDesign.TOP_1X2, ArchPieceThickness.THIN, ArchPieceDepth.MIDDLE, Appearance.DEFAULT, FaceTrims.both(Appearance.DEFAULT));
-        var store = new DoorArchStore(); assertTrue(store.set(attachment));
-        var saved = new CompoundTag(); store.save(saved);
-        var loaded = new DoorArchStore(); loaded.load(saved);
-        assertEquals(attachment, loaded.attachment().orElseThrow());
-        var clear = new CompoundTag(); new DoorArchStore().writeUpdate(clear);
-        loaded.load(clear); assertTrue(loaded.attachment().isEmpty()); assertTrue(loaded.editable());
-        loaded.load(saved); loaded.load(new CompoundTag()); assertTrue(loaded.attachment().isEmpty());
+        for (var depth : ArchPieceDepth.values()) {
+            var attachment = new DoorArchAttachment(ArchPieceDesign.TOP_1X2, ArchPieceThickness.THIN, depth, Appearance.DEFAULT, FaceTrims.both(Appearance.DEFAULT));
+            var store = new DoorArchStore(); assertTrue(store.set(attachment));
+            var saved = new CompoundTag(); store.save(saved);
+            var loaded = new DoorArchStore(); loaded.load(saved);
+            assertEquals(attachment, loaded.attachment().orElseThrow());
+            var clear = new CompoundTag(); new DoorArchStore().writeUpdate(clear);
+            loaded.load(clear); assertTrue(loaded.attachment().isEmpty()); assertTrue(loaded.editable());
+            loaded.load(saved); loaded.load(new CompoundTag()); assertTrue(loaded.attachment().isEmpty());
+        }
     }
     @Test void futureMalformedAndExtraFieldsRemainInCustody() {
         var attachment = new DoorArchAttachment(ArchPieceDesign.TOP_1X1, ArchPieceThickness.FULL, ArchPieceDepth.FRONT, Appearance.DEFAULT, FaceTrims.NONE);

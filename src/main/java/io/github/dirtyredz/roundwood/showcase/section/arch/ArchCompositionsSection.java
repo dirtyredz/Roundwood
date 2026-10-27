@@ -49,11 +49,15 @@ public final class ArchCompositionsSection implements ShowcaseSection {
             int r = ShowcaseSpacing.FIRST_R + index * ShowcaseSpacing.pitch(3), f = FITTED_F + pose * (ShowcaseSpacing.GAP + 2);
             var block = blocks.get(index);
             canvas.sign(r, f, "Fitted " + block.design().columns() + "x" + block.design().height()/16,
-                    thickness.name(), depth.name(), "Leaf: BACK");
+                    thickness.name(), depth.name(), "Leaf: " + leafDepth(pose).name());
             if (canvas.door(block, Appearance.DEFAULT.painted(net.minecraft.world.item.DyeColor.BLUE), r, f,
-                    pose == 1 ? net.minecraft.world.level.block.state.properties.DoorHingeSide.RIGHT : net.minecraft.world.level.block.state.properties.DoorHingeSide.LEFT, false))
+                    pose == 1 ? net.minecraft.world.level.block.state.properties.DoorHingeSide.RIGHT : net.minecraft.world.level.block.state.properties.DoorHingeSide.LEFT, false, leafDepth(pose)))
                 canvas.fittedArch(thickness, depth, FITTED_BODY, FITTED_CASINGS, r, f);
         }
+    }
+
+    public static io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth leafDepth(int pose) {
+        return io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.values()[pose == 0 ? 0 : pose == 1 ? 2 : 1];
     }
 
     private static void columns(ShowcaseCanvas canvas, int r, int opening, int height) {

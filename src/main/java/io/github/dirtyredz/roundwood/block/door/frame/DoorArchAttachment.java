@@ -15,7 +15,6 @@ public record DoorArchAttachment(ArchPieceDesign product, ArchPieceThickness thi
         Objects.requireNonNull(product); Objects.requireNonNull(thickness); Objects.requireNonNull(depth);
         Objects.requireNonNull(appearance); Objects.requireNonNull(casings);
         if (product.shoulder() || (thickness == ArchPieceThickness.FULL && depth != ArchPieceDepth.FRONT)
-                || (thickness == ArchPieceThickness.THIN && depth == ArchPieceDepth.BACK)
                 || !AppearanceFamily.TRIM.accepts(appearance)
                 || !casings.front().map(AppearanceFamily.TRIM::accepts).orElse(true)
                 || !casings.back().map(AppearanceFamily.TRIM::accepts).orElse(true))

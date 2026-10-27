@@ -100,7 +100,12 @@ public final class ShowcaseCanvas {
 
     /** As {@link #door(Appearance, int, int, DoorHingeSide, boolean)} for any door design (0.11.0: the arched door). */
     public boolean door(AssemblyDoorBlock block, Appearance appearance, int r, int f, DoorHingeSide hinge, boolean open) {
-        DoorLayout.Assembly assembly = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), hinge, block.design());
+        return door(block, appearance, r, f, hinge, open, io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.FRONT);
+    }
+
+    public boolean door(AssemblyDoorBlock block, Appearance appearance, int r, int f, DoorHingeSide hinge, boolean open,
+                        io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth depth) {
+        DoorLayout.Assembly assembly = new DoorLayout.Assembly(frame.pos(r, 0, f), frame.forward(), hinge, block.design(), depth);
         boolean placed = DoorPlacement.placeAt(level, block, assembly, open, appearance);
         if (!placed) {
             problem("door not placed at " + assembly.anchor().toShortString());

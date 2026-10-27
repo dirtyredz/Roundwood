@@ -186,7 +186,7 @@
 - **Projected door use cannot use vanilla's packet unchanged (0.13.4).** Its real free-edge point
   can exceed the one-block limit from the owning cell's centre. Keep the point intact and use
   `DoorUseChannel` / `ProjectedDoorUse`; moving it to the hinge changes region and placement intent.
-  The server checks the real rays and routes normal use. Mining and picking the projection remain
+  The server checks the real rays and routes normal use. Use `DoorRaycast` for acquisition and validation: a BACK leaf can be visible along a ray that never traverses an owned cell, so vanilla `Level.clip` alone misses it. Acquire before both highlights and input: Minecraft re-picks at tick start, overwriting the rendered target before key handling. Mining and picking the projection remain
   refused. Whole-door outline rays can return a point beyond the currently traversed cell, so the
   projected-use validator also checks a collision ray for intervening solid neighbours.
 - **Per-cell rendering has distinct seed and cull policies.** The compatibility frame culls;
@@ -374,6 +374,6 @@
   by 3/4 before the shared -16 shift. Renderer and item display transforms restore Y; board UVs
   use authored coordinates and a 64px square extent. Do not author elements up to y=48.
 
-Thin fitted-frame eligibility (full frames are not rebated and may be clipped by the swing) must include hardware and both hinges throughout the continuous swing. Endpoint-only or unbounded sampled-angle checks are insufficient. Unknown `DoorArch` payloads must round-trip unchanged; clients receive a locked marker rather than inventing an editable empty frame.
+Fitting must not move the door depth. Full tops accept every door depth; thin tops refuse only an equal closed plane. Both thicknesses may clip during the swing. Ground fitting must inspect the expected top above the normal landing cell, not only the clicked block. Unknown `DoorArch` payloads must round-trip unchanged; clients receive a locked marker rather than inventing an editable empty frame.
 
 An empty arch collision shape still occupies its block positions. Only explicit compatible fitted-top conversion may replace those positions. Both fitting orders take precedence over toggle/camouflage; unsupported fits are refused with a hint and a red preview. Vanilla/other-mod doors remain separate-cell placements, and shoulders cannot become fitted tops.

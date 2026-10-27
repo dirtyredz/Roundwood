@@ -24,14 +24,14 @@ public record DoorArchFitPlan(DoorLayout.Assembly door, ArchPieceLayout.Assembly
     public static Optional<DoorArchFitPlan> of(DoorLayout.Assembly door, ArchPieceLayout.Assembly arch, boolean camouflage) {
         if (camouflage || arch.design() != topFor(door.design()) || arch.facing() != door.facing()
                 || !arch.anchor().equals(door.anchor().above(topOffset(door.design())))
-                || !DoorArchClearance.accepts(door.design(), arch.thickness(), arch.depth())) return Optional.empty();
-        return Optional.of(new DoorArchFitPlan(new DoorLayout.Assembly(door.anchor(), door.facing(), door.hinge(), door.design(), DoorDepth.BACK), arch));
+                || !DoorArchClearance.accepts(arch.thickness(), arch.depth(), door.depth())) return Optional.empty();
+        return Optional.of(new DoorArchFitPlan(door, arch));
     }
     public static Optional<DoorArchFitPlan> fromDoor(DoorLayout.Assembly door, ArchPieceThickness thickness, ArchPieceDepth depth, boolean camouflage) {
         return of(door, new ArchPieceLayout.Assembly(door.anchor().above(topOffset(door.design())), door.facing(),
                 topFor(door.design()), Side.LEFT, thickness, depth), camouflage);
     }
-    public static Optional<DoorArchFitPlan> fromArch(DoorDesign design, ArchPieceLayout.Assembly arch, DoorHingeSide hinge) {
-        return of(new DoorLayout.Assembly(arch.anchor().below(topOffset(design)), arch.facing(), hinge, design, DoorDepth.BACK), arch, false);
+    public static Optional<DoorArchFitPlan> fromArch(DoorDesign design, ArchPieceLayout.Assembly arch, DoorHingeSide hinge, DoorDepth depth) {
+        return of(new DoorLayout.Assembly(arch.anchor().below(topOffset(design)), arch.facing(), hinge, design, depth), arch, false);
     }
 }

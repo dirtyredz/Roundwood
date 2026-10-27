@@ -4,50 +4,15 @@ import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness;
 import io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
-import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
-import io.github.dirtyredz.roundwood.geometry.Box;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import org.junit.jupiter.api.Test;
-import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DoorArchClearanceTest {
-    @Test void intervalExtremaIncludeInteriorStationaryPoints() {
-        var range = DoorArchClearance.range(3, 4, 0, Math.PI / 2);
-        assertEquals(3, range[0], 1e-8);
-        assertEquals(5, range[1], 1e-8);
-        var negative = DoorArchClearance.range(-3, -4, 0, Math.PI / 2);
-        assertEquals(-5, negative[0], 1e-8);
-        assertEquals(-3, negative[1], 1e-8);
-        for (double a : new double[]{-19, -1.5, 0, 1.5, 33}) for (double b : new double[]{-2, -.5, 0, 2}) {
-            double lo = .173, hi = .619;
-            var bounded = DoorArchClearance.range(a, b, lo, hi);
-            for (int i = 0; i <= 100; i++) {
-                double angle = lo + (hi - lo) * i / 100;
-                double value = a * Math.cos(angle) + b * Math.sin(angle);
-                assertTrue(value >= bounded[0] && value <= bounded[1]);
-            }
-        }
-    }
-
-    @Test void eligibleThinPlanesClearBothHingesAndAllHardware() {
-        for (var door : DoorDesign.values()) {
-            assertFalse(DoorArchClearance.accepts(door, ArchPieceThickness.THIN, ArchPieceDepth.BACK));
-            for (var thickness : new ArchPieceThickness[]{ArchPieceThickness.THIN}) for (var depth : ArchPieceDepth.values()) {
-                if (!DoorArchClearance.accepts(door, thickness, depth)) continue;
-                var frame = new ArrayList<Box>();
-                for (var layer : DoorArchGeometry.Layer.values())
-                    frame.addAll(DoorArchGeometry.boxes(door, thickness, depth, layer).stream()
-                            .map(b -> b.translate(0, DoorArchFitPlan.topOffset(door) * 16, 0)).toList());
-                for (var hinge : DoorHingeSide.values()) for (var piece : DoorGeometry.leaf(door, hinge))
-                    for (double step : new double[]{0, .1, 11.25, 37, 45, 73.9, 89.9, 90}) {
-                        Box swung = bounds(door, hinge, piece.box(), step);
-                        for (Box box : frame) assertFalse(overlaps(swung, box), () -> door + " " + thickness + " " + depth + " " + swung + " / " + box);
-                    }
-            }
-            assertTrue(DoorArchClearance.accepts(door, ArchPieceThickness.THIN, ArchPieceDepth.MIDDLE));
-            assertTrue(DoorArchClearance.accepts(door, ArchPieceThickness.THIN, ArchPieceDepth.FRONT));
+    @Test void onlyEqualThinClosedPlanesAreRefused() {
+        for (var depth : ArchPieceDepth.values()) for (var door : io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.values()) {
+            assertEquals(!depth.name().equals(door.name()), DoorArchClearance.accepts(ArchPieceThickness.THIN, depth, door));
+            assertEquals(depth == ArchPieceDepth.FRONT, DoorArchClearance.accepts(ArchPieceThickness.FULL, depth, door));
         }
     }
 
@@ -98,18 +63,4 @@ class DoorArchClearanceTest {
         }
     }
 
-    private static Box bounds(DoorDesign door, DoorHingeSide hinge, Box box, double degrees) {
-        double minX = Double.POSITIVE_INFINITY, minZ = minX, maxX = Double.NEGATIVE_INFINITY, maxZ = maxX;
-        for (double x : new double[]{box.minX(), box.maxX()}) for (double z : new double[]{box.minZ(), box.maxZ()}) {
-            var point = DoorGeometry.turn(door, x, z, hinge == DoorHingeSide.LEFT ? degrees : -degrees, hinge);
-            minX = Math.min(minX, point[0]); maxX = Math.max(maxX, point[0]);
-            minZ = Math.min(minZ, point[1] - 13); maxZ = Math.max(maxZ, point[1] - 13);
-        }
-        return new Box(minX, box.minY(), minZ, maxX, box.maxY(), maxZ);
-    }
-    private static boolean overlaps(Box a, Box b) {
-        return Math.min(a.maxX(), b.maxX()) - Math.max(a.minX(), b.minX()) > 1e-8
-                && Math.min(a.maxY(), b.maxY()) - Math.max(a.minY(), b.minY()) > 1e-8
-                && Math.min(a.maxZ(), b.maxZ()) - Math.max(a.minZ(), b.minZ()) > 1e-8;
-    }
 }

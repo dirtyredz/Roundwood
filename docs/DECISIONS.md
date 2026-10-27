@@ -2,9 +2,15 @@
 
 Newest first.
 
+## 2026-10-26 - Preserve fitted aim and acquire projected leaves
+
+Owner placement feedback supersedes the BACK-only fitting pose and thin swing-clearance gate. Full tops keep every aimed door depth. Thin tops also allow every depth, except an equal closed door/slab plane: refuse that combination with the shared red preview, rather than moving either component. This prevents coplanar faces while preserving aim. Swing clipping remains accepted. Ground and adjacent-face clicks discover the existing component from the normal landing cell; direct component clicks still work.
+
+A visible open leaf may lie outside all owned cells, especially at BACK. Vanilla cell traversal then misses it entirely, before interaction routing. A bounded loaded-assembly ray query supplements acquisition on the client and validation on the server. Nearest world/frame geometry still blocks the leaf; distance, permissions and projected transport checks remain in force.
+
 ## 2026-10-26 - Same-cell Roundwood fitting (0.16.0)
 
-Fitted Roundwood tops supersede the adjacent-layers-only recommendation for matching Roundwood doors. Same-cell support uses an anchor attachment rather than combination block IDs; vanilla and other-mod doors remain separate-cell placements. The leaf sits at BACK depth. A fitted FULL top is geometrically identical to the standalone full arch (no rear rebate): the owner disliked the cut-away on the arch front and accepted that the swinging leaf may clip through the arch (2026-10-26). This supersedes the earlier conservative-rebate decision; clearance bounds now only gate thin MIDDLE/FRONT eligibility. Independent frame geometry stays outside door transforms and projected-leaf transport.
+Fitted Roundwood tops supersede the adjacent-layers-only recommendation for matching Roundwood doors. Same-cell support uses an anchor attachment rather than combination block IDs; vanilla and other-mod doors remain separate-cell placements. The original BACK-only pose is superseded above. A fitted FULL top is geometrically identical to the standalone full arch (no rear rebate): the owner disliked the cut-away on the arch front and accepted that the swinging leaf may clip through the arch (2026-10-26). This supersedes the earlier conservative-rebate decision; the later placement feedback above also supersedes thin swing-clearance eligibility. Independent frame geometry stays outside door transforms and projected-leaf transport.
 
 ## 2026-10-26 - Separate thin arch products
 
