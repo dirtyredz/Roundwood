@@ -7,8 +7,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * A bounded least-recently-used cache of appearance models, keyed by look and geometry variant
- * (never by position). Thread-safe: windows are built on chunk-render workers. Every instance
+ * A bounded least-recently-used cache of appearance models and quad lists. Material-model keys
+ * describe looks/geometry; chunk-quad keys may include immutable positioned snapshots. Thread-safe:
+ * models are built on chunk-render workers. Every instance
  * registers itself so one reload clears them all together with the donor caches
  * ({@link #clearAll}); stale models are therefore never drawn after F3+T or a resource change.
  */
@@ -16,6 +17,8 @@ public final class AppearanceModelCache<K, V> {
     /** Appearance-model entries per cache. */
     public static final int MODELS = 2048;
     private static final List<AppearanceModelCache<?, ?>> ALL = new ArrayList<>();
+    private static volatile long generation;
+    public static long generation() { return generation; }
 
     private final Map<K, V> entries;
 
@@ -55,5 +58,6 @@ public final class AppearanceModelCache<K, V> {
         }
         DonorSprites.clear();
         DonorColors.clear();
+        generation++;
     }
 }

@@ -25,7 +25,7 @@ import net.minecraftforge.client.model.data.ModelData;
 import java.util.*;
 
 /** Forge model API only. Chunk builders get immutable, cached pre-lighting quads. */
-public final class StaticWorldModel extends BakedModelWrapper<BakedModel> {
+public final class StaticWorldModel extends BakedModelWrapper<BakedModel> implements StaticGeometryModel {
     private record Key(BlockState state, Direction side, RenderType layer, AssemblyRenderSnapshot snapshot) {}
     private static final AppearanceModelCache<Key, List<BakedQuad>> QUADS = new AppearanceModelCache<>(4096);
     public StaticWorldModel(BakedModel original) { super(original); }

@@ -60,6 +60,18 @@ class FittedCorpusTest {
                 assertEquals(45, bodies);
                 assertEquals(8622, total, "Extraction must preserve the captured fitted geometry exactly");
                 assertTrue(total <= 9000, "Fitted corpus emitted " + total + " quads; budget is 9000");
+                long[] warm = new long[5];
+                for (int run = 0; run < warm.length; run++) {
+                    long begin = System.nanoTime();
+                    int count = 0;
+                    for (var sample : cases) count += ArchPieceModels.bakeSurfaces(DoorArchFitPlan.topFor(sample.design), sample.cell,
+                            DoorArchModels.surfaces(sample.design, sample.thickness, sample.depth, sample.layer,
+                                    sample.cell.column, sample.cell.row), Direction.SOUTH, sprite, sample.masonry).size();
+                    warm[run] = System.nanoTime() - begin;
+                    assertEquals(8622, count);
+                }
+                java.util.Arrays.sort(warm);
+                System.out.printf("Fitted synthetic section warmed raw-bake median (5 runs): %.3f ms; no lighting/upload included%n", warm[2]/1e6);
             }
         }
     }

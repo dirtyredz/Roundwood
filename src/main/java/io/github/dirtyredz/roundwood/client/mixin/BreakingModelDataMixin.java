@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.client.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import io.github.dirtyredz.roundwood.client.render.StaticWorldModel;
+import io.github.dirtyredz.roundwood.client.render.StaticGeometryModel;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
@@ -20,6 +20,6 @@ public abstract class BreakingModelDataMixin {
     private ModelData roundwood$breakingData(ModelData data, BlockState state, BlockPos pos, BlockAndTintGetter region,
                                              PoseStack pose, VertexConsumer consumer, ModelData supplied) {
         var model = ((BlockRenderDispatcher) (Object) this).getBlockModel(state);
-        return model instanceof StaticWorldModel ? model.getModelData(region, pos, state, data) : data;
+        return StaticGeometryModel.breakingData(model, region, pos, state, data);
     }
 }

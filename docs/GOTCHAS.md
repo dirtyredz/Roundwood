@@ -1,5 +1,15 @@
 # Gotchas - Roundwood
 
+- **Invalid anchor identity must retire its old footprint.** A state packet can turn an anchor into
+  a satellite without replacing its block entity. Publish an unavailable revision and dirty the old
+  owned cells; retain current member states so later restoration is detected without repeated rebuilds.
+  The bounded membership poll registers assembly anchors only, not ordinary windows.
+
+- **Rebuild timing is not FPS.** `ChunkSectionRebuildTest` replays the captured static census into actual
+  owning sections with synthetic sprites and current geometry; it times raw quad baking without world
+  light, GPU upload or other mods. The separate fitted aggregate pins 8,622 quads. Leaf allocation
+  measurements cover warmed input/model/bounds lookup, not vanilla vertex emission.
+
 - **Static rendering ownership is exclusive.** `legacyStaticRendering=false` suppresses every static
   BER entry; true suppresses the corresponding chunk attachments. Change with the world closed.
   All BER registrations remain for owner screenshot acceptance; do not delete them yet.

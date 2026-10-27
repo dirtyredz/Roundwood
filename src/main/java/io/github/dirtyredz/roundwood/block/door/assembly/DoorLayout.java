@@ -43,6 +43,13 @@ public final class DoorLayout {
         public final DoorColumn column;
         public final DoubleBlockHalf half;
         private final int x, y;
+        private static final java.util.Map<DoorDesign, List<Part>> BY_DESIGN = new java.util.EnumMap<>(DoorDesign.class);
+        private static final Part[][] CELLS = new Part[3][4];
+        static {
+            for (var part : values()) CELLS[part.x][part.y] = part;
+            for (var design : DoorDesign.values()) BY_DESIGN.put(design,
+                    java.util.Arrays.stream(values()).filter(p -> p.x < design.columns() && p.y < design.height() / 16).toList());
+        }
         Part(int x, int y) {
             this.column = x == 0 ? DoorColumn.LEFT : DoorColumn.RIGHT;
             this.half = y == 0 ? DoubleBlockHalf.LOWER : DoubleBlockHalf.UPPER;
@@ -50,7 +57,8 @@ public final class DoorLayout {
         }
         public int columnIndex() { return x; }
         public static Part at(int x, int y) {
-            return java.util.Arrays.stream(values()).filter(p -> p.x == x && p.y == y).findFirst().orElseThrow();
+            if (x < 0 || x >= 3 || y < 0 || y >= 4) throw new java.util.NoSuchElementException("No value present");
+            return CELLS[x][y];
         }
 
         Part(DoorColumn column, DoubleBlockHalf half) {
@@ -73,7 +81,7 @@ public final class DoorLayout {
 
         /** The parts a door of {@code design} owns, in this enum's order. */
         public static List<Part> of(DoorDesign design) {
-            return java.util.Arrays.stream(values()).filter(p -> p.x < design.columns() && p.y < design.height() / 16).toList();
+            return BY_DESIGN.get(design);
         }
     }
 

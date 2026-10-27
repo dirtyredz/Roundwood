@@ -7,6 +7,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 ## Layout
 
 - `block/assembly/render/` owns immutable render snapshots and publication ordering for anchor-only assemblies. `client/render/assembly/` owns client membership validation and worker-safe model-data extraction.
+- `client/door/DoorLeafRenderState` caches leaf inputs, membership positions and models by payload/reload generation; the anchor caches layout and sweep bounds. `src/test/.../client/arch/ChunkSectionRebuildTest` replays `src/test/resources/fps/static-census.json` into owning sections without lighting or upload. Leaf allocation tests live beside the leaf cache.
 - `client/material/StaticBlockColors` and `TintBindings` own stable donor tint routing; `client/render/StaticQuadTransform` moves BER depth poses into quad vertices. `client/{trim,archway}/*WorldModel` preserve compatibility geometry/culling; `client/window/trim/WindowStaticModels` composes perimeter and sill geometry into the window's separate solid pass.
 - `client/render/StaticWorldModel` wraps static assembly models and caches complete quad results. `client/arch/ArchPieceWorldModel` and `client/door/DoorStaticModel` compose the existing cell bakers. `client/mixin/BreakingModelDataMixin` resolves satellite data for Forge's breaking overload; `roundwood.mixins.json` is client-only. Legacy BERs remain available through `StaticRenderingConfig` pending owner screenshots.
 
@@ -21,7 +22,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `block/door/frame/` owns the fitted-top compatibility table, immutable attachment, strict versioned store, closed-plane compatibility and fitted volumes/surfaces. The same fit proposal drives ordinary clicks, playerless showcase construction and preview.
 - `block/assembly/placement/AssemblyWriteTransaction` owns full-NBT rollback for installation and fitting, including unchanged-state cells. `block/arch/fitting/ArchDoorFitting` is the narrow bootstrap-bound port; arch adapters never import the door fitting implementation. `client/door/DoorArchPlacementPreview` draws the shared proposal and refusals.
 - `block/door/selection/DoorRaycast` owns nearest world/open-leaf acquisition, shared by client picking and projected server validation. Its bounded scan reads loaded cells only and deduplicates assemblies.
-- `client/door/DoorArchModels` owns fitted surfaces and typed, reload-aware cell-model caches over the arch donor/masonry baker. `DoorArchRenderer` submits those models through the existing BER path. `DoorArchInteraction` owns frame hit routing and independent trim hosts; `DoorArchLoot` appends component refunds during ordinary loot evaluation.
+- `client/door/DoorArchModels` owns fitted surfaces and typed, reload-aware cell-model caches over the arch donor/masonry baker. `DoorStaticModel` supplies chunk geometry; `DoorArchRenderer` retains the optional legacy BER path. `DoorArchInteraction` owns frame hit routing and independent trim hosts; `DoorArchLoot` appends component refunds during ordinary loot evaluation.
 - `showcase/section/arch/ArchCompositionsSection` includes all twelve fitted samples; `FittedShowcaseGameTests` is the bounded section gate.
 
 - `block/arch/geometry/ArchPieceThickness` and `block/arch/assembly/ArchPieceDepth` own full/thin slab dimensions and thin poses.

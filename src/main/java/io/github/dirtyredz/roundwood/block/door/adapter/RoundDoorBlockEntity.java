@@ -36,6 +36,19 @@ import java.util.Optional;
  */
 public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements TrimAttachmentSource {
     private final DoorSwing swing;
+    private BlockState renderState;
+    private DoorLayout.Assembly renderAssembly;
+    private AABB renderBounds;
+
+    /** Immutable block states are a cheap invalidation key; only changed poses rebuild layout/bounds. */
+    public DoorLayout.Assembly renderAssembly() {
+        if (renderState != getBlockState()) {
+            renderState = getBlockState();
+            renderAssembly = DoorLayout.of(getBlockPos(), renderState);
+            renderBounds = renderAssembly.sweepBounds();
+        }
+        return renderAssembly;
+    }
     private final DoorArchStore arch = new DoorArchStore();
     private final io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore hardware = new io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore();
     public io.github.dirtyredz.roundwood.block.door.hardware.DoorHardware hardware() { return hardware.value(); }
@@ -129,7 +142,8 @@ public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements
     public AABB getRenderBoundingBox() {
         BlockState state = getBlockState();
         if (state.getBlock() instanceof AssemblyDoorBlock) {
-            return DoorLayout.of(getBlockPos(), state).sweepBounds();
+            renderAssembly();
+            return renderBounds;
         }
         return new AABB(getBlockPos());
     }

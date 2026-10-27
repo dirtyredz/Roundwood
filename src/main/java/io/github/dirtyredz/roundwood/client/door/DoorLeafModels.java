@@ -16,6 +16,11 @@ import io.github.dirtyredz.roundwood.geometry.Box;
 public final class DoorLeafModels {
     /** The round door's id (its item and empty world model; the 0.4.0 aliases point at them). */
     public static final String DOOR_ID = DoorDesign.ROUND.id();
+    private static final ResourceLocation[][] LOCATIONS = new ResourceLocation[DoorDesign.values().length][DoorHingeSide.values().length];
+    static {
+        for (var design : DoorDesign.values()) for (var hinge : DoorHingeSide.values())
+            LOCATIONS[design.ordinal()][hinge.ordinal()] = ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, path(design, hinge));
+    }
 
     public static double modelYScale(DoorDesign design) { return Math.min(1, 48.0 / design.height()); }
 
@@ -40,6 +45,6 @@ public final class DoorLeafModels {
     }
 
     public static ResourceLocation location(DoorDesign design, DoorHingeSide hinge) {
-        return ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, path(design, hinge));
+        return LOCATIONS[design.ordinal()][hinge.ordinal()];
     }
 }

@@ -22,7 +22,8 @@ class StaticSubmissionTest {
             new io.github.dirtyredz.roundwood.client.window.trim.WindowTrimRenderer((net.minecraft.client.renderer.block.ModelBlockRenderer) null).render(null, 0, null, null, 0, 0);
             StaticRenderingConfig.LEGACY.set(true);
             assertThrows(NullPointerException.class, () -> new ArchPieceRenderer((AssemblyCellRenderer) null).render(null, 0, null, null, 0, 0));
-            assertTrue(new StaticWorldModel(null).getQuads(null, null, null, ModelData.EMPTY, null).isEmpty());
+            // Null model data is a tripwire: legacy mode must return before attempting chunk work.
+            assertTrue(new StaticWorldModel(null).getQuads(null, null, null, null, null).isEmpty());
         } finally { StaticRenderingConfig.LEGACY.set(false); }
     }
 }

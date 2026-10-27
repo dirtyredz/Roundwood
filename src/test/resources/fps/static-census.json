@@ -1,0 +1,422 @@
+[
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    17,
+                    -58,
+                    37
+                ],
+        "state":  "Block{roundwood:round_door}[column=left,depth=front,facing=south,half=lower,hinge=left,open=false,powered=false]",
+        "nbt":  "{Camouflage:{Material:{Name:\"minecraft:stone_bricks\"}}}"
+    },
+    {
+        "type":  "roundwood:round_window",
+        "pos":  [
+                    22,
+                    -58,
+                    37
+                ],
+        "state":  "Block{roundwood:round_window}[axis=x,east=false,face_reversed=false,north=false,position=center,south=false,trimmed=true,waterlogged=false,west=false]",
+        "nbt":  "{WindowCrossBeams:{Front:{},Version:1},WindowTrim:{Version:2}}"
+    },
+    {
+        "type":  "roundwood:round_window",
+        "pos":  [
+                    33,
+                    -58,
+                    37
+                ],
+        "state":  "Block{roundwood:round_window}[axis=x,east=false,face_reversed=false,north=false,position=center,south=false,trimmed=true,waterlogged=false,west=false]",
+        "nbt":  "{WindowTrim:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:spruce_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1}},Version:2}}"
+    },
+    {
+        "type":  "roundwood:round_window",
+        "pos":  [
+                    27,
+                    -57,
+                    37
+                ],
+        "state":  "Block{roundwood:round_window_arch_right}[depth=center,east=false,face_reversed=false,north=false,orientation=north,south=false,trimmed=true,waterlogged=false,west=false]",
+        "nbt":  "{WindowSillTrim:{Front:{RoundwoodAppearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1}},Version:1},WindowTrim:{Version:2}}"
+    },
+    {
+        "type":  "roundwood:round_window",
+        "pos":  [
+                    28,
+                    -57,
+                    37
+                ],
+        "state":  "Block{roundwood:round_window_arch_left}[depth=center,east=false,face_reversed=false,north=false,orientation=north,south=false,trimmed=true,waterlogged=false,west=false]",
+        "nbt":  "{WindowSillTrim:{Front:{RoundwoodAppearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1}},Version:1},WindowTrim:{Version:2}}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    42,
+                    -58,
+                    49
+                ],
+        "state":  "Block{roundwood:keyhole_shoulder_thin}[cell=lower_left,depth=front,facing=south,side=right]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    43,
+                    -58,
+                    49
+                ],
+        "state":  "Block{roundwood:keyhole_shoulder_thin}[cell=lower_left,depth=front,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    50,
+                    -58,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_2x3_thin}[cell=lower_left,depth=front,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    57,
+                    -58,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_1x2_thin}[cell=lower_left,depth=front,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    64,
+                    -58,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_1x1_thin}[cell=lower_left,depth=front,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    69,
+                    -58,
+                    49
+                ],
+        "state":  "Block{roundwood:keyhole_shoulder}[cell=lower_left,facing=south,side=right]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    70,
+                    -58,
+                    49
+                ],
+        "state":  "Block{roundwood:keyhole_shoulder}[cell=lower_left,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    77,
+                    -58,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_2x3}[cell=lower_left,facing=south,side=left]",
+        "nbt":  "{ArchPieceTrim:{Back:{RoundwoodAppearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1}},Version:1},RoundwoodAppearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    83,
+                    -58,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_1x2}[cell=lower_left,facing=south,side=left]",
+        "nbt":  "{ArchPieceTrim:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:cherry_planks\",Version:1}},Version:1}}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    88,
+                    -58,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_1x1}[cell=lower_left,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    42,
+                    -56,
+                    49
+                ],
+        "state":  "Block{roundwood:keyhole_shoulder_thin}[cell=lower_left,depth=middle,facing=south,side=right]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    43,
+                    -56,
+                    49
+                ],
+        "state":  "Block{roundwood:keyhole_shoulder_thin}[cell=lower_left,depth=middle,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    50,
+                    -56,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_2x3_thin}[cell=lower_left,depth=middle,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    57,
+                    -56,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_1x2_thin}[cell=lower_left,depth=middle,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    64,
+                    -56,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_1x1_thin}[cell=lower_left,depth=middle,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    42,
+                    -54,
+                    49
+                ],
+        "state":  "Block{roundwood:keyhole_shoulder_thin}[cell=lower_left,depth=back,facing=south,side=right]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    43,
+                    -54,
+                    49
+                ],
+        "state":  "Block{roundwood:keyhole_shoulder_thin}[cell=lower_left,depth=back,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    50,
+                    -54,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_2x3_thin}[cell=lower_left,depth=back,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    57,
+                    -54,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_1x2_thin}[cell=lower_left,depth=back,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    64,
+                    -54,
+                    49
+                ],
+        "state":  "Block{roundwood:arch_top_1x1_thin}[cell=lower_left,depth=back,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    78,
+                    -58,
+                    55
+                ],
+        "state":  "Block{roundwood:keyhole_shoulder}[cell=lower_left,facing=south,side=right]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    79,
+                    -58,
+                    55
+                ],
+        "state":  "Block{roundwood:keyhole_shoulder}[cell=lower_left,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    79,
+                    -57,
+                    55
+                ],
+        "state":  "Block{roundwood:arch_top_1x2}[cell=lower_left,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    87,
+                    -57,
+                    55
+                ],
+        "state":  "Block{roundwood:arch_top_1x2}[cell=lower_left,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:arch_piece",
+        "pos":  [
+                    71,
+                    -55,
+                    55
+                ],
+        "state":  "Block{roundwood:arch_top_2x3}[cell=lower_left,facing=south,side=left]",
+        "nbt":  "{}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    67,
+                    -58,
+                    61
+                ],
+        "state":  "Block{roundwood:tall_double_arched_door}[cell_x=0,cell_y=0,depth=front,facing=south,half=lower,hinge=left,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"FRONT\",Product:\"TOP_2X3\",Thickness:\"FULL\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    74,
+                    -58,
+                    61
+                ],
+        "state":  "Block{roundwood:double_arched_door}[cell_x=0,cell_y=0,depth=front,facing=south,half=lower,hinge=left,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"FRONT\",Product:\"TOP_2X3\",Thickness:\"FULL\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    81,
+                    -58,
+                    61
+                ],
+        "state":  "Block{roundwood:arched_door}[depth=front,facing=south,half=lower,hinge=left,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"FRONT\",Product:\"TOP_1X1\",Thickness:\"FULL\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    88,
+                    -58,
+                    61
+                ],
+        "state":  "Block{roundwood:round_door}[column=left,depth=front,facing=south,half=lower,hinge=left,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"FRONT\",Product:\"TOP_1X2\",Thickness:\"FULL\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    67,
+                    -58,
+                    67
+                ],
+        "state":  "Block{roundwood:tall_double_arched_door}[cell_x=0,cell_y=0,depth=back,facing=south,half=lower,hinge=right,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"MIDDLE\",Product:\"TOP_2X3\",Thickness:\"THIN\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    74,
+                    -58,
+                    67
+                ],
+        "state":  "Block{roundwood:double_arched_door}[cell_x=0,cell_y=0,depth=back,facing=south,half=lower,hinge=right,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"MIDDLE\",Product:\"TOP_2X3\",Thickness:\"THIN\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    81,
+                    -58,
+                    67
+                ],
+        "state":  "Block{roundwood:arched_door}[depth=back,facing=south,half=lower,hinge=right,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"MIDDLE\",Product:\"TOP_1X1\",Thickness:\"THIN\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    88,
+                    -58,
+                    67
+                ],
+        "state":  "Block{roundwood:round_door}[column=left,depth=back,facing=south,half=lower,hinge=right,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"MIDDLE\",Product:\"TOP_1X2\",Thickness:\"THIN\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    67,
+                    -58,
+                    73
+                ],
+        "state":  "Block{roundwood:tall_double_arched_door}[cell_x=0,cell_y=0,depth=middle,facing=south,half=lower,hinge=left,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"FRONT\",Product:\"TOP_2X3\",Thickness:\"THIN\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    74,
+                    -58,
+                    73
+                ],
+        "state":  "Block{roundwood:double_arched_door}[cell_x=0,cell_y=0,depth=middle,facing=south,half=lower,hinge=left,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"FRONT\",Product:\"TOP_2X3\",Thickness:\"THIN\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    81,
+                    -58,
+                    73
+                ],
+        "state":  "Block{roundwood:arched_door}[depth=middle,facing=south,half=lower,hinge=left,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"FRONT\",Product:\"TOP_1X1\",Thickness:\"THIN\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    },
+    {
+        "type":  "roundwood:round_door",
+        "pos":  [
+                    88,
+                    -58,
+                    73
+                ],
+        "state":  "Block{roundwood:round_door}[column=left,depth=middle,facing=south,half=lower,hinge=left,open=false,powered=false]",
+        "nbt":  "{DoorArch:{Appearance:{Kind:\"masonry\",Material:\"minecraft:bricks\",Version:1},Casings:{Back:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:birch_planks\",Version:1}},Front:{RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"green\",Version:1}},Version:1},Depth:\"FRONT\",Product:\"TOP_1X2\",Thickness:\"THIN\",Version:1},RoundwoodAppearance:{Kind:\"wood\",Material:\"minecraft:oak_planks\",Paint:\"blue\",Version:1}}"
+    }
+]

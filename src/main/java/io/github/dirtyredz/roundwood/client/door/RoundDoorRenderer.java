@@ -37,6 +37,7 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
     private final BlockRenderDispatcher blocks;
     private final DoorTrimRenderer trims;
     private final DoorArchRenderer frame;
+    private final java.util.Map<RoundDoorBlockEntity, DoorLeafRenderState> leaves = new java.util.WeakHashMap<>();
 
     public RoundDoorRenderer(BlockEntityRendererProvider.Context context) {
         this.blocks = context.getBlockRenderDispatcher();
@@ -53,10 +54,17 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
                 || DoorLayout.partOf(state) != DoorLayout.Part.LOWER_LEFT) {
             return;
         }
-        DoorLayout.Assembly assembly = DoorLayout.of(entity.getBlockPos(), state);
-        if (!assembly.complete(level, door)) {
+        DoorLayout.Assembly assembly = entity.renderAssembly();
+        var cached = leaves.get(entity);
+        if (cached == null || cached.assembly() != assembly) {
+            cached = new DoorLeafRenderState(assembly);
+            leaves.put(entity, cached);
+        }
+        if (!cached.complete(level, door)) {
             return;
         }
+        cached.material(entity.appearance(), entity.hardware(), io.github.dirtyredz.roundwood.client.material.AppearanceModelCache.generation(),
+                DoorAppearanceModels::look, DoorAppearanceModels::leaf);
         frame.render(entity, assembly, level, pose, buffers);
         pose.pushPose();
         double shift = assembly.depth().offset() / 16;
@@ -65,13 +73,11 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
         CamouflageRenderer.render(entity, assembly, level, pose, buffers);
         trims.render(entity, assembly, level, pose, buffers);
 
-        for (DoorHingeSide hinge : door.design().doubleLeaf() ? DoorHingeSide.values() : new DoorHingeSide[]{state.getValue(DoorBlock.HINGE)}) {
-        DoorAppearanceModels.Look look = DoorAppearanceModels.look(entity.appearance());
+        for (int leaf = 0; leaf < cached.leaves(); leaf++) {
+        DoorHingeSide hinge = cached.hinge(leaf);
         DoorDesign design = door.design();
-        BakedModel model = DoorAppearanceModels.leaf(look, design, hinge, entity.hardware());
-        float red = look.tint() < 0 ? 1F : ((look.tint() >> 16) & 0xFF) / 255F;
-        float green = look.tint() < 0 ? 1F : ((look.tint() >> 8) & 0xFF) / 255F;
-        float blue = look.tint() < 0 ? 1F : (look.tint() & 0xFF) / 255F;
+        BakedModel model = cached.model(leaf);
+        float red = cached.red(), green = cached.green(), blue = cached.blue();
         double progress = entity.swing().progress(level.getGameTime() + partialTick);
 
         pose.pushPose();

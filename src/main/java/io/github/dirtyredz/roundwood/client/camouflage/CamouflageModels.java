@@ -51,19 +51,26 @@ public final class CamouflageModels {
     }
 
     private static BakedModel build(Key key) {
-        int turns = VoxelShapeFactory.quarterTurns(key.facing());
+        var quads = bake(key.design(), key.facing(), key.part(), key.coverage(), side -> DonorSprites.face(key.donor(), side));
+        return GeneralQuadModels.world(quads, DonorSprites.face(key.donor(), Direction.NORTH).sprite());
+    }
+
+    /** Production pre-lighting baker with an explicit donor-material resolver for headless geometry tests. */
+    public static List<BakedQuad> bake(DoorDesign design, Direction facing, DoorLayout.Part part, CamouflageCoverage coverage,
+                                      java.util.function.Function<Direction, DonorSprites.FaceMaterial> materials) {
+        int turns = VoxelShapeFactory.quarterTurns(facing);
         List<BakedQuad> quads = new ArrayList<>();
-        for (CamouflageGeometry.Face face : CamouflageGeometry.exposedFaces(key.design(), key.part().columnIndex(), key.part().row(), key.coverage())) {
+        for (CamouflageGeometry.Face face : CamouflageGeometry.exposedFaces(design, part.columnIndex(), part.row(), coverage)) {
             Box box = face.box().rotateY(turns);
             Direction side = VoxelShapeFactory.turn(direction(face.side()), turns);
-            DonorSprites.FaceMaterial material = DonorSprites.face(key.donor(), side);
+            DonorSprites.FaceMaterial material = materials.apply(side);
             BlockElementFace element = new BlockElementFace(null, material.tintIndex(), "", new BlockFaceUV(FaceUv.of(box, side), 0));
             quads.add(BAKERY.bakeQuad(
                     new Vector3f((float) box.minX(), (float) box.minY(), (float) box.minZ()),
                     new Vector3f((float) box.maxX(), (float) box.maxY(), (float) box.maxZ()),
                     element, material.sprite(), side, BlockModelRotation.X0_Y0, null, true, NAME));
         }
-        return GeneralQuadModels.world(quads, DonorSprites.face(key.donor(), Direction.NORTH).sprite());
+        return List.copyOf(quads);
     }
 
     private static Direction direction(CamouflageGeometry.Side side) {

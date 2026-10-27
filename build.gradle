@@ -46,7 +46,7 @@ if (project.hasProperty('doorTargets')) {
 
 // Focused full-showcase reproduction; all section checks share the showcase package.
 if (project.hasProperty('renderingTargets')) {
-    sourceSets.gameTest.java.include '**/fixture/**', '**/StaticRenderLifecycleGameTests.java',
+    sourceSets.gameTest.java.include '**/fixture/**', '**/StaticRenderLifecycleGameTests.java', '**/AssemblyRenderNotificationsGameTests.java',
             '**/WindowTrimGameTests.java', '**/WindowSillGameTests.java', '**/WindowBeamGameTests.java',
             '**/WindowAppearanceGameTests.java', '**/TrimAppearanceGameTests.java',
             '**/AnchorPersistenceGameTests.java', '**/DoorArchPersistenceGameTests.java',

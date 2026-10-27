@@ -47,7 +47,7 @@ import io.github.dirtyredz.roundwood.migration.item.RetiredCrossWindowItem;
 /**
  * Wraps canonical and compatibility window models. Plain panes retain generated geometry and
  * frame/glass retexturing. Fitted panes compose independent beam geometry and use immutable
- * neighbour coverage; face trims and sills remain with WindowTrimRenderer. All models are cached
+ * neighbour coverage; face trims and sills join the solid chunk layer unless legacy rendering is enabled. All models are cached
  * by geometry and materials and invalidated by the existing appearance-cache reload lifecycle.
  */
 public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {

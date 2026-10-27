@@ -16,10 +16,16 @@ public final class AssemblyModelData {
         if (assembly == null) return original;
         if (!(region.getBlockEntity(assembly.anchor()) instanceof AppearanceAnchorBlockEntity entity)) return ModelData.EMPTY;
         var snapshot = entity.staticRenderPublication().current();
-        if (snapshot == null || !snapshot.available() || !snapshot.assembly().equals(assembly)) return ModelData.EMPTY;
-        for (var member : snapshot.members().entrySet()) {
-            if (region.getBlockState(member.getKey()) != member.getValue()) return ModelData.EMPTY;
-        }
+        if (!matches(assembly, snapshot, region::getBlockState)) return ModelData.EMPTY;
         return original.derive().with(PROPERTY, snapshot).build();
+    }
+
+    static boolean matches(io.github.dirtyredz.roundwood.block.assembly.Assembly<?> assembly,
+                           AssemblyRenderSnapshot snapshot, java.util.function.Function<BlockPos, BlockState> states) {
+        if (snapshot == null || !snapshot.available() || !snapshot.assembly().equals(assembly)) return false;
+        for (var member : snapshot.members().entrySet()) {
+            if (states.apply(member.getKey()) != member.getValue()) return false;
+        }
+        return true;
     }
 }

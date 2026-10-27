@@ -73,7 +73,11 @@ public interface Assembly<P> {
 
     /** True when every cell is loaded and holds this assembly's parts. */
     default boolean complete(Level level, Block block) {
-        return presentParts(level, block).size() == parts().size();
+        for (P part : parts()) {
+            BlockPos cell = pos(part);
+            if (!level.isLoaded(cell) || !isPart(level.getBlockState(cell), block, part)) return false;
+        }
+        return true;
     }
 
     /** True when {@code player} may interact with every cell (the whole-assembly edit permission). */

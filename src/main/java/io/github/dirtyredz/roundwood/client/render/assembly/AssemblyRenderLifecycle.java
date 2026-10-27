@@ -25,7 +25,8 @@ public final class AssemblyRenderLifecycle {
         for (var entity : ANCHORS) {
             var snapshot = entity.staticRenderPublication().current();
             var level = entity.getLevel();
-            if (snapshot == null || level == null) continue;
+            if (level == null) continue;
+            if (snapshot == null) { AssemblyRenderUpdates.refresh(entity, false); continue; }
             for (var part : entity.staticRenderPublication().footprint()) {
                 var current = level.isLoaded(part) ? level.getBlockState(part) : null;
                 if (snapshot.members().get(part) != current) { AssemblyRenderUpdates.refresh(entity, false); break; }

@@ -25,6 +25,12 @@ indices bind to immutable donor-state/original-index pairs for the session; the 
 handler delegates at the owning position. Bindings are not recycled on resource reload because
 retained compiled meshes may still use them. No color lookup reads a block entity.
 
+The surviving leaf BER caches its layout, member positions, hinge iteration, resolved appearance,
+hardware and material models. A model-cache generation invalidates retained leaf models on reload;
+payload equality invalidates changed finishes. The anchor caches conservative sweep bounds by immutable
+block state. Warm bounds/input lookups allocate no new collections; vertex emission is still vanilla.
+`Assembly.complete` short-circuits without building `presentParts`; that enumeration remains unchanged.
+
 ## Frameless pane
 
 The appended BLANK window profile has a full 16x16 opening and reuses oriented placement, recessed glass, tint persistence and the Cross Beams composition. It has no perimeter/sill host and its router refuses frame donors without payment. Runtime designs include blank-with-beams; `ModBlocks.WindowProducts` lists only registered products, preserving exactly thirteen historical crossed IDs. Loot includes the pane and optional beams only.
@@ -35,7 +41,7 @@ Fitted-top geometry preserves the door depth and uses a top anchored at y+1 (arc
 
 Fitting is an explicit occupied-cell conversion, in either ordinary-click order. The shared proposal discovers the existing component from the normal landing cell (including a ground click), or from a direct component click. Door depth uses the normal face thirds; fitting an arch preserves the existing door pose. It validates complete loaded matching assemblies, permissions, dry/bounded cells, support, obstruction and readable custody, then revalidates before writing. A shared write transaction snapshots every destination state and full entity NBT, initializes the attachment before approval, and restores all cells on cancellation/failure. Fitting owns one multi-place event, including unchanged-state anchor cells; payment and announcements follow approval. Other blocks remain subject to ordinary replaceability.
 
-DoorArchModels owns fitted surfaces and the typed, reload-aware cell-model cache; DoorArchRenderer only submits the resulting models. The fitted frame renders before the door depth/swing transform. Targets and highlights union its cached static shape with the leaf. `DoorRaycast` acquires whole open leaves even when the ray never enters an owned cell: nearby loaded assemblies are tested once, against the nearest ordinary world hit. The ordinary ray clips door outlines to their traversed cells so an out-of-cell hit cannot hide a nearer blocker. Client picking before highlights and projected server validation share this path. Frame regions apply at the first surface actually hit; a farther frame cannot steal a leaf click. Frame body/casings keep separate appearance stores. Only the initiating cell evaluates component loot, with the ordinary explosion survival probability for each component; teardown never refunds. Unknown frame custody stays opaque on a harvested door item and cannot be placed lossily. Known fitted assemblies drop separate items without packed duplicate refunds.
+DoorArchModels owns fitted surfaces and the typed, reload-aware cell-model cache; DoorStaticModel places those models in owning cells; legacy DoorArchRenderer submits them before the door depth/swing transform. Targets and highlights union its cached static shape with the leaf. `DoorRaycast` acquires whole open leaves even when the ray never enters an owned cell: nearby loaded assemblies are tested once, against the nearest ordinary world hit. The ordinary ray clips door outlines to their traversed cells so an out-of-cell hit cannot hide a nearer blocker. Client picking before highlights and projected server validation share this path. Frame regions apply at the first surface actually hit; a farther frame cannot steal a leaf click. Frame body/casings keep separate appearance stores. Only the initiating cell evaluates component loot, with the ordinary explosion survival probability for each component; teardown never refunds. Unknown frame custody stays opaque on a harvested door item and cannot be placed lossily. Known fitted assemblies drop separate items without packed duplicate refunds.
 
 ## Thin standalone arch pieces
 
@@ -805,6 +811,6 @@ A donor-mode ray acquires actual endpoint hardware. DoorHardwareTarget checks ne
 DoorHardware Version 1 stores two independently optional appearances. Missing means brass; updates explicitly clear absent slots. Unknown versions, fields and nested data remain opaque on disk and on harvested door items. Checked stacks refuse lossy placement. The shared installer initializes hardware within its rollback transaction, including door-into-arch fitting. Pick and loot decorate only the door item; hardware has no raw donor refund.
 
 Fitted bodies/casings now use the standalone merged surface builder (0.17.0). The render-only
-normal offsets still apply afterward. This reduces geometry emitted by the existing BER; static
-chunk migration and its cross-section invalidation are not implemented yet. Leaves remain on
+normal offsets still apply afterward. Both chunk and legacy paths reuse those surfaces; static
+chunk snapshots invalidate their full owned footprints across sections. Leaves remain on
 the BER in every pose, preserving animation ownership while chunk uploads can be delayed.
