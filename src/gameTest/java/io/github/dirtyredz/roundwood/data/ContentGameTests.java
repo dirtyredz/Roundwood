@@ -66,8 +66,8 @@ public final class ContentGameTests {
     public static void canonicalEntriesAndFortyNineHiddenAliasesAreRegistered(GameTestHelper helper) {
         long blocks = ForgeRegistries.BLOCKS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         long items = ForgeRegistries.ITEMS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(blocks == 86, "expected 20 + 4 modular + 13 + 49 blocks, found " + blocks);
-        check(items == 89, "expected 20 + 4 modular + two attachments + 13 + 49 + the window trim items, found " + items);
+        check(blocks == 90, "expected 20 + 8 modular (4 full, 4 thin) + 13 + 49 blocks, found " + blocks);
+        check(items == 93, "expected 20 + 8 modular + two attachments + 13 + 49 + the window trim items, found " + items);
         for (String id : List.of("arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder")) {
             Block block = ForgeRegistries.BLOCKS.getValue(id(id));
             Item item = ForgeRegistries.ITEMS.getValue(id(id));
@@ -230,7 +230,7 @@ public final class ContentGameTests {
                 "a painting recipe is still loaded");
         long count = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
                 .filter(r -> r.getId().getNamespace().equals(Roundwood.MOD_ID)).count();
-        check(count == 24, "expected 24 roundwood crafting recipes, loaded " + count);
+        check(count == 28, "expected 28 roundwood crafting recipes, loaded " + count);
         ItemStack k = new ItemStack(Items.STICK);
         var ladder = find(level, grid(k, e, k, k, k, k, k, e, k)).orElseThrow();
         check(ladder.assemble(grid(k, e, k, k, k, k, k, e, k), level.registryAccess()).is(Items.LADDER), "beams collided with the vanilla ladder");
@@ -357,7 +357,7 @@ public final class ContentGameTests {
         expected.add("arch_sill_trim");
         expected.add("cross_beams");
         check(shown.stream().map(stack -> ForgeRegistries.ITEMS.getKey(stack.getItem()).getPath()).toList().equals(expected),
-                "tab is not the three doors, 13 plain windows, four arch pieces, Universal Trim, Arch Sill and Cross Beams: " + shown);
+                "tab is not the three doors, 13 plain windows, four full and four thin arch pieces, Universal Trim, Arch Sill and Cross Beams: " + shown);
         check(shown.stream().noneMatch(ItemStack::hasTag), "tab entries carry an appearance: " + shown);
         check(AppearanceStacks.read(shown.get(0)).equals(Appearance.DEFAULT), "the tab's door is not oak");
         helper.succeed();
@@ -377,7 +377,7 @@ public final class ContentGameTests {
             check(!stack.hasTag() && AppearanceStacks.read(stack).equals(AppearanceDefaults.of(item))
                     && WindowGlassStacks.key(stack).equals(AppearanceDefaults.of(item).key()), item + " is not its plain default: " + stack);
         }
-        check(ModItems.all().size() == 24 && shown.size() == 24, "tab lists " + shown.size() + " items, not the 24 of 0.15.0");
+        check(ModItems.all().size() == 28 && shown.size() == 28, "tab lists " + shown.size() + " items, not the 28 of 0.16.0");
         check(shown.stream().anyMatch(stack -> stack.getItem() == ModItems.CROSS_BEAMS.get()), "Cross Beams is not listed");
         for (Item retired : io.github.dirtyredz.roundwood.migration.LegacyContent.items()) {
             check(shown.stream().noneMatch(stack -> stack.getItem() == retired), "hidden compatibility item " + retired + " is listed");
@@ -396,7 +396,8 @@ public final class ContentGameTests {
             "round_window_top_left", "round_window_top_right",
             "round_window_edge_top", "round_window_edge_left",
             "round_window_edge_bottom", "round_window_edge_right",
-            "arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder", "round_trim");
+            "arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder",
+            "arch_top_1x1_thin", "arch_top_1x2_thin", "arch_top_2x3_thin", "keyhole_shoulder_thin", "round_trim");
 
     /** The canonical block of a family's 0.4.0 aliases (written out, not read from list positions). */
     private static Block canonicalBlock(io.github.dirtyredz.roundwood.appearance.AppearanceFamily family) {

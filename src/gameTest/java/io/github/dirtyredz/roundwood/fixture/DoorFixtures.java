@@ -217,10 +217,10 @@ public final class DoorFixtures {
     }
 
     public static DoorLayout.Assembly assembly(GameTestHelper helper, BlockPos anchor, Direction facing, DoorHingeSide hinge, DoorDesign design) {
-        return new DoorLayout.Assembly(helper.absolutePos(anchor), facing, hinge, design);
+        return new DoorLayout.Assembly(helper.absolutePos(anchor), facing, hinge, design, io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.MIDDLE);
     }
 
-    /** As above with the hinge a centre click gives in open space. */
+    /** As above with the hinge a centre click gives in open space (and the MIDDLE depth a centre click picks). */
     public static DoorLayout.Assembly assembly(GameTestHelper helper, BlockPos anchor, Direction facing) {
         return assembly(helper, anchor, facing, DoorHingeSide.LEFT);
     }
