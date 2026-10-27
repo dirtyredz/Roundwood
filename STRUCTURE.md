@@ -6,7 +6,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
-- `src/test/.../showcase/FeedbackShowcaseLayoutTest` guards the fixed arena bounds and new sample spacing. The pieces row retains thirteen framed profiles; the frameless pane is demonstrated in the assembled window, keeping every door on the existing floor.
+- `src/test/.../showcase/FeedbackShowcaseLayoutTest` guards the fixed arena bounds and new sample spacing. The pieces row retains thirteen framed profiles; the frameless pane is demonstrated in the assembled window, keeping every door on the existing floor. `-PshowcaseTargets` selects the complete showcase GameTest package and its environment guard for local reproduction.
 
 - `block/door/hardware/` owns typed spear/knob meshes, the two-slot value, strict versioned storage, checked stack custody and donor recognition. `block/door/interaction/DoorHardwareTarget` owns the shared endpoint proposal; `DoorHardwareInteraction` revalidates and pays. Selection acquires both ordinary and projected hardware surfaces.
 - `client/door/DoorHardwareModels` consumes baked slot markers before retexturing; `DoorHardwarePreview` renders the shared proposal. Door model keys include both slot finishes; item overrides and viewer keys use the complete stack. Hardware unit tests mirror geometry, store, targeting and rendering; `src/gameTest/.../block/door/hardware/` checks real rays and custody.

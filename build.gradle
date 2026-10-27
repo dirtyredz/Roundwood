@@ -44,6 +44,11 @@ if (project.hasProperty('doorTargets')) {
             '**/DoorFreeEdgeGameTests.java', '**/ArchedDoorPlacementGameTests.java', '**/FittedShowcaseGameTests.java', '**/ShowcaseChecks.java', '**/ArchSectionsChecks.java', '**/DoorArchPersistenceGameTests.java', '**/DoorArchFittingGameTests.java', '**/DoorArchLifecycleGameTests.java', '**/AssemblyPlacementGameTests.java', '**/TestWorldGameTests.java'
 }
 
+// Focused full-showcase reproduction; all section checks share the showcase package.
+if (project.hasProperty('showcaseTargets')) {
+    sourceSets.gameTest.java.include '**/fixture/**', '**/showcase/**', '**/TestWorldGameTests.java'
+}
+
 // Isolated reproduction selection for inspecting the occupied-cell witness.
 if (project.hasProperty('archFitReproduction')) {
     sourceSets.gameTest.java.include '**/fixture/**', '**/DoorArchFittingGameTests.java', '**/TestWorldGameTests.java'

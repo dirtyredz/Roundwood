@@ -20,7 +20,7 @@ class FeedbackShowcaseLayoutTest {
     }
     @Test void hardwareExamplesHaveIndependentLabelsAndKeepTheFittedRowGap(){
         int lastFitted=ShowcaseSpacing.FIRST_R+3*ShowcaseSpacing.pitch(3)+2;
-        assertTrue(DoorHardwareSection.R0-lastFitted>ShowcaseSpacing.GAP);
+        assertTrue(ShowcaseCanvas.labelR(DoorHardwareSection.R0)-lastFitted>ShowcaseSpacing.GAP);
         for(int i=0;i<4;i++){
             assertTrue(DoorHardwareSection.r(i)+2<ShowcaseFrame.WIDTH);
             if(i>0)assertTrue(DoorHardwareSection.r(i)-(DoorHardwareSection.r(i-1)+2)>ShowcaseSpacing.GAP);

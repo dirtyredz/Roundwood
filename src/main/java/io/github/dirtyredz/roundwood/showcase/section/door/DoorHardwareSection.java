@@ -13,7 +13,7 @@ import java.util.Optional;
 /** Four component examples beside the fitted row, without a material/design cross product. */
 public final class DoorHardwareSection implements ShowcaseSection {
     public static final int F=ArchCompositionsSection.FITTED_F;
-    public static final int R0=ShowcaseSpacing.FIRST_R+4*ShowcaseSpacing.pitch(3);
+    public static final int R0=ShowcaseSpacing.FIRST_R+4*ShowcaseSpacing.pitch(3)-ShowcaseSpacing.LABEL_OFFSET;
     public static final Appearance HINGES=surface("iron_block"), KNOBS=surface("gold_block");
     public static final DoorHardware HARDWARE=new DoorHardware(Optional.of(HINGES),Optional.of(KNOBS));
     public static int r(int index){return R0+index*ShowcaseSpacing.pitch(3);}

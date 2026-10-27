@@ -20,6 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.gametest.GameTestHolder;
@@ -29,8 +30,8 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 
 /**
- * The showcase builder in a 92 x 10 x 92 template (the bounds include all standalone and fitted arch rows) filled with gold: everything it promises is
- * present, complete and in the appearance its section names, and no gold outside its bounds was
+ * The showcase builder in a 92 x 10 x 92 template (the bounds include all standalone and fitted arch rows) filled with bedrock: everything it promises is
+ * present, complete and in the appearance its section names, and no bedrock outside its bounds was
  * touched (in each facing).
  */
 @GameTestHolder(Roundwood.MOD_ID)
@@ -39,6 +40,7 @@ public final class ShowcaseGameTests {
     private static final String TEMPLATE = "showcase";
     private static final int SIZE = 92;
     private static final int HEIGHT = 10;
+    private static final BlockState BOUNDS_MARKER = Blocks.BEDROCK.defaultBlockState();
 
     private ShowcaseGameTests() {
     }
@@ -99,7 +101,7 @@ public final class ShowcaseGameTests {
         for (int x = 0; x < SIZE; x++) {
             for (int y = 0; y < HEIGHT; y++) {
                 for (int z = 0; z < SIZE; z++) {
-                    helper.setBlock(new BlockPos(x, y, z), Blocks.GOLD_BLOCK);
+                    helper.setBlock(new BlockPos(x, y, z), BOUNDS_MARKER);
                 }
             }
         }
@@ -162,9 +164,11 @@ public final class ShowcaseGameTests {
             for (int y = 0; y < HEIGHT; y++) {
                 for (int z = 0; z < SIZE; z++) {
                     BlockPos abs = helper.absolutePos(new BlockPos(x, y, z));
-                    boolean gold = helper.getLevel().getBlockState(abs).is(Blocks.GOLD_BLOCK);
+                    var state = helper.getLevel().getBlockState(abs);
+                    boolean marker = state == BOUNDS_MARKER;
                     boolean inside = bounds.isInside(abs);
-                    check(inside != gold, inside ? "inside block not rewritten at " + abs : "outside block changed at " + abs);
+                    check(inside != marker, inside ? "inside block not rewritten at " + abs + " (template "
+                            + x + "," + y + "," + z + "; " + state + ")" : "outside block changed at " + abs);
                 }
             }
         }
