@@ -947,3 +947,14 @@ The owner approved raising only the 2x3 radius-24 crown by eight pixels (spring8
 ## 0.17.0 independent hardware
 
 Hinges and knobs are two assembly-wide finish groups. Ordinary donor clicks select actual surfaces on either face/leaf; sneaking has the same result. Only settled endpoints are editable: the shared server/client swing timeline gates the preview and application, avoiding an animated-angle protocol. Mesh markers survive baking even while both slots share default brass. One donor pays for a changed slot; unchanged, creative and refused actions are free. The door item retains finishes, with no raw donor refund. Versioned unknown payloads remain opaque and cannot be placed lossily.
+
+## 0.17.0 fitted surface consolidation
+
+Fitted bodies and casings use the same merged rectangles and exposed strips as standalone
+arches. Logical volumes and selection remain unchanged. SurfaceSeparation still applies once,
+after consolidation, preserving the 0.17.0 normal offsets and the continuous separation guard.
+The 0.16.0 census replayed against the raised 0.17.0 crown contains 25,686 fitted quads before
+consolidation and 8,622 after (the old report's 46,074 baseline used the older crown).
+The first paired JDK 17, 512 MiB counting-consumer run measured 4,109,760 -> 1,379,552 B/pass
+and 18.091 -> 6.027 ms/pass. These exclude real world AO, buffer upload and client frame times.
+The regression budget remains 9,000 fitted quads and 1.45 MB/pass; no noisy timing assertion in CI.

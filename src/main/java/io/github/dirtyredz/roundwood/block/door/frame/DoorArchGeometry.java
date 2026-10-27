@@ -50,39 +50,13 @@ public final class DoorArchGeometry {
         return SURFACES.computeIfAbsent(new Key(door, thickness, depth, layer, column, row), DoorArchGeometry::surfaces);
     }
     private static List<Surface> surfaces(Key key) {
-        var out = new ArrayList<Surface>();
-        for (int x = key.column * 16; x < (key.column + 1) * 16; x++) for (int y = key.row * 16; y < (key.row + 1) * 16; y++) {
-            var band = band(key.door, key.thickness, key.depth, key.layer, x, y);
-            if (band == null) continue;
-            add(out, key, x, y, band[0], band[1], Direction.NORTH);
-            add(out, key, x, y, band[0], band[1], Direction.SOUTH);
-            for (var face : new Direction[]{Direction.WEST, Direction.EAST, Direction.DOWN, Direction.UP}) {
-                var neighbour = band(key.door, key.thickness, key.depth, key.layer, x + face.getStepX(), y + face.getStepY());
-                if (neighbour == null || neighbour[1] <= band[0] || neighbour[0] >= band[1]) {
-                    add(out, key, x, y, band[0], band[1], face);
-                } else {
-                    if (neighbour[0] > band[0]) add(out, key, x, y, band[0], neighbour[0], face);
-                    if (neighbour[1] < band[1]) add(out, key, x, y, neighbour[1], band[1], face);
-                }
-            }
-        }
-        return List.copyOf(out);
+        double back = key.thickness.back(key.depth);
+        double front = key.thickness.front(key.depth);
+        if (key.layer == Layer.FRONT_CASING) { back = front; front++; }
+        if (key.layer == Layer.BACK_CASING) { front = back; back--; }
+        return io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceGeometry.surfaces(
+                DoorArchFitPlan.topFor(key.door), Side.LEFT, key.column, key.row, back, front, "");
     }
-    private static void add(List<Surface> out, Key key, int x, int y, double back, double front, Direction face) {
-        // Side UVs must not cross a donor tile, including rear casings straddling z=0.
-        if (face.getAxis() != Direction.Axis.Z) {
-            double boundary = (Math.floor(back / 16) + 1) * 16;
-            if (boundary < front) {
-                add(out, key, x, y, back, boundary, face);
-                add(out, key, x, y, boundary, front, face);
-                return;
-            }
-        }
-        var surface = new Surface(new Box(x - key.column * 16, y - key.row * 16, back,
-                x - key.column * 16 + 1, y - key.row * 16 + 1, front), face, "");
-        out.add(surface);
-    }
-
     /** Whole static frame in door coordinates; target proxies remain in occupied depth cells. */
     public static List<Box> selection(DoorDesign door, DoorArchAttachment attachment, boolean target) {
         var out = new ArrayList<Box>();

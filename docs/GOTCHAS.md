@@ -393,3 +393,8 @@ Non-wood does not mean masonry: BLOCK_SURFACE must use donor sprites without mor
 - Door model cache keys include design, panel look, leaf/item variant and both hardware slots. Stack viewer keys include raw hardware custody. Resource reload clears model and donor caches.
 
 - Donor acquisition first tests visible surfaces for hardware, then falls back to empty camouflage targets. Otherwise an invisible far corner can mask an open hinge. Buried hardware is subtracted against installed static geometry so casing targets keep ownership. Check both world interaction and item-use permission for every assembly cell.
+
+- Fitted surfaces must share ArchPieceGeometry's merged cell faces. Do not restore per-pixel
+  front/back polygons: masonry clipping amplifies them. Apply normal separation after merging;
+  never change selection volumes to solve a render-plane problem. Historical FPS census numbers
+  must name the geometry revision: the 0.17.0 raised crown changes the baseline substantially.
