@@ -31,9 +31,7 @@ public final class DoorArchInteraction {
         if(frame.product()!=DoorArchFitPlan.topFor(door.design())) return Optional.empty();
         var point=door.toAuthored(DoorHitResolver.insidePoint(hit)).add(0,0,door.depth().offset());
         if(DoorArchGeometry.selection(door.design(),frame,true).stream().noneMatch(b->point.x>=b.minX()-1e-6 && point.x<=b.maxX()+1e-6 && point.y>=b.minY()-1e-6 && point.y<=b.maxY()+1e-6 && point.z>=b.minZ()-1e-6 && point.z<=b.maxZ()+1e-6)) return Optional.empty();
-        int x=Math.max(0,Math.min(frame.product().width()-1,(int)Math.floor(point.x))),y=Math.max(0,Math.min(frame.product().height()-1,(int)Math.floor(point.y)-16*DoorArchFitPlan.topOffset(door.design())));
-        double back=frame.thickness()==io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL?DoorArchClearance.back(door.design(),x,y):frame.depth().back();
-        double front=frame.thickness()==io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL?16:back+3;
+        double back=frame.thickness().back(frame.depth()),front=frame.thickness().front(frame.depth());
         return Optional.of(new Hit(entity,door,AttachmentFace.at(point.z,(back+front)/2),hit.getDirection().getAxis()==door.facing().getAxis()));
     }
     public static InteractionResult use(Hit hit, Level level, BlockPos pos, Player player, InteractionHand hand) {

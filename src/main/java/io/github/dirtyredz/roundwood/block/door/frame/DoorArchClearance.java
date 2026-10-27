@@ -19,7 +19,7 @@ public final class DoorArchClearance {
     private static final ConcurrentHashMap<DoorDesign, double[][]> REBATES = new ConcurrentHashMap<>();
     private DoorArchClearance() {}
 
-    public static double back(DoorDesign design, int x, int y) { return REBATES.computeIfAbsent(design, DoorArchClearance::rebate)[x][y]; }
+    private static double back(DoorDesign design, int x, int y) { return REBATES.computeIfAbsent(design, DoorArchClearance::rebate)[x][y]; }
     public static boolean accepts(DoorDesign design, ArchPieceThickness thickness, ArchPieceDepth depth) {
         if (thickness == ArchPieceThickness.FULL) return depth == ArchPieceDepth.FRONT;
         if (depth == ArchPieceDepth.BACK) return false;

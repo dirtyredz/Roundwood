@@ -34,8 +34,8 @@ follow the slab and keep independent looks. See [feature notes](docs/FEATURES.md
 
 **Fitted arches (0.16.0).** Ordinary-click a matching top with a Roundwood door, or a door
 with its matching top. Arched 1x2 takes Top 1x1; Round 2x2 takes Top 1x2; both paired doors
-take Top 2x3. The preview shows the BACK leaf and static frame. Full tops gain a shallow rear
-recess; thin tops fit at MIDDLE or FRONT. Frame and door appearances/casings stay independent,
+take Top 2x3. The preview shows the BACK leaf and static frame. Full tops are unchanged from the
+standalone arch (the swinging leaf may clip through them); thin tops fit at MIDDLE or FRONT. Frame and door appearances/casings stay independent,
 and harvesting any owned cell yields separate components. Red outlines indicate refused fits.
 Vanilla/other-mod doors and shoulders do not use same-cell fitting. Inspect all twelve fitted
 examples with /roundwood showcase. See [0.16.0 release notes](docs/releases/0.16.0.md).

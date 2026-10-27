@@ -91,7 +91,8 @@ class FramedDoorFacesTest {
                         for(var surface:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.surfaces(design,thickness,depth,layer,col,row))
                             frames.add(new Surface(surface.backing().translate(col*16,row*16+16*io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topOffset(design),0),surface.face(),layer.name()));
                 var doors=new ArrayList<Surface>();
-                for(var hinge:DoorHingeSide.values()) for(boolean open:new boolean[]{false,true})
+                // Full frames match the standalone arch, so the swinging leaf may pass through them (owner-accepted); only the closed leaf is guarded, and back-to-back opposed faces at the jamb are hidden contact, not z-fighting.
+                for(var hinge:DoorHingeSide.values()) for(boolean open:thickness==io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL?new boolean[]{false}:new boolean[]{false,true})
                     for(var piece:DoorGeometry.leaf(design,hinge)) for(var side:Direction.values()) {
                         var box=open?DoorGeometry.swing(design,piece.box(),hinge):piece.box();
                         var normal=!open||side.getAxis()==Direction.Axis.Y?side:hinge==DoorHingeSide.LEFT?side.getCounterClockWise():side.getClockWise();
@@ -100,7 +101,7 @@ class FramedDoorFacesTest {
                 for(var part:DoorLayout.Part.of(design)) for(var face:AttachmentFace.values())
                     for(var surface:DoorTrimGeometry.surfaces(design,face,part.columnIndex(),part.row()))
                         doors.add(new Surface(surface.backing().translate(part.columnIndex()*16,part.row()*16,-13),surface.face(),"door casing"));
-                for(var frame:frames) for(var door:doors) assertFalse(overlap(frame,door),()->design+" "+thickness+" "+depth+" "+frame+" / "+door);
+                for(var frame:frames) for(var door:doors) assertFalse(thickness==io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL&&frame.face()==door.face().getOpposite()?false:overlap(frame,door),()->design+" "+thickness+" "+depth+" "+frame+" / "+door);
             }
     }
 

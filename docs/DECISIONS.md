@@ -4,7 +4,7 @@ Newest first.
 
 ## 2026-10-26 - Same-cell Roundwood fitting (0.16.0)
 
-Fitted Roundwood tops supersede the adjacent-layers-only recommendation for matching Roundwood doors. Same-cell support uses an anchor attachment rather than combination block IDs; vanilla and other-mod doors remain separate-cell placements. BACK leaf depth and a conservative rear rebate preserve the existing swing, hardware and front curve. Independent frame geometry stays outside door transforms and projected-leaf transport.
+Fitted Roundwood tops supersede the adjacent-layers-only recommendation for matching Roundwood doors. Same-cell support uses an anchor attachment rather than combination block IDs; vanilla and other-mod doors remain separate-cell placements. The leaf sits at BACK depth. A fitted FULL top is geometrically identical to the standalone full arch (no rear rebate): the owner disliked the cut-away on the arch front and accepted that the swinging leaf may clip through the arch (2026-10-26). This supersedes the earlier conservative-rebate decision; clearance bounds now only gate thin MIDDLE/FRONT eligibility. Independent frame geometry stays outside door transforms and projected-leaf transport.
 
 ## 2026-10-26 - Separate thin arch products
 

@@ -374,6 +374,6 @@
   by 3/4 before the shared -16 shift. Renderer and item display transforms restore Y; board UVs
   use authored coordinates and a 64px square extent. Do not author elements up to y=48.
 
-Fitted-frame clearance must include hardware and both hinges throughout the continuous swing. Endpoint-only or unbounded sampled-angle checks are insufficient. Unknown `DoorArch` payloads must round-trip unchanged; clients receive a locked marker rather than inventing an editable empty frame.
+Thin fitted-frame eligibility (full frames are not rebated and may be clipped by the swing) must include hardware and both hinges throughout the continuous swing. Endpoint-only or unbounded sampled-angle checks are insufficient. Unknown `DoorArch` payloads must round-trip unchanged; clients receive a locked marker rather than inventing an editable empty frame.
 
 An empty arch collision shape still occupies its block positions. Only explicit compatible fitted-top conversion may replace those positions. Both fitting orders take precedence over toggle/camouflage; unsupported fits are refused with a hint and a red preview. Vanilla/other-mod doors remain separate-cell placements, and shoulders cannot become fitted tops.

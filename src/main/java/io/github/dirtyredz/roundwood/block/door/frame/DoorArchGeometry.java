@@ -36,8 +36,9 @@ public final class DoorArchGeometry {
 
     private static double[] band(DoorDesign door, ArchPieceThickness thickness, ArchPieceDepth depth, Layer layer, int x, int y) {
         if (!DoorArchFitPlan.topFor(door).contains(Side.LEFT, x, y)) return null;
-        double back = thickness == ArchPieceThickness.FULL ? DoorArchClearance.back(door, x, y) : depth.back();
-        double front = thickness == ArchPieceThickness.FULL ? 16 : back + 3;
+        // Identical to the standalone arch piece: no rebate for the door leaf.
+        double back = thickness.back(depth);
+        double front = thickness.front(depth);
         return switch (layer) {
             case BODY -> new double[]{back, front};
             case FRONT_CASING -> new double[]{front, front + 1};

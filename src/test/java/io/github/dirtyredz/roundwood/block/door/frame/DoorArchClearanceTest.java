@@ -31,10 +31,10 @@ class DoorArchClearanceTest {
         }
     }
 
-    @Test void fullRebatesAndEligibleThinPlanesClearBothHingesAndAllHardware() {
+    @Test void eligibleThinPlanesClearBothHingesAndAllHardware() {
         for (var door : DoorDesign.values()) {
             assertFalse(DoorArchClearance.accepts(door, ArchPieceThickness.THIN, ArchPieceDepth.BACK));
-            for (var thickness : ArchPieceThickness.values()) for (var depth : ArchPieceDepth.values()) {
+            for (var thickness : new ArchPieceThickness[]{ArchPieceThickness.THIN}) for (var depth : ArchPieceDepth.values()) {
                 if (!DoorArchClearance.accepts(door, thickness, depth)) continue;
                 var frame = new ArrayList<Box>();
                 for (var layer : DoorArchGeometry.Layer.values())
@@ -51,7 +51,7 @@ class DoorArchClearanceTest {
         }
     }
 
-    @Test void frontMasksStayExactAndRearCasingsKeepCompleteOnePixelCoverage() {
+    @Test void fittedFullArchEqualsStandaloneFullArchAndRearCasingsKeepOnePixelCoverage() {
         for (var door : DoorDesign.values()) {
             var top = DoorArchFitPlan.topFor(door);
             var bodies = DoorArchGeometry.boxes(door, ArchPieceThickness.FULL, ArchPieceDepth.FRONT, DoorArchGeometry.Layer.BODY);
@@ -60,7 +60,7 @@ class DoorArchClearanceTest {
             for (int i = 0; i < bodies.size(); i++) {
                 var body = bodies.get(i); var casing = backs.get(i);
                 assertEquals(16, body.maxZ());
-                assertTrue(body.minZ() < 8, "rear recess remains less than half depth");
+                assertEquals(0, body.minZ(), "no rebate: back face at the standalone full arch depth");
                 assertEquals(body.minZ(), casing.maxZ());
                 assertEquals(1, casing.maxZ() - casing.minZ(), 1e-12);
             }
