@@ -366,3 +366,8 @@ The first full review found no correctness problems. The debt is tracked in Dock
 `appearance/material/SurfaceMaterials` owns the exact block-finish allowlist and wax normalization. `client/door/DoorSurfaceModels` tiles donor panels before tall-model compression. SurfaceMaterialsTest, DoorSurfaceModelsTest and SurfaceFinishGameTests cover kind compatibility, UVs, cache distinction and payment.
 
 `showcase/section/door/DoorHardwareSection` adds four bounded component examples beside the fitted row. `HardwareShowcaseChecks` is shared by the focused hardware showcase GameTest and full showcase suite. WindowEdgesSection owns the 3x3 frameless-centre example; MaterialsSection owns the fourteen distinct donor blocks.
+
+- Fitted render surfaces in `block/door/frame/DoorArchGeometry` reuse the standalone
+  `ArchPieceGeometry` merged builder. Logical selection volumes stay in the door module.
+  `src/test/resources/fps/fitted-corpus.json` pins the diagnostic census's 135 fitted inputs;
+  `client/arch/FittedCorpusTest` enforces the production-baked 9,000-quad budget.

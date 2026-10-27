@@ -778,3 +778,8 @@ Door hardware has two assembly-wide optional finishes, HINGES and KNOBS; missing
 A donor-mode ray acquires actual endpoint hardware. DoorHardwareTarget checks nearest panel/frame/casing/world surfaces, permissions, complete loaded assembly and the server/client swing timeline. The same proposal drives preview and payment; moving, stale, blocked and opaque requests consume the interaction without payment or toggle. Editing resumes after settling (eight ticks for a full swing, scaled for reversal).
 
 DoorHardware Version 1 stores two independently optional appearances. Missing means brass; updates explicitly clear absent slots. Unknown versions, fields and nested data remain opaque on disk and on harvested door items. Checked stacks refuse lossy placement. The shared installer initializes hardware within its rollback transaction, including door-into-arch fitting. Pick and loot decorate only the door item; hardware has no raw donor refund.
+
+Fitted bodies/casings now use the standalone merged surface builder (0.17.0). The render-only
+normal offsets still apply afterward. This reduces geometry emitted by the existing BER; static
+chunk migration and its cross-section invalidation are not implemented yet. Leaves remain on
+the BER in every pose, preserving animation ownership while chunk uploads can be delayed.

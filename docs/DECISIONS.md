@@ -958,3 +958,17 @@ consolidation and 8,622 after (the old report's 46,074 baseline used the older c
 The first paired JDK 17, 512 MiB counting-consumer run measured 4,109,760 -> 1,379,552 B/pass
 and 18.091 -> 6.027 ms/pass. These exclude real world AO, buffer upload and client frame times.
 The regression budget remains 9,000 fitted quads and 1.45 MB/pass; no noisy timing assertion in CI.
+
+Static chunk migration is not part of this implementation. Front door casings currently select
+an adjacent lighting cell but translate their geometry back to the door; owner-cell chunk baking
+must explicitly validate this AO/light difference. Camouflage must retain donor-state tinting.
+The snapshot/invalidation and zero-static-BER acceptance remain outstanding, so the experimental
+migration was removed. Leaves retain BER ownership at all poses: delayed chunk uploads have no
+proven bounded handoff to swinging geometry. Neither static nor idle-leaf BER removal is claimed.
+
+Benchmark recipe: replay the captured census with the stage-2 FpsMicrobenchTest harness from
+fps-diag, JDK 17.0.20.1, -Xms512m -Xmx512m, four 150 ms warmups and seven >=200 ms batches.
+For the 0.17.0 paired run, retain the pre-merge DoorArchGeometry as FpsBaselineGeometry and apply
+the current SurfaceSeparation to both paths; the candidate calls production DoorArchRenderer.surfaces.
+Use a separate output/class directory, never Gradle's build/classes/java/test (test discovery scans it).
+Coverage and baked area by normal/colour must match before recording timings. No client FPS is inferred.
