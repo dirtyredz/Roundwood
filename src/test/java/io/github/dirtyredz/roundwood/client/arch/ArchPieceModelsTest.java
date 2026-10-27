@@ -37,9 +37,11 @@ class ArchPieceModelsTest {
                         var top=io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topFor(door);
                         for(var layer:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.values()) for(var cell:ArchPieceCell.of(top))
                             for(var facing:Direction.Plane.HORIZONTAL) for(boolean masonry:new boolean[]{false,true}) {
-                                var quads=ArchPieceModels.bakeSurfaces(top,cell,
-                                        io.github.dirtyredz.roundwood.client.door.DoorArchModels.surfaces(door,thickness,depth,layer,cell.column,cell.row),facing,sprite,masonry);
-                                for(var quad:quads) {if(masonry) checkUvDeltas(quad,sprite);else checkQuad(quad,sprite);}
+                                var quads=io.github.dirtyredz.roundwood.client.door.DoorArchModels.quads(door,thickness,depth,layer,cell,facing,sprite,masonry);
+                                double back=thickness.back(depth),front=thickness.front(depth);
+                                if(layer==io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.FRONT_CASING){back=front;front++;}
+                                if(layer==io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.BACK_CASING){front=back;back--;}
+                                for(var quad:quads) checkUvDeltas(authored(quad,facing,back,front,layer==io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.BODY?1.0/256:2.0/256),sprite);
                                 area(quads);
                             }
                     }
@@ -53,11 +55,11 @@ class ArchPieceModelsTest {
                 for (var depth : io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.values())
                     for (var facing : Direction.Plane.HORIZONTAL) for (boolean masonry : new boolean[]{false, true}) {
                         var body = ArchPieceModels.quads(design, side, cell, depth.back(), depth.back() + 3, facing, sprite, masonry, ArchPieceModels.Layer.BODY);
-                        for (var quad : body) { if (masonry) checkUvDeltas(quad, sprite); else checkQuad(quad, sprite); }
+                        for (var quad : body) checkUvDeltas(authored(quad,facing,depth.back(),depth.back()+3,1.0/256),sprite);
                         for (var face : AttachmentFace.values()) {
                             var band = ArchPieceTrimGeometry.depth(face, depth.back(), depth.back() + 3);
                             var casing = ArchPieceModels.quads(design, side, cell, band[0], band[1], facing, sprite, masonry, ArchPieceModels.Layer.CASING);
-                            for (var quad : casing) { if (masonry) checkUvDeltas(quad, sprite); else checkQuad(quad, sprite); }
+                            for (var quad : casing) checkUvDeltas(authored(quad,facing,band[0],band[1],2.0/256),sprite);
                             // A contact surface must move along its normal, including jamb/reveal faces.
                             var unseparated = ArchPieceModels.quads(design, side, cell, band[0], band[1], facing, sprite, masonry, ArchPieceModels.Layer.BODY);
                             if (masonry) continue;
@@ -80,7 +82,7 @@ class ArchPieceModelsTest {
                         var quads = ArchPieceModels.quads(design, side, cell, depth[0], depth[1], facing, sprite, false, depth[1] - depth[0] == 1 ? ArchPieceModels.Layer.CASING : ArchPieceModels.Layer.BODY);
                         boolean empty = design == ArchPieceDesign.TOP_2X3 && cell.column == 1 && cell.row == 0;
                         assertEquals(empty, quads.isEmpty());
-                        for (var quad : quads) { seen.add(quad.getDirection()); checkQuad(quad, sprite); }
+                        for (var quad : quads) { seen.add(quad.getDirection()); checkUvDeltas(authored(quad,facing,depth[0],depth[1],depth[1]-depth[0]==1?2.0/256:1.0/256),sprite); }
                     }
                 }
             assertEquals(EnumSet.allOf(Direction.class), seen);
@@ -108,10 +110,10 @@ class ArchPieceModelsTest {
                     assertTrue(plain.stream().noneMatch(q -> q.getVertices()[3] == ArchMasonryModels.MORTAR), "wood has no mortar");
                     mortarQuads += masonry.stream().filter(q -> q.getVertices()[3] == ArchMasonryModels.MORTAR).count();
                     assertEquals(area(plain), area(masonry), 1e-4, "partition must preserve total drawn area");
-                    var body = planarSignature(masonry, facing);
+                    var body = planarSignature(masonry.stream().map(q->authored(q,facing,0,16,1.0/256)).toList(), facing);
                     for (double[] depth : new double[][]{{16,17},{-1,0}})
-                        assertEquals(body, planarSignature(ArchPieceModels.quads(design, side, cell, depth[0], depth[1], facing, sprite, true, ArchPieceModels.Layer.CASING), facing));
-                    for (var quad : masonry) checkUvDeltas(quad, sprite);
+                        assertEquals(body, planarSignature(ArchPieceModels.quads(design, side, cell, depth[0], depth[1], facing, sprite, true, ArchPieceModels.Layer.CASING).stream().map(q->authored(q,facing,depth[0],depth[1],2.0/256)).toList(), facing));
+                    for (var quad : masonry) checkUvDeltas(authored(quad,facing,0,16,1.0/256), sprite);
                 }
             assertTrue(mortarQuads > 0, "masonry quads carry the darkened donor colour");
             for (var design : ArchPieceDesign.values()) for (boolean masonry : new boolean[]{false,true}) {
@@ -181,49 +183,18 @@ class ArchPieceModelsTest {
         }
     }
 
-    private static void checkQuad(BakedQuad quad, Sprite sprite) {
-        int[] vertices = quad.getVertices();
-        int stride = vertices.length / 4;
-        double[][] projected = new double[4][];
-        double[] min = {Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
-        double[] max = {Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
-        for (int vertex = 0; vertex < 4; vertex++) {
-            int i = vertex * stride;
-            double x = Float.intBitsToFloat(vertices[i]) * 16;
-            double y = Float.intBitsToFloat(vertices[i + 1]) * 16;
-            double z = Float.intBitsToFloat(vertices[i + 2]) * 16;
-            // Independent vanilla projection, including signs: vertical V always decreases with Y.
-            projected[vertex] = switch (quad.getDirection()) {
-                case DOWN -> new double[] {x, 16 - z};
-                case UP -> new double[] {x, z};
-                case NORTH -> new double[] {16 - x, 16 - y};
-                case SOUTH -> new double[] {x, 16 - y};
-                case WEST -> new double[] {z, 16 - y};
-                case EAST -> new double[] {16 - z, 16 - y};
-            };
-            for (int axis = 0; axis < 2; axis++) {
-                min[axis] = Math.min(min[axis], projected[vertex][axis]);
-                max[axis] = Math.max(max[axis], projected[vertex][axis]);
-            }
+    /** Undo only the specified render separation before checking the authored donor scale. */
+    private static BakedQuad authored(BakedQuad q,Direction facing,double back,double front,double epsilon) {
+        var data=q.getVertices().clone();int stride=data.length/4;
+        int turns=io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory.quarterTurns(facing);
+        for(int i=0;i<data.length;i+=stride) {
+            double x=Float.intBitsToFloat(data[i])*16,y=Float.intBitsToFloat(data[i+1])*16,z=Float.intBitsToFloat(data[i+2])*16;
+            for(int t=0;t<(4-turns)%4;t++){double nx=16-z;z=x;x=nx;}
+            x+=x<0?epsilon:-epsilon;y+=y<0?epsilon:-epsilon;
+            z=back+(z-(back-epsilon))*(front-back)/(front-back+2*epsilon);
+            for(int t=0;t<turns;t++){double nx=16-z;z=x;x=nx;}
+            data[i]=Float.floatToRawIntBits((float)(x/16));data[i+1]=Float.floatToRawIntBits((float)(y/16));data[i+2]=Float.floatToRawIntBits((float)(z/16));
         }
-        for (int axis = 0; axis < 2; axis++) {
-            assertTrue(max[axis] > min[axis], "nonzero geometric span");
-            double offset = Math.floor(min[axis] / 16) * 16;
-            double centre = (min[axis] + max[axis]) / 2 - offset;
-            double uvMin = Double.POSITIVE_INFINITY, uvMax = Double.NEGATIVE_INFINITY;
-            for (int vertex = 0; vertex < 4; vertex++) {
-                double atlasUv = Float.intBitsToFloat(vertices[vertex * stride + 4 + axis]);
-                double uv = axis == 0 ? sprite.getUOffset((float) atlasUv) : sprite.getVOffset((float) atlasUv);
-                // FaceBakery shrinks toward the centre, then fillVertex mixes 0.999 of this corner
-                // with 0.001 of the opposite corner. Undo both vanilla anti-bleed insets only.
-                double unshrunk = centre + (uv - centre) / ((1 - sprite.uvShrinkRatio()) * 0.998);
-                assertEquals(projected[vertex][axis] - offset, unshrunk, 0.0001,
-                        quad.getDirection() + " vertex " + vertex + " UV axis " + axis);
-                assertTrue(uv >= 0 && uv <= 16, "UV stays inside its sprite");
-                uvMin = Math.min(uvMin, unshrunk);
-                uvMax = Math.max(uvMax, unshrunk);
-            }
-            assertEquals(max[axis] - min[axis], uvMax - uvMin, 0.0001, "UV span equals geometric extent");
-        }
+        return new BakedQuad(data,q.getTintIndex(),q.getDirection(),q.getSprite(),q.isShade(),q.hasAmbientOcclusion());
     }
 }

@@ -89,7 +89,7 @@ class ChunkSectionRebuildTest {
                 System.out.printf("Census section %s: models=%d quads=%d cold=%.3f ms warm-median=%.3f ms%n",
                         entry.getKey(), models.size(), quads.size(), cold, warm[2]/1e6);
             }
-            assertEquals(8622, fitted);
+            assertEquals(13410, fitted);
             System.out.printf("Census total: %d sections, %d static submissions -> 0 in chunk mode, %d pre-lighting quads%n", sections.size(), draws.size(), total);
         }
     }
@@ -128,7 +128,7 @@ class ChunkSectionRebuildTest {
                 var mat = layer == DoorArchGeometry.Layer.BODY ? frame.getCompound("Appearance") : frame.getCompound("Casings").getCompound(address).getCompound("RoundwoodAppearance");
                 boolean masonry = mat.getString("Kind").equals("masonry");
                 for (var cell : ArchPieceCell.of(product)) draws.add(new Draw("fitted", sample.position().above(DoorArchFitPlan.topOffset(design)+cell.row).relative(facing.getClockWise(), cell.column),
-                        () -> ArchPieceModels.bakeSurfaces(product, cell, DoorArchModels.surfaces(design, thickness, depth, layer, cell.column, cell.row), facing, sprite, masonry)));
+                        () -> DoorArchModels.quads(design,thickness,depth,layer,cell,facing,sprite,masonry)));
             }
         }
         if (nbt.contains("Camouflage")) for (var part : assembly.parts()) draws.add(new Draw("camouflage", assembly.pos(part), () -> {

@@ -32,7 +32,7 @@ public final class DoorArchModels {
                                          ArchPieceDepth depth, DoorArchGeometry.Layer layer,
                                          int column, int row) {
         return (layer == DoorArchGeometry.Layer.BODY ? SurfaceSeparation.ARCH_BODY : SurfaceSeparation.ARCH_CASING)
-                .apply(DoorArchGeometry.surfaces(design, thickness, depth, layer, column, row));
+                .apply(DoorArchGeometry.surfaces(design, thickness, depth, layer, column, row),column*16,row*16);
     }
 
     public static BakedModel cell(DoorDesign design, Direction facing, ArchPieceThickness thickness,
@@ -40,9 +40,20 @@ public final class DoorArchModels {
                                    ArchPieceModels.Look material) {
         return MODELS.get(new Key(design, facing, thickness, depth, layer, cell, material), key -> {
             var sprite = DonorSprites.atlas(key.material.texture());
-            return GeneralQuadModels.world(ArchPieceModels.bakeSurfaces(DoorArchFitPlan.topFor(key.design), key.cell,
-                    surfaces(key.design, key.thickness, key.depth, key.layer, key.cell.column, key.cell.row),
-                    key.facing, sprite, key.material.masonry()), sprite);
+            return GeneralQuadModels.world(quads(key.design,key.thickness,key.depth,key.layer,key.cell,
+                    key.facing,sprite,key.material.masonry()),sprite);
         });
+    }
+
+    /** Explicit complete-layer inputs: neighboring cells participate in edge repair before baking. */
+    public static List<net.minecraft.client.renderer.block.model.BakedQuad> quads(DoorDesign design,
+            ArchPieceThickness thickness,ArchPieceDepth depth,DoorArchGeometry.Layer layer,ArchPieceCell cell,
+            Direction facing,net.minecraft.client.renderer.texture.TextureAtlasSprite sprite,boolean masonry) {
+        double back=thickness.back(depth),front=thickness.front(depth);
+        if(layer==DoorArchGeometry.Layer.FRONT_CASING){back=front;front++;}
+        if(layer==DoorArchGeometry.Layer.BACK_CASING){front=back;back--;}
+        return ArchPieceModels.quads(DoorArchFitPlan.topFor(design),
+                io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side.LEFT,cell,back,front,facing,sprite,masonry,
+                layer==DoorArchGeometry.Layer.BODY?ArchPieceModels.Layer.BODY:ArchPieceModels.Layer.CASING);
     }
 }

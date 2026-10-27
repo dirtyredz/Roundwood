@@ -78,9 +78,9 @@ public final class ArchPieceModels {
                                   Direction facing, TextureAtlasSprite sprite, boolean masonry) {
         return quads(design, side, cell, back, front, facing, sprite, masonry, Layer.BODY);
     }
-    static List<BakedQuad> quads(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front,
+    public static List<BakedQuad> quads(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front,
                                   Direction facing, TextureAtlasSprite sprite, boolean masonry, Layer layer) {
-        return bakeSurfaces(design, cell, renderSurfaces(design, side, cell, back, front, layer), facing, sprite, masonry);
+        return ArchMeshModels.quads(design,side,cell,back,front,facing,sprite,masonry,layer==Layer.BODY?1.0/256:2.0/256);
     }
 
     public static List<io.github.dirtyredz.roundwood.geometry.Surface> renderSurfaces(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front, Layer layer) {
@@ -88,22 +88,7 @@ public final class ArchPieceModels {
                 ? ArchPieceGeometry.surfaces(design, side, cell.column, cell.row, back, front, "")
                 : ArchPieceTrimGeometry.surfaces(design, side, cell.column, cell.row, back, front, "");
         return (layer == Layer.BODY ? io.github.dirtyredz.roundwood.client.render.SurfaceSeparation.ARCH_BODY
-                : io.github.dirtyredz.roundwood.client.render.SurfaceSeparation.ARCH_CASING).apply(raw);
-    }
-
-    /** Shared donor/masonry bake for standalone and fitted volumes. */
-    public static List<BakedQuad> bakeSurfaces(ArchPieceDesign design, ArchPieceCell cell,
-            List<io.github.dirtyredz.roundwood.geometry.Surface> surfaces, Direction facing, TextureAtlasSprite sprite, boolean masonry) {
-        int turns = VoxelShapeFactory.quarterTurns(facing);
-        List<BakedQuad> quads = new ArrayList<>();
-        var joints = masonry ? ArchMasonryModels.joints(design) : List.<List<ArchMasonryModels.Point>>of();
-        for (var surface : surfaces) {
-            var quad = SurfaceQuadBaker.bake(surface.backing().rotateY(turns), VoxelShapeFactory.turn(surface.face(), turns), sprite);
-            if (masonry && surface.face().getAxis() == Direction.Axis.Z)
-                quads.addAll(ArchMasonryModels.bake(surface, quad, cell.column * 16, cell.row * 16, turns, joints));
-            else quads.add(quad);
-        }
-        return List.copyOf(quads);
+                : io.github.dirtyredz.roundwood.client.render.SurfaceSeparation.ARCH_CASING).apply(raw,cell.column*16,cell.row*16);
     }
 
     public static BakedModel item(ArchPieceDesign design, BakedModel oak, Appearance appearance) {

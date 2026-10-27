@@ -95,14 +95,14 @@ class DoorArchBakedFacesTest {
     private static List<Rect> frames(DoorDesign design,ArchPieceThickness thickness,ArchPieceDepth depth,Direction facing,TextureAtlasSprite sprite,int adjacent) {
         var top=DoorArchFitPlan.topFor(design); var out=new ArrayList<Rect>();
         for(var cell:ArchPieceCell.of(top)) for(var layer:DoorArchGeometry.Layer.values()) {
-            List<Surface> surfaces;
-            if(adjacent==0) surfaces=DoorArchModels.surfaces(design,thickness,depth,layer,cell.column,cell.row);
-            else if(layer==DoorArchGeometry.Layer.BODY) surfaces=ArchPieceModels.renderSurfaces(top,KeyholeShoulderProfile.Side.LEFT,cell,0,16,ArchPieceModels.Layer.BODY);
+            List<BakedQuad> quads;
+            if(adjacent==0) quads=DoorArchModels.quads(design,thickness,depth,layer,cell,facing,sprite,false);
+            else if(layer==DoorArchGeometry.Layer.BODY) quads=ArchPieceModels.quads(top,KeyholeShoulderProfile.Side.LEFT,cell,0,16,facing,sprite,false,ArchPieceModels.Layer.BODY);
             else {
                 var band=ArchPieceTrimGeometry.depth(layer==DoorArchGeometry.Layer.FRONT_CASING?AttachmentFace.FRONT:AttachmentFace.BACK);
-                surfaces=ArchPieceModels.renderSurfaces(top,KeyholeShoulderProfile.Side.LEFT,cell,band[0],band[1],ArchPieceModels.Layer.CASING);
+                quads=ArchPieceModels.quads(top,KeyholeShoulderProfile.Side.LEFT,cell,band[0],band[1],facing,sprite,false,ArchPieceModels.Layer.CASING);
             }
-            for(var quad:ArchPieceModels.bakeSurfaces(top,cell,surfaces,facing,sprite,false))
+            for(var quad:quads)
                 out.add(rectangle(quad,p->{
                     // Undo the baker's per-cell facing, add the authored cell origin, then apply the world pose.
                     double x=p[0],z=p[2];
