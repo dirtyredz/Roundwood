@@ -80,12 +80,18 @@ public final class ArchPieceModels {
     }
     static List<BakedQuad> quads(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front,
                                   Direction facing, TextureAtlasSprite sprite, boolean masonry, Layer layer) {
+        return bakeSurfaces(design, cell, layer == Layer.BODY
+                ? ArchPieceGeometry.surfaces(design, side, cell.column, cell.row, back, front, "")
+                : ArchPieceTrimGeometry.surfaces(design, side, cell.column, cell.row, back, front, ""), facing, sprite, masonry);
+    }
+
+    /** Shared donor/masonry bake for standalone and fitted volumes. */
+    public static List<BakedQuad> bakeSurfaces(ArchPieceDesign design, ArchPieceCell cell,
+            List<io.github.dirtyredz.roundwood.geometry.Surface> surfaces, Direction facing, TextureAtlasSprite sprite, boolean masonry) {
         int turns = VoxelShapeFactory.quarterTurns(facing);
         List<BakedQuad> quads = new ArrayList<>();
         var joints = masonry ? ArchMasonryModels.joints(design) : List.<List<ArchMasonryModels.Point>>of();
-        for (var surface : layer == Layer.BODY
-                ? ArchPieceGeometry.surfaces(design, side, cell.column, cell.row, back, front, "")
-                : ArchPieceTrimGeometry.surfaces(design, side, cell.column, cell.row, back, front, "")) {
+        for (var surface : surfaces) {
             var quad = SurfaceQuadBaker.bake(surface.backing().rotateY(turns), VoxelShapeFactory.turn(surface.face(), turns), sprite);
             if (masonry && surface.face().getAxis() == Direction.Axis.Z)
                 quads.addAll(ArchMasonryModels.bake(surface, quad, cell.column * 16, cell.row * 16, turns, joints));

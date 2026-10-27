@@ -928,3 +928,5 @@ everything else references vanilla textures by resource location and never copie
 ## 2026-10-20 - No RedzCore dependency
 
 Nothing here is used by a second mod yet (workspace rule).
+
+Fitted Roundwood tops supersede the adjacent-layers-only recommendation for matching Roundwood doors. Same-cell support uses an anchor attachment rather than combination block IDs; vanilla and other-mod doors remain separate-cell placements. BACK leaf depth and a conservative rear rebate preserve the existing swing, hardware and front curve. Independent frame geometry stays outside door transforms and projected-leaf transport.

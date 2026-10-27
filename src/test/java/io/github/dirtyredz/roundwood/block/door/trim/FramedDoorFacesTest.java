@@ -80,6 +80,30 @@ class FramedDoorFacesTest {
         assertFalse(overlap(a,new Surface(new Box(1,0,1,2,1,2),Direction.NORTH,"")));
     }
 
+    @Test void fittedFrameSurfacesDoNotFightLeafHardwareOrDoorCasings() {
+        for(var design:DoorDesign.values()) for(var thickness:io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.values())
+            for(var depth:io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.values()) {
+                if(!io.github.dirtyredz.roundwood.block.door.frame.DoorArchClearance.accepts(design,thickness,depth)) continue;
+                var top=io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topFor(design);
+                var frames=new ArrayList<Surface>();
+                for(var layer:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.values())
+                    for(int col=0;col<top.columns();col++) for(int row=0;row<top.rows();row++)
+                        for(var surface:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.surfaces(design,thickness,depth,layer,col,row))
+                            frames.add(new Surface(surface.backing().translate(col*16,row*16+16*io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topOffset(design),0),surface.face(),layer.name()));
+                var doors=new ArrayList<Surface>();
+                for(var hinge:DoorHingeSide.values()) for(boolean open:new boolean[]{false,true})
+                    for(var piece:DoorGeometry.leaf(design,hinge)) for(var side:Direction.values()) {
+                        var box=open?DoorGeometry.swing(design,piece.box(),hinge):piece.box();
+                        var normal=!open||side.getAxis()==Direction.Axis.Y?side:hinge==DoorHingeSide.LEFT?side.getCounterClockWise():side.getClockWise();
+                        doors.add(new Surface(box.translate(0,0,-13),normal,"leaf"));
+                    }
+                for(var part:DoorLayout.Part.of(design)) for(var face:AttachmentFace.values())
+                    for(var surface:DoorTrimGeometry.surfaces(design,face,part.columnIndex(),part.row()))
+                        doors.add(new Surface(surface.backing().translate(part.columnIndex()*16,part.row()*16,-13),surface.face(),"door casing"));
+                for(var frame:frames) for(var door:doors) assertFalse(overlap(frame,door),()->design+" "+thickness+" "+depth+" "+frame+" / "+door);
+            }
+    }
+
     static boolean overlap(Surface a, Surface b) {
         int axis = a.face().getAxis().ordinal();
         if (a.face().getAxis() != b.face().getAxis()) return false;

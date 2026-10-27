@@ -346,3 +346,5 @@ The first full review found no correctness problems. The debt is tracked in Dock
 `block/door/frame/` owns the fitted-top compatibility table, immutable attachment, strict versioned store, continuous swing clearance and recessed volumes/surfaces. Placement routing is added separately.
 
 `block/assembly/placement/AssemblyWriteTransaction` owns full-NBT rollback for installation and fitting, including unchanged-state cells. `block/arch/fitting/ArchDoorFitting` is the narrow bootstrap-bound port; arch adapters never import the door fitting implementation. `client/door/DoorArchPlacementPreview` draws the shared proposal and refusals.
+
+`client/door/DoorArchRenderer` draws fitted tops as static cell models, using the arch donor/masonry baker. `DoorArchInteraction` owns frame hit routing and independent trim hosts; `DoorArchLoot` appends component refunds during ordinary loot evaluation.

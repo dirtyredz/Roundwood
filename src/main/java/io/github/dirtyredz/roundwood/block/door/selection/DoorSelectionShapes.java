@@ -56,13 +56,13 @@ public final class DoorSelectionShapes {
     public static VoxelShape target(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
         int rings = holdsDoorTrim(context) ? 3 : installed(level, assembly);
-        return shape(state, holdsBlockItem(context) || filled(level, assembly), rings, true);
+        return Shapes.or(shape(state, (holdsBlockItem(context) && anchor(level, assembly).flatMap(RoundDoorBlockEntity::arch).isEmpty()) || filled(level, assembly), rings, true), frame(state, level, pos, true));
     }
 
     /** What is there to highlight: the leaf at rest, plus the filled corners and the installed rings. */
     public static VoxelShape visible(BlockState state, BlockGetter level, BlockPos pos) {
         DoorLayout.Assembly assembly = DoorLayout.of(pos, state);
-        return shape(state, filled(level, assembly), installed(level, assembly), false);
+        return Shapes.or(shape(state, filled(level, assembly), installed(level, assembly), false), frame(state, level, pos, false));
     }
 
     /**
@@ -74,7 +74,7 @@ public final class DoorSelectionShapes {
         boolean corners = filled(level, assembly);
         int rings = installed(level, assembly);
         if (!corners && rings == 0) {
-            return Shapes.empty();
+            return frame(state, level, pos, false);
         }
         DoorDesign design = assembly.design();
         int turns = VoxelShapeFactory.quarterTurns(state.getValue(DoorBlock.FACING));
@@ -82,11 +82,18 @@ public final class DoorSelectionShapes {
         int column = part.columnIndex();
         int row = part.row();
         var key = java.util.List.<Object>of(design, turns, part, corners, rings, assembly.depth());
-        return STATIC.computeIfAbsent(key, k -> {
+        return Shapes.or(frame(state, level, pos, false), STATIC.computeIfAbsent(key, k -> {
             List<Box> boxes = new ArrayList<>(corners ? CamouflageGeometry.corners(design) : List.of());
             addRings(boxes, design, rings, false, assembly.depth().offset());
             return VoxelShapeFactory.shape(VoxelShapeFactory.rotate(DoorOutlineGeometry.relativeTo(boxes.stream().map(b -> b.translate(0, 0, assembly.depth().offset())).toList(), column, row), turns));
-        });
+        }));
+    }
+
+    private static VoxelShape frame(BlockState state, BlockGetter level, BlockPos pos, boolean target) {
+        var door = DoorLayout.of(pos, state);
+        return anchor(level, door).flatMap(RoundDoorBlockEntity::arch).map(frame ->
+                io.github.dirtyredz.roundwood.block.door.frame.DoorArchShapes.of(door, frame, target)
+                        .move(door.anchor().getX()-pos.getX(), door.anchor().getY()-pos.getY(), door.anchor().getZ()-pos.getZ())).orElse(Shapes.empty());
     }
 
     private static VoxelShape shape(BlockState state, boolean corners, int rings, boolean target) {

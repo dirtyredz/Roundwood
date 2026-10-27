@@ -175,13 +175,27 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         Appearance appearance = DoorAppearance.forDrops(builder, state);
         DoorAppearance.ANCHORS.forLoot(builder, state).ifPresent(anchor -> builder.withParameter(LootContextParams.BLOCK_ENTITY, anchor));
-        return AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.DOOR, appearance);
+        var ordinary = AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.DOOR, appearance);
+        return DoorAppearance.ANCHORS.forLoot(builder, state).map(anchor ->
+                io.github.dirtyredz.roundwood.block.door.frame.DoorArchLoot.append(ordinary, anchor, this, builder)).orElse(ordinary);
     }
 
     /** Picking any part gives the door in its appearance. */
     @Override
     public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
         return AppearanceStacks.create(familyItem(), DoorAppearance.of(level, pos, state));
+    }
+
+    @Override
+    public ItemStack getCloneItemStack(BlockState state, net.minecraft.world.phys.HitResult target, BlockGetter level, BlockPos pos, Player player) {
+        if (target instanceof BlockHitResult hit) {
+            var frame = io.github.dirtyredz.roundwood.block.door.frame.DoorArchInteraction.hit(level, pos, state, hit);
+            if (frame.isPresent()) {
+                var attachment = frame.get().entity().arch().orElseThrow();
+                return AppearanceStacks.create(io.github.dirtyredz.roundwood.registry.ModBlocks.archPiece(attachment.product(), attachment.thickness()).asItem(), attachment.appearance());
+            }
+        }
+        return getCloneItemStack(level, pos, state);
     }
 
     @Override

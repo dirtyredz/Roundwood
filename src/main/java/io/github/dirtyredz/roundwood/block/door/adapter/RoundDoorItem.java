@@ -27,6 +27,7 @@ public class RoundDoorItem extends AppearanceBlockItem {
     }
 
     @Override public InteractionResult useOn(net.minecraft.world.item.context.UseOnContext context) {
+        if (context.getItemInHand().hasTag() && context.getItemInHand().getTag().contains(io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG)) return InteractionResult.FAIL;
         return io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.claims(context) ? io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.use(context) : super.useOn(context);
     }
     @Override

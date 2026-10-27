@@ -36,10 +36,12 @@ import net.minecraftforge.client.model.data.ModelData;
 public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEntity> {
     private final BlockRenderDispatcher blocks;
     private final DoorTrimRenderer trims;
+    private final DoorArchRenderer frame;
 
     public RoundDoorRenderer(BlockEntityRendererProvider.Context context) {
         this.blocks = context.getBlockRenderDispatcher();
         this.trims = new DoorTrimRenderer(blocks.getModelRenderer());
+        this.frame = new DoorArchRenderer(blocks.getModelRenderer());
     }
 
     @Override
@@ -55,6 +57,7 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
         if (!assembly.complete(level, door)) {
             return;
         }
+        frame.render(entity, assembly, level, pose, buffers);
         pose.pushPose();
         double shift = assembly.depth().offset() / 16;
         pose.translate(-assembly.facing().getStepX() * shift, 0, -assembly.facing().getStepZ() * shift);

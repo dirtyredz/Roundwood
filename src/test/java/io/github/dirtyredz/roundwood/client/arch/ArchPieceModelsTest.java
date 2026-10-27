@@ -27,6 +27,25 @@ class ArchPieceModelsTest {
         Sprite(SpriteContents contents) { super(TEXTURE, contents, 256, 256, 32, 64); }
     }
 
+    @Test void fittedRebatesBakeWithBoundedDonorUvsAndOutwardWinding() {
+        try(var contents=new SpriteContents(TEXTURE,new FrameSize(16,16),new NativeImage(16,16,false),AnimationMetadataSection.EMPTY)) {
+            var sprite=new Sprite(contents);
+            for(var door:io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.values())
+                for(var thickness:io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.values())
+                    for(var depth:io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.values()) {
+                        if(!io.github.dirtyredz.roundwood.block.door.frame.DoorArchClearance.accepts(door,thickness,depth)) continue;
+                        var top=io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topFor(door);
+                        for(var layer:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.values()) for(var cell:ArchPieceCell.of(top))
+                            for(var facing:Direction.Plane.HORIZONTAL) for(boolean masonry:new boolean[]{false,true}) {
+                                var quads=ArchPieceModels.bakeSurfaces(top,cell,
+                                        io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.surfaces(door,thickness,depth,layer,cell.column,cell.row),facing,sprite,masonry);
+                                for(var quad:quads) {if(masonry) checkUvDeltas(quad,sprite);else checkQuad(quad,sprite);}
+                                area(quads);
+                            }
+                    }
+        }
+    }
+
     @Test void thinBodiesStayExactAndCasingFacesSeparateWithoutTextureBleed() {
         try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), AnimationMetadataSection.EMPTY)) {
             var sprite = new Sprite(contents);

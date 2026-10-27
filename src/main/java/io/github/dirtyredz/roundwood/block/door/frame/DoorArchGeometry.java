@@ -17,9 +17,14 @@ public final class DoorArchGeometry {
     public enum Layer { BODY, FRONT_CASING, BACK_CASING }
     private record Key(DoorDesign door, ArchPieceThickness thickness, ArchPieceDepth depth, Layer layer, int column, int row) {}
     private static final ConcurrentHashMap<Key, List<Surface>> SURFACES = new ConcurrentHashMap<>();
+    private record VolumeKey(DoorDesign door, ArchPieceThickness thickness, ArchPieceDepth depth, Layer layer) {}
+    private static final ConcurrentHashMap<VolumeKey, List<Box>> VOLUMES = new ConcurrentHashMap<>();
     private DoorArchGeometry() {}
 
     public static List<Box> boxes(DoorDesign door, ArchPieceThickness thickness, ArchPieceDepth depth, Layer layer) {
+        return VOLUMES.computeIfAbsent(new VolumeKey(door, thickness, depth, layer), key -> buildBoxes(door, thickness, depth, layer));
+    }
+    private static List<Box> buildBoxes(DoorDesign door, ArchPieceThickness thickness, ArchPieceDepth depth, Layer layer) {
         var top = DoorArchFitPlan.topFor(door);
         var result = new ArrayList<Box>();
         for (int x = 0; x < top.width(); x++) for (int y = 0; y < top.height(); y++) {
