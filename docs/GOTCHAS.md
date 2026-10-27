@@ -355,15 +355,16 @@
   Shoulders have four-pixel bases to y=0 (the historical corbel thinned by 2 to match the flush spring); migration preserves the keyhole lower shape shifted 2 px outward, not crown pixels.
 
 - **Door geometry must include saved depth (0.15.0).** Translate before collision clipping and
-  before facing rotation; undo depth in authored hit coordinates. Shift the whole renderer,
-  including casings/camouflage, and keep back-flush casing targets in-cell. FRONT is the old-world
+  before facing rotation; undo depth in authored hit coordinates. Shift the leaf renderer,
+  including door casings/camouflage; the fitted arch renders before that shift. Keep back-flush casing targets in-cell. FRONT is the old-world
   default. Do not change it to MIDDLE just because aim-at-centre now places in the middle.
 - **The double doors own nine or twelve cells.** Iterate assembly.parts() / Part.of(design), never
   Part.values() for a historical round door. Its columnIndex()/row() are authoritative;
   legacy column/half cannot identify the third column or row. Whole-door shape cache keys
   must allow all twelve cells without overlapping bit fields.
-- **A matching arch and door need adjacent depth layers.** The 3x3 door crown complements
-  the 2x3 arch at y+1 (the 3x4 at y+2), but the shared installer deliberately does not merge occupied cells.
+- **Fitting is explicit, not general replaceability (0.16.0).** The 3x3 door uses the 2x3 top at y+1;
+  the 3x4 uses y+2. Only matching Roundwood tops may share door cells through the fitting transaction.
+  Vanilla/other-mod doors and shoulders keep standalone placement.
 
 - **Separate casing surfaces, not only front/back depths (0.15.0).** The old casing contact faces
   coincided with the closed leaf at z=13/16; jamb faces also coincided with hinge straps. Use

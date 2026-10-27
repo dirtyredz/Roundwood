@@ -20,7 +20,7 @@ Generic: not tied to any modpack.
 and **Bottom Right**, and since 0.10.0 **Round Window Arch, Bottom Left** and **Bottom Right**,
 **Round Window Corner, Top Left** and **Top Right**, and **Round Window Edge, Top**, **Left**,
 **Bottom** and **Right**), **Arch Top 1x1**, **Arch Top 1x2**, **Arch Top 2x3** and
-**Keyhole Shoulder** (0.14.0), the **Universal Trim**, **Arch Sill** and **Cross Beams**. Creative tab order: round
+**Keyhole Shoulder** (0.14.0), their four **Thin** counterparts (0.16.0), the **Universal Trim**, **Arch Sill** and **Cross Beams**. Creative tab order: round
 door, arched door, double arched door, tall double arched door, then each plain window profile (round, arch left,
 arch right, corner bottom left, corner bottom right, arch bottom left, arch bottom right, corner top
 left, corner top right, edge top, left, bottom, right), the three arch tops, keyhole shoulder, Universal Trim,
@@ -32,23 +32,31 @@ piece alone to obtain its thin counterpart, preserving its appearance and suppor
 there is no reverse recipe. Aim to place thin pieces at FRONT, MIDDLE or BACK. Both casing faces
 follow the slab and keep independent looks. See [feature notes](docs/FEATURES.md).
 
+**Fitted arches (0.16.0).** Ordinary-click a matching top with a Roundwood door, or a door
+with its matching top. Arched 1x2 takes Top 1x1; Round 2x2 takes Top 1x2; both paired doors
+take Top 2x3. The preview shows the BACK leaf and static frame. Full tops gain a shallow rear
+recess; thin tops fit at MIDDLE or FRONT. Frame and door appearances/casings stay independent,
+and harvesting any owned cell yields separate components. Red outlines indicate refused fits.
+Vanilla/other-mod doors and shoulders do not use same-cell fitting. Inspect all twelve fitted
+examples with /roundwood showcase. See [0.16.0 release notes](docs/releases/0.16.0.md).
+
 **Tall Double Arched Door (0.15.0).** The 3-wide, 4-tall variant adds a straight row below
 exactly the same crown as the 3x3 double door. Match it with the 2x3 arch top starting two
-blocks above the door floor in the adjacent depth layer. Both leaves move together; all
+blocks above the door floor, now also through same-cell fitting. Both leaves move together; all
 three depths, paint, two face trims, redstone and single-item drops work as on the 3x3.
 Craft it with PPP / NDN / PPP (P = planks, N = gold nugget, D = Double Arched Door).
 
-**Door depth targeting (0.15.0).** Round and double arched doors have front, middle and back
+**Door depth targeting (0.15.0).** All Roundwood doors have front, middle and back
 positions. Aim along depth on a floor, ceiling or side wall; on a wall facing the door,
 aim at the lower/middle/upper third for back/middle/front. The bands and full leaf preview
 show the result. Hinge choice still follows across-width aim and neighbouring blocks.
-Existing round doors retain their original front position when loaded.
+Existing doors retain their original front position when depth is absent from saved state.
 
 **Double Arched Door (0.15.0).** One item reserves a dry, replaceable 3 wide x 3 high footprint
 with a solid floor beneath all three columns. Two leaves swing together on the outer hinges.
 The bottom is square; the crown exactly fills the 2x3 arch opening when that arch's bottom
-is one block above the door floor. Place the arch in the adjacent depth layer, flush against
-the door: assemblies cannot share occupied cells. The arch's eight-pixel apex band remains
+is one block above the door floor. Fit the matching arch with an ordinary click, or keep
+it independently placed in an adjacent depth layer. The arch's eight-pixel apex band remains
 above the leaf. Each leaf has straps and a knob on both faces, with the existing wood/paint,
 camouflage, trims, redstone and projected-use behaviour. Recipe: `PNP / PPP / PNP`,
 where P is any planks and N is a gold nugget.

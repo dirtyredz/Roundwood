@@ -70,6 +70,8 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("tooltip.roundwood.universal_trim",
                 "Trims the clicked face of a window, door, arch piece or retired archway; restyle with planks, masonry or dye, remove with shears");
         add("tooltip.roundwood.glass", "Glass: %s");
+        add("message.roundwood.arch_fit_refused", "This arch cannot fit here: check size, depth, clearance and existing attachments.");
+        add("message.roundwood.unknown_arch_item", "This door carries an unknown frame payload; placement would lose it.");
         add("message.roundwood.aim_at_leaf", "Aim at the door leaf to restyle or paint it");
         add("message.roundwood.masonry_unpaintable", "Masonry trims cannot be painted");
         add("message.roundwood.masonry_trim_only", "Aim at a trim or cross beam to apply masonry");

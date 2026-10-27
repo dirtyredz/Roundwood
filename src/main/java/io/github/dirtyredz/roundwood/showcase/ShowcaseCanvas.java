@@ -120,6 +120,23 @@ public final class ShowcaseCanvas {
         return fitted;
     }
 
+    /** Fits a top through the same proposal/transaction as ordinary clicks, then styles its own casings. */
+    public boolean fittedArch(io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness thickness,
+            io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth depth, Appearance appearance, FaceTrims trims, int r, int f) {
+        var anchor = pos(r, 0, f);
+        if (!io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.fitAt(level, anchor, thickness, depth, appearance)) {
+            problem("arch did not fit at " + anchor.toShortString()); return false;
+        }
+        var entity = (io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity) level.getBlockEntity(anchor);
+        var door = DoorLayout.of(anchor, level.getBlockState(anchor));
+        for (var face : AttachmentFace.values()) trims.get(face).ifPresent(look -> {
+            var hit = new io.github.dirtyredz.roundwood.block.door.frame.DoorArchInteraction.Hit(entity, door, face, true);
+            if (!io.github.dirtyredz.roundwood.block.attachment.host.TrimFitting.install(
+                    io.github.dirtyredz.roundwood.block.door.frame.DoorArchInteraction.host(hit, anchor), face, look)) problem("fitted casing refused");
+        });
+        return true;
+    }
+
     /** Places one whole modular piece and its independent casings through production transactions. */
     public boolean archPiece(ArchPieceDesign design, Side side, Appearance appearance, FaceTrims trims, int r, int y, int f) {
         return archPiece(design, side, io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL,

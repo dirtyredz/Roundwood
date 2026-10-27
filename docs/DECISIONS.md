@@ -2,6 +2,10 @@
 
 Newest first.
 
+## 2026-10-26 - Same-cell Roundwood fitting (0.16.0)
+
+Fitted Roundwood tops supersede the adjacent-layers-only recommendation for matching Roundwood doors. Same-cell support uses an anchor attachment rather than combination block IDs; vanilla and other-mod doors remain separate-cell placements. BACK leaf depth and a conservative rear rebate preserve the existing swing, hardware and front curve. Independent frame geometry stays outside door transforms and projected-leaf transport.
+
 ## 2026-10-26 - Separate thin arch products
 
 Each active modular arch product gains a separate `_thin` block/item ID. Existing full-depth
@@ -29,7 +33,7 @@ are a defaulted property: FRONT is the historical plane, not the new centre-aim 
 3x3 double door is one nine-cell assembly with one open state and two outer-hinged leaves;
 both move together through the existing lifecycle and projected-use transport. Its crown
 is the exact complement of the modular 2x3 top at y+1. Door and arch remain separate
-assemblies in adjacent depth layers. No sneak gesture or occupied-cell merging is added.
+assemblies in adjacent depth layers in 0.15.0. Superseded for matching Roundwood tops by the 0.16.0 fitting decision above.
 
 ## 2026-10-25 - Flush arch springs and supported shoulders (0.14.0 owner feedback)
 
@@ -928,5 +932,3 @@ everything else references vanilla textures by resource location and never copie
 ## 2026-10-20 - No RedzCore dependency
 
 Nothing here is used by a second mod yet (workspace rule).
-
-Fitted Roundwood tops supersede the adjacent-layers-only recommendation for matching Roundwood doors. Same-cell support uses an anchor attachment rather than combination block IDs; vanilla and other-mod doors remain separate-cell placements. BACK leaf depth and a conservative rear rebate preserve the existing swing, hardware and front curve. Independent frame geometry stays outside door transforms and projected-leaf transport.

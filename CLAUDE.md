@@ -8,7 +8,8 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   `runGameTestServer`, `git diff --check`, and `..\..\tools\sync-mod-files.ps1 -Check` from the
   workspace. The owner checks visuals and client behaviour in game.
 - **Focused door targeting:** `./gradlew --offline runGameTestServer -PdoorTargets` compiles
-  only fixtures, door depth/double-door placement/lifecycle, arch placement and environment checks.
+  only fixtures, door depth/placement, fitted-arch transaction/lifecycle, thin acquisition, arch placement,
+  the bounded new showcase sections and environment checks. Full showcase/navigation/migration suites run on ANU.
 - **Focused villager repeats:** `./gradlew --offline runGameTestServer -PnavigationRepeats=20`
   compiles only navigation tests, fixtures and environment checks, with 20 independent required
   copies of each of the seven walks (no retries or timeout changes). Omit the property for the
@@ -36,6 +37,8 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
   bytes. Run `node tools/generate-test-structures.mjs` when a template changes.
 - **Layout:** every source and resource directory is declared in STRUCTURE.md `## Layout`. GameTests
   stay in `src/gameTest/`, unit tests in `src/test/`, generators in `tools/`.
+- **Fitted arches:** `block/door/frame` owns compatibility, continuous clearance and independent custody.
+  Keep static frame transforms separate from leaf depth/swing; arch callbacks use the bootstrap-bound fitting port.
 - **Version** lives only in `gradle.properties` (`mod_version`).
 - Shared files (wrapper, `.gitattributes`, `.gitignore`) come from `../../tools/mod-template/`;
   never edit them here.

@@ -103,12 +103,30 @@ public final class DoorArchFitting {
     private static boolean knownArchEntity(ArchPieceBlockEntity entity) {
         return Set.of(AppearanceNbt.TAG, ArchPieceTrimNbt.TAG).containsAll(entity.saveWithoutMetadata().getAllKeys());
     }
-    public static InteractionResult use(UseOnContext context) {
+    /** Showcase/commands use the same proposal and write transaction, silently and without an item charge. */
+    public static boolean fitAt(Level level, BlockPos pos, ArchPieceThickness thickness, ArchPieceDepth depth,
+                                io.github.dirtyredz.roundwood.appearance.Appearance appearance) {
+        if (level.isClientSide || !level.isLoaded(pos) || !(level.getBlockState(pos).getBlock() instanceof AssemblyDoorBlock block)
+                || !DoorArchClearance.accepts(block.design(), thickness, depth)) return false;
+        var door = DoorLayout.of(pos, level.getBlockState(pos));
+        var item = io.github.dirtyredz.roundwood.registry.ModBlocks.archPiece(DoorArchFitPlan.topFor(block.design()), thickness).asItem();
+        var stack = AppearanceStacks.create(item, appearance);
+        var point = net.minecraft.world.phys.Vec3.atLowerCornerOf(door.anchor()).add(.5, depth == ArchPieceDepth.MIDDLE ? .5 : .875, .5)
+                .relative(door.facing().getOpposite(), .5);
+        var hit = new net.minecraft.world.phys.BlockHitResult(point, door.facing().getOpposite(), door.anchor(), false);
+        var context = new UseOnContext(level, null, net.minecraft.world.InteractionHand.MAIN_HAND, stack, hit) {};
+        var planned = propose(context);
+        if (planned.isEmpty() || planned.get().attachment().depth() != depth) return false;
+        use(context, false);
+        return level.getBlockEntity(door.anchor()) instanceof RoundDoorBlockEntity entity && entity.arch().filter(planned.get().attachment()::equals).isPresent();
+    }
+    public static InteractionResult use(UseOnContext context) { return use(context, true); }
+    private static InteractionResult use(UseOnContext context, boolean announce) {
         if (!claims(context)) return InteractionResult.PASS;
         var proposal = propose(context);
         if (proposal.isEmpty()) {
             if (!context.getLevel().isClientSide && context.getPlayer() != null)
-                context.getPlayer().displayClientMessage(Component.literal("This arch cannot fit here: check size, depth, clearance and existing attachments."), true);
+                context.getPlayer().displayClientMessage(Component.translatable("message.roundwood.arch_fit_refused"), true);
             return InteractionResult.CONSUME;
         }
         if (context.getLevel().isClientSide) return InteractionResult.SUCCESS;
@@ -125,7 +143,7 @@ public final class DoorArchFitting {
                 if (!(level.getBlockEntity(plan.fit().door().anchor()) instanceof RoundDoorBlockEntity entity)) return false;
                 entity.load(plan.anchorData().copy());
                 return entity.arch().filter(plan.attachment()::equals).isPresent();
-            }, () -> !ForgeEventFactory.onMultiBlockPlace(context.getPlayer(), before, context.getClickedFace()));
+            }, () -> context.getPlayer() == null || !ForgeEventFactory.onMultiBlockPlace(context.getPlayer(), before, context.getClickedFace()));
         } finally {
             level.captureBlockSnapshots = capturing;
             if (level.capturedBlockSnapshots.size() > mark) level.capturedBlockSnapshots.subList(mark, level.capturedBlockSnapshots.size()).clear();
@@ -134,6 +152,7 @@ public final class DoorArchFitting {
         var anchor = plan.fit().door().anchor(); level.getBlockEntity(anchor).setChanged();
         for (var snapshot : before) level.markAndNotifyBlock(snapshot.getPos(), level.getChunkAt(snapshot.getPos()),
                 snapshot.getReplacedBlock(), level.getBlockState(snapshot.getPos()), Block.UPDATE_ALL, Block.UPDATE_LIMIT);
+        if (!announce) return InteractionResult.CONSUME;
         var state = level.getBlockState(anchor); var player = context.getPlayer(); var sound = state.getSoundType(level, anchor, player);
         level.playSound(player, anchor, sound.getPlaceSound(), SoundSource.BLOCKS, (sound.getVolume()+1)/2, sound.getPitch()*.8F);
         level.gameEvent(GameEvent.BLOCK_PLACE, anchor, GameEvent.Context.of(player, state));

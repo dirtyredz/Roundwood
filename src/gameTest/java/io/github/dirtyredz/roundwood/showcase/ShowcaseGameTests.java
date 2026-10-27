@@ -29,7 +29,7 @@ import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
 
 /**
- * The showcase builder in a 92 x 10 x 92 template (the bounds are 90 x 8 x 40) filled with gold: everything it promises is
+ * The showcase builder in a 92 x 10 x 92 template (the bounds include all standalone and fitted arch rows) filled with gold: everything it promises is
  * present, complete and in the appearance its section names, and no gold outside its bounds was
  * touched (in each facing).
  */

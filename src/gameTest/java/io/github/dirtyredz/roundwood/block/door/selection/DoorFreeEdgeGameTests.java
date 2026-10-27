@@ -107,6 +107,41 @@ public final class DoorFreeEdgeGameTests {
         helper.succeed();
     }
 
+    @GameTest(template = TEMPLATE)
+    public static void fittedFrameOccludesProjectedLeafUse(GameTestHelper helper) {
+        floor(helper);
+        var door = ModBlocks.roundDoor();
+        var level = helper.getLevel();
+        var original = placeOakDoor(helper, ANCHOR, Direction.NORTH, DoorHingeSide.LEFT, "frame_projection");
+        check(io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.fitAt(level, original.anchor(),
+                io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL,
+                io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.FRONT,
+                io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.BRICKS), "frame fixture");
+        var assembly = DoorLayout.of(original.anchor(), level.getBlockState(original.anchor()));
+        door.setOpen(null, level, level.getBlockState(assembly.anchor()), assembly.anchor(), true);
+        var player = player(helper, "frame_projection_user", GameType.SURVIVAL, Direction.NORTH);
+        var requested = aim(helper, player, point(assembly, 1.5, .9, .5),
+                point(assembly, 3.0 / 16, .9, 1.875 - assembly.depth().offset() / 16));
+        check(DoorHitResolver.projected(level, requested), "fixture is not a projected leaf point");
+        boolean witnessed = false;
+        for (double height = 2.2; height <= 3.01; height += .1) {
+            var eye = point(assembly, 3.0 / 16, height, -.5);
+            player.setPos(eye.x, eye.y - player.getEyeHeight(), eye.z);
+            var ray = level.clip(new ClipContext(eye, requested.getLocation(), ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player));
+            var resolved = DoorHitResolver.resolve(level, ray);
+            if (ray.getType() != HitResult.Type.BLOCK || resolved.isEmpty()) continue;
+            var hit = resolved.get();
+            if (io.github.dirtyredz.roundwood.block.door.frame.DoorArchInteraction.hit(level, hit.getBlockPos(), level.getBlockState(hit.getBlockPos()), hit).isEmpty()) continue;
+            check(!DoorHitResolver.projected(level, hit), "static frame acquired projected ownership");
+            check(ProjectedDoorUse.use(player, requested) == InteractionResult.FAIL, "frame-occluded leaf request accepted");
+            check(level.getBlockState(assembly.anchor()).getValue(DoorBlock.OPEN), "occluded request toggled door");
+            witnessed = true;
+            break;
+        }
+        check(witnessed, "no actual frame-occluded ray witnessed");
+        helper.succeed();
+    }
+
     private static BlockHitResult aim(GameTestHelper helper, ServerPlayer player, Vec3 eye, Vec3 target) {
         player.setPos(eye.x, eye.y - player.getEyeHeight(), eye.z);
         Vec3 end = target.add(target.subtract(eye).scale(0.1));

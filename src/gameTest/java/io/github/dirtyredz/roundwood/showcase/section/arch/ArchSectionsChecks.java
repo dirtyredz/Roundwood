@@ -64,7 +64,32 @@ public final class ArchSectionsChecks {
             label(level, frame, owned, r, f, tall ? "Taller opening" : keyhole ? "Keyhole opening" : "Ordinary opening");
         }
         verifyOwnsOnly(level, frame, "arch compositions", 0, ArchCompositionsSection.R_MAX, f, f, owned);
+        verifyFitted(level, frame);
     }
+    public static void verifyFitted(ServerLevel level, ShowcaseFrame frame) {
+        for (int pose = 0; pose < 3; pose++) {
+            var owned = new HashSet<BlockPos>();
+            int f = ArchCompositionsSection.FITTED_F + pose * (io.github.dirtyredz.roundwood.showcase.ShowcaseSpacing.GAP + 2);
+            var blocks = ModBlocks.doors();
+            for (int index = 0; index < blocks.size(); index++) {
+                int r = io.github.dirtyredz.roundwood.showcase.ShowcaseSpacing.FIRST_R + index * io.github.dirtyredz.roundwood.showcase.ShowcaseSpacing.pitch(3);
+                var block = blocks.get(index); var pos = frame.pos(r, 0, f); var state = level.getBlockState(pos);
+                check(state.is(block), "missing fitted showcase door");
+                var door = io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.of(pos, state);
+                check(door.depth() == io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth.BACK && door.complete(level, block), "fitted showcase pose/completeness");
+                var entity = (io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity) level.getBlockEntity(pos);
+                var attachment = entity.arch().orElseThrow();
+                check(attachment.product() == io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topFor(block.design())
+                        && attachment.thickness() == (pose == 0 ? io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL : io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.THIN)
+                        && attachment.depth() == (pose == 1 ? io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.MIDDLE : io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.FRONT), "fitted showcase attachment");
+                check(attachment.appearance().equals(ArchCompositionsSection.FITTED_BODY) && attachment.casings().equals(ArchCompositionsSection.FITTED_CASINGS), "fitted showcase independent looks");
+                for (var cell : door.positions()) check(owned.add(cell), "overlapping fitted showcase");
+                label(level, frame, owned, r, f, "Fitted " + block.design().columns() + "x" + block.design().height()/16);
+            }
+            verifyOwnsOnly(level, frame, "fitted arches", 0, 28, f, f, owned);
+        }
+    }
+
     private static void piece(ServerLevel level, ShowcaseFrame frame, Set<BlockPos> owned, int r, int y, int f,
                               ArchPieceDesign design, Side side, Appearance look, FaceTrims trims) {
         var piece = new ArchPieceLayout.Assembly(frame.pos(r, y, f), frame.forward(), design, side);

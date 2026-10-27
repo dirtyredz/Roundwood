@@ -197,7 +197,7 @@ public final class ArchedDoorPlacementGameTests {
                     DoorLayout.Assembly planned = plan.get().assembly();
                     check(planned.anchor().equals(helper.absolutePos(ANCHOR)) && planned.hinge() == hinge && planned.design() == door.design(),
                             name + ": planned " + planned);
-                    check(planned.parts().size() == door.design().columns() * 2, name + ": planned parts");
+                    check(planned.parts().size() == door.design().columns() * door.design().height() / 16, name + ": planned parts");
                     for (DoorLayout.Part part : planned.parts()) {
                         BlockState placed = helper.getLevel().getBlockState(planned.pos(part));
                         check(placed.equals(plan.get().states().get(part)), name + ": " + part + " placed " + placed

@@ -1,5 +1,13 @@
 # Architecture - Roundwood
 
+## Fitted arch ownership (0.16.0)
+
+Fitted-top geometry uses a BACK door and a top anchored at y+1 (arched, round, double) or y+2 (tall double). Full tops retain their front mask; each mask pixel retreats behind conservative interval bounds of both hinges and all hardware, with room for a one-pixel rear casing. Exposed faces subtract neighboring depth intervals. Thin MIDDLE/FRONT slabs must pass the same clearance predicate; BACK is incompatible. The door anchor has an independent versioned `DoorArch` store; missing means absent, explicit empty updates clear clients, and unknown payloads remain opaque and refuse edits. Arched doors now default the existing depth property to FRONT.
+
+Fitting is an explicit occupied-cell conversion, in either ordinary-click order. It validates complete loaded matching assemblies, permissions, dry/bounded cells, support, obstruction and readable custody, then revalidates before writing. A shared write transaction snapshots every destination state and full entity NBT, initializes the attachment before approval, and restores all cells on cancellation/failure. Fitting owns one multi-place event, including unchanged-state anchor cells; payment and announcements follow approval. Other blocks remain subject to ordinary replaceability.
+
+The fitted frame renders before the door depth/swing transform. Targets and highlights union its cached static shape with the leaf; frame hits route before door rings, camouflage and toggling. Frame body/casings keep separate appearance stores. Only the initiating cell evaluates component loot, with the ordinary explosion survival probability for each component; teardown never refunds. Unknown frame custody stays opaque on a harvested door item and cannot be placed lossily. Known fitted assemblies drop separate items without packed duplicate refunds.
+
 ## Thin standalone arch pieces
 
 Each modular product has a separate `_thin` registration. Existing IDs remain full-depth and
@@ -755,9 +763,3 @@ whole-image), oak source quarters per family, one empty world model and a single
 over the canonical models and item models parenting the canonical items. Items carry front GUI light
 and computed centred transforms. Plus 20 recipes and their advancements, loot (aliases drop the
 canonical item; windows and doors add one trim pool per face), tags and English names.
-
-Fitted-top geometry uses a BACK door and a top anchored at y+1 (arched, round, double) or y+2 (tall double). Full tops retain their front mask; each mask pixel retreats behind conservative interval bounds of both hinges and all hardware, with room for a one-pixel rear casing. Exposed faces subtract neighboring depth intervals. Thin MIDDLE/FRONT slabs must pass the same clearance predicate; BACK is incompatible. The door anchor has an independent versioned `DoorArch` store; missing means absent, explicit empty updates clear clients, and unknown payloads remain opaque and refuse edits. Arched doors now default the existing depth property to FRONT.
-
-Fitting is an explicit occupied-cell conversion, in either ordinary-click order. It validates complete loaded matching assemblies, permissions, dry/bounded cells, support, obstruction and readable custody, then revalidates before writing. A shared write transaction snapshots every destination state and full entity NBT, initializes the attachment before approval, and restores all cells on cancellation/failure. Fitting owns one multi-place event, including unchanged-state anchor cells; payment and announcements follow approval. Other blocks remain subject to ordinary replaceability.
-
-The fitted frame renders before the door depth/swing transform. Targets and highlights union its cached static shape with the leaf; frame hits route before door rings, camouflage and toggling. Frame body/casings keep separate appearance stores. Only the initiating cell evaluates component loot, with the ordinary explosion survival probability for each component; teardown never refunds. Unknown frame custody stays opaque on a harvested door item and cannot be placed lossily. Known fitted assemblies drop separate items without packed duplicate refunds.

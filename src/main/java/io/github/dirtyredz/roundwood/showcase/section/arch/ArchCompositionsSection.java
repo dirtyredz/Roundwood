@@ -17,8 +17,16 @@ public final class ArchCompositionsSection implements ShowcaseSection {
     public static final int TALL_R = KEYHOLE_R + ShowcaseSpacing.pitch(4);
     public static final int R_MAX = TALL_R + 4;
 
+    public static final int FITTED_F = F + ShowcaseSpacing.GAP + 2;
+    public static final int FITTED_LAST_F = FITTED_F + 2 * (ShowcaseSpacing.GAP + 2);
+    public static final Appearance FITTED_BODY = Appearance.masonry(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("minecraft", "bricks"));
+    public static final FaceTrims FITTED_CASINGS = FaceTrims.NONE.with(io.github.dirtyredz.roundwood.block.attachment.AttachmentFace.FRONT,
+            Appearance.DEFAULT.painted(net.minecraft.world.item.DyeColor.GREEN)).with(io.github.dirtyredz.roundwood.block.attachment.AttachmentFace.BACK,
+            Appearance.wood(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("minecraft", "birch_planks")));
+
     @Override public String id() { return "arch_compositions"; }
     @Override public void build(ShowcaseCanvas canvas) {
+        buildFitted(canvas);
         canvas.sign(ORDINARY_R, F, "Ordinary opening", "Flush spring edges");
         columns(canvas, ORDINARY_R, 2, 2);
         canvas.archPiece(ArchPieceDesign.TOP_1X2, Side.LEFT, Appearance.DEFAULT, FaceTrims.NONE, ORDINARY_R + 1, 1, F);
@@ -31,6 +39,23 @@ public final class ArchCompositionsSection implements ShowcaseSection {
         columns(canvas, TALL_R, 3, 5);
         canvas.archPiece(ArchPieceDesign.TOP_2X3, Side.LEFT, Appearance.DEFAULT, FaceTrims.NONE, TALL_R + 1, 3, F);
     }
+    public void buildFitted(ShowcaseCanvas canvas) {
+        var blocks = io.github.dirtyredz.roundwood.registry.ModBlocks.doors();
+        for (int pose = 0; pose < 3; pose++) for (int index = 0; index < blocks.size(); index++) {
+            var thickness = pose == 0 ? io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL
+                    : io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.THIN;
+            var depth = pose == 1 ? io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.MIDDLE
+                    : io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.FRONT;
+            int r = ShowcaseSpacing.FIRST_R + index * ShowcaseSpacing.pitch(3), f = FITTED_F + pose * (ShowcaseSpacing.GAP + 2);
+            var block = blocks.get(index);
+            canvas.sign(r, f, "Fitted " + block.design().columns() + "x" + block.design().height()/16,
+                    thickness.name(), depth.name(), "Leaf: BACK");
+            if (canvas.door(block, Appearance.DEFAULT.painted(net.minecraft.world.item.DyeColor.BLUE), r, f,
+                    pose == 1 ? net.minecraft.world.level.block.state.properties.DoorHingeSide.RIGHT : net.minecraft.world.level.block.state.properties.DoorHingeSide.LEFT, false))
+                canvas.fittedArch(thickness, depth, FITTED_BODY, FITTED_CASINGS, r, f);
+        }
+    }
+
     private static void columns(ShowcaseCanvas canvas, int r, int opening, int height) {
         for (int y = 0; y < height; y++) {
             canvas.set(r, y, F, Blocks.OAK_PLANKS.defaultBlockState());

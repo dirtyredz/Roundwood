@@ -6,6 +6,11 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 
 ## Layout
 
+- `block/door/frame/` owns the fitted-top compatibility table, immutable attachment, strict versioned store, continuous swing clearance and recessed volumes/surfaces. The same fit proposal drives ordinary clicks, playerless showcase construction and preview.
+- `block/assembly/placement/AssemblyWriteTransaction` owns full-NBT rollback for installation and fitting, including unchanged-state cells. `block/arch/fitting/ArchDoorFitting` is the narrow bootstrap-bound port; arch adapters never import the door fitting implementation. `client/door/DoorArchPlacementPreview` draws the shared proposal and refusals.
+- `client/door/DoorArchRenderer` draws fitted tops as static cell models, using the arch donor/masonry baker. `DoorArchInteraction` owns frame hit routing and independent trim hosts; `DoorArchLoot` appends component refunds during ordinary loot evaluation.
+- `showcase/section/arch/ArchCompositionsSection` includes all twelve fitted samples; `FittedShowcaseGameTests` is the bounded section gate.
+
 - `block/arch/geometry/ArchPieceThickness` and `block/arch/assembly/ArchPieceDepth` own full/thin slab dimensions and thin poses.
   `block/arch/adapter/ThinArchPieceBlock` adds only the thin depth property; assembly membership includes thickness and depth.
 - `block/assembly/placement/FaceDepthBands` is the shared aimed-face band authority for doors and thin arches.
@@ -17,7 +22,7 @@ Code map. Behaviour: [README.md](README.md). How it works: [docs/ARCHITECTURE.md
 - `block/door/adapter/DoubleArchedDoorBlock` owns the size-parameterized nine/twelve-cell saved schema;
   `block/door/assembly/DoorDepth` owns saved depth offsets and shared face bands.
 - `src/test/java/io/github/dirtyredz/roundwood/block/door/assembly/` guards depth targeting.
-- `block/door/trim/FramedDoorFacesTest` checks production casing surfaces against panels, hardware and adjacent arch models.
+- `block/door/trim/FramedDoorFacesTest` checks production casing surfaces against panels, hardware, adjacent arch models and actual fitted full/thin frames.
   `client/door/DoorLeafModels` owns legal model-coordinate mapping for both paired-door heights.
   Leaf/selection tests guard both hinges, three depths, matching arch masks and projected rays.
 - `src/gameTest/java/io/github/dirtyredz/roundwood/block/door/placement/DoorTargetsGameTests`
@@ -342,9 +347,3 @@ The first full review found no correctness problems. The debt is tracked in Dock
 - dk-d1d87975 done: `appearance/AppearanceAnchor`, typed `AssemblyPlacementPlan<P,A>`, per-family `AssemblyAnchors.Lookup` constants and typed item binding replace forwarding facades; window wrapping lives with its model.
 
 - dk-ea090069 done: `PlacementHighlights` owns held-hand precedence and the live-client event guard; `AssemblyCellRenderer` owns per-cell tessellation and balanced poses.
-
-`block/door/frame/` owns the fitted-top compatibility table, immutable attachment, strict versioned store, continuous swing clearance and recessed volumes/surfaces. Placement routing is added separately.
-
-`block/assembly/placement/AssemblyWriteTransaction` owns full-NBT rollback for installation and fitting, including unchanged-state cells. `block/arch/fitting/ArchDoorFitting` is the narrow bootstrap-bound port; arch adapters never import the door fitting implementation. `client/door/DoorArchPlacementPreview` draws the shared proposal and refusals.
-
-`client/door/DoorArchRenderer` draws fitted tops as static cell models, using the arch donor/masonry baker. `DoorArchInteraction` owns frame hit routing and independent trim hosts; `DoorArchLoot` appends component refunds during ordinary loot evaluation.

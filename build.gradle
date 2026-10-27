@@ -37,14 +37,14 @@ if (project.hasProperty('navigationRepeats')) {
             '**/TrimNavigationGameTests.java', '**/environment/**'
 }
 
-// Bounded placement/lifecycle gate for 0.15.0; excludes navigation, showcase and migration suites.
+// Bounded fitted-door gate for 0.16.0; includes only the new showcase sections, not the full showcase suite.
 if (project.hasProperty('doorTargets')) {
     sourceSets.gameTest.java.include '**/fixture/**', '**/DoorTargetsGameTests.java',
             '**/ArchPiecePlacementGameTests.java', '**/ArchPieceTrimGameTests.java', '**/ArchThinningGameTests.java',
-            '**/DoorFreeEdgeGameTests.java', '**/DoorArchPersistenceGameTests.java', '**/DoorArchFittingGameTests.java', '**/DoorArchLifecycleGameTests.java', '**/AssemblyPlacementGameTests.java', '**/TestWorldGameTests.java'
+            '**/DoorFreeEdgeGameTests.java', '**/ArchedDoorPlacementGameTests.java', '**/FittedShowcaseGameTests.java', '**/ShowcaseChecks.java', '**/ArchSectionsChecks.java', '**/DoorArchPersistenceGameTests.java', '**/DoorArchFittingGameTests.java', '**/DoorArchLifecycleGameTests.java', '**/AssemblyPlacementGameTests.java', '**/TestWorldGameTests.java'
 }
 
-// Explicit red witness while the fitted-door slices are still under construction.
+// Isolated reproduction selection for inspecting the occupied-cell witness.
 if (project.hasProperty('archFitReproduction')) {
     sourceSets.gameTest.java.include '**/fixture/**', '**/DoorArchFittingGameTests.java', '**/TestWorldGameTests.java'
 }
