@@ -64,6 +64,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         }
         add("tooltip.roundwood.wood", "Wood: %s");
         add("tooltip.roundwood.masonry", "Masonry: %s");
+        add("tooltip.roundwood.surface", "Surface: %s");
         add("tooltip.roundwood.paint", "Paint: %s");
         add("tooltip.roundwood.unavailable", "Material %s is not installed (shown as oak)");
         add("tooltip.roundwood.restyle", "Restyle placed: planks or dye (doors: sneak + planks)");

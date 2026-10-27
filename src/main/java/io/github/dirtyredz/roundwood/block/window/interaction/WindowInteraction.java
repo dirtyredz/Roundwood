@@ -120,7 +120,7 @@ public final class WindowInteraction {
             case SHEARS -> WindowUseRules.Item.SHEARS;
             case DONOR -> switch (tool.donor().orElseThrow().type()) {
                 case PAINT -> WindowUseRules.Item.DYE;
-                case WOOD -> WindowUseRules.Item.PLANKS;
+                case WOOD, BLOCK_SURFACE -> WindowUseRules.Item.PLANKS;
                 case MASONRY -> WindowUseRules.Item.MASONRY;
             };
             case OTHER -> WindowUseRules.Item.OTHER;

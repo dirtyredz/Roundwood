@@ -44,6 +44,10 @@ public final class AppearanceChanges {
         return to(current, Appearance.masonry(block));
     }
 
+    public static Change surface(Appearance current, ResourceLocation block) {
+        return to(current, Appearance.surface(block));
+    }
+
     private static Change to(Appearance current, Appearance next) {
         return next.equals(current) ? new Change(Outcome.UNCHANGED, current) : new Change(Outcome.CHANGED, next);
     }

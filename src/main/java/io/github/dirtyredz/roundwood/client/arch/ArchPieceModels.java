@@ -41,7 +41,7 @@ public final class ArchPieceModels {
 
     public static Look look(Appearance appearance) { return look(appearance, AppearanceLooks::planks); }
     static Look look(Appearance appearance, Function<Appearance, ResourceLocation> textures) {
-        return new Look(textures.apply(appearance), !appearance.isWood());
+        return new Look(textures.apply(appearance), appearance.kind() == Appearance.Kind.MASONRY);
     }
 
     public static BakedModel body(ArchPieceDesign design, Side side, ArchPieceCell cell, Direction facing, Look look) {

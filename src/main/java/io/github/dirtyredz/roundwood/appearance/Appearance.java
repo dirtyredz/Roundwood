@@ -29,7 +29,7 @@ public record Appearance(Kind kind, ResourceLocation material, Optional<DyeColor
     public static final Appearance DEFAULT = wood(OAK_PLANKS);
 
     public enum Kind {
-        WOOD, MASONRY;
+        WOOD, MASONRY, BLOCK_SURFACE;
 
         public String id() {
             return name().toLowerCase(Locale.ROOT);
@@ -47,11 +47,15 @@ public record Appearance(Kind kind, ResourceLocation material, Optional<DyeColor
 
     public Appearance {
         // Masonry is never painted: normalise rather than carry a paint nothing draws.
-        paint = kind == Kind.MASONRY ? Optional.empty() : paint;
+        paint = kind != Kind.WOOD ? Optional.empty() : paint;
     }
 
     public static Appearance wood(ResourceLocation planks) {
         return new Appearance(Kind.WOOD, planks, Optional.empty());
+    }
+
+    public static Appearance surface(ResourceLocation block) {
+        return new Appearance(Kind.BLOCK_SURFACE, block, Optional.empty());
     }
 
     public static Appearance masonry(ResourceLocation block) {

@@ -90,7 +90,7 @@ class ArchPieceModelsTest {
     @Test void donorSubstitutionPaintAndMasonryPolicyAreExplicit() {
         var cherry = Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", "cherry_planks"));
         var masonry = Appearance.masonry(ResourceLocation.fromNamespaceAndPath("minecraft", "bricks"));
-        for (var appearance : new Appearance[]{Appearance.DEFAULT, cherry, cherry.painted(DyeColor.BLUE), masonry}) {
+        for (var appearance : new Appearance[]{Appearance.DEFAULT, cherry, cherry.painted(DyeColor.BLUE), masonry, Appearance.surface(ResourceLocation.fromNamespaceAndPath("minecraft","gold_block"))}) {
             var look = ArchPieceModels.look(appearance, ignored -> TEXTURE);
             assertEquals(TEXTURE, look.texture());
             assertEquals(appearance == masonry, look.masonry());

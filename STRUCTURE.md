@@ -356,3 +356,5 @@ The first full review found no correctness problems. The debt is tracked in Dock
 `block/door/hardware/DoorHardwareGeometry` owns half-pixel spear straps and fixed-height knobs. `tools/structures/doors-v0160.mjs` records independent historical door states and possessions; DoorFeedbackUpgradeGameTests loads them without replacement.
 
 `client/render/SurfaceSeparation` owns the three render offsets. DoorTrimModels, DoorArchRenderer and ArchPieceModels expose their render surfaces; geometry classes return authored surfaces. `client/door/DoorArchBakedFacesTest` and `testsupport/BakedCoplanarity` inspect generated leaf and production frame vertices across the supported pose matrix.
+
+`appearance/material/SurfaceMaterials` owns the exact block-finish allowlist and wax normalization. `client/door/DoorSurfaceModels` tiles donor panels before tall-model compression. SurfaceMaterialsTest, DoorSurfaceModelsTest and SurfaceFinishGameTests cover kind compatibility, UVs, cache distinction and payment.

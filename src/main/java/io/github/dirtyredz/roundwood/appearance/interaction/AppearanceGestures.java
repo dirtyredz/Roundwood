@@ -28,7 +28,7 @@ import java.util.Optional;
  */
 public final class AppearanceGestures {
     public enum Type {
-        WOOD, PAINT, MASONRY
+        WOOD, PAINT, MASONRY, BLOCK_SURFACE
     }
 
     /** A recognised gesture: what it applies and the stack that pays for it. */
@@ -38,6 +38,7 @@ public final class AppearanceGestures {
                 case WOOD -> AppearanceChanges.wood(current, material);
                 case PAINT -> AppearanceChanges.paint(current, dye);
                 case MASONRY -> AppearanceChanges.masonry(current, material);
+                case BLOCK_SURFACE -> AppearanceChanges.surface(current, material);
             };
         }
     }
@@ -73,6 +74,9 @@ public final class AppearanceGestures {
         if (planks.isPresent()) {
             return Optional.of(new Gesture(Type.WOOD, planks.get(), null, hand, stack));
         }
+        var surface = io.github.dirtyredz.roundwood.appearance.material.SurfaceMaterials.fromStack(stack);
+        if (surface.isPresent() && family.accepts(Appearance.Kind.BLOCK_SURFACE))
+            return Optional.of(new Gesture(Type.BLOCK_SURFACE, surface.get(), null, hand, stack));
         if (family.accepts(Appearance.Kind.MASONRY)) {
             return MasonryMaterials.fromStack(stack).map(id -> new Gesture(Type.MASONRY, id, null, hand, stack));
         }

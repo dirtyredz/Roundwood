@@ -36,13 +36,14 @@ public final class TrimLooks {
     /** Thin beams retain window plank/paint artwork; masonry uses the existing granular artwork. */
     public static Look beams(Appearance appearance) {
         ResourceLocation texture;
-        if (!appearance.isWood() && appearance.paint().isEmpty()) texture = MasonryMaterials.byBlock(appearance.material()).map(MasonryStyles::edge).orElse(BuiltinWoodStyles.OAK_PLANKS);
+        if (appearance.kind() == Appearance.Kind.MASONRY) texture = MasonryMaterials.byBlock(appearance.material()).map(MasonryStyles::edge).orElse(BuiltinWoodStyles.OAK_PLANKS);
         else texture = AppearanceLooks.planks(appearance);
         return Look.tiled(texture);
     }
 
     public static Look of(Appearance appearance, Function<MasonryMaterials.Material, ResourceLocation> masonryFace) {
-        if (!appearance.isWood() && appearance.paint().isEmpty()) {
+        if (appearance.kind() == Appearance.Kind.BLOCK_SURFACE) return Look.tiled(AppearanceLooks.planks(appearance));
+        if (appearance.kind() == Appearance.Kind.MASONRY) {
             return MasonryMaterials.byBlock(appearance.material())
                     .map(m -> new Look(true, masonryFace.apply(m), MasonryStyles.edge(m)))
                     .orElse(OAK);

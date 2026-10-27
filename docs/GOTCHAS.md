@@ -384,3 +384,5 @@ Frameless panes have no frame or perimeter/sill host. Refuse frame donors withou
 A fitted round arch does not erase or refund camouflage. Render and target only its lower corners; include CamouflageCoverage in corner/outline/model cache keys. Actual frame-surface hits still take precedence.
 
 Do not position hardware from assembly height or a fixed root X. Knobs are y15..17; spear roots follow each leaf row. Paired casing springs include the modular top spring offset. The historical 0.16.0 fixture deliberately contains the old saved schema, not generated current-state defaults.
+
+Non-wood does not mean masonry: BLOCK_SURFACE must use donor sprites without mortar or painting. Waxed copper donors normalize to the corresponding unwaxed full block; cut copper, stairs and slabs are excluded. Tiling after tall-door Y compression stretches textures; bake tiles first, compress positions afterwards.

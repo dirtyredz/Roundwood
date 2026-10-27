@@ -35,7 +35,7 @@ public final class ShowcaseSamples {
     }
 
     public static List<Appearance> masonry(List<Appearance> samples) {
-        return samples.stream().filter(a -> !a.isWood()).toList();
+        return samples.stream().filter(a -> a.kind() == Appearance.Kind.MASONRY).toList();
     }
 
     /** A bare vanilla wood sample by its planks id, e.g. {@code spruce_planks}. */

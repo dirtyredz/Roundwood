@@ -584,3 +584,5 @@ and gotchas.
 MIT. Textures under `src/main/resources` are original; vanilla textures are referenced, never copied.
 
 The **Frameless Window Pane** (`frameless_window`) fills the centre of a larger window without a wooden border. Craft one from one glass pane. It supports the usual aimed placement, glass dyes and optional Cross Beams, but no perimeter trim or sill.
+
+Block-surface finishes (0.17.0) apply to doors, window frames, casings and arch bodies: iron/gold/diamond/emerald/netherite blocks; full copper at every oxidation stage, including waxed donors; quartz block, smooth quartz, chiseled quartz, quartz bricks and quartz pillar. They use donor textures at block scale and do not oxidize or accept dye. Cut copper, stairs and slabs are not donors. Existing donor gestures and one-item payment rules apply.

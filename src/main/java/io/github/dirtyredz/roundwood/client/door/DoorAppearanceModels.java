@@ -44,9 +44,10 @@ public final class DoorAppearanceModels {
     public static final int PANEL_TINT = 0;
 
     /** The panel artwork and its tint ({@code -1}: none). */
-    public record Look(ResourceLocation panel, int tint) {
+    public record Look(ResourceLocation panel, int tint, boolean tiled) {
+        public Look(ResourceLocation panel, int tint) { this(panel,tint,false); }
         public boolean isOakTemplate() {
-            return panel.equals(BuiltinWoodStyles.OAK_DOOR_PANEL) && tint < 0;
+            return !tiled && panel.equals(BuiltinWoodStyles.OAK_DOOR_PANEL) && tint < 0;
         }
     }
 
@@ -74,6 +75,7 @@ public final class DoorAppearanceModels {
     }
 
     public static Look look(Appearance appearance) {
+        if (appearance.kind() == Appearance.Kind.BLOCK_SURFACE) return new Look(AppearanceLooks.planks(appearance),-1,true);
         return AppearanceLooks.resolve(appearance,
                 dye -> new Look(PaintStyles.doorPanel(dye), -1),
                 style -> Optional.of(new Look(style.doorPanel(), -1)),
@@ -85,17 +87,18 @@ public final class DoorAppearanceModels {
     public static BakedModel leaf(Look look, DoorDesign design, DoorHingeSide hinge) {
         BakedModel oak = Minecraft.getInstance().getModelManager().getModel(DoorLeafModels.location(design, hinge));
         return look.isOakTemplate() ? oak
-                : MODELS.get(new Key(look, design, hinge.getSerializedName()), key -> retexture(oak, look));
+                : MODELS.get(new Key(look, design, hinge.getSerializedName()), key -> retexture(oak, look, design, hinge, false));
     }
 
     /** {@code oakItem} ({@code design}'s item model) in {@code appearance}. */
     public static BakedModel item(DoorDesign design, BakedModel oakItem, Appearance appearance) {
         Look look = look(appearance);
-        return look.isOakTemplate() ? oakItem : MODELS.get(new Key(look, design, "item"), key -> retexture(oakItem, look));
+        return look.isOakTemplate() ? oakItem : MODELS.get(new Key(look, design, "item"), key -> retexture(oakItem, look, design, DoorHingeSide.LEFT, true));
     }
 
-    private static BakedModel retexture(BakedModel oak, Look look) {
+    private static BakedModel retexture(BakedModel oak, Look look, DoorDesign design, DoorHingeSide hinge, boolean item) {
         TextureAtlasSprite panel = DonorSprites.atlas(look.panel());
+        if (look.tiled()) return DoorSurfaceModels.replacePanel(oak,design,hinge,item,panel,DoorAppearanceModels::isPanel);
         int tint = look.tint() >= 0 ? PANEL_TINT : -1;
         return ModelRetexturing.map(oak, quad -> isPanel(quad) ? ModelRetexturing.retexture(quad, panel, tint) : quad, side -> side);
     }

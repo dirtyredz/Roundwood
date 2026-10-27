@@ -16,7 +16,7 @@ public final class AppearanceTooltip {
     }
 
     public static List<Component> describe(Appearance appearance) {
-        String kind = appearance.isWood() ? "tooltip.roundwood.wood" : "tooltip.roundwood.masonry";
+        String kind = switch (appearance.kind()) { case WOOD -> "tooltip.roundwood.wood"; case MASONRY -> "tooltip.roundwood.masonry"; case BLOCK_SURFACE -> "tooltip.roundwood.surface"; };
         if (!BuiltInRegistries.BLOCK.containsKey(appearance.material())) {
             return List.of(Component.translatable("tooltip.roundwood.unavailable", appearance.material().toString())
                     .withStyle(ChatFormatting.RED));

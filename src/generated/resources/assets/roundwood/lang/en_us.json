@@ -111,6 +111,7 @@
   "tooltip.roundwood.paint": "Paint: %s",
   "tooltip.roundwood.restyle": "Restyle placed: planks or dye (doors: sneak + planks)",
   "tooltip.roundwood.retired_archway": "Retired archway: converts to modular arch pieces",
+  "tooltip.roundwood.surface": "Surface: %s",
   "tooltip.roundwood.unavailable": "Material %s is not installed (shown as oak)",
   "tooltip.roundwood.universal_trim": "Trims the clicked face of a window, door, arch piece or retired archway; restyle with planks, masonry or dye, remove with shears",
   "tooltip.roundwood.wood": "Wood: %s"
