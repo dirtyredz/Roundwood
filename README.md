@@ -5,6 +5,15 @@ restyle in the world: any planks (vanilla or modded) set the wood, any of the 16
 and trims can also be faced with radial brick. Install on **both** the server and every client.
 Generic: not tied to any modpack.
 
+**0.17.0 trial:** frameless centre glazing, lower camouflage with fitted round arches,
+raised paired crowns, edge-contact spear hinges and independently finished hinges/knobs.
+Existing saved doors adopt the new geometry in place. See [release notes](docs/releases/0.17.0.md).
+
+Ordinary-click a hinge or knob with a plank or supported block-surface donor to finish that
+component across both faces and paired leaves. Sneaking is optional. Wait for the swing to
+settle; blocked, moving, unchanged and creative actions charge nothing. Picked and harvested
+doors keep both finishes. Body, frame, casing and camouflage remain independent.
+
 ## Supported versions
 
 | Component | Version |
@@ -19,11 +28,11 @@ Generic: not tied to any modpack.
 (**Round Window**, **Round Window Arch, Left** and **Right**, **Round Window Corner, Bottom Left**
 and **Bottom Right**, and since 0.10.0 **Round Window Arch, Bottom Left** and **Bottom Right**,
 **Round Window Corner, Top Left** and **Top Right**, and **Round Window Edge, Top**, **Left**,
-**Bottom** and **Right**), **Arch Top 1x1**, **Arch Top 1x2**, **Arch Top 2x3** and
+**Bottom** and **Right**, plus **Frameless Window Pane**), **Arch Top 1x1**, **Arch Top 1x2**, **Arch Top 2x3** and
 **Keyhole Shoulder** (0.14.0), their four **Thin** counterparts (0.16.0), the **Universal Trim**, **Arch Sill** and **Cross Beams**. Creative tab order: round
 door, arched door, double arched door, tall double arched door, then each plain window profile (round, arch left,
 arch right, corner bottom left, corner bottom right, arch bottom left, arch bottom right, corner top
-left, corner top right, edge top, left, bottom, right), the three arch tops, keyhole shoulder, Universal Trim,
+left, corner top right, edge top, left, bottom, right, frameless), the three arch tops, keyhole shoulder, Universal Trim,
 Arch Sill, Cross Beams. They are crafted (and found in the creative tab) in oak;
 their look is changed once placed and travels with them when picked or broken.
 
@@ -34,8 +43,8 @@ follow the slab and keep independent looks. See [feature notes](docs/FEATURES.md
 
 **Fitted arches (0.16.0).** Ordinary-click a matching top with a Roundwood door, or a door
 with its matching top. Arched 1x2 takes Top 1x1; Round 2x2 takes Top 1x2; both paired doors
-take Top 2x3. The preview shows the BACK leaf and static frame. Full tops are unchanged from the
-standalone arch (the swinging leaf may clip through them); thin tops fit at MIDDLE or FRONT. Frame and door appearances/casings stay independent,
+take Top 2x3. The preview shows the aimed leaf depth and static frame. Full tops are unchanged from the
+standalone arch (the swinging leaf may clip through them); thin tops refuse only the same closed plane as the leaf. Frame and door appearances/casings stay independent,
 and harvesting any owned cell yields separate components. Red outlines indicate refused fits.
 Vanilla/other-mod doors and shoulders do not use same-cell fitting. Inspect all twelve fitted
 examples with /roundwood showcase. See [0.16.0 release notes](docs/releases/0.16.0.md).
@@ -390,9 +399,9 @@ would be a bottom corner's recipe, so each piece has its own. Shaped recipes als
 the left and right edges differ by where the pane sits.
 
 Crafting always gives the oak object; restyle it in the world. With **EMI** and **JEI** each of the
-24 items (four doors, 13 plain windows, four arch pieces, Universal Trim, Arch Sill and Cross Beams) is
+29 items (four doors, 14 plain windows, eight full/thin arch pieces, Universal Trim, Arch Sill and Cross Beams) is
 listed once, as its plain oak look, and nothing cycles; retired crossed windows and old archways stay hidden.
-Styled stacks in your inventory are told apart by their look (EMI comparison key, JEI subtype).
+Styled stacks in your inventory are told apart by their look and door hardware (EMI comparison key, JEI subtype).
 Neither viewer is required.
 
 ## Upgrading

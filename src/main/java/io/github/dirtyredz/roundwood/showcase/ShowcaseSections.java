@@ -33,7 +33,8 @@ public final class ShowcaseSections {
             new CamouflageSection(),
             new RedstoneSection(),
             new io.github.dirtyredz.roundwood.showcase.section.arch.ArchPiecesSection(),
-            new io.github.dirtyredz.roundwood.showcase.section.arch.ArchCompositionsSection());
+            new io.github.dirtyredz.roundwood.showcase.section.arch.ArchCompositionsSection(),
+            new io.github.dirtyredz.roundwood.showcase.section.door.DoorHardwareSection());
 
     private ShowcaseSections() {
     }

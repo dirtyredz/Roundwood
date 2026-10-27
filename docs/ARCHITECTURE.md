@@ -115,8 +115,7 @@ The old crossed-window and trim paths are unchanged (those stacks still convert 
 
 `assembly/DoorDepth` owns the three saved depths and aimed-face bands. FRONT defaults to
 the historical slab 13..16; MIDDLE shifts by -6.5 pixels and BACK by -13. The round block
-extends its inherited default state; no existing identity value changes. Arched 1x2 doors
-retain their old schema. Depth participates in assembly membership, shape caches and placement.
+extends its inherited default state; no existing identity value changes. Arched 1x2 doors also carry depth, with old states defaulting to FRONT. Depth participates in assembly membership, shape caches and placement.
 `Assembly.toAuthored` removes the shift before hit classification; collision shifts before
 cell clipping, selection shifts before facing rotation, and the renderer moves leaf,
 camouflage and casings together. Back-flush casing targets stay inside the cell.
@@ -275,7 +274,7 @@ is not treated as a removal.
 north: one board panel over the whole disc at depth z 13..16 (no trim ring since 0.4.0), brass
 straps on the hinge side half a pixel proud of each face (z 12.5..13 and 16..16.5) and a 2 x 2
 knob in the middle of each face standing two pixels proud (z 11..13 and 16..18). The hardware is
-decorative: collision and selection use the disc slab only. It turns as a rigid body about the vertical axis through the middle
+decorative for collision; donor-mode selection additionally acquires the actual hinge and knob surfaces. It turns as a rigid body about the vertical axis through the middle
 of its hinge-side thickness (x 1.5 or 30.5, z 14.5), +90 / -90 degrees, so the open leaf lies along
 the hinge wall (3/16 thick) and its outer half projects one block in the `facing` direction.
 
@@ -520,7 +519,7 @@ one perimeter item per stored face, two sill pools on upper arches, and exactly 
 beam pool. Pick-block includes only pane/frame/tint. Pending retired blocks instead return one
 hidden stack with full contents, never separate refunds. `WindowGlass` v1 lives on entities and
 pane stacks; absent means clear, tint covers glazing and connectors only. Viewers use frame plus
-glass subtype keys; the twenty advertised defaults include thirteen profiles and Cross Beams, while
+glass subtype keys; the 29 advertised defaults include fourteen profiles and Cross Beams, while
 all retired crossed items and frozen aliases stay hidden. Generated world meshes contain only the
 112 plain pane models; compatibility blockstates reference them and runtime composition supplies beams.
 
@@ -643,10 +642,10 @@ of its cells (z 0..1, authored facing north), cut into cell-local quarters.
 
 ## Appearance (0.5.0)
 
-There are 18 canonical blocks and 20 advertised items, including 13 plain windows and the three
+There are 27 canonical/compatibility blocks and 29 advertised items, including 14 plain windows and the three
 TRIM-family attachment items. The 13 retired crossed products and 49 frozen aliases remain hidden.
 
-- **Value** (`appearance/Appearance`): kind (wood/masonry), the donor block's id and an optional dye.
+- **Value** (`appearance/Appearance`): kind (wood/masonry/block surface), the donor block's id and an optional dye.
   Saved as `RoundwoodAppearance: {Version, Kind, Material, Paint}` (`AppearanceNbt`) in item tags and
   block entities alike. Missing means the holder's default (`AppearanceDefaults`: oak, or an alias's
   historical finish), so only non-default looks are stored and default stacks stack. Reading never
@@ -752,11 +751,8 @@ Everything is generated: textures by `tools/generate-textures.mjs` (checked in u
 texture-tile boundaries and by default writes vanilla's default UVs for its position inside its own
 tile, so no face samples outside its sprite. A `FaceStyle` can hide buried faces, give some faces
 another texture variable (a frame's sides) or explicit UVs: door panels and whole-ring frames use
-`AssemblyFaceUv`, which spreads one image across the whole 32 x 32 front and back. Door: two leaf
-templates, two oak leaves (`round_door_leaf_<hinge>`), one empty world model and a single `""`
-variant. Window: pane-only visible-surface models per design and pose (trims are
-not in them; see Window; no connection selects a model), in one-model-per-state blockstates; 112 plain window block models (141 block
-models in all), 26 window item models. Textures:
+`AssemblyFaceUv`, which spreads one image across the whole 32 x 32 front and back. Each door design has two leaf templates, two default leaves, an empty world model and a single `""` variant. Window: pane-only visible-surface models per design and pose (trims are
+not in them; see Window; no connection selects a model), in one-model-per-state blockstates and registered-product item models. Textures:
 `window_glass_clear`, `window_glass_<dye>` (sixteen), `trim_radial_thin_<m>`,
 `window_trim_round_<m>`, `window_trim_arch_<m>`, `universal_trim_<m>` (0.9.0); `window_trim_face`
 and `_edge` are still generated but unused. The Universal Trim, Arch Sill and Cross Beams item models are the attachment icons

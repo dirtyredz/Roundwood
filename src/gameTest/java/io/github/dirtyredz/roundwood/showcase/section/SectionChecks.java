@@ -94,6 +94,9 @@ public final class SectionChecks {
         for (int i = 0; i < masonry().size(); i++) {
             wallBlock(level, frame, owned, MaterialsSection.masonryR(i), MaterialsSection.MASONRY_Y, f, masonry().get(i));
         }
+        var surfaces=ShowcaseSamples.surfaces(ShowcaseSamples.all());
+        check(surfaces.size()==14,"surface wall count");
+        for(int i=0;i<surfaces.size();i++)wallBlock(level,frame,owned,MaterialsSection.R0+i,MaterialsSection.SURFACE_Y,f,surfaces.get(i));
         int barrelR = MaterialsSection.barrelR(masonry().size());
         BlockPos barrel = frame.pos(barrelR, MaterialsSection.MASONRY_Y, f);
         owned.add(barrel);

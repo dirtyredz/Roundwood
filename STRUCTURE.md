@@ -362,3 +362,5 @@ The first full review found no correctness problems. The debt is tracked in Dock
 `client/render/SurfaceSeparation` owns the three render offsets. DoorTrimModels, DoorArchRenderer and ArchPieceModels expose their render surfaces; geometry classes return authored surfaces. `client/door/DoorArchBakedFacesTest` and `testsupport/BakedCoplanarity` inspect generated leaf and production frame vertices across the supported pose matrix.
 
 `appearance/material/SurfaceMaterials` owns the exact block-finish allowlist and wax normalization. `client/door/DoorSurfaceModels` tiles donor panels before tall-model compression. SurfaceMaterialsTest, DoorSurfaceModelsTest and SurfaceFinishGameTests cover kind compatibility, UVs, cache distinction and payment.
+
+`showcase/section/door/DoorHardwareSection` adds four bounded component examples beside the fitted row. `HardwareShowcaseChecks` is shared by the focused hardware showcase GameTest and full showcase suite. WindowEdgesSection owns the 3x3 frameless-centre example; MaterialsSection owns the fourteen distinct donor blocks.

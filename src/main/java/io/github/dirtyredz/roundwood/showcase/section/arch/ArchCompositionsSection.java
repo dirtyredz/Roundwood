@@ -53,6 +53,9 @@ public final class ArchCompositionsSection implements ShowcaseSection {
             if (canvas.door(block, Appearance.DEFAULT.painted(net.minecraft.world.item.DyeColor.BLUE), r, f,
                     pose == 1 ? net.minecraft.world.level.block.state.properties.DoorHingeSide.RIGHT : net.minecraft.world.level.block.state.properties.DoorHingeSide.LEFT, false, leafDepth(pose)))
                 canvas.fittedArch(thickness, depth, FITTED_BODY, FITTED_CASINGS, r, f);
+            if(block.design()==io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND && pose==0
+                    && canvas.level().getBlockEntity(canvas.pos(r,0,f)) instanceof io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity entity)
+                entity.setCamouflage(io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData.free(Blocks.STONE_BRICKS.defaultBlockState()));
         }
     }
 

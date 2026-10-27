@@ -124,6 +124,7 @@ public final class ShowcaseGameTests {
         SectionChecks.verifyPieces(level, frame);
         SectionChecks.verifyMaterials(level, frame);
         ArchSectionsChecks.verify(level, frame);
+        io.github.dirtyredz.roundwood.showcase.section.door.HardwareShowcaseChecks.verify(level,frame);
         SpacingChecks.verifySpacing(level, frame);
         // Integrity checks run a tick later: everything must still be whole afterwards.
         helper.runAfterDelay(3, () -> {
@@ -133,6 +134,7 @@ public final class ShowcaseGameTests {
             SectionChecks.verifyPieces(level, frame);
             SectionChecks.verifyMaterials(level, frame);
             ArchSectionsChecks.verify(level, frame);
+        io.github.dirtyredz.roundwood.showcase.section.door.HardwareShowcaseChecks.verify(level,frame);
             clearSilently(helper);
             helper.succeed();
         });

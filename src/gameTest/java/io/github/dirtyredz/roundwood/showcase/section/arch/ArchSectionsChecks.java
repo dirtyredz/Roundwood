@@ -78,6 +78,8 @@ public final class ArchSectionsChecks {
                 var door = io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.of(pos, state);
                 check(door.depth() == ArchCompositionsSection.leafDepth(pose) && door.complete(level, block), "fitted showcase pose/completeness");
                 var entity = (io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity) level.getBlockEntity(pos);
+                if(block.design()==io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.ROUND && pose==0)
+                    check(entity.camouflage().isPresent() && io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageCoverage.of(block.design(),true)==io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageCoverage.LOWER,"fitted bottom camouflage missing");
                 var attachment = entity.arch().orElseThrow();
                 check(attachment.product() == io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topFor(block.design())
                         && attachment.thickness() == (pose == 0 ? io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL : io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.THIN)

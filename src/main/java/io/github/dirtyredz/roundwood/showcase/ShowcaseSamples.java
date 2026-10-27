@@ -38,6 +38,10 @@ public final class ShowcaseSamples {
         return samples.stream().filter(a -> a.kind() == Appearance.Kind.MASONRY).toList();
     }
 
+    public static List<Appearance> surfaces(List<Appearance> samples) {
+        return samples.stream().filter(a->a.kind()==Appearance.Kind.BLOCK_SURFACE).toList();
+    }
+
     /** A bare vanilla wood sample by its planks id, e.g. {@code spruce_planks}. */
     public static Appearance vanillaWood(String planks) {
         return Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", planks));

@@ -37,6 +37,8 @@ public final class AppearanceSamples {
         if (family.accepts(Appearance.Kind.MASONRY)) {
             masonry.forEach(id -> out.add(Appearance.masonry(id)));
         }
+        if(family.accepts(Appearance.Kind.BLOCK_SURFACE))
+            io.github.dirtyredz.roundwood.appearance.material.SurfaceMaterials.blocks().forEach(id->out.add(Appearance.surface(id)));
         return List.copyOf(out);
     }
 

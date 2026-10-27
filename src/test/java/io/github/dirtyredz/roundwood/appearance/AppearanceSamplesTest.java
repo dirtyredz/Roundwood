@@ -47,7 +47,7 @@ class AppearanceSamplesTest {
             assertEquals(Appearance.wood(vanillaIds().get(i)), samples.get(i), "index " + i);
         }
         // 11 woods, then 16 paints, no modded woods and (door) no masonry.
-        assertEquals(11 + 16, samples.size());
+        assertEquals(11 + 16 + 14, samples.size());
     }
 
     @Test
@@ -60,7 +60,7 @@ class AppearanceSamplesTest {
         List<Appearance> samples = AppearanceSamples.forFamily(AppearanceFamily.WINDOW, present, MASONRY);
         assertEquals(Appearance.wood(mod("apple_planks")), samples.get(11));
         assertEquals(Appearance.wood(mod("zebra_planks")), samples.get(12));
-        assertEquals(11 + 2 + 16, samples.size());
+        assertEquals(11 + 2 + 16 + 14, samples.size());
         long oaks = samples.stream().filter(a -> a.equals(Appearance.wood(mc("oak_planks")))).count();
         assertEquals(1, oaks, "vanilla oak must not be repeated");
         assertEquals(List.of(mod("apple_planks"), mod("zebra_planks")), AppearanceSamples.modded(present));
@@ -79,7 +79,7 @@ class AppearanceSamplesTest {
             assertEquals(mod(String.format("wood_%02d_planks", i)), modded.get(i), "the first eight by id");
         }
         List<Appearance> samples = AppearanceSamples.forFamily(AppearanceFamily.DOOR, present, MASONRY);
-        assertEquals(11 + 8 + 16, samples.size());
+        assertEquals(11 + 8 + 16 + 14, samples.size());
     }
 
     @Test
@@ -97,10 +97,10 @@ class AppearanceSamplesTest {
         List<Appearance> door = AppearanceSamples.forFamily(AppearanceFamily.DOOR, List.of(), MASONRY);
         List<Appearance> window = AppearanceSamples.forFamily(AppearanceFamily.WINDOW, List.of(), MASONRY);
         List<Appearance> trim = AppearanceSamples.forFamily(AppearanceFamily.TRIM, List.of(), MASONRY);
-        assertTrue(door.stream().allMatch(Appearance::isWood));
-        assertTrue(window.stream().allMatch(Appearance::isWood));
-        assertEquals(27 + 4, trim.size());
-        assertEquals(door, trim.subList(0, 27));
+        assertTrue(door.stream().noneMatch(a -> a.kind()==Appearance.Kind.MASONRY));
+        assertTrue(window.stream().noneMatch(a -> a.kind()==Appearance.Kind.MASONRY));
+        assertEquals(27 + 4 + 14, trim.size());
+        assertEquals(door.subList(0,27), trim.subList(0, 27));
         for (int i = 0; i < 4; i++) {
             assertEquals(Appearance.masonry(MASONRY.get(i)), trim.get(27 + i), "masonry " + i);
         }
@@ -134,10 +134,21 @@ class AppearanceSamplesTest {
         }
         for (AppearanceFamily family : AppearanceFamily.values()) {
             List<Appearance> samples = AppearanceSamples.forFamily(family, many, MASONRY);
-            assertTrue(samples.size() <= 11 + 8 + 16 + 4, family + ": " + samples.size());
+            assertTrue(samples.size() <= 11 + 8 + 16 + 4 + 14, family + ": " + samples.size());
             assertEquals(samples.size(), new HashSet<>(samples).size(), family + ": duplicates");
         }
-        assertEquals(11 + 8 + 16 + 4, AppearanceSamples.forFamily(AppearanceFamily.TRIM, many, MASONRY).size());
-        assertEquals(11 + 8 + 16, AppearanceSamples.forFamily(AppearanceFamily.DOOR, many, MASONRY).size());
+        assertEquals(11 + 8 + 16 + 4 + 14, AppearanceSamples.forFamily(AppearanceFamily.TRIM, many, MASONRY).size());
+        assertEquals(11 + 8 + 16 + 14, AppearanceSamples.forFamily(AppearanceFamily.DOOR, many, MASONRY).size());
+    }
+
+    @Test void surfaceExamplesAreDistinctNormalizedAndAppendedInEveryFamily() {
+        var expected=List.of("iron_block","gold_block","diamond_block","emerald_block","netherite_block",
+                "copper_block","exposed_copper","weathered_copper","oxidized_copper","quartz_block",
+                "smooth_quartz","chiseled_quartz_block","quartz_bricks","quartz_pillar");
+        for(var family:AppearanceFamily.values()) {
+            var all=AppearanceSamples.forFamily(family,List.of(),MASONRY);
+            assertEquals(expected,all.stream().filter(a->a.kind()==Appearance.Kind.BLOCK_SURFACE).map(a->a.material().getPath()).toList());
+            assertEquals(14,all.subList(all.size()-14,all.size()).stream().distinct().count());
+        }
     }
 }

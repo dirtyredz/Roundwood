@@ -30,6 +30,7 @@ public final class MaterialsSection implements ShowcaseSection {
     public static final int MAX_WOODS = 19;
     public static final int WOOD_Y = 0;
     public static final int MASONRY_Y = 1;
+    public static final int SURFACE_Y = 2;
     /** The last column the wall can use. */
     public static final int R_MAX = R0 + MAX_WOODS - 1;
     /** Dyes in the barrel: a full stack each. */
@@ -97,6 +98,11 @@ public final class MaterialsSection implements ShowcaseSection {
         for (int i = 0; i < masonry.size(); i++) {
             canvas.set(masonryR(i), MASONRY_Y, F, block(masonry.get(i)).defaultBlockState());
             canvas.wallSign(masonryR(i), MASONRY_Y, F, lines(ShowcaseSamples.label(masonry.get(i))));
+        }
+        var surfaces=ShowcaseSamples.surfaces(samples);
+        for(int i=0;i<surfaces.size();i++) {
+            canvas.set(R0+i,SURFACE_Y,F,block(surfaces.get(i)).defaultBlockState());
+            canvas.wallSign(R0+i,SURFACE_Y,F,lines(ShowcaseSamples.label(surfaces.get(i))));
         }
         canvas.barrel(barrelR(masonry.size()), MASONRY_Y, F, dyes(ShowcaseSamples.paints(samples)));
         canvas.wallSign(barrelR(masonry.size()), MASONRY_Y, F, "Dyes", "all sixteen", "paint sources");

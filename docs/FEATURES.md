@@ -30,3 +30,5 @@ The paired doors now reach their assembly tops with the raised 2x3 crown. Every 
 Block-surface finishes support iron, gold, diamond, emerald, netherite, every full copper oxidation stage (including waxed donors), quartz block, smooth quartz, chiseled quartz, quartz bricks and quartz pillar. Use the existing body/frame/trim donor gestures. They stay fixed and cannot be dyed; unchanged applications and creative use are free.
 
 Doors have independent assembly-wide hinge and knob finishes. Ordinary click either component with an accepted plank or block-surface donor, from either face or paired leaf; sneaking is optional. One donor changes that slot, with unchanged/creative/refused actions free. Wait for the eight-tick swing to settle before editing. Picked and harvested door items keep both finishes; there is no separate donor refund.
+
+0.17.0 upgrades existing saved assemblies in place. The showcase adds a frameless centre, fitted lower camouflage, all four independently finished hardware examples, and a third material-wall row for the fourteen distinct surface looks. Waxed copper donors normalize to those same four copper textures.

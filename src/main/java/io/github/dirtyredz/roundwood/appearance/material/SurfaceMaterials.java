@@ -13,6 +13,10 @@ public final class SurfaceMaterials {
     private static final List<String> COPPER=List.of("copper_block","exposed_copper","weathered_copper","oxidized_copper");
     private static final List<String> QUARTZ=List.of("quartz_block","smooth_quartz","chiseled_quartz_block","quartz_bricks","quartz_pillar");
     private SurfaceMaterials() {}
+    public static List<ResourceLocation> blocks() {
+        return java.util.stream.Stream.of(METALS,COPPER,QUARTZ).flatMap(List::stream)
+                .map(name->ResourceLocation.fromNamespaceAndPath("minecraft",name)).toList();
+    }
     public static Optional<ResourceLocation> normalize(ResourceLocation block) {
         if(!block.getNamespace().equals("minecraft")) return Optional.empty();
         String name=block.getPath();
