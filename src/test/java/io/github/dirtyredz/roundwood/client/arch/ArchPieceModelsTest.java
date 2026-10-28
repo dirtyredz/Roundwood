@@ -37,7 +37,7 @@ class ArchPieceModelsTest {
                         var top=io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan.topFor(door);
                         for(var layer:io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.values()) for(var cell:ArchPieceCell.of(top))
                             for(var facing:Direction.Plane.HORIZONTAL) for(boolean masonry:new boolean[]{false,true}) {
-                                var quads=io.github.dirtyredz.roundwood.client.door.DoorArchModels.quads(door,thickness,depth,layer,cell,facing,sprite,masonry);
+                                var quads=io.github.dirtyredz.roundwood.client.door.arch.DoorArchModels.quads(door,thickness,depth,layer,cell,facing,sprite,masonry);
                                 double back=thickness.back(depth),front=thickness.front(depth);
                                 if(layer==io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.FRONT_CASING){back=front;front++;}
                                 if(layer==io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry.Layer.BACK_CASING){front=back;back--;}

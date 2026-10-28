@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.client.render;
 
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
-import io.github.dirtyredz.roundwood.client.material.ModelRetexturing;
+import io.github.dirtyredz.roundwood.client.material.tint.ModelRetexturing;
 import io.github.dirtyredz.roundwood.client.material.TrimLooks;
 import io.github.dirtyredz.roundwood.geometry.AssemblyFaceUv;
 import io.github.dirtyredz.roundwood.geometry.Box;

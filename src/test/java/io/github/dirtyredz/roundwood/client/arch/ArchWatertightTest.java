@@ -4,7 +4,7 @@ import io.github.dirtyredz.roundwood.block.arch.assembly.*;
 import io.github.dirtyredz.roundwood.block.arch.geometry.*;
 import io.github.dirtyredz.roundwood.block.door.frame.*;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
-import io.github.dirtyredz.roundwood.client.door.DoorArchModels;
+import io.github.dirtyredz.roundwood.client.door.arch.DoorArchModels;
 import io.github.dirtyredz.roundwood.geometry.*;
 import net.minecraft.core.Direction;
 import net.minecraft.client.renderer.block.model.BakedQuad;

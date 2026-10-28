@@ -66,7 +66,9 @@ import java.util.function.Supplier;
  * holds the door's appearance (picked and dropped with the item). Subclasses add only the design
  * and any state identity of their own (the round door's {@code column}).
  */
-public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock, AppearanceDefaults, AppearanceUseTarget {
+public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock, AppearanceDefaults, AppearanceUseTarget, io.github.dirtyredz.roundwood.block.assembly.render.StaticRenderBlock {
+    @Override public DoorLayout.Assembly renderAssembly(BlockPos pos, BlockState state) { return DoorLayout.of(pos, state); }
+
     private final Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType;
 
     protected AssemblyDoorBlock(Properties properties, BlockSetType type, Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType) {

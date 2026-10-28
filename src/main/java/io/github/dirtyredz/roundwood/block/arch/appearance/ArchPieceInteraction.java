@@ -43,7 +43,7 @@ public final class ArchPieceInteraction {
     public static InteractionResult use(ArchPieceBlock block, BlockState state, Level level, BlockPos pos, Player player,
                                         InteractionHand hand, BlockHitResult hit) {
         var fitContext = new net.minecraft.world.item.context.UseOnContext(player, hand, hit);
-        if (io.github.dirtyredz.roundwood.block.arch.fitting.ArchDoorFitting.claims(fitContext)) return io.github.dirtyredz.roundwood.block.arch.fitting.ArchDoorFitting.use(fitContext);
+        if (io.github.dirtyredz.roundwood.block.arch.adapter.ArchDoorFitting.claims(fitContext)) return io.github.dirtyredz.roundwood.block.arch.adapter.ArchDoorFitting.use(fitContext);
         ArchPieceTrimTarget.Hit target = ArchPieceTrimTarget.of(state, pos, hit);
         HeldTrimTool tool = HeldTrimTool.of(player, hand);
         return switch (decide(state, level, pos, tool, target)) {
@@ -62,7 +62,7 @@ public final class ArchPieceInteraction {
     /** True when this click is one of the piece's own actions: the sneak-use bridge lets exactly these reach {@link #use}. */
     public static boolean claims(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand,
                                  BlockHitResult hit) {
-        if (io.github.dirtyredz.roundwood.block.arch.fitting.ArchDoorFitting.claims(new net.minecraft.world.item.context.UseOnContext(player, hand, hit))) return true;
+        if (io.github.dirtyredz.roundwood.block.arch.adapter.ArchDoorFitting.claims(new net.minecraft.world.item.context.UseOnContext(player, hand, hit))) return true;
         return decide(state, level, pos, HeldTrimTool.of(player, hand), ArchPieceTrimTarget.of(state, pos, hit)) != Action.PASS;
     }
 

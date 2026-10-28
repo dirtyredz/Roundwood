@@ -5,7 +5,7 @@ import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
 import io.github.dirtyredz.roundwood.client.material.MasonryStyles;
-import io.github.dirtyredz.roundwood.client.material.ModelRetexturing;
+import io.github.dirtyredz.roundwood.client.material.tint.ModelRetexturing;
 import io.github.dirtyredz.roundwood.client.material.TrimLooks;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;

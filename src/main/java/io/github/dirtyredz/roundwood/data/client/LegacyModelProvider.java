@@ -3,8 +3,8 @@ package io.github.dirtyredz.roundwood.data.client;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
-import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
-import io.github.dirtyredz.roundwood.client.render.RingModelNames;
+import io.github.dirtyredz.roundwood.client.door.leaf.DoorLeafModels;
+import io.github.dirtyredz.roundwood.client.trim.RingModelNames;
 import io.github.dirtyredz.roundwood.data.client.window.WindowModelProvider;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -16,7 +16,7 @@ import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import io.github.dirtyredz.roundwood.block.window.pane.OrientedWindowBlock;
 import io.github.dirtyredz.roundwood.data.client.window.OrientedWindowModelProvider;
-import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
+import io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility;
 
 /**
  * Compatibility resources for the 49 hidden 0.4.0 aliases, kept apart from the canonical providers:

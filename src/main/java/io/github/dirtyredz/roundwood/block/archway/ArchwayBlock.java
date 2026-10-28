@@ -64,7 +64,9 @@ import java.util.function.Supplier;
  * The callbacks hand off to the archway's assembly, appearance and trim services; placement only
  * ever happens whole, through {@link ArchwayItem}.
  */
-public class ArchwayBlock extends Block implements EntityBlock, AppearanceDefaults, AppearanceUseTarget {
+public class ArchwayBlock extends Block implements EntityBlock, AppearanceDefaults, AppearanceUseTarget, io.github.dirtyredz.roundwood.block.assembly.render.StaticRenderBlock {
+    @Override public ArchwayLayout.Assembly renderAssembly(BlockPos pos, BlockState state) { return ArchwayLayout.of(pos, state); }
+
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<ArchwayPart> PART = EnumProperty.create("part", ArchwayPart.class);
 

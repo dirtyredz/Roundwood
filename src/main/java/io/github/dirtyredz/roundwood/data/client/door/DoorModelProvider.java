@@ -4,7 +4,7 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
-import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
+import io.github.dirtyredz.roundwood.client.door.leaf.DoorLeafModels;
 import io.github.dirtyredz.roundwood.data.client.GeometryModelWriter;
 import io.github.dirtyredz.roundwood.geometry.AssemblyFaceUv;
 import io.github.dirtyredz.roundwood.geometry.Box;

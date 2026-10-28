@@ -63,7 +63,9 @@ import java.util.function.Supplier;
  * ever happens whole, through {@code assembly/TrimPlacement} (0.8.0: frames are compatibility content
  * from older saves; the {@code round_trim} item now attaches to doors and never places one).
  */
-public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefaults {
+public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefaults, io.github.dirtyredz.roundwood.block.assembly.render.StaticRenderBlock {
+    @Override public TrimLayout.Assembly renderAssembly(BlockPos pos, BlockState state) { return TrimLayout.of(pos, state); }
+
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<Quarter> PART = EnumProperty.create("part", Quarter.class);
 

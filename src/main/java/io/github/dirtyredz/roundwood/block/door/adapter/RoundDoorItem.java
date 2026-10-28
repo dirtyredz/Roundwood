@@ -32,7 +32,7 @@ public class RoundDoorItem extends AppearanceBlockItem {
                     net.minecraft.network.chat.Component.translatable("message.roundwood.unknown_arch_item"), true);
             return InteractionResult.FAIL;
         }
-        return io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.claims(context) ? io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.use(context) : super.useOn(context);
+        return io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting.claims(context) ? io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting.use(context) : super.useOn(context);
     }
     @Override
     public InteractionResult place(BlockPlaceContext context) {

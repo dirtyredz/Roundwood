@@ -12,7 +12,7 @@ import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import org.joml.Vector3f;
 
-import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
+import io.github.dirtyredz.roundwood.client.door.leaf.DoorLeafModels;
 import io.github.dirtyredz.roundwood.data.client.GeometryModelWriter;
 import io.github.dirtyredz.roundwood.geometry.AssemblyFaceUv;
 import io.github.dirtyredz.roundwood.geometry.Box;

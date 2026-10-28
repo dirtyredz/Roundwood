@@ -1,14 +1,24 @@
 package io.github.dirtyredz.roundwood.client;
 
 import io.github.dirtyredz.roundwood.Roundwood;
+import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlock;
+import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
+import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
+import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
+import io.github.dirtyredz.roundwood.client.arch.ArchPieceWorldModel;
+import io.github.dirtyredz.roundwood.client.arch.archway.ArchwayWorldModel;
+import io.github.dirtyredz.roundwood.client.door.DoorStaticModel;
+import io.github.dirtyredz.roundwood.client.render.world.StaticModelSources;
+import io.github.dirtyredz.roundwood.client.render.world.StaticWorldModel;
+import io.github.dirtyredz.roundwood.client.trim.TrimWorldModel;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.client.door.DoorAppearanceModels;
-import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
-import io.github.dirtyredz.roundwood.client.door.RoundDoorRenderer;
+import io.github.dirtyredz.roundwood.client.door.leaf.DoorLeafModels;
+import io.github.dirtyredz.roundwood.client.door.leaf.RoundDoorRenderer;
 import io.github.dirtyredz.roundwood.client.item.FamilyItemModels;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
-import io.github.dirtyredz.roundwood.client.render.RingModelNames;
+import io.github.dirtyredz.roundwood.client.trim.RingModelNames;
 import io.github.dirtyredz.roundwood.client.window.WindowAppearanceModel;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
@@ -43,7 +53,7 @@ public final class RoundwoodClient {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        io.github.dirtyredz.roundwood.client.render.assembly.AssemblyRenderLifecycle.bind();
+        io.github.dirtyredz.roundwood.client.render.world.AssemblyRenderLifecycle.bind();
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_DOOR.get(), RoundDoorRenderer::new);
     }
 
@@ -65,7 +75,7 @@ public final class RoundwoodClient {
     public static void wrapModels(ModelEvent.ModifyBakingResult event) {
         Map<ResourceLocation, BakedModel> models = event.getModels();
         WindowAppearanceModel.wrapBlocks(models);
-        io.github.dirtyredz.roundwood.client.render.StaticWorldModel.wrapBlocks(models);
+        StaticWorldModel.wrapBlocks(models, staticSources());
         for (Item item : Stream.of(ModItems.all().stream(), LegacyContent.items().stream()).flatMap(stream -> stream).distinct().toList()) {
             ModelResourceLocation location = new ModelResourceLocation(ForgeRegistries.ITEMS.getKey(item), "inventory");
             BakedModel model = models.get(location);
@@ -76,6 +86,16 @@ public final class RoundwoodClient {
         }
     }
 
+    /** Each host family binds its own chunk-model source; the shared static model never names a family. */
+    private static StaticModelSources staticSources() {
+        return StaticModelSources.builder()
+                .bind(AssemblyDoorBlock.class, DoorStaticModel.SOURCE)
+                .bind(ArchPieceBlock.class, ArchPieceWorldModel.SOURCE)
+                .bind(ArchwayBlock.class, ArchwayWorldModel.SOURCE)
+                .bind(RoundTrimBlock.class, TrimWorldModel.SOURCE)
+                .build();
+    }
+
     /** Door items in an unfamiliar wood tint their panel (tint index 0) with the donor colour; brass is never tinted. */
     @SubscribeEvent
     public static void registerItemColors(RegisterColorHandlersEvent.Item event) {
@@ -83,7 +103,7 @@ public final class RoundwoodClient {
     }
 
     @SubscribeEvent public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
-        io.github.dirtyredz.roundwood.client.material.StaticBlockColors.register(event);
+        io.github.dirtyredz.roundwood.client.material.tint.StaticBlockColors.register(event);
     }
 
     @SubscribeEvent

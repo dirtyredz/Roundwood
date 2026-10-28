@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.data.ExistingFileHelper;
 
 import java.util.concurrent.CompletableFuture;
-import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
+import io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility;
 
 /**
  * Item tags name only the canonical items (the window trim is a trim item) (the hidden 0.4.0 alias items are never advertised).

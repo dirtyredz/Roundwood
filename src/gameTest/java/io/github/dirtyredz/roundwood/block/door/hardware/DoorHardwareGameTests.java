@@ -173,7 +173,7 @@ public final class DoorHardwareGameTests {
         floor(helper);var level=helper.getLevel();
         var door=placeOakDoor(helper,new BlockPos(3,1,3),Direction.NORTH,DoorHingeSide.LEFT,"hardware_frame");
         var entity=anchorEntity(helper,door);
-        check(io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.fitAt(level,door.anchor(),
+        check(io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting.fitAt(level,door.anchor(),
                 io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL,
                 io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.FRONT,AppearanceFixtures.BRICKS),"frame fixture");
         check(io.github.dirtyredz.roundwood.block.door.trim.DoorTrimActions.install(level,door.anchor(),

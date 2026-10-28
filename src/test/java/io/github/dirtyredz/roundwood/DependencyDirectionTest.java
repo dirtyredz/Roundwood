@@ -18,6 +18,22 @@ class DependencyDirectionTest {
         }
     }
 
+    /** Shared assembly lifecycle and the static chunk model reach families only through their ports. */
+    @Test
+    void sharedStaticRenderingNamesNoHostFamily() throws Exception {
+        var families = java.util.List.of("block.door", "block.arch", "block.archway", "block.trim", "block.window",
+                "client.door", "client.arch", "client.trim", "client.window");
+        for (var shared : java.util.List.of("block/assembly", "client/render/world")) {
+            try (var files = Files.walk(ROOT.resolve(shared))) {
+                for (var file : files.filter(p -> p.toString().endsWith(".java")).toList()) {
+                    var source = Files.readString(file);
+                    for (var family : families)
+                        assertFalse(source.contains("io.github.dirtyredz.roundwood." + family + "."), file + " names " + family);
+                }
+            }
+        }
+    }
+
     @Test
     void registryMigrationExceptionIsLimitedToRetiredAdapters() throws Exception {
         var imports = new java.util.HashSet<String>();

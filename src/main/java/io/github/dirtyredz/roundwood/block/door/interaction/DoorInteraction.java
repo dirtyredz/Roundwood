@@ -51,7 +51,7 @@ public final class DoorInteraction {
     public static InteractionResult use(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos, Player player,
                                         InteractionHand hand, BlockHitResult hit) {
         var fitContext = new net.minecraft.world.item.context.UseOnContext(player, hand, hit);
-        if (io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.claims(fitContext)) return io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.use(fitContext);
+        if (io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting.claims(fitContext)) return io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting.use(fitContext);
         if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty()
                 && player.getOffhandItem().getItem() instanceof io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceItem) return InteractionResult.PASS;
         if (hand == InteractionHand.MAIN_HAND && player.getMainHandItem().isEmpty()
@@ -97,7 +97,7 @@ public final class DoorInteraction {
     /** The sneak-use bridge: a trim fit, a trim-ring action, or the door's ordinary restyling gesture. */
     public static boolean claims(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand,
                                  BlockHitResult hit) {
-        if (io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.claims(new net.minecraft.world.item.context.UseOnContext(player, hand, hit))) return true;
+        if (io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting.claims(new net.minecraft.world.item.context.UseOnContext(player, hand, hit))) return true;
         if (io.github.dirtyredz.roundwood.block.door.frame.DoorArchInteraction.hit(level, pos, state, hit).isPresent()) return true;
         if (io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareDonors.of(player,hand).isPresent()) return true;
         HeldTrimTool tool = HeldTrimTool.of(player, hand);

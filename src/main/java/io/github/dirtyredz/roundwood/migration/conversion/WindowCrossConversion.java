@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.migration.conversion;
 
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
-import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
+import io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;

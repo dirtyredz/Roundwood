@@ -9,7 +9,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimSurfac
 import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimUv;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
-import io.github.dirtyredz.roundwood.client.material.ModelRetexturing;
+import io.github.dirtyredz.roundwood.client.material.tint.ModelRetexturing;
 import io.github.dirtyredz.roundwood.client.material.TrimLooks;
 import io.github.dirtyredz.roundwood.geometry.FaceUv;
 import io.github.dirtyredz.roundwood.geometry.Surface;

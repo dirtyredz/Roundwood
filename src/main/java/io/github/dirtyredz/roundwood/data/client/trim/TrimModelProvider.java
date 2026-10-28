@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.data.client.trim;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.geometry.RingGeometry;
-import io.github.dirtyredz.roundwood.client.render.RingModelNames;
+import io.github.dirtyredz.roundwood.client.trim.RingModelNames;
 import io.github.dirtyredz.roundwood.data.client.door.DoorModelProvider;
 import io.github.dirtyredz.roundwood.data.client.GeometryModelWriter;
 import io.github.dirtyredz.roundwood.geometry.AssemblyFaceUv;

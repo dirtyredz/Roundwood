@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.migration;
 
+import io.github.dirtyredz.roundwood.migration.retired.ArchwayStackMigration;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;

@@ -1,5 +1,8 @@
 package io.github.dirtyredz.roundwood.client.door;
 
+import io.github.dirtyredz.roundwood.client.door.leaf.DoorSurfaceModels;
+import io.github.dirtyredz.roundwood.client.door.leaf.DoorLeafModels;
+import io.github.dirtyredz.roundwood.client.door.hardware.DoorHardwareModels;
 import io.github.dirtyredz.roundwood.client.material.AppearanceLooks;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModItems;
@@ -14,9 +17,9 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.BuiltinWoodStyles;
-import io.github.dirtyredz.roundwood.client.material.DonorColors;
+import io.github.dirtyredz.roundwood.client.material.tint.DonorColors;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
-import io.github.dirtyredz.roundwood.client.material.ModelRetexturing;
+import io.github.dirtyredz.roundwood.client.material.tint.ModelRetexturing;
 import io.github.dirtyredz.roundwood.client.material.PaintStyles;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;

@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.client.arch;
 
+import io.github.dirtyredz.roundwood.client.render.world.StaticQuadTransform;
+import io.github.dirtyredz.roundwood.client.render.world.StaticWorldModel;
 import com.google.gson.Gson;
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.dirtyredz.roundwood.block.arch.assembly.*;
@@ -13,7 +15,7 @@ import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.*;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.geometry.trim.WindowTrimSurfaces;
-import io.github.dirtyredz.roundwood.client.door.DoorArchModels;
+import io.github.dirtyredz.roundwood.client.door.arch.DoorArchModels;
 import io.github.dirtyredz.roundwood.client.render.*;
 import io.github.dirtyredz.roundwood.testsupport.QuadModel;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -133,7 +135,7 @@ class ChunkSectionRebuildTest {
         }
         if (nbt.contains("Camouflage")) for (var part : assembly.parts()) draws.add(new Draw("camouflage", assembly.pos(part), () -> {
             double shift = assembly.depth().offset()/16;
-            return io.github.dirtyredz.roundwood.client.camouflage.CamouflageModels.bake(design, facing, part,
+            return io.github.dirtyredz.roundwood.client.door.CamouflageModels.bake(design, facing, part,
                     CamouflageCoverage.of(design, !frame.isEmpty()), side -> new io.github.dirtyredz.roundwood.client.material.DonorSprites.FaceMaterial(sprite, -1))
                     .stream().map(quad -> StaticQuadTransform.translate(quad, -facing.getStepX()*shift, 0, -facing.getStepZ()*shift, -1)).toList();
         }));

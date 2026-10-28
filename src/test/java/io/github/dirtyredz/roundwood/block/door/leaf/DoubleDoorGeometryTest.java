@@ -20,9 +20,9 @@ class DoubleDoorGeometryTest {
             assertEquals(y<16 || DESIGN.inLeaf(x,y-16), tall.inLeaf(x,y), x+"/"+y);
         }
         for (var hinge : DoorHingeSide.values()) for (var piece : DoorGeometry.leaf(tall, hinge)) {
-            var model = io.github.dirtyredz.roundwood.client.door.DoorLeafModels.modelBox(tall, piece.box());
+            var model = io.github.dirtyredz.roundwood.client.door.leaf.DoorLeafModels.modelBox(tall, piece.box());
             assertTrue(model.within(new Box(-16,-16,-16,32,32,32)));
-            assertEquals(piece.box(), io.github.dirtyredz.roundwood.client.door.DoorLeafModels.authoredBox(tall,model));
+            assertEquals(piece.box(), io.github.dirtyredz.roundwood.client.door.leaf.DoorLeafModels.authoredBox(tall,model));
         }
         var open = DoorGeometry.placedEnvelope(tall, DoorHingeSide.LEFT, true);
         assertTrue(open.stream().allMatch(b -> b.maxX() <= 3 || b.minX() >= 45));

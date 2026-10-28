@@ -21,7 +21,7 @@ public final class ArchPieceItem extends AppearanceBlockItem {
     }
     public ArchPieceBlock piece() { return (ArchPieceBlock) getBlock(); }
     @Override public InteractionResult useOn(net.minecraft.world.item.context.UseOnContext context) {
-        return io.github.dirtyredz.roundwood.block.arch.fitting.ArchDoorFitting.claims(context) ? io.github.dirtyredz.roundwood.block.arch.fitting.ArchDoorFitting.use(context) : super.useOn(context);
+        return io.github.dirtyredz.roundwood.block.arch.adapter.ArchDoorFitting.claims(context) ? io.github.dirtyredz.roundwood.block.arch.adapter.ArchDoorFitting.use(context) : super.useOn(context);
     }
     @Override public InteractionResult place(BlockPlaceContext context) { return ArchPiecePlacement.place(this, context); }
     @Override public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {

@@ -8,7 +8,7 @@ import io.github.dirtyredz.roundwood.client.arch.ArchPieceModels;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorItem;
-import io.github.dirtyredz.roundwood.client.archway.ArchwayModels;
+import io.github.dirtyredz.roundwood.client.arch.archway.ArchwayModels;
 import io.github.dirtyredz.roundwood.client.door.DoorAppearanceModels;
 import io.github.dirtyredz.roundwood.client.window.WindowAppearanceModel;
 import net.minecraft.client.resources.model.BakedModel;

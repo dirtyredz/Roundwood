@@ -42,6 +42,10 @@ import java.util.Map;
 public abstract class AppearanceAnchorBlockEntity extends BlockEntity implements AppearanceAnchor {
     private final io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderPublication<io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderSnapshot, BlockPos> staticRenderPublication = new io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderPublication<>();
     public final io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderPublication<io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderSnapshot, BlockPos> staticRenderPublication() { return staticRenderPublication; }
+    /** Family values this anchor adds to its static-render snapshot; most families add none. */
+    public io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderExtras renderExtras() {
+        return io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderExtras.NONE;
+    }
 
     @Override public void onLoad() {
         super.onLoad();

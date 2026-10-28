@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.Block;
 import java.util.Map;
 import java.util.ArrayList;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
-import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
+import io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowAppearanceData;
@@ -19,7 +19,7 @@ import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.BuiltinWoodStyles;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
 import io.github.dirtyredz.roundwood.client.material.GlassStyles;
-import io.github.dirtyredz.roundwood.client.material.ModelRetexturing;
+import io.github.dirtyredz.roundwood.client.material.tint.ModelRetexturing;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -103,7 +103,7 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
             if (renderType == null || super.getRenderTypes(state, random, data).contains(renderType))
                 out.addAll(paneQuads(state, side, random, data, renderType));
             if (side == null && (renderType == null || renderType == RenderType.solid()))
-                out.addAll(io.github.dirtyredz.roundwood.client.render.StaticWorldModel.collect(
+                out.addAll(io.github.dirtyredz.roundwood.client.render.world.StaticWorldModel.collect(
                         io.github.dirtyredz.roundwood.client.window.trim.WindowStaticModels.models(state, snapshot), state, random, renderType));
             return List.copyOf(out);
         });

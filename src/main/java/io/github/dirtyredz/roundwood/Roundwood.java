@@ -5,8 +5,8 @@ import io.github.dirtyredz.roundwood.block.assembly.AssemblyHarvest;
 import io.github.dirtyredz.roundwood.block.door.adapter.DoorUseChannel;
 import io.github.dirtyredz.roundwood.data.RoundwoodDataProviders;
 import io.github.dirtyredz.roundwood.migration.ChunkMigrations;
-import io.github.dirtyredz.roundwood.migration.ArchwayStackMigration;
-import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
+import io.github.dirtyredz.roundwood.migration.retired.ArchwayStackMigration;
+import io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
@@ -29,9 +29,9 @@ public final class Roundwood {
     public static final String MOD_ID = "roundwood";
 
     public Roundwood() {
-        io.github.dirtyredz.roundwood.block.arch.fitting.ArchDoorFitting.bind(
-                io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting::claims,
-                io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting::use);
+        io.github.dirtyredz.roundwood.block.arch.adapter.ArchDoorFitting.bind(
+                io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting::claims,
+                io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting::use);
         DoorUseChannel.register();
         CrossWindowCompatibility.registerWindowHandler();
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();

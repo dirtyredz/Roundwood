@@ -134,7 +134,7 @@ public final class ContentGameTests {
         }
         List<Block> windows = new java.util.ArrayList<>(ModBlocks.windows());
         windows.addAll(LegacyContent.windows());
-        windows.addAll(io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility.blocks());
+        windows.addAll(io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility.blocks());
         check(windows.size() == 42, "expected 27 + 15 window blocks, found " + windows.size());
         for (Block window : windows) {
             check(ModBlockEntities.roundWindow().isValid(window.defaultBlockState()), window + " cannot carry the window entity");
@@ -196,7 +196,7 @@ public final class ContentGameTests {
                     && !piece.defaultBlockState().is(BlockTags.DOORS), "modular piece gameplay tags");
         }
         for (Block alias : LegacyContent.blocks()) {
-            if (io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility.isRetired(alias.defaultBlockState())) {
+            if (io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility.isRetired(alias.defaultBlockState())) {
                 check(alias.defaultBlockState().is(ModTags.ROUND_WINDOWS) && new ItemStack(alias).is(ModTags.ROUND_WINDOW_ITEMS), "retired window lost gameplay tags");
                 continue;
             }

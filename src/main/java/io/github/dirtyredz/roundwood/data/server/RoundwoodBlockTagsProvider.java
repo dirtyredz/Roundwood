@@ -14,7 +14,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
+import io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility;
 
 /**
  * Gameplay tags cover the canonical blocks and the hidden 0.4.0 aliases (an unconverted alias still

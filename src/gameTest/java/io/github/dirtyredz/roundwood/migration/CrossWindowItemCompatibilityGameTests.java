@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.migration;
 
+import io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;

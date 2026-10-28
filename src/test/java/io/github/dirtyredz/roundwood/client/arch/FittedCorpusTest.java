@@ -8,7 +8,7 @@ import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness;
 import io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan;
 import io.github.dirtyredz.roundwood.block.door.frame.DoorArchGeometry;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
-import io.github.dirtyredz.roundwood.client.door.DoorArchModels;
+import io.github.dirtyredz.roundwood.client.door.arch.DoorArchModels;
 import io.github.dirtyredz.roundwood.testsupport.MinecraftBootstrap;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -50,7 +50,7 @@ class FittedCorpusTest {
                     chunkModels.add(new io.github.dirtyredz.roundwood.testsupport.QuadModel(quads, sprite));
                 }
                 long baked = System.nanoTime();
-                var chunkQuads = io.github.dirtyredz.roundwood.client.render.StaticWorldModel.collect(chunkModels, null,
+                var chunkQuads = io.github.dirtyredz.roundwood.client.render.world.StaticWorldModel.collect(chunkModels, null,
                         net.minecraft.util.RandomSource.create(0), null);
                 assertEquals(legacyQuads, chunkQuads, "Chunk collection preserves vertices, UVs, sprites, normals, tint and shade/AO flags");
                 System.out.printf("Fitted synthetic section: %d models, %d quads; cold bake %.3f ms, cached-model collection %.3f ms%n",

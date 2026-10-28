@@ -18,7 +18,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import java.util.Set;
 import java.util.stream.Stream;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowBeamNbt;
-import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
+import io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility;
 
 /**
  * Every part drops its family's canonical item (explosion rules apply); the block puts the broken

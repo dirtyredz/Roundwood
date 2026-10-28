@@ -113,7 +113,7 @@ public final class DoorFreeEdgeGameTests {
         var door = ModBlocks.roundDoor();
         var level = helper.getLevel();
         var original = placeOakDoor(helper, ANCHOR, Direction.NORTH, DoorHingeSide.LEFT, "frame_projection");
-        check(io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.fitAt(level, original.anchor(),
+        check(io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting.fitAt(level, original.anchor(),
                 io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL,
                 io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.FRONT,
                 io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.BRICKS), "frame fixture");
@@ -152,7 +152,7 @@ public final class DoorFreeEdgeGameTests {
             var anchor = helper.absolutePos(ANCHOR);
             var assembly = new DoorLayout.Assembly(anchor, facing, hinge, block.design(), depth);
             check(io.github.dirtyredz.roundwood.block.door.assembly.DoorPlacement.placeAt(level, block, assembly, false), "leaf fixture");
-            check(io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.fitAt(level, anchor,
+            check(io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting.fitAt(level, anchor,
                     io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.FULL,
                     io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.FRONT,
                     io.github.dirtyredz.roundwood.appearance.Appearance.DEFAULT), "fit fixture");

@@ -61,6 +61,9 @@ public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements
     public void loadHardware(CompoundTag parent) { hardware.load(parent); changed(); }
 
     public Optional<DoorArchAttachment> arch() { return arch.attachment(); }
+    @Override public DoorRenderExtras renderExtras() {
+        return new DoorRenderExtras(arch(), camouflage().map(CamouflageData::material));
+    }
     public boolean archEditable() { return arch.editable(); }
     public boolean setArch(@Nullable DoorArchAttachment attachment) {
         if (!arch.set(attachment)) return false;

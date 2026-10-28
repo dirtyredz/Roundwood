@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.assembly;
 
+import io.github.dirtyredz.roundwood.block.door.adapter.DoorRenderExtras;
+
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlockEntity;
 import io.github.dirtyredz.roundwood.block.arch.assembly.*;
@@ -71,15 +73,15 @@ public final class StaticRenderLifecycleGameTests {
                 ArchPieceThickness.FULL, ArchPieceDepth.FRONT, AppearanceFixtures.BRICKS, FaceTrims.both(AppearanceFixtures.SPRUCE));
         check(entity.setArch(frame), "fit payload");
         var fitted = entity.staticRenderPublication().current();
-        check(fitted.available() && fitted.frame().orElseThrow().equals(frame), "published fitted payload");
+        check(fitted.available() && DoorRenderExtras.of(fitted).frame().orElseThrow().equals(frame), "published fitted payload");
         check(fitted.members().size() == 12 && fitted.members().keySet().stream().map(SectionPos::of).distinct().count() == 4, "all twelve cells across sections");
         var states = new java.util.LinkedHashMap<BlockPos, net.minecraft.world.level.block.state.BlockState>();
         for (var cell : door.positions()) states.put(cell, level.getBlockState(cell));
         boolean installed = io.github.dirtyredz.roundwood.block.assembly.placement.AssemblyWriteTransaction.write(level, states,
                 () -> entity.setArch(null), () -> false);
-        check(!installed && entity.staticRenderPublication().current().frame().orElseThrow().equals(frame), "rollback publishes restored unchanged-state NBT");
-        check(entity.setArch(null) && entity.staticRenderPublication().current().frame().isEmpty(), "clear publishes empty frame");
-        check(fitted.frame().isPresent(), "retained snapshot remains immutable");
+        check(!installed && DoorRenderExtras.of(entity.staticRenderPublication().current()).frame().orElseThrow().equals(frame), "rollback publishes restored unchanged-state NBT");
+        check(entity.setArch(null) && DoorRenderExtras.of(entity.staticRenderPublication().current()).frame().isEmpty(), "clear publishes empty frame");
+        check(DoorRenderExtras.of(fitted).frame().isPresent(), "retained snapshot remains immutable");
         level.destroyBlock(pos.above(3), false);
         check(!entity.staticRenderPublication().current().available(), "break retires door snapshot");
         for (int x = 0; x < 3; x++) level.setBlockAndUpdate(pos.east(x).below(), Blocks.AIR.defaultBlockState());

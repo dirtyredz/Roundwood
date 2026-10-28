@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.client.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import io.github.dirtyredz.roundwood.client.render.StaticGeometryModel;
+import io.github.dirtyredz.roundwood.client.render.world.StaticGeometryModel;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;

@@ -51,7 +51,11 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /** Minecraft callbacks only; assembly services own completeness, removal, harvesting and anchors. */
-public class ArchPieceBlock extends Block implements EntityBlock, AppearanceDefaults, AppearanceUseTarget {
+public class ArchPieceBlock extends Block implements EntityBlock, AppearanceDefaults, AppearanceUseTarget, io.github.dirtyredz.roundwood.block.assembly.render.StaticRenderBlock {
+    @Override public @org.jetbrains.annotations.Nullable ArchPieceLayout.Assembly renderAssembly(BlockPos pos, BlockState state) {
+        return state.getValue(CELL).in(design()) ? ArchPieceLayout.of(pos, state) : null;
+    }
+
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<ArchPieceCell> CELL = EnumProperty.create("cell", ArchPieceCell.class);
     public static final EnumProperty<Side> SIDE = EnumProperty.create("side", Side.class);

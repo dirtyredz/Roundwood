@@ -129,7 +129,7 @@ public final class ShowcaseCanvas {
     public boolean fittedArch(io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness thickness,
             io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth depth, Appearance appearance, FaceTrims trims, int r, int f) {
         var anchor = pos(r, 0, f);
-        if (!io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitting.fitAt(level, anchor, thickness, depth, appearance)) {
+        if (!io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting.fitAt(level, anchor, thickness, depth, appearance)) {
             problem("arch did not fit at " + anchor.toShortString()); return false;
         }
         var entity = (io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity) level.getBlockEntity(anchor);
