@@ -12,21 +12,20 @@ import java.util.List;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
-/** The family-neutral static-render seams: source lookup by block class and the shared cell-layer order. */
+/** The family-neutral static-render seams: explicit block bindings and the shared cell-layer order. */
 class StaticModelPortTest {
     static { io.github.dirtyredz.roundwood.testsupport.MinecraftBootstrap.ensure(); }
 
-    private static class Family extends Block { Family() { super(BlockBehaviour.Properties.of()); } }
-    private static final class Variant extends Family {}
-    private static final class Other extends Block { Other() { super(BlockBehaviour.Properties.of()); } }
+    private static final class Family extends Block { Family() { super(BlockBehaviour.Properties.of()); } }
 
-    @Test void subclassesInheritTheirFamilySourceAndUnboundBlocksHaveNone() {
+    @Test void registeredBlocksResolveTheirExplicitSourcesAndUnboundBlocksHaveNone() {
         StaticModelSource source = (state, snapshot) -> List.of();
-        var sources = StaticModelSources.builder().bind(Family.class, source).build();
-        assertSame(source, sources.find(new Family()).orElseThrow());
-        assertSame(source, sources.find(new Variant()).orElseThrow());
-        assertTrue(sources.find(new Other()).isEmpty());
-        assertThrows(IllegalStateException.class, () -> StaticModelSources.builder().bind(Family.class, source).bind(Family.class, source));
+        var bound = new Family();
+        var other = new Family();
+        var sources = StaticModelSources.builder().bind(bound, source).build();
+        assertSame(source, sources.find(bound).orElseThrow());
+        assertTrue(sources.find(other).isEmpty());
+        assertThrows(IllegalStateException.class, () -> StaticModelSources.builder().bind(bound, source).bind(bound, source));
         assertFalse(source.culledBySide(), "sources draw unculled by default");
     }
 

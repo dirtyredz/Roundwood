@@ -36,8 +36,8 @@ Families plug in through two ports, so the shared publication and the chunk mode
 `block/assembly/render/StaticRenderBlock` (its render assembly for a state) and its anchor entity may
 override `renderExtras()` with immutable family values (`AssemblyRenderExtras`; the door publishes
 `DoorRenderExtras`: fitted arch and camouflage donor). Client side, each family has a
-`client/render/world/StaticModelSource` (cell models, side culling, particle sprite) bound to its
-block class in `RoundwoodClient` (`StaticModelSources`, nearest superclass wins). `CellLayers` is the
+`client/render/world/StaticModelSource` (cell models, side culling, particle sprite) bound to every
+registered host block in `RoundwoodClient` (`StaticModelSources`). `CellLayers` is the
 shared composition: a cached body, then one casing per trimmed face in `AttachmentFace` order.
 
 Window snapshots also carry perimeter/sill looks. Their wrapper preserves the original translucent

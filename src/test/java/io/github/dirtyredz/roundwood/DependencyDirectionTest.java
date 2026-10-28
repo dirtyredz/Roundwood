@@ -35,6 +35,17 @@ class DependencyDirectionTest {
     }
 
     @Test
+    void clientWorldRenderingImportsNoRegistryOrMigrationCatalog() throws Exception {
+        try (var files = Files.walk(ROOT.resolve("client/render/world"))) {
+            for (var file : files.filter(p -> p.toString().endsWith(".java")).toList()) {
+                var source = Files.readString(file);
+                assertFalse(source.contains("io.github.dirtyredz.roundwood.registry."), file + " imports registry");
+                assertFalse(source.contains("io.github.dirtyredz.roundwood.migration."), file + " imports migration");
+            }
+        }
+    }
+
+    @Test
     void registryMigrationExceptionIsLimitedToRetiredAdapters() throws Exception {
         var imports = new java.util.HashSet<String>();
         try (var files = Files.walk(ROOT.resolve("registry"))) {

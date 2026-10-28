@@ -14,8 +14,8 @@ classes, with door-only fields (`frame`, `camouflage`) in the shared snapshot. T
   `DoorRenderExtras`). The snapshot carries `extras` instead of door fields; records keep chunk-quad
   cache equality.
 - Client side, each family implements `client/render/world/StaticModelSource` (models, `culledBySide`
-  for the frame's ring quarters, particle sprite). `RoundwoodClient` binds sources to block classes
-  (`StaticModelSources`; a subclass inherits its family's source); the wrapper holds its source.
+  for the frame's ring quarters, particle sprite). `RoundwoodClient` binds every registered host
+  block to its source (`StaticModelSources`); the wrapper holds its source.
 - `CellLayers` names the repeated body-plus-face-casings composition (arch pieces, archways, the
   door's casings and fitted-arch cells). The per-family bakers keep their own typed caches: their
   keys differ by geometry, so one shared cache would only widen the key.

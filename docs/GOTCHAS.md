@@ -125,9 +125,9 @@
 - **Planks and dye on a window change the frame; dye on glass tints.** Planks and frame paint leave
   the glass alone; dye aimed at the glass tints the whole window's glass. Aim
   decides (trim band, frame or beam, glass), and no gesture needs sneaking.
-- **Every window blockstate applies one complete model** (pane-only visible surfaces, one model
-  per pose; there are no `_arms_*` or `_trimmed` models, trims are drawn by a block-entity
-  renderer). After any pose or geometry change rerun
+- **Every window blockstate applies one complete pane model** (pane-only visible surfaces, one model
+  per pose; there are no `_arms_*` or `_trimmed` models). `WindowStaticModels` composes perimeter
+  trims and sills into the model's separate solid chunk pass. After any pose or geometry change rerun
   `runData`; `GeneratedWindowPaneModelsTest` compares every state's model with the block geometry
   and fails on a stale file.
 - **Internal translucent faces cause seams.** Glass faces drawn inside or against other glass show
@@ -202,8 +202,10 @@
 - **Appearance caches are dropped on every model bake** (F3+T, resource packs): donor sprites,
   sampled colours, leaf/quarter/window/item models together. A donor whose texture changes is
   re-sampled then.
-- **Trims are drawn by their anchor's renderer** since 0.5.0: like doors, no mining crack shows,
-  break particles are oak, and an incomplete frame draws nothing.
+- **Window trims and compatibility frames are chunk-baked.** `WindowStaticModels` contributes window
+  perimeter and sill geometry through `WindowAppearanceModel`; `TrimWorldModel` supplies each
+  compatibility-frame quarter through `StaticWorldModel`. Mining cracks therefore use the same
+  model-data-backed chunk geometry; an incomplete compatibility frame draws nothing.
 - **Alias ids stay registered.** The 49 0.4.0 ids exist as hidden blocks and items so old chunks and
   inventories load; they are in no tab, recipe or viewer. Never delete them while worlds may hold
   0.4.0 content; old items in containers are not renamed (they place canonical blocks).

@@ -1,10 +1,6 @@
 package io.github.dirtyredz.roundwood.client;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlock;
-import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
-import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
-import io.github.dirtyredz.roundwood.block.trim.RoundTrimBlock;
 import io.github.dirtyredz.roundwood.client.arch.ArchPieceWorldModel;
 import io.github.dirtyredz.roundwood.client.arch.archway.ArchwayWorldModel;
 import io.github.dirtyredz.roundwood.client.door.DoorStaticModel;
@@ -22,6 +18,7 @@ import io.github.dirtyredz.roundwood.client.trim.RingModelNames;
 import io.github.dirtyredz.roundwood.client.window.WindowAppearanceModel;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
+import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -86,13 +83,15 @@ public final class RoundwoodClient {
         }
     }
 
-    /** Each host family binds its own chunk-model source; the shared static model never names a family. */
+    /** Every registered host block is bound explicitly; the shared static model names no registry or family. */
     private static StaticModelSources staticSources() {
         return StaticModelSources.builder()
-                .bind(AssemblyDoorBlock.class, DoorStaticModel.SOURCE)
-                .bind(ArchPieceBlock.class, ArchPieceWorldModel.SOURCE)
-                .bind(ArchwayBlock.class, ArchwayWorldModel.SOURCE)
-                .bind(RoundTrimBlock.class, TrimWorldModel.SOURCE)
+                .bindAll(ModBlocks.doors(), DoorStaticModel.SOURCE)
+                .bindAll(LegacyContent.doors(), DoorStaticModel.SOURCE)
+                .bindAll(ModBlocks.archPieces(), ArchPieceWorldModel.SOURCE)
+                .bindAll(ModBlocks.archways(), ArchwayWorldModel.SOURCE)
+                .bind(ModBlocks.roundTrim(), TrimWorldModel.SOURCE)
+                .bindAll(LegacyContent.trims(), TrimWorldModel.SOURCE)
                 .build();
     }
 

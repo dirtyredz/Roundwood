@@ -2,8 +2,6 @@ package io.github.dirtyredz.roundwood.client.render.world;
 
 import io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderSnapshot;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
-import io.github.dirtyredz.roundwood.migration.LegacyContent;
-import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -35,10 +33,7 @@ public final class StaticWorldModel extends BakedModelWrapper<BakedModel> implem
 
     /** Wraps every blockstate model of each Roundwood block that has a bound static source. */
     public static void wrapBlocks(Map<ResourceLocation, BakedModel> models, StaticModelSources sources) {
-        var blocks = new ArrayList<>(ModBlocks.canonical());
-        blocks.addAll(LegacyContent.blocks());
-        blocks.addAll(ModBlocks.archways());
-        for (var block : blocks) sources.find(block).ifPresent(source -> {
+        sources.forEach((block, source) -> {
             for (var state : block.getStateDefinition().getPossibleStates()) {
                 var location = BlockModelShaper.stateToModelLocation(state);
                 var model = models.get(location);
