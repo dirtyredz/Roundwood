@@ -2,6 +2,29 @@
 
 Newest first.
 
+## 2026-10-28 - Static rendering reaches families through ports
+
+The structure review found the shared snapshot publication (`AssemblyRenderUpdates.layout`/`refresh`)
+and the chunk model (`StaticWorldModel`) switching over the door, arch-piece, frame and archway
+classes, with door-only fields (`frame`, `camouflage`) in the shared snapshot. That made
+`block/assembly` and `client/render` import every host family. Now:
+
+- Server side, host blocks implement `block/assembly/render/StaticRenderBlock.renderAssembly`, and an
+  anchor entity's `renderExtras()` returns immutable `AssemblyRenderExtras` (the door's
+  `DoorRenderExtras`). The snapshot carries `extras` instead of door fields; records keep chunk-quad
+  cache equality.
+- Client side, each family implements `client/render/world/StaticModelSource` (models, `culledBySide`
+  for the frame's ring quarters, particle sprite). `RoundwoodClient` binds sources to block classes
+  (`StaticModelSources`; a subclass inherits its family's source); the wrapper holds its source.
+- `CellLayers` names the repeated body-plus-face-casings composition (arch pieces, archways, the
+  door's casings and fitted-arch cells). The per-family bakers keep their own typed caches: their
+  keys differ by geometry, so one shared cache would only widen the key.
+
+Rejected: a mutable global registry filled from client setup (ordering against model baking is
+fragile, and server code would gain client registration); instanceof dispatch on the snapshot's
+assembly type (keeps the shared code naming families). Pure refactor; quads and particles are
+unchanged.
+
 ## 2026-10-28 - Static pieces use chunk models exclusively
 
 Owner screenshots approved the proud casing, front door casing and camouflaged round-door corner.

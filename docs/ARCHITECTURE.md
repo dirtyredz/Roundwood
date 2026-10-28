@@ -31,6 +31,15 @@ quads retain proud bands and separation offsets. A client-only mixin replaces mo
 six-argument breaking entry for marked models, so satellite cracks use current geometry.
 Static pieces have no BER fallback. Door leaves retain BER ownership for their animated swing.
 
+Families plug in through two ports, so the shared publication and the chunk model name no family
+(`DependencyDirectionTest` guards it). Server side, a host block implements
+`block/assembly/render/StaticRenderBlock` (its render assembly for a state) and its anchor entity may
+override `renderExtras()` with immutable family values (`AssemblyRenderExtras`; the door publishes
+`DoorRenderExtras`: fitted arch and camouflage donor). Client side, each family has a
+`client/render/world/StaticModelSource` (cell models, side culling, particle sprite) bound to its
+block class in `RoundwoodClient` (`StaticModelSources`, nearest superclass wins). `CellLayers` is the
+shared composition: a cached body, then one casing per trimmed face in `AttachmentFace` order.
+
 Window snapshots also carry perimeter/sill looks. Their wrapper preserves the original translucent
 pane/glass/beam pass and adds opaque attachments only in the solid pass (both for null-layer cracks).
 Compatibility frames preserve their directional cull lists; other static attachments are general quads.
@@ -53,7 +62,7 @@ The appended BLANK window profile has a full 16x16 opening and reuses oriented p
 
 Fitted-top geometry preserves the door depth and uses a top anchored at y+1 (arched, round, double) or y+2 (tall double). Full tops are geometrically identical to the standalone full arch (no rear rebate; the swinging leaf may clip through them, owner-accepted 2026-10-26). Thin slabs support all depths except the same closed plane as the door; that fit is refused without moving either component. Swing clipping is accepted for both thicknesses. The door anchor has an independent versioned `DoorArch` store; missing means absent, explicit empty updates clear clients, and unknown payloads remain opaque and refuse edits. Arched doors now default the existing depth property to FRONT.
 
-Fitting is an explicit occupied-cell conversion, in either ordinary-click order. The shared proposal discovers the existing component from the normal landing cell (including a ground click), or from a direct component click. Door depth uses the normal face thirds; fitting an arch preserves the existing door pose. It validates complete loaded matching assemblies, permissions, dry/bounded cells, support, obstruction and readable custody, then revalidates before writing. A shared write transaction snapshots every destination state and full entity NBT, initializes the attachment before approval, and restores all cells on cancellation/failure. Fitting owns one multi-place event, including unchanged-state anchor cells; payment and announcements follow approval. Other blocks remain subject to ordinary replaceability.
+Fitting is an explicit occupied-cell conversion, in either ordinary-click order (`block/door/frame/fitting/`: `DoorArchFitting` resolves the click, `DoorIntoArchProposal` and `ArchOntoDoorProposal` build the two orders, both validated by `DoorArchProposal`; `block/assembly/placement/AssemblyCapturedPlacement` owns the Forge snapshot capture and multi-place event). The shared proposal discovers the existing component from the normal landing cell (including a ground click), or from a direct component click. Door depth uses the normal face thirds; fitting an arch preserves the existing door pose. It validates complete loaded matching assemblies, permissions, dry/bounded cells, support, obstruction and readable custody, then revalidates before writing. A shared write transaction snapshots every destination state and full entity NBT, initializes the attachment before approval, and restores all cells on cancellation/failure. Fitting owns one multi-place event, including unchanged-state anchor cells; payment and announcements follow approval. Other blocks remain subject to ordinary replaceability.
 
 DoorArchModels owns fitted surfaces and the typed, reload-aware cell-model cache; DoorStaticModel places those models in owning cells. Targets and highlights union its cached static shape with the leaf. `DoorRaycast` acquires whole open leaves even when the ray never enters an owned cell: nearby loaded assemblies are tested once, against the nearest ordinary world hit. The ordinary ray clips door outlines to their traversed cells so an out-of-cell hit cannot hide a nearer blocker. Client picking before highlights and projected server validation share this path. Frame regions apply at the first surface actually hit; a farther frame cannot steal a leaf click. Frame body/casings keep separate appearance stores. Only the initiating cell evaluates component loot, with the ordinary explosion survival probability for each component; teardown never refunds. Unknown frame custody stays opaque on a harvested door item and cannot be placed lossily. Known fitted assemblies drop separate items without packed duplicate refunds.
 
@@ -334,7 +343,7 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   looking player (`EntityCollisionContext`) holds a block item in either hand, so empty corners can
   take camouflage. The **visible** shape adds only filled corners. Vanilla highlights `getShape`,
   which outlined an open door as the closed frame whenever a block was held (0.3.x), so
-  `client/door/DoorHighlightRenderer` cancels `RenderHighlightEvent.Block` for round doors and draws
+  `client/door/preview/DoorHighlightRenderer` cancels `RenderHighlightEvent.Block` for round doors and draws
   the visible shape's edges with vanilla's line style (nothing for an incomplete assembly). While
   the anchor's swing is moving it draws `selection/DoorSwingOutline` instead: the closed leaf's
   silhouette turned by `DoorGeometry.swingDegrees` of the swing's progress (the renderer's own
@@ -356,7 +365,7 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
 - **Particles** (`client/door/DoorParticles`): break and hit particles use the cell's collision
   piece, not the whole-door outline (which would scatter four doors' worth of particles).
 - **Rendering**: every door state uses an empty world model (break particle only). The anchor carries
-  a non-ticking `RoundDoorBlockEntity`; `client/door/RoundDoorRenderer` draws the leaf in the door's
+  a non-ticking `RoundDoorBlockEntity`; `client/door/leaf/RoundDoorRenderer` draws the leaf in the door's
   appearance (from `block/round_door_leaf_<hinge>`, registered for baking by `RoundwoodClient`,
   looked up per frame so resource reloads are safe) through the normal baked-model path
   (`Sheets.solidBlockSheet`, packed light of the anchor, overlay). It draws nothing for an
@@ -384,7 +393,7 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   `AssemblyPlacementPlan<DoorLayout.Part, DoorLayout.Assembly>` (`of(block, context)` for players,
   `at(level, block, assembly, open)` for the showcase and commands): cells, hinge, open state, or
   empty when refused. Its placement entry point installs that same plan. The client preview
-  (`client/door/DoorPlacementPreview`, via `selection/DoorPlacementOutline`) draws the same plan for
+  (`client/door/preview/DoorPlacementPreview`, via `selection/DoorPlacementOutline`) draws the same plan for
   both doors, so preview and result cannot drift.
 - **Per-design geometry.** `DoorGeometry`, `DoorShapes`, `CamouflageGeometry`, `DoorTrimGeometry` and
   the client model caches take the design and key on it. The arched leaf is 16 x 32 pixels from
@@ -418,7 +427,7 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   permission, replaceable, dry, entity obstruction against the frame's own collision, and a sturdy
   floor under both lower cells. `ArchwayPlacement` writes exactly the plan through the
   shared `AssemblyPlacement` and `AssemblyInstallation` (one Forge multi-place event, rolled back on cancel) and charges once;
-  `client/archway/ArchwayPlacementPreview` draws the same plan (frame outline from
+  `client/arch/archway/ArchwayPlacementPreview` draws the same plan (frame outline from
   `ArchwayGeometry.placed`, the four-cell footprint).
 - **Lifecycle.** Integrity is deferred one tick and retried while a cell is unloaded
   (`AssemblyIntegrity`); removing a cell clears the loaded partners silently (`AssemblyRemoval` over
@@ -444,7 +453,8 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   satellite model data supplies mining cracks.
 
 The round ring source geometry and quarter identity live in `geometry/RingGeometry`;
-`client/render/RingModels` and `RingModelNames` serve both the frame and door attachment.
+`client/trim/RingModels` and `RingModelNames` serve the compatibility frame (its chunk model and
+datagen); door casings are baked from geometry by `client/door/DoorTrimModels`.
 Their historical model identifiers and source depths remain unchanged.
 
 ## Camouflage
@@ -477,12 +487,11 @@ change; the 0.2.0 passage is unchanged.
   the only one who can drop it, so partner removal and repeated callbacks find nothing. Creative
   breaks run inside a thread-local discard scope around `onDestroyedByPlayer` (try/finally).
   Explosions, replacement and fire return it (no explosion decay).
-- **Rendering** (`client/camouflage`): the anchor's renderer draws the corners before the leaf's
-  facing/swing transforms: per cell a cached `SimpleBakedModel` of the exposed corner faces, turned
-  for `facing`, each face using the donor model's representative sprite/tint for that world side,
-  UVs cropped like a full block at that spot; tessellated with `ModelBlockRenderer.tesselateBlock`
-  at the cell's own position (world light, AO, biome tint) into `RenderType.solid()`, no side
-  culling. Caches are bounded and dropped on `ModelEvent.BakingCompleted`.
+- **Rendering** (`client/door/CamouflageModels`): the door's chunk model (`DoorStaticModel`) draws
+  the corners: per cell a cached model of the exposed corner faces, turned for `facing`, each face
+  using the donor model's representative sprite for that world side, UVs cropped like a full block at
+  that spot, moved by the door depth and tinted through `StaticBlockColors` at the owning position;
+  no side culling. Caches are bounded and dropped on `ModelEvent.BakingCompleted`.
 
 ## Window
 
@@ -648,7 +657,7 @@ services (see Face-trim attachments). Until 0.9.0 the `round_trim` item was the 
   family rules (masonry is not paintable). Otherwise the existing leaf restyle (sneak + planks,
   dye), camouflage and toggle apply. `DoorInteraction.claims` feeds the sneak bridge.
 - **Rendering.** `DoorStaticModel` uses the shared turned quarter models
-  (`client/render/RingModels`, same looks). FRONT belongs to the cells in front, BACK to the door's
+  (the frame's `client/trim/RingModels`, same looks). FRONT belongs to the cells in front, BACK to the door's
   cells with vertices shifted to 12..13;
   rear surfaces are kept. The BACK ring overlaps the hinge-side brass straps where they cross it
   (cosmetic).
