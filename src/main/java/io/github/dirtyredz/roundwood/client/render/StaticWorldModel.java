@@ -50,7 +50,7 @@ public final class StaticWorldModel extends BakedModelWrapper<BakedModel> implem
         return ChunkRenderTypeSet.of(RenderType.solid());
     }
     @Override public List<BakedQuad> getQuads(BlockState state, Direction side, RandomSource random, ModelData data, RenderType layer) {
-        if (StaticRenderingConfig.legacy() || layer != null && layer != RenderType.solid()) return List.of();
+        if (layer != null && layer != RenderType.solid()) return List.of();
         var snapshot = data.get(AssemblyModelData.PROPERTY);
         if (state == null || snapshot == null || !snapshot.available()) return List.of();
         return QUADS.get(new Key(state, side, layer, snapshot), key -> {

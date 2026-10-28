@@ -7,7 +7,6 @@ import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
-import io.github.dirtyredz.roundwood.client.camouflage.CamouflageRenderer;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -29,20 +28,16 @@ import net.minecraftforge.client.model.data.ModelData;
  * facing, then swung about the hinge axis by the animated angle. Uses the normal baked-model path
  * (entity-solid block sheet, packed light, overlay), no custom shader; a donor tint reaches only the
  * panel's tinted quads, never the brass.
- * The static camouflage corners and trim rings (0.8.0) are drawn first, without the leaf's transforms
- * ({@link CamouflageRenderer}, {@link DoorTrimRenderer}).
+ * Static camouflage, trim and fitted-frame geometry belongs to the chunk model; this renderer owns
+ * only the animated leaf.
  * Incomplete assemblies draw nothing, so a broken door never shows a phantom leaf.
  */
 public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEntity> {
     private final BlockRenderDispatcher blocks;
-    private final DoorTrimRenderer trims;
-    private final DoorArchRenderer frame;
     private final java.util.Map<RoundDoorBlockEntity, DoorLeafRenderState> leaves = new java.util.WeakHashMap<>();
 
     public RoundDoorRenderer(BlockEntityRendererProvider.Context context) {
         this.blocks = context.getBlockRenderDispatcher();
-        this.trims = new DoorTrimRenderer(blocks.getModelRenderer());
-        this.frame = new DoorArchRenderer(blocks.getModelRenderer());
     }
 
     @Override
@@ -65,14 +60,9 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
         }
         cached.material(entity.appearance(), entity.hardware(), io.github.dirtyredz.roundwood.client.material.AppearanceModelCache.generation(),
                 DoorAppearanceModels::look, DoorAppearanceModels::leaf);
-        frame.render(entity, assembly, level, pose, buffers);
         pose.pushPose();
         double shift = assembly.depth().offset() / 16;
         pose.translate(-assembly.facing().getStepX() * shift, 0, -assembly.facing().getStepZ() * shift);
-        // The corners stay in the closed door plane: drawn before any facing or swing transform.
-        CamouflageRenderer.render(entity, assembly, level, pose, buffers);
-        trims.render(entity, assembly, level, pose, buffers);
-
         for (int leaf = 0; leaf < cached.leaves(); leaf++) {
         DoorHingeSide hinge = cached.hinge(leaf);
         DoorDesign design = door.design();

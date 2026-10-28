@@ -2,7 +2,14 @@
 
 Newest first.
 
-## 2026-10-27 - Owning-cell lighting and retained legacy comparison
+## 2026-10-28 - Static pieces use chunk models exclusively
+
+Owner screenshots approved the proud casing, front door casing and camouflaged round-door corner.
+Remove the temporary comparison config and every static BER. Static frames, casings, camouflage,
+arch pieces, compatibility archways and window attachments now have exactly one owner: their chunk
+models. The animated door leaf remains a BER because its swing projects beyond owned cells.
+
+## 2026-10-27 - Owning-cell lighting and temporary legacy comparison (superseded 2026-10-28)
 
 This supersedes the preparation checkpoint's transformed-pipeline prerequisite at the end of this document.
 
@@ -12,8 +19,8 @@ depth shifts participate in final local vertices, and camouflage uses the host l
 Geometry, donor tint and quad shade/AO flags remain acceptance criteria. Exact legacy-lighting
 equivalence and a transformed headless lighting harness are explicitly excluded.
 
-Keep the legacy static BERs behind `legacyStaticRendering` until owner screenshots approve a proud
-casing, front door casing and camouflaged round-door corner. Change the option with the world closed.
+The temporary static BER comparison path was retained until owner screenshots approved a proud
+casing, front door casing and camouflaged round-door corner; that condition is now satisfied.
 Do not add a missing-snapshot BER fallback: that can overlap an already uploaded chunk mesh.
 Satellite membership gets bounded tick validation because Forge has no public per-client-block-update
 event covering every packet; all payload/load/removal invalidation remains event-driven. A narrow
@@ -539,8 +546,8 @@ was on an edge (flush, floor, ceiling). The cause was the 0.7.0 inlay: a flush p
 replaced the pane's own outer pixels (0..1 or 15..16), so it stood at the surface instead of proud
 and read as no trim. Every band now stands one pixel proud of its slab face (flush 0..2 gets -1..0
 and 2..3; 14..16 gets 13..14 and 16..17), so the wall-side band lies one pixel outside the window's
-block. The owner accepted that. It is render-only: `WindowTrimRenderer` draws it from cached models,
-and collision, support, connection and neighbour blocks never see it. The chunk model is pane-only
+  block. The owner accepted that. It is render-only: the window chunk model draws it from cached models,
+  and collision, support, connection and neighbour blocks never see it. The base generated model is pane-only
 now (window block models 220 to 110). Rejected: keeping the inlay (the reported bug), reserving the
 neighbour cell (a trim would need a block there, and a cell holds one block) and thickening the
 slab (changes collision and every pose). Tradeoff: normal depth testing can hide a wall-side band
@@ -997,7 +1004,7 @@ changed sampling cell, final depth coordinates and camouflage's host-state AO. G
 donor tint must remain intact. This supersedes the earlier exact-lighting requirement, not
 the requirement to test the actual pipeline. Static BER removal requires owner screenshots
 of a proud casing, front door casing and camouflaged round-door corner; a completed migration
-must retain an exclusive legacy/chunk client toggle until then.
+was required to retain an exclusive comparison switch until then. That switch was removed after approval.
 
 Only preparation landed here: DoorArchModels extracts the fitted surface and model cache with
 a typed key. The strict lighting prerequisite failed under ordinary JUnit at Forge network
@@ -1006,8 +1013,8 @@ snapshot lifecycle is shipped; all static BER paths remain active. Slices 2-4 re
 
 ## Chunk-build regression repair (2026-10-27)
 
-The preceding preparation-only status is historical: slices 2-4 shipped in a4fdd8c with an exclusive
-legacy toggle. Owner feedback then exposed arch gaps and open/donor-held targeting cost.
+The preceding preparation-only status is historical: slices 2-4 shipped in a4fdd8c with a temporary
+comparison path. Owner feedback then exposed arch gaps and open/donor-held targeting cost.
 Independent face-normal offsets open even a cuboid, so arch layers now translate their connected
 XY silhouette (expanding outer minimum boundaries rather than retreating from adjacent blocks)
 and expand the shared Z interval. Authored UVs/mortar stay unchanged. Complete-layer

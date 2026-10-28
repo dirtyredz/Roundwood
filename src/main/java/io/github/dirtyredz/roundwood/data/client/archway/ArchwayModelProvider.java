@@ -10,7 +10,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 
 /**
  * The archways' blockstates (0.12.0). An archway is drawn whole by its anchor's block-entity renderer
- * ({@code client/archway/ArchwayRenderer}, from the frame mask in the archway's look), so every state of
+ * (through the archway's chunk model, from the frame mask in the archway's look), so every state of
  * a design (facing, part) uses one empty world model that only carries the oak plank break particle.
  */
 public class ArchwayModelProvider extends BlockStateProvider {

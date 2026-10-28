@@ -13,6 +13,7 @@ blocked_by: []
 relates: []
 ---
 # Implement showcase static rendering FPS fix
+
 Implement section 4 of the showcase FPS fix spec (2026-10-26 report2.md), preserving 0.17.0 geometry.
 
 Slice 1 remains implemented by da04e1f: fitted surfaces reuse the standalone merged builder. The captured 135-case fitted corpus produces 8,622 quads, below the 9,000 budget. Preparation commit c43fe8c is preserved.
@@ -23,8 +24,8 @@ Payload/load/update/removal invalidation is event-driven. Only supported assembl
 
 Owner approved vanilla owning-cell/host-state lighting on 2026-10-27, including documented proud/front-casing and camouflage shading differences. The second-attempt correction explicitly excludes a transformed lighting-equivalence harness. Plain JUnit checks pre-lighting geometry, tint, shade/AO flags, publication, membership and emitter guards. Camouflage retains existing shade/AO flags; flat-light fallback is not selected without client evidence.
 
-All legacy static BERs remain behind config/roundwood-client.toml legacyStaticRendering (false by default). False guards every static BER entry; true suppresses migrated chunk geometry. The captured census retains 12,774 static quads and changes 215 static submissions to zero in chunk mode (135 fitted + 72 standalone + 8 other). This is headless corpus/guard evidence, not a client frame capture. Leaves retain BER ownership for every pose; slice 5 remains excluded.
+Owner approved the proud casing, front door casing and camouflaged round-door corner in game on 2026-10-28. The legacyStaticRendering config, all seven static renderers, their registrations and shared BER cell helper are removed. The captured census retains 12,774 static quads and guards 215 migrated pieces with zero static BER submissions (135 fitted + 72 standalone + 8 other). Leaves retain BER ownership for every pose; slice 5 remains excluded.
 
 Local verification: 437 JUnit tests pass; build and release-jar guard pass; 142 focused rendering/door GameTests pass. The invalid-anchor regression was observed failing before its fix. Two combined local invocations were externally stopped after unit/build success, so the outstanding focused GameTests were rerun separately and passed. Earlier slice gates passed 429/104 and 431/68 unit/GameTest counts. An existing local Embeddium 0.3.31+mc1.20.1 jar passed headless class loading, and its bytecode uses the Forge model APIs implemented here. Headless raw quad-bake timing covers all eight captured sections, excluding lighting and GPU upload.
 
-Owner follow-up: compare a proud casing, front door casing and camouflaged round-door corner with the toggle false/true, changing it with the game closed and restarting. Also verify AO/pipeline settings, tint, section-edge geometry, satellite mining cracks/particles, reload/unload/edit/fit/break recovery, paired leaf reversals and identical-view FPS. Legacy renderer deletion waits for screenshot approval. Final committed-ref ANU and installation results are reported by the implementation handoff; no client run is authorized.
+Removal follow-up: screenshot approval is complete. Local removal verification passes the unit/build gate and 73 focused rendering GameTests. Final committed-ref ANU and installation remain orchestrator checks; no client run was performed.

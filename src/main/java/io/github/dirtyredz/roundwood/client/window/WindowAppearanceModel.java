@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.world.level.block.Block;
 import java.util.Map;
 import java.util.ArrayList;
-import io.github.dirtyredz.roundwood.client.window.trim.WindowTrimRenderer;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.migration.CrossWindowCompatibility;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
@@ -47,7 +46,7 @@ import io.github.dirtyredz.roundwood.migration.item.RetiredCrossWindowItem;
 /**
  * Wraps canonical and compatibility window models. Plain panes retain generated geometry and
  * frame/glass retexturing. Fitted panes compose independent beam geometry and use immutable
- * neighbour coverage; face trims and sills join the solid chunk layer unless legacy rendering is enabled. All models are cached
+ * neighbour coverage; face trims and sills join the solid chunk layer. All models are cached
  * by geometry and materials and invalidated by the existing appearance-cache reload lifecycle.
  */
 public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
@@ -79,14 +78,13 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
         super(original);
     }
 
-    private record WorldKey(BlockState state, Direction side, RenderType layer, WindowAppearanceData snapshot, boolean legacy) {}
+    private record WorldKey(BlockState state, Direction side, RenderType layer, WindowAppearanceData snapshot) {}
     private static final AppearanceModelCache<WorldKey, List<BakedQuad>> WORLD = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
 
     @Override public net.minecraftforge.client.ChunkRenderTypeSet getRenderTypes(BlockState state, RandomSource random, ModelData data) {
         var base = super.getRenderTypes(state, random, data);
         var snapshot = data.get(WindowAppearanceData.PROPERTY);
-        if (io.github.dirtyredz.roundwood.client.render.StaticRenderingConfig.legacy() || snapshot == null
-                || !snapshot.trims().any() && !snapshot.sills().any()) return base;
+        if (snapshot == null || !snapshot.trims().any() && !snapshot.sills().any()) return base;
         return net.minecraftforge.client.ChunkRenderTypeSet.union(base, net.minecraftforge.client.ChunkRenderTypeSet.of(RenderType.solid()));
     }
 
@@ -98,14 +96,13 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction side, RandomSource random, ModelData data,
                                     @Nullable RenderType renderType) {
-        boolean legacy = io.github.dirtyredz.roundwood.client.render.StaticRenderingConfig.legacy();
         var snapshot = data.get(WindowAppearanceData.PROPERTY);
         if (state == null) return paneQuads(state, side, random, data, renderType);
-        return WORLD.get(new WorldKey(state, side, renderType, snapshot, legacy), key -> {
+        return WORLD.get(new WorldKey(state, side, renderType, snapshot), key -> {
             var out = new ArrayList<BakedQuad>();
             if (renderType == null || super.getRenderTypes(state, random, data).contains(renderType))
                 out.addAll(paneQuads(state, side, random, data, renderType));
-            if (!legacy && side == null && (renderType == null || renderType == RenderType.solid()))
+            if (side == null && (renderType == null || renderType == RenderType.solid()))
                 out.addAll(io.github.dirtyredz.roundwood.client.render.StaticWorldModel.collect(
                         io.github.dirtyredz.roundwood.client.window.trim.WindowStaticModels.models(state, snapshot), state, random, renderType));
             return List.copyOf(out);

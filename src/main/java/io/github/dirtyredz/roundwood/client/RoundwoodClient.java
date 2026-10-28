@@ -1,8 +1,6 @@
 package io.github.dirtyredz.roundwood.client;
 
 import io.github.dirtyredz.roundwood.Roundwood;
-import io.github.dirtyredz.roundwood.client.archway.ArchwayRenderer;
-import io.github.dirtyredz.roundwood.client.arch.ArchPieceRenderer;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.client.door.DoorAppearanceModels;
@@ -10,10 +8,8 @@ import io.github.dirtyredz.roundwood.client.door.DoorLeafModels;
 import io.github.dirtyredz.roundwood.client.door.RoundDoorRenderer;
 import io.github.dirtyredz.roundwood.client.item.FamilyItemModels;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
-import io.github.dirtyredz.roundwood.client.trim.RoundTrimRenderer;
 import io.github.dirtyredz.roundwood.client.render.RingModelNames;
 import io.github.dirtyredz.roundwood.client.window.WindowAppearanceModel;
-import io.github.dirtyredz.roundwood.client.window.trim.WindowTrimRenderer;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import io.github.dirtyredz.roundwood.registry.ModItems;
@@ -34,7 +30,7 @@ import java.util.stream.Stream;
 import net.minecraft.resources.ResourceLocation;
 
 /**
- * Client-only wiring on the mod bus: the door, frame, window-trim and (0.12.0) archway renderers, the source models they draw (no
+ * Client-only wiring on the mod bus: the animated door renderer, the source models it draws (no
  * blockstate references them, so they are registered for baking here), the appearance-aware window
  * blockstate and item models (every trim id draws the Universal Trim's square icon), the door items'
  * panel tint, and dropping every appearance, donor and camouflage cache whenever models are re-baked.
@@ -49,10 +45,6 @@ public final class RoundwoodClient {
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         io.github.dirtyredz.roundwood.client.render.assembly.AssemblyRenderLifecycle.bind();
         event.registerBlockEntityRenderer(ModBlockEntities.ROUND_DOOR.get(), RoundDoorRenderer::new);
-        event.registerBlockEntityRenderer(ModBlockEntities.ROUND_TRIM.get(), RoundTrimRenderer::new);
-        event.registerBlockEntityRenderer(ModBlockEntities.ROUND_WINDOW.get(), WindowTrimRenderer::new);
-        event.registerBlockEntityRenderer(ModBlockEntities.ARCHWAY.get(), ArchwayRenderer::new);
-        event.registerBlockEntityRenderer(ModBlockEntities.ARCH_PIECE.get(), ArchPieceRenderer::new);
     }
 
     @SubscribeEvent

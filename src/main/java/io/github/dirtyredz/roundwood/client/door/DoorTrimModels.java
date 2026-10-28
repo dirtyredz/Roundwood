@@ -15,7 +15,7 @@ import net.minecraft.core.Direction;
 /**
  * Baked models of one cell's piece of a door casing in one look (0.11.0), built from the design's
  * casing outline ({@link DoorTrimGeometry#inCasing}) rather than from the legacy frame's quarter
- * models, for {@link DoorTrimRenderer}: the arched door's jambs and crown. Each piece is the
+ * models, for the door chunk model: the arched door's jambs and crown. Each piece is the
  * casing's visible surfaces inside the cell, its front and back included (the opening leaf exposes
  * the back), built by the shared {@link PixelSlabModels} (0.12.0; the archways use it too): wood
  * tiles like a block (its stripped log); paint and masonry spread one image over the whole door's

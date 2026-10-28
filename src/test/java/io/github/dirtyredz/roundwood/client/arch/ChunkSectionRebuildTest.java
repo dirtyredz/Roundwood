@@ -64,7 +64,7 @@ class ChunkSectionRebuildTest {
                     default -> fail(sample.type());
                 }
             }
-            assertEquals(215, draws.size(), "captured static BER submission census");
+            assertEquals(215, draws.size(), "captured migrated static-piece census");
             assertEquals(135, draws.stream().filter(draw -> draw.group().equals("fitted")).count());
             var sections = new TreeMap<String, List<Draw>>();
             for (var draw : draws) sections.computeIfAbsent(SectionPos.of(draw.cell()).toString(), key -> new ArrayList<>()).add(draw);

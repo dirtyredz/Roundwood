@@ -20,7 +20,7 @@ import java.util.function.Function;
  * ({@link ArchwayDesign#inFrame}) by {@link PixelSlabModels}, so what is drawn is what is hit
  * (collision keeps only the lower jambs):
  * <ul>
- *     <li>{@link #body}: one cell's piece of the frame, full block deep, for {@link ArchwayRenderer};</li>
+ *     <li>{@link #body}: one cell's piece of the frame, full block deep, for the chunk model;</li>
  *     <li>{@link #casing}: one cell's piece of a face's Universal Trim casing, one pixel proud;</li>
  *     <li>{@link #item}: the whole archway, face-on, for every stack, copying the generated oak
  *     item model's transforms and lighting.</li>

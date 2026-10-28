@@ -29,8 +29,7 @@ It rebuilds data only on change. World exit drops registrations; model rebake cl
 World wrappers use Forge model APIs and cache quads by state, side, layer and snapshot. General
 quads retain proud bands and separation offsets. A client-only mixin replaces model data at Forge's
 six-argument breaking entry for marked models, so satellite cracks use current geometry.
-The `legacyStaticRendering` client option preserves the old path for screenshot comparisons;
-exit/reopen the world when changing it. Leaves retain BER ownership.
+Static pieces have no BER fallback. Door leaves retain BER ownership for their animated swing.
 
 Window snapshots also carry perimeter/sill looks. Their wrapper preserves the original translucent
 pane/glass/beam pass and adds opaque attachments only in the solid pass (both for null-layer cracks).
@@ -56,7 +55,7 @@ Fitted-top geometry preserves the door depth and uses a top anchored at y+1 (arc
 
 Fitting is an explicit occupied-cell conversion, in either ordinary-click order. The shared proposal discovers the existing component from the normal landing cell (including a ground click), or from a direct component click. Door depth uses the normal face thirds; fitting an arch preserves the existing door pose. It validates complete loaded matching assemblies, permissions, dry/bounded cells, support, obstruction and readable custody, then revalidates before writing. A shared write transaction snapshots every destination state and full entity NBT, initializes the attachment before approval, and restores all cells on cancellation/failure. Fitting owns one multi-place event, including unchanged-state anchor cells; payment and announcements follow approval. Other blocks remain subject to ordinary replaceability.
 
-DoorArchModels owns fitted surfaces and the typed, reload-aware cell-model cache; DoorStaticModel places those models in owning cells; legacy DoorArchRenderer submits them before the door depth/swing transform. Targets and highlights union its cached static shape with the leaf. `DoorRaycast` acquires whole open leaves even when the ray never enters an owned cell: nearby loaded assemblies are tested once, against the nearest ordinary world hit. The ordinary ray clips door outlines to their traversed cells so an out-of-cell hit cannot hide a nearer blocker. Client picking before highlights and projected server validation share this path. Frame regions apply at the first surface actually hit; a farther frame cannot steal a leaf click. Frame body/casings keep separate appearance stores. Only the initiating cell evaluates component loot, with the ordinary explosion survival probability for each component; teardown never refunds. Unknown frame custody stays opaque on a harvested door item and cannot be placed lossily. Known fitted assemblies drop separate items without packed duplicate refunds.
+DoorArchModels owns fitted surfaces and the typed, reload-aware cell-model cache; DoorStaticModel places those models in owning cells. Targets and highlights union its cached static shape with the leaf. `DoorRaycast` acquires whole open leaves even when the ray never enters an owned cell: nearby loaded assemblies are tested once, against the nearest ordinary world hit. The ordinary ray clips door outlines to their traversed cells so an out-of-cell hit cannot hide a nearer blocker. Client picking before highlights and projected server validation share this path. Frame regions apply at the first surface actually hit; a farther frame cannot steal a leaf click. Frame body/casings keep separate appearance stores. Only the initiating cell evaluates component loot, with the ordinary explosion survival probability for each component; teardown never refunds. Unknown frame custody stays opaque on a harvested door item and cannot be placed lossily. Known fitted assemblies drop separate items without packed duplicate refunds.
 
 ## Thin standalone arch pieces
 
@@ -135,11 +134,11 @@ refuse with the existing hints. Loot evaluates against the anchor from any owned
 and decorates only the exact body item, keeping both casing looks independent.
 Casings cover the whole mask at z=-1..0 or 16..17 and never add collision.
 
-`client/arch` draws body and casings from the anchor through `AssemblyCellRenderer`,
-with each owned cell's light and AO. Cached models key product, side, cell, facing,
+`client/arch` contributes body and casings through each owned cell's chunk model, with that
+cell's light and AO. Cached models key product, side, cell, facing,
 depth and look; resource rebakes clear them through `AppearanceModelCache`.
 Every face uses the donor sprite (or painted boards), with UV projection after rotation.
-Empty world models ensure that only the BER draws the body.
+Generated source models stay empty; the Forge wrapper contributes the snapshot geometry.
 Styled items reuse the body baker and retain its donor UVs while translating cells
 into the complete icon. `ArchPieceItemGeometry` shifts the three-wide icon by -16
 pixels in X, shared by runtime and datagen, fitting the legal [-16,32] interval.
@@ -434,14 +433,15 @@ the hinge wall (3/16 thick) and its outer half projects one block in the `facing
   front or back plane addresses that face; any other surface is the archway; a held Universal Trim
   fits the nearer face by depth. The router (`ArchwayInteraction`, the held item classified by `HeldTrimTool`) is the window convention: plain
   click, sneaking identical through `claimsUse`, main hand first.
-- **Rendering.** `ArchwayRenderer` (anchor BER, solid layer, per-cell world light) draws each cell's
-  frame and installed casing pieces from `ArchwayModels`, which bakes them with the shared
+- **Rendering.** `ArchwayWorldModel` contributes each cell's frame and installed casing pieces to
+  the solid chunk layer from `ArchwayModels`, which bakes them with the shared
   `client/render/PixelSlabModels` (the arched door casing uses it too). Since 0.13.3, archway bodies,
   casings and items use the donor block sprite on every face (paint: tiled window boards), with
   `FaceUv.tiled` applied after rotation: one sprite UV unit per model pixel, aligned with world
   block axes. They do not use stripped-log trim bindings or whole-face masonry artwork. The old
   masonry textures remain available to resource packs. Items are baked from the mask with the oak
-  item model's transforms. The world model is empty, so no mining crack shows.
+  item model's transforms. The generated world model is empty; the wrapper supplies geometry and
+  satellite model data supplies mining cracks.
 
 The round ring source geometry and quarter identity live in `geometry/RingGeometry`;
 `client/render/RingModels` and `RingModelNames` serve both the frame and door attachment.
@@ -552,11 +552,11 @@ the level thread; chunk workers never read block entities. Missing, unknown and 
 retain faces. Load/unload, attachment updates and state changes refresh self and adjacent model data,
 including across chunk boundaries. Bounded caches include geometry and all material inputs and clear
 on resource reload. Hidden crossed item icons compose their beams and cache by source/frame/glass/beam.
-`WindowTrimRenderer` explicitly draws PERIMETER and SILL only; neither draws whole-pane beams twice.
+`WindowStaticModels` contributes PERIMETER and SILL only; neither draws whole-pane beams twice.
 
 **Face attachments.** Perimeter bands follow each profile's outer border; only upper arches accept
-sills. Each stands one pixel proud, even outside a flush pane's cell, and is drawn by the block-entity
-renderer without collision. Selection includes only the in-cell portion; the wall-side band is
+sills. Each stands one pixel proud, even outside a flush pane's cell, and is drawn by the chunk model
+without collision. Selection includes only the in-cell portion; the wall-side band is
 targeted through the slab beneath it. `WindowTrimGeometry`/`WindowTrimLayout` explicitly reject
 CROSS_BEAMS. Faces retain their own independent looks and shears refunds.
 
@@ -647,9 +647,9 @@ services (see Face-trim attachments). Until 0.9.0 the `round_trim` item was the 
   face (a free no-op if untrimmed); planks, masonry and dye restyle an installed ring by the trim
   family rules (masonry is not paintable). Otherwise the existing leaf restyle (sneak + planks,
   dye), camouflage and toggle apply. `DoorInteraction.claims` feeds the sneak bridge.
-- **Rendering.** `client/door/DoorTrimRenderer`, called by `RoundDoorRenderer` before the facing and
-  swing transforms, uses the shared turned quarter models (`client/render/RingModels`,
-  same looks). FRONT is drawn at the cells in front, BACK in the door's cells shifted to 12..13;
+- **Rendering.** `DoorStaticModel` uses the shared turned quarter models
+  (`client/render/RingModels`, same looks). FRONT belongs to the cells in front, BACK to the door's
+  cells with vertices shifted to 12..13;
   rear surfaces are kept. The BACK ring overlaps the hinge-side brass straps where they cross it
   (cosmetic).
 - **Loot.** Door tables (canonical and aliases) gain the two face pools, dropping `roundwood:round_trim`
@@ -725,12 +725,12 @@ TRIM-family attachment items. The 13 retired crossed products and 49 frozen alia
 - **Rendering** (client): the oak source models are retextured, never rebuilt per frame.
   `DoorAppearanceModels` swaps only the leaf's `door_panel_oak` quads (vanilla woods and paint: their
   own panel art; other woods: `door_panel_neutral` with tint index 0, the BER passing the donor's
-  sampled colour so only the panel is tinted). `RoundTrimRenderer` (anchor BER) tessellates each
-  quarter, retextured by face/edge and turned for the facing (positions, normals, winding, cull
-  sides), at its own cell with world light; `DoorTrimRenderer` does the same for door trims. Window
+  sampled colour so only the panel is tinted). `TrimWorldModel` contributes each frame quarter,
+  retextured by face/edge and turned for the facing (positions, normals, winding, cull sides), to
+  its own chunk cell; `DoorStaticModel` does the same for door trims. Window
   frame and glass stay chunk-baked: `WindowAppearanceModel` wraps every window blockstate model and
   swaps the `oak_planks` quads (frame look) and the clear glass quads (tint) by the model data its
-  entity hands it; window trims are drawn by `WindowTrimRenderer` (see Window trims). `AppearanceItemOverrides` resolves item stacks the same way. `DonorSprites` (shared with
+  entity hands it; window trims are composed by `WindowStaticModels` (see Window trims). `AppearanceItemOverrides` resolves item stacks the same way. `DonorSprites` (shared with
   camouflage) and `DonorColors` cache 512 donors; model caches hold 2048 entries keyed by look and
   geometry variant (the window item cache by source item model, wood and glass); all of them clear together on every model bake.
 - **Viewers**: each canonical item is listed once, as the default (oak) stack the creative tab gives
@@ -826,6 +826,6 @@ A donor-mode ray acquires actual endpoint hardware. DoorHardwareTarget checks ne
 DoorHardware Version 1 stores two independently optional appearances. Missing means brass; updates explicitly clear absent slots. Unknown versions, fields and nested data remain opaque on disk and on harvested door items. Checked stacks refuse lossy placement. The shared installer initializes hardware within its rollback transaction, including door-into-arch fitting. Pick and loot decorate only the door item; hardware has no raw donor refund.
 
 Fitted bodies/casings now use the standalone merged surface builder (0.17.0). The render-only
-connected layer offsets apply after topology repair. Both chunk and legacy paths reuse that mesh; static
-chunk snapshots invalidate their full owned footprints across sections. Leaves remain on
-the BER in every pose, preserving animation ownership while chunk uploads can be delayed.
+connected layer offsets apply after topology repair. Chunk models reuse that mesh, and static
+snapshots invalidate their full owned footprints across sections. Leaves remain on the BER in every
+pose, preserving animation ownership while chunk uploads can be delayed.

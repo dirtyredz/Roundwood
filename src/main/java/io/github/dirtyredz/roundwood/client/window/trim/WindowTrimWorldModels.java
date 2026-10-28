@@ -23,7 +23,7 @@ import java.util.List;
 import io.github.dirtyredz.roundwood.client.render.SurfaceQuadBaker;
 
 /**
- * Baked models of one face's window trim in one look (0.8.0), for {@link WindowTrimRenderer}: the
+ * Baked models of one face's window trim in one look (0.8.0), for the window chunk model: the
  * band's outward face and perimeter reveals ({@link WindowTrimSurfaces}) as general quads (no cull
  * side: a projecting trim must never be dropped because the neighbouring cell is solid; ordinary
  * depth testing decides what shows). Wood tiles like a block, the edge UVs folded back into the

@@ -19,9 +19,9 @@
   light, GPU upload or other mods. The separate fitted aggregate pins 13,410 conforming quads. Leaf allocation
   measurements cover warmed input/model/bounds lookup, not vanilla vertex emission.
 
-- **Static rendering ownership is exclusive.** `legacyStaticRendering=false` suppresses every static
-  BER entry; true suppresses the corresponding chunk attachments. Change with the world closed.
-  All BER registrations remain for owner screenshot acceptance; do not delete them yet.
+- **Static pieces have one rendering owner.** Frames, casings, camouflage, arch pieces, compatibility
+  archways and window attachments are chunk-baked only. Do not add a BER fallback: it can overlap an
+  already uploaded chunk mesh. The animated door leaf is the sole assembly BER.
 - **Keep camouflage tint bindings stable across resource reloads.** Their host indices resolve the
   donor state and original index at the owning cell, including synthetic biome-colored donors.
   Ordinary paint remains untinted. Camouflage retains quad shade/AO flags with host-state lighting;
@@ -36,8 +36,8 @@
   Forge event-class transformation. Without version detection it first fails with `Game version not set`.
   `MinecraftBootstrap.ensure()` deliberately swallows bootstrap errors for pure geometry tests;
   it does not prove real AO/flat tessellation works. The owner accepted owning-cell lighting;
-  do not build a transformed lighting harness. Compare geometry/tint/flags headlessly and use
-  owner screenshots through `config/roundwood-client.toml` (`legacyStaticRendering`) for lighting acceptance.
+  do not build a transformed lighting harness. Compare geometry/tint/flags headlessly; the owner
+  accepted the owning-cell result in game before the old renderers were removed.
 
 - Thin arch depth is resolved after shoulder orientation. Overlay regions must intersect wedges
   with bands in the resulting facing. Full arch IDs have no depth property and remain full-depth.
@@ -150,7 +150,7 @@
   faces. Refresh self and adjacent panes after attachment/state/load changes, including chunk edges.
 
 - **Every window trim stands one pixel proud; the wall-side band of a flush, floor or ceiling pane
-  is outside the cell.** It is render-only (`WindowTrimRenderer`): never collision, support or
+  is outside the cell.** It is render-only chunk geometry: never collision, support or
   connection. Selection includes only the in-cell part, and a flush wall-side band is targeted
   through the slab face under it. Normal depth testing can hide it inside a solid neighbour, but it
   is never culled by one. (0.7.0 inlaid it, which read as no trim.)
@@ -228,10 +228,9 @@
   The server checks the real rays and routes normal use. Use `DoorRaycast` for acquisition and validation: a BACK leaf can be visible along a ray that never traverses an owned cell, so vanilla `Level.clip` alone misses it. Acquire before both highlights and input: Minecraft re-picks at tick start, overwriting the rendered target before key handling. Mining and picking the projection remain
   refused. Whole-door outline rays can return a point beyond the currently traversed cell, so the
   projected-use validator also checks a collision ray for intervening solid neighbours.
-- **Per-cell rendering has distinct seed and cull policies.** The compatibility frame culls;
-  camouflage, archways and door casings do not. A projected door ring uses the door cell
-  for its seed, the projected cell for lighting, and a separate depth shift. Preserve these inputs
-  to `AssemblyCellRenderer`; the shared draw operation must not erase them.
+- **Static chunk models have distinct cull policies.** The compatibility frame retains directional
+  cull faces; camouflage, archways and door casings emit general quads. Preserve those differences
+  when changing the shared collectors.
 - **Camouflage copies looks only.** Donor sounds, hardness, light, redstone, gravity, connected
   textures and overlays (grass side tint layer) do not transfer; one sprite per face.
 - **Mirrored structure copies start without camouflage**: mirroring moves the old anchor's NBT onto a
