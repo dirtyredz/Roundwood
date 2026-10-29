@@ -297,8 +297,8 @@
   upper half equals the arched window face pixel for pixel (`WindowShapeArtworkTest`). Change either
   generator and a full masonry circle breaks at its diameter. The sill's art is one 4-texel course at
   texel rows 28..32 of the 2 x 2 image; moving the sill or its height needs new art.
-- **GameTest window and door hits must come from real rays** (`fixture/WindowRays`,
-  `fixture/DoorRays`), clipped against the real shapes. Constructed hit results skip the targeting
+- **GameTest window and door hits must come from real rays** (`fixture/window/WindowRays`,
+  `fixture/door/DoorRays`), clipped against the real shapes. Constructed hit results skip the targeting
   that these gestures now depend on.
 - **Door leaves no longer follow plank resource packs.** Since 0.4.0 the leaf uses Roundwood's own
   generated board art (one 32 x 32 image across the leaf); a resource pack must retexture
@@ -351,7 +351,7 @@
 - **Villager passage tests need closed corridor ends and an initial destination.** An idle brain
   can choose its own walk target before an `onEachTick` callback supplies one. In an open-ended
   corridor it can leave the raised floor, get stuck outside, or go around the door; a z-only
-  arrival check then even reports passage without an opening. `fixture/VillagerPassage` encloses
+  arrival check then even reports passage without an opening. `fixture/door/VillagerPassage` encloses
   the plot and sets `WALK_TARGET` at spawn, keeping normal brain/pathfinding/door behavior.
   Successful walkers are discarded. The flat-world reproduction failed 8/140 walks, including
   a frame-only walk, without any nested-mutation warnings; the bounded, directed fixture passed
