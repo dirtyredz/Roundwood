@@ -32,14 +32,14 @@ import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.leaf;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.oakPainted;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.pick;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.use;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.anchorEntity;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeOakDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.rel;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.anchorEntity;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.oakDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.placeOakDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.rel;
 
 /**
  * Restyling doors through the real interaction path ({@code ServerPlayerGameMode.useItemOn}, so

@@ -8,6 +8,8 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.*;
 import io.github.dirtyredz.roundwood.block.window.interaction.WindowBeamFitPlan;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.fixture.*;
+import io.github.dirtyredz.roundwood.fixture.window.WindowFixtures;
+import io.github.dirtyredz.roundwood.fixture.window.WindowRays;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,7 +23,7 @@ import net.minecraftforge.gametest.*;
 import java.util.List;
 import java.util.Optional;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.*;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.*;
 
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)

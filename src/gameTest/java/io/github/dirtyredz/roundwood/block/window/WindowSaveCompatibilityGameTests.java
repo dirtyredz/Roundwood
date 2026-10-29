@@ -28,8 +28,8 @@ import java.util.List;
 
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.SPRUCE;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.windowLook;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 
 /**
  * Worlds saved by 0.5.0: chunk palette entries without {@code position} decode as centred windows

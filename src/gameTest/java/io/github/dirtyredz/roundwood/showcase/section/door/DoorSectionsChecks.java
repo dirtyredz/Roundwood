@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 
 /**
  * The door-family examples of the showcase read back from the world: the one camouflaged door and

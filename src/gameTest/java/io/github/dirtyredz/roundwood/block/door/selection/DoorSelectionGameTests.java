@@ -28,15 +28,15 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.List;
 import java.util.Optional;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.anchorEntity;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.hold;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeOakDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.point;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.anchorEntity;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.hold;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.oakDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.placeOakDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.point;
 
 /**
  * Selection through the real ray cast ({@code Level.clip} with the player's context): the round

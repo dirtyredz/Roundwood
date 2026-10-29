@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.List;
 import java.util.Set;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 
 /**
  * Read-back helpers shared by the per-section showcase checks: the sample groups the showcase lays out,

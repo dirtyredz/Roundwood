@@ -5,7 +5,7 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorColumn;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
-import io.github.dirtyredz.roundwood.fixture.DoorFixtures;
+import io.github.dirtyredz.roundwood.fixture.door.DoorFixtures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTest;
@@ -28,13 +28,13 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assembly;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.assembly;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.oakDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.placeDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
 
 /**
  * World collision and ray hits, measured through the level (not the shape objects). Coordinates

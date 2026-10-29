@@ -27,7 +27,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.Optional;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.*;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.*;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.*;
 
 @GameTestHolder(Roundwood.MOD_ID)

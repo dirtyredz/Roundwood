@@ -15,7 +15,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 
 /** Production-path placement hits and assertions; all positions passed here are relative. */
 public final class ArchPieceFixtures {

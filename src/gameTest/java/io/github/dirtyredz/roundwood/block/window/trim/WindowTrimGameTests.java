@@ -15,7 +15,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
 import io.github.dirtyredz.roundwood.fixture.AppearanceFixtures;
-import io.github.dirtyredz.roundwood.fixture.WindowRays;
+import io.github.dirtyredz.roundwood.fixture.window.WindowRays;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.world.item.Item;
@@ -44,12 +44,12 @@ import java.util.Optional;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.BRICKS;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.SPRUCE;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.STONE_BRICKS;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropped;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.clearDrops;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.dropped;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.styled;
 
 /**
  * Face trims on windows (0.8.0) through the production interaction path, with hits from real rays
@@ -141,7 +141,7 @@ public final class WindowTrimGameTests {
                 continue; // retired: converted to a plain pane plus Cross Beams, never a live host
             }
             for (WindowPose pose : POSES) {
-                io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, pose);
+                io.github.dirtyredz.roundwood.fixture.window.WindowFixtures.setWindow(helper, AT, design, pose);
                 String what = design.id() + " " + pose;
                 Direction positive = Direction.fromAxisAndDirection(pose.normal(), Direction.AxisDirection.POSITIVE);
                 Direction negative = positive.getOpposite();
@@ -189,7 +189,7 @@ public final class WindowTrimGameTests {
         for (Item id : AppearanceFixtures.universalTrimIds()) {
             for (boolean sneaking : new boolean[] {false, true}) {
                 String what = id + (sneaking ? " sneaking" : "");
-                io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, arch, SOUTH);
+                io.github.dirtyredz.roundwood.fixture.window.WindowFixtures.setWindow(helper, AT, arch, SOUTH);
                 AttachmentFace south = face(helper, Direction.SOUTH);
                 ItemStack stack = new ItemStack(id, 2);
                 Appearance look = AppearanceStacks.read(stack);
@@ -214,7 +214,7 @@ public final class WindowTrimGameTests {
     public static void donorsRestyleOnlyTheAimedFace(GameTestHelper helper) {
         ServerPlayer player = player(helper, "trim_style", GameType.SURVIVAL, Direction.NORTH);
         WindowDesign round = WindowDesign.plain(WindowProfile.ROUND);
-        io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, round, SOUTH);
+        io.github.dirtyredz.roundwood.fixture.window.WindowFixtures.setWindow(helper, AT, round, SOUTH);
         check(WindowTrimActions.install(helper.getLevel(), helper.absolutePos(AT), AttachmentFace.FRONT, Appearance.DEFAULT), "front");
         check(WindowTrimActions.install(helper.getLevel(), helper.absolutePos(AT), AttachmentFace.BACK, Appearance.DEFAULT), "back");
         AttachmentFace south = face(helper, Direction.SOUTH);
@@ -251,7 +251,7 @@ public final class WindowTrimGameTests {
     public static void theOffhandActsOnlyWithAnEmptyMainHand(GameTestHelper helper) {
         ServerPlayer player = player(helper, "trim_offhand", GameType.SURVIVAL, Direction.NORTH);
         WindowDesign arch = WindowDesign.plain(WindowProfile.ARCH_LEFT);
-        io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, arch, SOUTH);
+        io.github.dirtyredz.roundwood.fixture.window.WindowFixtures.setWindow(helper, AT, arch, SOUTH);
         ItemStack offTrim = trims(SPRUCE, 1);
         AppearanceFixtures.use(helper, player, new ItemStack(Items.STICK), offTrim, bandHit(helper, player, arch.profile(), Direction.SOUTH), false);
         check(!entity(helper, AT).trims().any() && offTrim.getCount() == 1, "offhand trim fitted with a full main hand");
@@ -268,7 +268,7 @@ public final class WindowTrimGameTests {
         Appearance front = AppearanceFixtures.oakPainted(DyeColor.CYAN);
         Appearance back = AppearanceFixtures.oakPainted(DyeColor.LIME);
         WindowDesign design = new WindowDesign(WindowProfile.BOTTOM_LEFT, WindowPattern.CROSS);
-        io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, SOUTH);
+        io.github.dirtyredz.roundwood.fixture.window.WindowFixtures.setWindow(helper, AT, design, SOUTH);
         entity(helper, AT).setAppearance(frame);
         WindowTrimActions.install(helper.getLevel(), helper.absolutePos(AT), AttachmentFace.FRONT, front);
         WindowTrimActions.install(helper.getLevel(), helper.absolutePos(AT), AttachmentFace.BACK, back);
@@ -279,14 +279,14 @@ public final class WindowTrimGameTests {
         check(dropped(helper, ModItems.ROUND_TRIM.get()) == 2 && dropped(helper, ModItems.window(WindowDesign.plain(design.profile()))) == 1, "extra drops");
         clearDrops(helper);
         // One oak face: one plain oak trim.
-        io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, SOUTH);
+        io.github.dirtyredz.roundwood.fixture.window.WindowFixtures.setWindow(helper, AT, design, SOUTH);
         WindowTrimActions.install(helper.getLevel(), helper.absolutePos(AT), AttachmentFace.BACK, Appearance.DEFAULT);
         player.gameMode.destroyBlock(helper.absolutePos(AT));
         check(dropped(helper, ModItems.ROUND_TRIM.get(), Appearance.DEFAULT) == 1 && dropped(helper, ModItems.ROUND_TRIM.get()) == 1,
                 "one oak face drops one oak trim");
         clearDrops(helper);
         ServerPlayer creative = player(helper, "trim_drop_creative", GameType.CREATIVE, Direction.NORTH);
-        io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, SOUTH);
+        io.github.dirtyredz.roundwood.fixture.window.WindowFixtures.setWindow(helper, AT, design, SOUTH);
         WindowTrimActions.install(helper.getLevel(), helper.absolutePos(AT), AttachmentFace.FRONT, front);
         creative.gameMode.destroyBlock(helper.absolutePos(AT));
         check(dropped(helper, ModItems.ROUND_TRIM.get()) == 0 && dropped(helper, ModItems.window(WindowDesign.plain(design.profile()))) == 0, "creative break dropped items");

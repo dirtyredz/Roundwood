@@ -3,7 +3,7 @@ package io.github.dirtyredz.roundwood.appearance;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.material.SurfaceMaterials;
 import io.github.dirtyredz.roundwood.fixture.AppearanceFixtures;
-import io.github.dirtyredz.roundwood.fixture.DoorRays;
+import io.github.dirtyredz.roundwood.fixture.door.DoorRays;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.*;
@@ -11,7 +11,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraftforge.gametest.*;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.*;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.*;
 
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)

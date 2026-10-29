@@ -17,19 +17,19 @@ import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assembly;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assertAssembly;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assertNoDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.blockEntities;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropped;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.rel;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.assembly;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.assertAssembly;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.assertNoDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.blockEntities;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.clearDrops;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.dropped;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.oakDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.placeDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.rel;
 
 /** Breaking any part removes the assembly and yields exactly the loot of one door. */
 @GameTestHolder(Roundwood.MOD_ID)
@@ -188,7 +188,7 @@ public final class DoorRemovalGameTests {
             check(helper.getBlockState(ANCHOR).isAir() && helper.getBlockState(ANCHOR.above()).isAir(), "the lone column was not removed");
             check(helper.getBlockState(ANCHOR.east()).isAir() && helper.getBlockState(ANCHOR.east().above()).isAir(),
                     "a missing part was created at the right column");
-            check(dropped(helper, item()) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropReport(helper, item()));
+            check(dropped(helper, item()) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.dropReport(helper, item()));
             helper.succeed();
         });
     }

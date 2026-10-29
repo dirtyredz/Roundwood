@@ -20,9 +20,9 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
 import io.github.dirtyredz.roundwood.fixture.AppearanceFixtures;
-import io.github.dirtyredz.roundwood.fixture.DoorFixtures;
-import io.github.dirtyredz.roundwood.fixture.DoorRays;
-import io.github.dirtyredz.roundwood.fixture.WindowRays;
+import io.github.dirtyredz.roundwood.fixture.door.DoorFixtures;
+import io.github.dirtyredz.roundwood.fixture.door.DoorRays;
+import io.github.dirtyredz.roundwood.fixture.window.WindowRays;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseWindow;
 import net.minecraft.core.BlockPos;
@@ -55,14 +55,14 @@ import java.util.function.Supplier;
 
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.BRICKS;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.SPRUCE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assembly;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.assembly;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.oakDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.placeDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.styled;
 
 /**
  * Characterization of the held-item rules the archway, door and window routers share, pinned before

@@ -11,9 +11,6 @@ import io.github.dirtyredz.roundwood.client.material.TrimLooks;
 import io.github.dirtyredz.roundwood.client.render.PixelSlabModels;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-
-import java.util.function.Function;
 
 /**
  * Baked archway models in one look (0.12.0), all built from the design's frame mask
@@ -48,13 +45,7 @@ public final class ArchwayModels {
 
     /** Both designs use block-scale donor artwork on the body, casing and inventory model. */
     public static TrimLooks.Look look(Appearance appearance) {
-        return look(appearance, AppearanceLooks::planks);
-    }
-
-    /** Explicit texture resolver keeps the material policy testable without a live client atlas. */
-    static TrimLooks.Look look(Appearance appearance, Function<Appearance, ResourceLocation> textures) {
-        ResourceLocation texture = textures.apply(appearance);
-        return TrimLooks.Look.tiled(texture);
+        return TrimLooks.Look.tiled(AppearanceLooks.planks(appearance));
     }
 
     /** The frame in {@code part}'s cell of an archway facing {@code facing}. */

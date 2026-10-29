@@ -22,7 +22,7 @@ import io.github.dirtyredz.roundwood.block.trim.assembly.TrimLayout;
 import io.github.dirtyredz.roundwood.geometry.RingGeometry.Quarter;
 import io.github.dirtyredz.roundwood.block.trim.assembly.TrimPlacement;
 import io.github.dirtyredz.roundwood.fixture.ArchwayFixtures;
-import io.github.dirtyredz.roundwood.fixture.DoorFixtures;
+import io.github.dirtyredz.roundwood.fixture.door.DoorFixtures;
 import io.github.dirtyredz.roundwood.fixture.TrimFixtures;
 import io.github.dirtyredz.roundwood.fixture.assembly.DenyingPlayer;
 import io.github.dirtyredz.roundwood.fixture.assembly.PlacementEffects;
@@ -59,11 +59,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.styled;
 
 /**
  * Whole-assembly placement as every family does it (characterization before the shared placement

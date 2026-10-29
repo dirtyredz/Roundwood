@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.fixture;
+package io.github.dirtyredz.roundwood.fixture.door;
 
 import com.mojang.authlib.GameProfile;
 import io.github.dirtyredz.roundwood.appearance.Appearance;

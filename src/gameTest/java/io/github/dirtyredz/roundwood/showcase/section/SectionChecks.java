@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.masonry;
 import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.paints;
 import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.signSays;

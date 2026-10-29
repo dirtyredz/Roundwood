@@ -93,7 +93,7 @@ class ArchPieceModelsTest {
         var cherry = Appearance.wood(ResourceLocation.fromNamespaceAndPath("minecraft", "cherry_planks"));
         var masonry = Appearance.masonry(ResourceLocation.fromNamespaceAndPath("minecraft", "bricks"));
         for (var appearance : new Appearance[]{Appearance.DEFAULT, cherry, cherry.painted(DyeColor.BLUE), masonry, Appearance.surface(ResourceLocation.fromNamespaceAndPath("minecraft","gold_block"))}) {
-            var look = ArchPieceModels.look(appearance, ignored -> TEXTURE);
+            var look = new ArchPieceModels.Look(TEXTURE, appearance.kind() == Appearance.Kind.MASONRY);
             assertEquals(TEXTURE, look.texture());
             assertEquals(appearance == masonry, look.masonry());
         }
@@ -105,8 +105,8 @@ class ArchPieceModelsTest {
             int mortarQuads = 0;
             for (var design : ArchPieceDesign.values()) for (var side : Side.values()) for (var cell : ArchPieceCell.of(design))
                 for (var facing : Direction.Plane.HORIZONTAL) {
-                    var plain = ArchPieceModels.quads(design, side, cell, 0, 16, facing, sprite);
-                    var masonry = ArchPieceModels.quads(design, side, cell, 0, 16, facing, sprite, true);
+                    var plain = ArchPieceModels.quads(design, side, cell, 0, 16, facing, sprite, false, ArchPieceModels.Layer.BODY);
+                    var masonry = ArchPieceModels.quads(design, side, cell, 0, 16, facing, sprite, true, ArchPieceModels.Layer.BODY);
                     assertTrue(plain.stream().noneMatch(q -> q.getVertices()[3] == ArchMasonryModels.MORTAR), "wood has no mortar");
                     mortarQuads += masonry.stream().filter(q -> q.getVertices()[3] == ArchMasonryModels.MORTAR).count();
                     assertEquals(area(plain), area(masonry), 1e-4, "partition must preserve total drawn area");
@@ -119,7 +119,8 @@ class ArchPieceModelsTest {
             for (var design : ArchPieceDesign.values()) for (boolean masonry : new boolean[]{false,true}) {
                 var item = ArchPieceModels.itemQuads(design, sprite, masonry);
                 int index = 0;
-                for (var cell : ArchPieceCell.of(design)) for (var body : ArchPieceModels.quads(design, Side.LEFT, cell, 0, 16, Direction.NORTH, sprite, masonry)) {
+                for (var cell : ArchPieceCell.of(design)) for (var body : ArchPieceModels.quads(design, Side.LEFT, cell,
+                        0, 16, Direction.NORTH, sprite, masonry, ArchPieceModels.Layer.BODY)) {
                     var whole = item.get(index++);
                     int[] before = body.getVertices(), after = whole.getVertices();
                     int stride = before.length / 4;

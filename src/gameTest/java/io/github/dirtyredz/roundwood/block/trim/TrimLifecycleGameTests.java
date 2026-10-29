@@ -27,13 +27,13 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.STRIP;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropped;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.STRIP;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.clearDrops;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.dropped;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.assertNoTrim;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.assertTrim;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.oakTrim;
@@ -189,7 +189,7 @@ public final class TrimLifecycleGameTests {
             for (BlockPos pos : assembly.positions()) {
                 check(helper.getLevel().getBlockState(pos).isAir(), "a quarter was created or left at " + pos);
             }
-            check(dropped(helper, oakTrim().asItem(), BIRCH) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropReport(helper, oakTrim().asItem(), BIRCH));
+            check(dropped(helper, oakTrim().asItem(), BIRCH) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.dropReport(helper, oakTrim().asItem(), BIRCH));
             helper.succeed();
         });
     }
@@ -206,7 +206,7 @@ public final class TrimLifecycleGameTests {
         helper.runAfterDelay(3, () -> {
             assertNoTrim(helper, assembly);
             check(helper.getLevel().getBlockState(assembly.pos(Quarter.UPPER_RIGHT)).isAir(), "the missing quarter was created");
-            check(dropped(helper, oakTrim().asItem(), SPRUCE) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropReport(helper, oakTrim().asItem(), SPRUCE));
+            check(dropped(helper, oakTrim().asItem(), SPRUCE) <= 1, "incomplete cleanup dropped " + io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.dropReport(helper, oakTrim().asItem(), SPRUCE));
             helper.succeed();
         });
     }

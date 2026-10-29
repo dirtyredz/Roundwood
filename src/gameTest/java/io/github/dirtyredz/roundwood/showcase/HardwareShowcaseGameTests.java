@@ -10,7 +10,7 @@ import net.minecraft.core.*;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.*;
 import net.minecraftforge.gametest.*;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)

@@ -29,7 +29,7 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.Optional;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.*;
 import static io.github.dirtyredz.roundwood.fixture.ArchPieceFixtures.*;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.*;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.*;
 
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)

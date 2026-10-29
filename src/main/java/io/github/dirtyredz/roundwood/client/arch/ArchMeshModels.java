@@ -3,6 +3,7 @@ package io.github.dirtyredz.roundwood.client.arch;
 import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceCell;
 import io.github.dirtyredz.roundwood.block.arch.geometry.*;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
+import io.github.dirtyredz.roundwood.client.render.SurfaceSeparation;
 import io.github.dirtyredz.roundwood.client.render.SurfaceQuadBaker;
 import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -17,16 +18,18 @@ final class ArchMeshModels {
     private static final AppearanceModelCache<Key,Map<ArchPieceCell,List<BakedQuad>>> MESHES=new AppearanceModelCache<>(128);
     private ArchMeshModels() {}
     static List<BakedQuad> quads(ArchPieceDesign design,KeyholeShoulderProfile.Side side,ArchPieceCell cell,
-                                 double back,double front,Direction facing,TextureAtlasSprite sprite,boolean masonry,double separation) {
+                                 double back,double front,Direction facing,TextureAtlasSprite sprite,boolean masonry,
+                                 ArchPieceModels.Layer layer) {
         var key=new Key(design,side,back,front,facing,sprite,masonry);
         var mesh=MESHES.get(key,ArchMeshModels::build).get(cell);
         int turns=VoxelShapeFactory.quarterTurns(facing);
-        return mesh.stream().map(q->transform(q,turns,separation,back,front,cell)).toList();
+        var separation=layer==ArchPieceModels.Layer.BODY?SurfaceSeparation.ARCH_BODY:SurfaceSeparation.ARCH_CASING;
+        return mesh.stream().map(q->transform(q,turns,separation.pixels(),back,front,cell)).toList();
     }
     private static Map<ArchPieceCell,List<BakedQuad>> build(Key key) {
         int turns=VoxelShapeFactory.quarterTurns(key.facing);
         var all=new ArrayList<ArchMeshTopology.CellQuad>();
-        var joints=key.masonry?ArchMasonryModels.joints(key.design):List.<List<ArchMasonryModels.Point>>of();
+        var joints=key.masonry?ArchMasonryModels.joints(key.design):List.<List<PolygonPartition.Point>>of();
         for(var cell:ArchPieceCell.of(key.design)) {
             for(var surface:ArchPieceGeometry.surfaces(key.design,key.side,cell.column,cell.row,key.back,key.front,"")) {
                 var quad=SurfaceQuadBaker.bake(surface.backing().rotateY(turns),VoxelShapeFactory.turn(surface.face(),turns),key.sprite);

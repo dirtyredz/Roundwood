@@ -32,17 +32,17 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assembly;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assertNoDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.assertOneAnchorEntity;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.blockEntities;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.oakDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.placeDoor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.useItemOn;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.assembly;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.assertNoDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.assertOneAnchorEntity;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.blockEntities;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.oakDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.placeDoor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.useItemOn;
 
 /** The anchor block entity's life: created with the door, gone with it, persisted, and carried through structure transforms. */
 @GameTestHolder(Roundwood.MOD_ID)

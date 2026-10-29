@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.data;
+package io.github.dirtyredz.roundwood.data.textures;
 
 import org.junit.jupiter.api.Test;
 

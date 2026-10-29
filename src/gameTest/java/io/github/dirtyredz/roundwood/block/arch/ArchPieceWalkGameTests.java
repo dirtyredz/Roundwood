@@ -25,10 +25,10 @@ import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPiecePlacement;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
 import io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
 
 /** Real player/villager movement through ordinary/keyhole compositions, for every top size at low and taller placement heights. */
 @GameTestHolder(Roundwood.MOD_ID)

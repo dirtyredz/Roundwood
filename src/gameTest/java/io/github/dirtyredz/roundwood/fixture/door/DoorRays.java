@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.fixture;
+package io.github.dirtyredz.roundwood.fixture.door;
 
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorHitResolver;

@@ -4,7 +4,7 @@ import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.fixture.AppearanceFixtures;
 import io.github.dirtyredz.roundwood.fixture.PlacementCanceller;
-import io.github.dirtyredz.roundwood.fixture.WindowFixtures;
+import io.github.dirtyredz.roundwood.fixture.window.WindowFixtures;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -30,10 +30,10 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.Map;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
 
 /**
  * Targeted placement through the real item path: every face and zone of a block, replaceable,

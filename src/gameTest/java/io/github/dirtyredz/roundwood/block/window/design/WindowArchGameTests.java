@@ -8,7 +8,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.WindowDepth;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowTargetZones;
 import io.github.dirtyredz.roundwood.fixture.AppearanceFixtures;
-import io.github.dirtyredz.roundwood.fixture.WindowFixtures;
+import io.github.dirtyredz.roundwood.fixture.window.WindowFixtures;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
@@ -32,13 +32,13 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.SPRUCE;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.windowLook;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropped;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.clearDrops;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.dropped;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.styled;
 
 /** The two arch pieces: independent placement, pairing, handedness, transforms, drops, picks, water and looks. */
 @GameTestHolder(Roundwood.MOD_ID)
@@ -193,7 +193,7 @@ public final class WindowArchGameTests {
         helper.setBlock(at.north(), Blocks.GLASS_PANE);
         BlockState before = helper.getBlockState(at);
         // A real ray onto the arch's frame wood (face pixel 0.5, 15.5), from its front side.
-        BlockHitResult face = io.github.dirtyredz.roundwood.fixture.WindowRays.face(helper, player, at, 0.5, 15.5,
+        BlockHitResult face = io.github.dirtyredz.roundwood.fixture.window.WindowRays.face(helper, player, at, 0.5, 15.5,
                 WindowFixtures.pose(before).front());
         check(AppearanceFixtures.use(helper, player, new ItemStack(Items.SPRUCE_PLANKS), ItemStack.EMPTY, face, true).consumesAction(),
                 "sneak + planks did not restyle the arch");

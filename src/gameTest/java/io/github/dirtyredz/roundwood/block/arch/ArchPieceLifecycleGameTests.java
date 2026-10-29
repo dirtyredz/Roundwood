@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.*;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.*;
 
 /** Variable-size assembly membership and shared lifecycle; full drop/trim guards join with resources. */
 @GameTestHolder(Roundwood.MOD_ID)

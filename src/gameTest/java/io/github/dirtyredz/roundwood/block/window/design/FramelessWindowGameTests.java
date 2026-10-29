@@ -10,8 +10,8 @@ import io.github.dirtyredz.roundwood.block.window.glass.WindowGlassStacks;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimActions;
 import io.github.dirtyredz.roundwood.fixture.AppearanceFixtures;
-import io.github.dirtyredz.roundwood.fixture.WindowFixtures;
-import io.github.dirtyredz.roundwood.fixture.WindowRays;
+import io.github.dirtyredz.roundwood.fixture.window.WindowFixtures;
+import io.github.dirtyredz.roundwood.fixture.window.WindowRays;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
@@ -28,7 +28,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.Optional;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.*;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.*;
 
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)

@@ -15,14 +15,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraftforge.gametest.*;
 import java.util.*;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
 public final class AssemblyRenderNotificationsGameTests {
     @GameTest(template = "empty")
     public static void settledOpenAndClosedPosesNeverRequestRebuilds(GameTestHelper helper) {
-        io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor(helper);
+        io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor(helper);
         var level=helper.getLevel();
         for(boolean open:new boolean[]{false,true}) {
             var block=ModBlocks.doubleArchedDoor();

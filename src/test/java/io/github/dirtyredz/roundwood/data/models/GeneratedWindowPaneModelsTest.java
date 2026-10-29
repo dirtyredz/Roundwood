@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.data;
+package io.github.dirtyredz.roundwood.data.models;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -13,6 +13,8 @@ import io.github.dirtyredz.roundwood.block.window.placement.WindowOrientation;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.geometry.Box;
 import io.github.dirtyredz.roundwood.geometry.Piece;
+import io.github.dirtyredz.roundwood.data.ModelExpectations;
+import io.github.dirtyredz.roundwood.data.ResolvedModels;
 import net.minecraft.core.Direction;
 import org.junit.jupiter.api.Test;
 

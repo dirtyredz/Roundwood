@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.fixture;
+package io.github.dirtyredz.roundwood.fixture.door;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;

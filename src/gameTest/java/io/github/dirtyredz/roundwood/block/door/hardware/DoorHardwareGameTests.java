@@ -18,7 +18,7 @@ import net.minecraft.gametest.framework.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraftforge.gametest.*;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.*;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.*;
 
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
@@ -110,7 +110,7 @@ public final class DoorHardwareGameTests {
         var entity=anchorEntity(helper,door);var player=player(helper,"hardware_motion",GameType.SURVIVAL,Direction.NORTH);
         var stack=new ItemStack(Items.IRON_BLOCK,4);hold(player,stack,ItemStack.EMPTY);
         var eye=point(door,1,.98,-1);player.setPos(eye.x,eye.y-player.getEyeHeight(),eye.z);
-        var hit=io.github.dirtyredz.roundwood.fixture.DoorRays.through(helper,player,door,1,.98,true);
+        var hit=io.github.dirtyredz.roundwood.fixture.door.DoorRays.through(helper,player,door,1,.98,true);
         check(DoorHardwareTarget.of(level,player,InteractionHand.MAIN_HAND,hit).orElseThrow().eligible(),"settled proposal");
         var barrier=BlockPos.containing(eye.add(hit.getLocation()).scale(.5));
         level.setBlock(barrier,net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(),3);
@@ -184,7 +184,7 @@ public final class DoorHardwareGameTests {
         var player=player(helper,"hardware_frame_ray",GameType.SURVIVAL,Direction.NORTH);
         var stack=new ItemStack(Items.GOLD_BLOCK,3);hold(player,stack,ItemStack.EMPTY);
         var eye=point(door,6.5/16,8.5/16,-1);player.setPos(eye.x,eye.y-player.getEyeHeight(),eye.z);
-        var hit=io.github.dirtyredz.roundwood.fixture.DoorRays.through(helper,player,door,6.5/16,8.5/16,true);
+        var hit=io.github.dirtyredz.roundwood.fixture.door.DoorRays.through(helper,player,door,6.5/16,8.5/16,true);
         var proposal=DoorHardwareTarget.of(level,player,InteractionHand.MAIN_HAND,hit).orElseThrow();
         check(proposal.eligible() && proposal.slot()==DoorHardwareSlot.HINGES,"exposed spear target");
         use(helper,player,hit);

@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.data;
+package io.github.dirtyredz.roundwood.data.models;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.List;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.connects;
 import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.windowLook;
 

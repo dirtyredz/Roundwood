@@ -57,19 +57,19 @@ import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import java.util.function.Supplier;
 
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.clearDrops;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropped;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.dropped;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.useItemOn;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.useItemOn;
 
 /** Round windows: orientation, thin-panel collision, pane connections, rotation and water. */
 @GameTestHolder(Roundwood.MOD_ID)

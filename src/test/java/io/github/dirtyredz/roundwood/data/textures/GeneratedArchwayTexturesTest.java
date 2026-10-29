@@ -1,4 +1,7 @@
-package io.github.dirtyredz.roundwood.data;
+package io.github.dirtyredz.roundwood.data.textures;
+
+import io.github.dirtyredz.roundwood.data.GeneratedFiles;
+import io.github.dirtyredz.roundwood.data.ResolvedModels;
 
 import org.junit.jupiter.api.Test;
 

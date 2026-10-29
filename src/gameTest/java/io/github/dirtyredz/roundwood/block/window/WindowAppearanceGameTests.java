@@ -6,9 +6,9 @@ import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowPosition;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowTargetZones;
-import io.github.dirtyredz.roundwood.fixture.DoorFixtures;
-import io.github.dirtyredz.roundwood.fixture.WindowFixtures;
-import io.github.dirtyredz.roundwood.fixture.WindowRays;
+import io.github.dirtyredz.roundwood.fixture.door.DoorFixtures;
+import io.github.dirtyredz.roundwood.fixture.window.WindowFixtures;
+import io.github.dirtyredz.roundwood.fixture.window.WindowRays;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -35,11 +35,11 @@ import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.WARPED;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.pick;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.use;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.windowLook;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.useItemOn;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.useItemOn;
 
 /**
  * Restyling a window's frame with planks and dye (0.8.0: no sneak needed, sneaking does the same),

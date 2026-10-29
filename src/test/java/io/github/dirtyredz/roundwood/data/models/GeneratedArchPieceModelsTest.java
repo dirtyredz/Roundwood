@@ -1,4 +1,6 @@
-package io.github.dirtyredz.roundwood.data;
+package io.github.dirtyredz.roundwood.data.models;
+
+import io.github.dirtyredz.roundwood.data.GeneratedFiles;
 
 import org.junit.jupiter.api.Test;
 import java.util.List;

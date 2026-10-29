@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import java.util.HashSet;
 import java.util.Set;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.showcase.ShowcaseChecks.*;
 
 /** Read-back checks run immediately and after integrity ticks, in every showcase facing. */

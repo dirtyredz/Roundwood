@@ -28,7 +28,7 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.List;
 import java.util.Set;
 import static io.github.dirtyredz.roundwood.fixture.ArchPieceFixtures.*;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.*;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.*;
 
 /** Real item use and shared installer tests; no client or copied placement implementation. */
 @GameTestHolder(Roundwood.MOD_ID)

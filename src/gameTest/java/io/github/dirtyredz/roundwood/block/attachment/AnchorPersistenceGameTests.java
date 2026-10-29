@@ -54,9 +54,9 @@ import java.util.function.Supplier;
 
 import static io.github.dirtyredz.roundwood.fixture.ArchwayFixtures.anchorEntity;
 import static io.github.dirtyredz.roundwood.fixture.ArchwayFixtures.write;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
 import static io.github.dirtyredz.roundwood.fixture.TrimFixtures.BRICK;
 
 /**
@@ -84,9 +84,9 @@ public final class AnchorPersistenceGameTests {
 
     private static RoundDoorBlockEntity door(GameTestHelper helper) {
         floor(helper);
-        DoorLayout.Assembly assembly = io.github.dirtyredz.roundwood.fixture.DoorFixtures.assembly(helper, DOOR_AT, Direction.NORTH);
+        DoorLayout.Assembly assembly = io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.assembly(helper, DOOR_AT, Direction.NORTH);
         check(DoorPlacement.placeAt(helper.getLevel(), ModBlocks.roundDoor(), assembly, false), "door not placed");
-        return io.github.dirtyredz.roundwood.fixture.DoorFixtures.anchorEntity(helper, assembly);
+        return io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.anchorEntity(helper, assembly);
     }
 
     private static ArchwayBlockEntity archway(GameTestHelper helper) {

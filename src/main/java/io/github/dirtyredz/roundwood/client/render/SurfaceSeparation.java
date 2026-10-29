@@ -8,6 +8,7 @@ public enum SurfaceSeparation {
     ARCH_BODY(1), ARCH_CASING(2), DOOR_CASING(3);
     private final double pixels;
     SurfaceSeparation(int units) { pixels=units/256.0; }
+    public double pixels() { return pixels; }
     public Surface apply(Surface surface) {
         return apply(surface,0,0);
     }

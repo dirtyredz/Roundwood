@@ -15,7 +15,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.fixture.AppearanceFixtures;
-import io.github.dirtyredz.roundwood.fixture.WindowRays;
+import io.github.dirtyredz.roundwood.fixture.window.WindowRays;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseWindow;
 import net.minecraft.core.BlockPos;
@@ -40,12 +40,12 @@ import java.util.Optional;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.BRICKS;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.SPRUCE;
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.STONE_BRICKS;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropped;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.clearDrops;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.dropped;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.styled;
 
 /**
  * Arch sills (0.10.0) through the production interaction path, with hits from real rays
@@ -117,7 +117,7 @@ public final class WindowSillGameTests {
                 for (WindowPose pose : POSES) {
                     WindowDesign design = new WindowDesign(profile, pattern);
                     helper.setBlock(AT, Blocks.AIR); // a new window, not the last one restated (its entity would keep its attachments)
-                    io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, pose);
+                    io.github.dirtyredz.roundwood.fixture.window.WindowFixtures.setWindow(helper, AT, design, pose);
                     entity(helper).setGlass(Optional.of(DyeColor.LIGHT_BLUE));
                     String what = design.id() + " " + pose;
                     Direction positive = Direction.fromAxisAndDirection(pose.normal(), Direction.AxisDirection.POSITIVE);
@@ -170,7 +170,7 @@ public final class WindowSillGameTests {
             if (design.profile().takesSill() || design.pattern() == io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern.CROSS) {
                 continue;
             }
-            io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, SOUTH);
+            io.github.dirtyredz.roundwood.fixture.window.WindowFixtures.setWindow(helper, AT, design, SOUTH);
             ItemStack sill = sills(BRICKS, 1);
             AppearanceFixtures.use(helper, player, sill, ItemStack.EMPTY, WindowRays.face(helper, player, AT, 8, 8, Direction.SOUTH), false);
             check(sill.getCount() == 1 && !entity(helper).trims(TrimSlot.SILL).any() && !WindowPaneBlock.trimmed(helper.getBlockState(AT)),
@@ -191,7 +191,7 @@ public final class WindowSillGameTests {
         Appearance sillFront = AppearanceFixtures.oakPainted(DyeColor.ORANGE);
         Appearance sillBack = AppearanceFixtures.oakPainted(DyeColor.GRAY);
         WindowDesign design = new WindowDesign(WindowProfile.ARCH_RIGHT, WindowPattern.CROSS);
-        io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, SOUTH);
+        io.github.dirtyredz.roundwood.fixture.window.WindowFixtures.setWindow(helper, AT, design, SOUTH);
         entity(helper).setAppearance(frame);
         BlockPos abs = helper.absolutePos(AT);
         check(WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.PERIMETER, AttachmentFace.FRONT, trimFront)
@@ -212,7 +212,7 @@ public final class WindowSillGameTests {
         check(dropped(helper, ModItems.ARCH_SILL_TRIM.get()) == 2 && dropped(helper, ModItems.ROUND_TRIM.get()) == 2, "extra drops");
         clearDrops(helper);
         ServerPlayer creative = player(helper, "sill_drop_creative", GameType.CREATIVE, Direction.NORTH);
-        io.github.dirtyredz.roundwood.fixture.WindowFixtures.setWindow(helper, AT, design, SOUTH);
+        io.github.dirtyredz.roundwood.fixture.window.WindowFixtures.setWindow(helper, AT, design, SOUTH);
         WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.SILL, AttachmentFace.FRONT, sillFront);
         creative.gameMode.destroyBlock(abs);
         check(dropped(helper, ModItems.ARCH_SILL_TRIM.get()) == 0, "creative break dropped a sill");

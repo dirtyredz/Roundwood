@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.data;
+package io.github.dirtyredz.roundwood.data.recipes;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;

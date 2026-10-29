@@ -22,6 +22,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.level.block.state.BlockState;
 import java.util.List;
+import java.util.function.IntUnaryOperator;
 
 /**
  * The door family's {@link StaticModelSource}: fitted casings, camouflage corners and the fitted
@@ -35,17 +36,13 @@ public final class DoorStaticModel implements StaticModelSource {
         var door = (DoorLayout.Assembly) snapshot.assembly();
         var extras = DoorRenderExtras.of(snapshot);
         var part = DoorLayout.partOf(state);
-        double shift = door.depth().offset() / 16;
-        var models = CellLayers.casings(snapshot.trims(), (face, look) -> ModelRetexturing.map(
+        var models = CellLayers.casings(snapshot.trims(), (face, look) -> depthShifted(
                 DoorTrimModels.casing(door.design(), face, part, door.facing(), DoorTrimModels.look(door.design(), look)),
-                quad -> StaticQuadTransform.translate(quad, -door.facing().getStepX() * shift, 0,
-                        -door.facing().getStepZ() * shift, quad.getTintIndex()), side -> side));
+                door, tint -> tint));
         extras.camouflage().ifPresent(donor -> {
             var corners = CamouflageModels.quarter(donor, door.design(), door.facing(), part,
                     CamouflageCoverage.of(door.design(), extras.frame().isPresent()));
-            models.add(ModelRetexturing.map(corners, quad -> StaticQuadTransform.translate(quad,
-                    -door.facing().getStepX() * shift, 0, -door.facing().getStepZ() * shift,
-                    StaticBlockColors.bind(donor, quad.getTintIndex())), side -> side));
+            models.add(depthShifted(corners, door, tint -> StaticBlockColors.bind(donor, tint)));
         });
         int row = part.row() - DoorArchFitPlan.topOffset(door.design());
         if (extras.frame().isEmpty() || row < 0) return models;
@@ -58,6 +55,13 @@ public final class DoorStaticModel implements StaticModelSource {
                             ? DoorArchGeometry.Layer.FRONT_CASING : DoorArchGeometry.Layer.BACK_CASING, cell, look)));
         }
         return models;
+    }
+
+    private static BakedModel depthShifted(BakedModel model, DoorLayout.Assembly door, IntUnaryOperator tint) {
+        double shift = door.depth().offset() / 16;
+        return ModelRetexturing.map(model, quad -> StaticQuadTransform.translate(quad,
+                -door.facing().getStepX() * shift, 0, -door.facing().getStepZ() * shift,
+                tint.applyAsInt(quad.getTintIndex())), side -> side);
     }
 
     private static BakedModel arch(DoorLayout.Assembly door, DoorArchAttachment frame, DoorArchGeometry.Layer layer,

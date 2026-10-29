@@ -20,16 +20,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Test helper: reads the checked-in generated models and resolves them the way the game does
  * (parent chain, texture variables, display, gui light). Independent of the mod's own code.
  */
-final class ResolvedModels {
-    static final Path MODELS = Path.of("src/generated/resources/assets/roundwood/models");
-    static final Path TEXTURES = Path.of("src/main/resources/assets/roundwood/textures/block");
+public final class ResolvedModels {
+    public static final Path MODELS = Path.of("src/generated/resources/assets/roundwood/models");
+    public static final Path TEXTURES = Path.of("src/main/resources/assets/roundwood/textures/block");
 
     private ResolvedModels() {
     }
 
     /** A model after inheritance: the nearest elements, merged textures and display, gui light. */
-    record Resolved(JsonArray elements, Map<String, String> textures, JsonObject display, String guiLight) {
-        String texture(String ref) {
+    public record Resolved(JsonArray elements, Map<String, String> textures, JsonObject display, String guiLight) {
+        public String texture(String ref) {
             String value = ref;
             for (int i = 0; i < 10 && value != null && value.startsWith("#"); i++) {
                 value = textures.get(value.substring(1));
@@ -38,7 +38,7 @@ final class ResolvedModels {
         }
     }
 
-    static JsonObject read(String id) {
+    public static JsonObject read(String id) {
         String[] parts = id.split(":", 2);
         assertEquals("roundwood", parts[0], "unexpected namespace in " + id);
         Path file = MODELS.resolve(parts[1] + ".json");
@@ -49,7 +49,7 @@ final class ResolvedModels {
         }
     }
 
-    static Resolved resolve(String id) {
+    public static Resolved resolve(String id) {
         List<JsonObject> chain = new ArrayList<>();
         String next = id;
         while (next != null) {
@@ -80,7 +80,7 @@ final class ResolvedModels {
     }
 
     /** The render type a model or its nearest ancestor declares, or null. */
-    static String renderType(String id) {
+    public static String renderType(String id) {
         String next = id;
         while (next != null) {
             JsonObject model = read(next);
@@ -92,12 +92,12 @@ final class ResolvedModels {
         return null;
     }
 
-    static double[] vec(JsonObject element, String key) {
+    public static double[] vec(JsonObject element, String key) {
         JsonArray a = element.getAsJsonArray(key);
         return new double[] {a.get(0).getAsDouble(), a.get(1).getAsDouble(), a.get(2).getAsDouble()};
     }
 
-    static double[] doubles(JsonArray array) {
+    public static double[] doubles(JsonArray array) {
         double[] out = new double[array.size()];
         for (int i = 0; i < out.length; i++) {
             out[i] = array.get(i).getAsDouble();
@@ -105,7 +105,7 @@ final class ResolvedModels {
         return out;
     }
 
-    static JsonArray array(double[] values) {
+    public static JsonArray array(double[] values) {
         JsonArray out = new JsonArray();
         for (double value : values) {
             out.add(value);
@@ -113,7 +113,7 @@ final class ResolvedModels {
         return out;
     }
 
-    static List<String> allModelIds() throws IOException {
+    public static List<String> allModelIds() throws IOException {
         try (Stream<Path> walk = Files.walk(MODELS)) {
             return walk.filter(p -> p.toString().endsWith(".json"))
                     .map(p -> "roundwood:" + MODELS.relativize(p).toString().replace('\\', '/').replace(".json", ""))
@@ -122,7 +122,7 @@ final class ResolvedModels {
     }
 
     /** Vanilla's default UVs for an element face, from tile-local coordinates. */
-    static double[] defaultUv(String face, double[] f, double[] t) {
+    public static double[] defaultUv(String face, double[] f, double[] t) {
         return switch (face) {
             case "down" -> new double[] {f[0], 16 - t[2], t[0], 16 - f[2]};
             case "up" -> new double[] {f[0], f[2], t[0], t[2]};
@@ -135,12 +135,12 @@ final class ResolvedModels {
     }
 
     /** The face's UVs as the game reads them: explicit, or vanilla's default from absolute coordinates. */
-    static double[] uv(JsonObject element, String face) {
+    public static double[] uv(JsonObject element, String face) {
         JsonObject f = element.getAsJsonObject("faces").getAsJsonObject(face);
         return f.has("uv") ? doubles(f.getAsJsonArray("uv")) : defaultUv(face, vec(element, "from"), vec(element, "to"));
     }
 
-    static boolean inDisc(int size, int diameter, int u, int v) {
+    public static boolean inDisc(int size, int diameter, int u, int v) {
         double du = u + 0.5 - size / 2.0;
         double dv = v + 0.5 - size / 2.0;
         return du * du + dv * dv <= diameter * diameter / 4.0;
@@ -150,7 +150,7 @@ final class ResolvedModels {
      * Pixel (u, v) of the x-y plane is covered by an element whose {@code side} face resolves to
      * {@code texture} (a resolved texture id, or a raw {@code #variable}).
      */
-    static boolean covered(Resolved model, int u, int v, String side, String texture) {
+    public static boolean covered(Resolved model, int u, int v, String side, String texture) {
         for (JsonElement e : model.elements()) {
             JsonObject element = e.getAsJsonObject();
             double[] from = vec(element, "from");
@@ -170,7 +170,7 @@ final class ResolvedModels {
     }
 
     /** Front ({@code south}) coverage, the face a north-authored model shows the viewer. */
-    static boolean frontCovered(Resolved model, int u, int v, String texture) {
+    public static boolean frontCovered(Resolved model, int u, int v, String texture) {
         return covered(model, u, v, "south", texture);
     }
 
@@ -178,7 +178,7 @@ final class ResolvedModels {
      * A half-pixel sample point just outside {@code face} of the box {@code from..to} that lies
      * strictly inside one of {@code boxes} ({from, to} pairs), or null when there is none.
      */
-    static double[] insideAnother(String face, double[] from, double[] to, List<double[][]> boxes) {
+    public static double[] insideAnother(String face, double[] from, double[] to, List<double[][]> boxes) {
         int n = switch (face) {
             case "west", "east" -> 0;
             case "down", "up" -> 1;
@@ -205,7 +205,7 @@ final class ResolvedModels {
         return null;
     }
 
-    static List<JsonObject> elements(Resolved model) {
+    public static List<JsonObject> elements(Resolved model) {
         List<JsonObject> out = new ArrayList<>();
         for (JsonElement e : model.elements()) {
             out.add(e.getAsJsonObject());

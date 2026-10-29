@@ -12,7 +12,7 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowTargetZones;
 import io.github.dirtyredz.roundwood.fixture.AppearanceFixtures;
-import io.github.dirtyredz.roundwood.fixture.WindowFixtures;
+import io.github.dirtyredz.roundwood.fixture.window.WindowFixtures;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.core.BlockPos;
@@ -35,13 +35,13 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
 import java.util.List;
 
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.windowLook;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.dropped;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.floor;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.player;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.styled;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.clearDrops;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.dropped;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.floor;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.player;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.styled;
 
 /**
  * The bottom corners (0.7.0), plain and crossed: placed by real items with the arches' targeting,
@@ -151,7 +151,7 @@ public final class WindowCornerGameTests {
         check(pick.is(left.asItem()) && AppearanceStacks.read(pick).equals(look), "pick " + pick);
         BlockState before = helper.getBlockState(at);
         AppearanceFixtures.use(helper, player, new ItemStack(Items.SPRUCE_PLANKS), ItemStack.EMPTY,
-                io.github.dirtyredz.roundwood.fixture.WindowRays.face(helper, player, at, 1.5, 8, Direction.SOUTH), true);
+                io.github.dirtyredz.roundwood.fixture.window.WindowRays.face(helper, player, at, 1.5, 8, Direction.SOUTH), true);
         check(AppearanceFixtures.SPRUCE.equals(windowLook(helper, helper.absolutePos(at))) && helper.getBlockState(at).equals(before),
                 "restyling a corner: " + helper.getBlockState(at));
         clearDrops(helper);

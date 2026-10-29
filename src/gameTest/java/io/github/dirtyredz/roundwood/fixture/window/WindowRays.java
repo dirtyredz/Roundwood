@@ -1,4 +1,4 @@
-package io.github.dirtyredz.roundwood.fixture;
+package io.github.dirtyredz.roundwood.fixture.window;
 
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;

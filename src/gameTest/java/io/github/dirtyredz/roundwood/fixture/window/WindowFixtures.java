@@ -1,8 +1,9 @@
-package io.github.dirtyredz.roundwood.fixture;
+package io.github.dirtyredz.roundwood.fixture.window;
 
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPose;
 import io.github.dirtyredz.roundwood.block.window.placement.WindowTargetZones;
+import io.github.dirtyredz.roundwood.fixture.door.DoorFixtures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;

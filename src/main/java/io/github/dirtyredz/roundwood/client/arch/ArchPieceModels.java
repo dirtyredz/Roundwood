@@ -5,7 +5,6 @@ import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceCell;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
-import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceGeometry;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceItemGeometry;
 import io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.Side;
 import io.github.dirtyredz.roundwood.block.arch.trim.ArchPieceTrimGeometry;
@@ -14,8 +13,6 @@ import io.github.dirtyredz.roundwood.client.material.AppearanceLooks;
 import io.github.dirtyredz.roundwood.client.material.AppearanceModelCache;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
 import io.github.dirtyredz.roundwood.client.render.GeneralQuadModels;
-import io.github.dirtyredz.roundwood.client.render.SurfaceQuadBaker;
-import io.github.dirtyredz.roundwood.geometry.VoxelShapeFactory;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.resources.model.SimpleBakedModel;
@@ -26,7 +23,6 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.function.Function;
 
 /** Cached cell models: the same donor on every surface, projected after facing rotation. */
 public final class ArchPieceModels {
@@ -39,9 +35,8 @@ public final class ArchPieceModels {
     private static final AppearanceModelCache<ItemKey, BakedModel> ITEMS = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
     private ArchPieceModels() {}
 
-    public static Look look(Appearance appearance) { return look(appearance, AppearanceLooks::planks); }
-    static Look look(Appearance appearance, Function<Appearance, ResourceLocation> textures) {
-        return new Look(textures.apply(appearance), appearance.kind() == Appearance.Kind.MASONRY);
+    public static Look look(Appearance appearance) {
+        return new Look(AppearanceLooks.planks(appearance), appearance.kind() == Appearance.Kind.MASONRY);
     }
 
     public static BakedModel body(ArchPieceDesign design, Side side, ArchPieceCell cell, Direction facing, Look look) {
@@ -68,27 +63,10 @@ public final class ArchPieceModels {
         });
     }
 
-    /** Production baker with an explicit sprite, also exercised without a client/GL context. */
-    static List<BakedQuad> quads(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front,
-                                  Direction facing, TextureAtlasSprite sprite) {
-        return quads(design, side, cell, back, front, facing, sprite, false);
-    }
-
-    static List<BakedQuad> quads(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front,
-                                  Direction facing, TextureAtlasSprite sprite, boolean masonry) {
-        return quads(design, side, cell, back, front, facing, sprite, masonry, Layer.BODY);
-    }
+    /** Production baker with explicit inputs, also exercised without a client/GL context. */
     public static List<BakedQuad> quads(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front,
                                   Direction facing, TextureAtlasSprite sprite, boolean masonry, Layer layer) {
-        return ArchMeshModels.quads(design,side,cell,back,front,facing,sprite,masonry,layer==Layer.BODY?1.0/256:2.0/256);
-    }
-
-    public static List<io.github.dirtyredz.roundwood.geometry.Surface> renderSurfaces(ArchPieceDesign design, Side side, ArchPieceCell cell, double back, double front, Layer layer) {
-        var raw = layer == Layer.BODY
-                ? ArchPieceGeometry.surfaces(design, side, cell.column, cell.row, back, front, "")
-                : ArchPieceTrimGeometry.surfaces(design, side, cell.column, cell.row, back, front, "");
-        return (layer == Layer.BODY ? io.github.dirtyredz.roundwood.client.render.SurfaceSeparation.ARCH_BODY
-                : io.github.dirtyredz.roundwood.client.render.SurfaceSeparation.ARCH_CASING).apply(raw,cell.column*16,cell.row*16);
+        return ArchMeshModels.quads(design, side, cell, back, front, facing, sprite, masonry, layer);
     }
 
     public static BakedModel item(ArchPieceDesign design, BakedModel oak, Appearance appearance) {

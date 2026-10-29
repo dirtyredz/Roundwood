@@ -17,8 +17,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.gametest.GameTestHolder;
 import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.check;
-import static io.github.dirtyredz.roundwood.fixture.DoorFixtures.TEMPLATE;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
+import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
 
 /** Reproductions of the old decoded-field transfer losing non-perimeter stores. */
 @GameTestHolder(Roundwood.MOD_ID)
@@ -101,7 +101,7 @@ public final class WindowCrossMigrationGameTests {
         future.putString("UnknownSill", "keep");
         disk.put("WindowSillTrim", future);
         source.load(disk);
-        io.github.dirtyredz.roundwood.fixture.DoorFixtures.clearDrops(helper);
+        io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.clearDrops(helper);
         check(io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion.convert(helper.getLevel(), pos)
                 == LegacyCells.Result.CONVERTED, "historical defaults conversion failed");
         var after = (RoundWindowBlockEntity) helper.getLevel().getBlockEntity(pos);

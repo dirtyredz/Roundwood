@@ -16,16 +16,17 @@ class ArchMasonryModelsTest {
             for (int column = 0; column < design.columns(); column++) for (int row = 0; row < design.rows(); row++)
                 for (var surface : ArchPieceGeometry.surfaces(design, side, column, row, 0, 16, "")) {
                     if (surface.face() != Direction.SOUTH) continue;
-                    var patches = ArchMasonryModels.partition(surface, column * 16, row * 16, joints);
                     var box = surface.backing();
+                    var patches = PolygonPartition.partition(box.minX() + column * 16, box.minY() + row * 16,
+                            box.maxX() + column * 16, box.maxY() + row * 16, joints);
                     double area = (box.maxX() - box.minX()) * (box.maxY() - box.minY());
-                    assertEquals(area, patches.stream().mapToDouble(p -> ArchMasonryModels.area(p.polygon())).sum(), 1e-7);
+                    assertEquals(area, patches.stream().mapToDouble(p -> PolygonPartition.area(p.polygon())).sum(), 1e-7);
                     for (var patch : patches) {
-                        double x = patch.polygon().stream().mapToDouble(ArchMasonryModels.Point::x).average().orElseThrow();
-                        double y = patch.polygon().stream().mapToDouble(ArchMasonryModels.Point::y).average().orElseThrow();
+                        double x = patch.polygon().stream().mapToDouble(PolygonPartition.Point::x).average().orElseThrow();
+                        double y = patch.polygon().stream().mapToDouble(PolygonPartition.Point::y).average().orElseThrow();
                         assertTrue(design.contains(side, (int) Math.floor(x), (int) Math.floor(y)));
-                        assertEquals(patch.mortar(), ArchMasonryJoints.contains(design, side, x, y), design + " " + x + "," + y);
-                        if (patch.mortar()) mortarArea += ArchMasonryModels.area(patch.polygon());
+                        assertEquals(patch.masked(), ArchMasonryJoints.contains(design, side, x, y), design + " " + x + "," + y);
+                        if (patch.masked()) mortarArea += PolygonPartition.area(patch.polygon());
                     }
                     // Independently sample coverage: every interior sample belongs to precisely one patch.
                     for (double x = box.minX() + .173; x < box.maxX(); x += .731)
@@ -54,7 +55,7 @@ class ArchMasonryModelsTest {
         }
     }
 
-    private static boolean contains(java.util.List<ArchMasonryModels.Point> polygon, double x, double y) {
+    private static boolean contains(java.util.List<PolygonPartition.Point> polygon, double x, double y) {
         for (int i = 0; i < polygon.size(); i++) {
             var a = polygon.get(i); var b = polygon.get((i + 1) % polygon.size());
             if ((b.x() - a.x()) * (y - a.y()) - (b.y() - a.y()) * (x - a.x()) < -1e-8) return false;

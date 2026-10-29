@@ -1,4 +1,7 @@
-package io.github.dirtyredz.roundwood.data;
+package io.github.dirtyredz.roundwood.data.models;
+
+import io.github.dirtyredz.roundwood.data.ModelExpectations;
+import io.github.dirtyredz.roundwood.data.ResolvedModels;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
