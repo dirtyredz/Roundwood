@@ -44,7 +44,7 @@ public final class SurfaceFinishGameTests {
             check(entity.appearance().equals(look),"finish reload");
         }
         var payload=new ItemStack(Items.IRON_BLOCK);
-        net.minecraft.world.item.BlockItem.setBlockEntityData(payload,net.minecraft.world.level.block.entity.BlockEntityType.CHEST,new net.minecraft.nbt.CompoundTag());
+        net.minecraft.world.item.BlockItem.setBlockEntityData(payload,net.minecraft.world.level.block.entity.BlockEntityType.CHEST,io.github.dirtyredz.roundwood.fixture.PlacedPayloads.contents());
         check(SurfaceMaterials.fromStack(payload).isEmpty(),"payload donor accepted");
         for(var item:new Item[]{Items.CUT_COPPER,Items.WAXED_CUT_COPPER,Items.QUARTZ_SLAB,Items.SMOOTH_QUARTZ_STAIRS})
             check(SurfaceMaterials.fromStack(new ItemStack(item)).isEmpty(),"unsupported shape accepted");

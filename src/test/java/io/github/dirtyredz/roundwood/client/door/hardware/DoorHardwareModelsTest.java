@@ -30,7 +30,7 @@ class DoorHardwareModelsTest {
             var b=Appearance.surface(ResourceLocation.fromNamespaceAndPath("minecraft","gold_block"));
             var looks=new DoorHardware(Optional.of(a),Optional.of(b));
             for(var design:DoorDesign.values()) for(var hinge:DoorHingeSide.values()) {
-                var model=BlockModel.fromString(Files.readString(Path.of("src/generated/resources/assets/roundwood/models/block/template_"+design.id()+"_leaf_"+hinge.getSerializedName()+".json")));
+                var model=BlockModel.fromString(Files.readString(io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/generated/resources/assets/roundwood/models/block/template_"+design.id()+"_leaf_"+hinge.getSerializedName()+".json")));
                 int hinges=0,knobs=0;
                 for(var element:model.getElements()) for(var face:element.faces.entrySet()) {
                     var q=new FaceBakery().bakeQuad(element.from,element.to,face.getValue(),brass,face.getKey(),BlockModelRotation.X0_Y0,element.rotation,element.shade);

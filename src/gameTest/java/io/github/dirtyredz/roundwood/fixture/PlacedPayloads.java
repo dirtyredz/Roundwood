@@ -22,11 +22,18 @@ public final class PlacedPayloads {
     public static ItemStack with(Item item, String legacyKey) {
         ItemStack stack = new ItemStack(item);
         switch (legacyKey) {
-            case "BlockEntityTag" -> BlockItem.setBlockEntityData(stack, BlockEntityType.CHEST, new CompoundTag());
+            case "BlockEntityTag" -> BlockItem.setBlockEntityData(stack, BlockEntityType.CHEST, contents());
             case "BlockStateTag" -> stack.set(DataComponents.BLOCK_STATE,
                     BlockItemStateProperties.EMPTY.with(BlockStateProperties.AXIS, Direction.Axis.X));
             default -> throw new IllegalArgumentException(legacyKey);
         }
         return stack;
+    }
+
+    /** Non-empty contents: vanilla drops an empty {@code block_entity_data} component instead of storing it. */
+    public static CompoundTag contents() {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("Lock", "fixture");
+        return tag;
     }
 }

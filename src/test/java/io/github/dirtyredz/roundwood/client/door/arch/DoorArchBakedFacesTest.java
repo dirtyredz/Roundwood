@@ -75,7 +75,7 @@ class DoorArchBakedFacesTest {
         }
     }
     private static List<BakedQuad> leaf(DoorDesign design,DoorHingeSide hinge,TextureAtlasSprite sprite) throws Exception {
-        var model=BlockModel.fromString(Files.readString(Path.of("src/generated/resources/assets/roundwood/models/block/template_"
+        var model=BlockModel.fromString(Files.readString(io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/generated/resources/assets/roundwood/models/block/template_"
                 +design.id()+"_leaf_"+hinge.getSerializedName()+".json")));
         var bakery=new FaceBakery(); var out=new ArrayList<BakedQuad>();
         for(var element:model.getElements()) for(var face:element.faces.entrySet())

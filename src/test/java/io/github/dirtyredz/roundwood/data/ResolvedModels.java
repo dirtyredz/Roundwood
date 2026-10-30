@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * (parent chain, texture variables, display, gui light). Independent of the mod's own code.
  */
 public final class ResolvedModels {
-    public static final Path MODELS = Path.of("src/generated/resources/assets/roundwood/models");
-    public static final Path TEXTURES = Path.of("src/main/resources/assets/roundwood/textures/block");
+    public static final Path MODELS = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/generated/resources/assets/roundwood/models");
+    public static final Path TEXTURES = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/main/resources/assets/roundwood/textures/block");
 
     private ResolvedModels() {
     }

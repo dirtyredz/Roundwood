@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * panes that apply exactly one complete model per state (0.7.0). Independent of the mod's own code.
  */
 class GeneratedBlockstatesTest {
-    private static final Path STATES = Path.of("src/generated/resources/assets/roundwood/blockstates");
+    private static final Path STATES = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/generated/resources/assets/roundwood/blockstates");
 
     private static JsonObject json(Path path) {
         try {

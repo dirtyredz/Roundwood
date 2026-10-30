@@ -48,7 +48,7 @@ class GeneratedRecipesTest {
             assertEquals("minecraft:crafting_shaped", json(recipe(full)).get("type").getAsString());
         }
     }
-    private static final Path DATA = Path.of("src/generated/resources/data/roundwood");
+    private static final Path DATA = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/generated/resources/data/roundwood");
     private static final String PLANKS = "{\"tag\":\"minecraft:planks\"}";
     private static final String PANE = "{\"item\":\"minecraft:glass_pane\"}";
     private static final String STICK = "{\"item\":\"minecraft:stick\"}";

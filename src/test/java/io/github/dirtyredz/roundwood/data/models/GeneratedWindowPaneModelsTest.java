@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Plus render types, textures, and the item models.
  */
 class GeneratedWindowPaneModelsTest {
-    private static final Path STATES = Path.of("src/generated/resources/assets/roundwood/blockstates");
+    private static final Path STATES = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/generated/resources/assets/roundwood/blockstates");
     private static final List<Direction> SIDES = List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST);
     private static final byte AIR = 0;
     private static final byte SOLID = 1;

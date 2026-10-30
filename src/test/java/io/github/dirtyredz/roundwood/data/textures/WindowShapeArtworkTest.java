@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * corners' face is the arched face's straight lower half reflected above an unchanged lower half.
  */
 class WindowShapeArtworkTest {
-    private static final Path TEXTURES = Path.of("src/main/resources/assets/roundwood/textures/block");
+    private static final Path TEXTURES = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/main/resources/assets/roundwood/textures/block");
     private static final List<String> MASONRY = List.of("brick", "stone_brick", "mud_brick", "deepslate_brick");
 
     private static BufferedImage image(String name) {

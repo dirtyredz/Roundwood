@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * {@link GeneratedMasonryTexturesTest}.
  */
 class GeneratedTexturesTest {
-    private static final Path DIR = Path.of("src/main/resources/assets/roundwood/textures/block");
+    private static final Path DIR = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/main/resources/assets/roundwood/textures/block");
     private static final List<String> WOODS = List.of("oak", "spruce", "birch", "jungle", "acacia", "dark_oak",
             "mangrove", "cherry", "bamboo", "crimson", "warped");
     private static final List<String> DYES = List.of("white", "orange", "magenta", "light_blue", "yellow", "lime",

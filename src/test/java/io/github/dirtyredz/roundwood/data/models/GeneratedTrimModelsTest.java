@@ -170,7 +170,7 @@ class GeneratedTrimModelsTest {
         ids.add("round_trim");
         assertEquals(20, ids.size());
         for (String id : ids) {
-            Path file = Path.of("src/generated/resources/assets/roundwood/blockstates/" + id + ".json");
+            Path file = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/generated/resources/assets/roundwood/blockstates/" + id + ".json");
             JsonObject state = JsonParser.parseString(Files.readString(file)).getAsJsonObject();
             assertFalse(state.has("multipart"), id);
             JsonObject variants = state.getAsJsonObject("variants");

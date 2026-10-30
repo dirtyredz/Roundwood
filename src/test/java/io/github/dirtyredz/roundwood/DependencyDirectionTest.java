@@ -7,7 +7,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DependencyDirectionTest {
-    private static final Path ROOT = Path.of("src/main/java/io/github/dirtyredz/roundwood");
+    private static final Path ROOT = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/main/java/io/github/dirtyredz/roundwood");
 
     @Test
     void windowsDoNotDependOnMigration() throws Exception {

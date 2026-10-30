@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * are written out here, independently of the generator.
  */
 class GeneratedMasonryTexturesTest {
-    private static final Path DIR = Path.of("src/main/resources/assets/roundwood/textures/block");
+    private static final Path DIR = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/main/resources/assets/roundwood/textures/block");
     private static final List<String> MATERIALS = List.of("brick", "stone_brick", "deepslate_brick", "mud_brick");
     /** Per material: the brick colour, then the mortar colour (RGB). */
     private static final Map<String, int[][]> PALETTE = Map.of(

@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ModLogoTest {
     @Test
     void modLogoIsSquareTransparentAndCrispAtLauncherSize() throws Exception {
-        var resources = Path.of("src/main/resources");
+        var resources = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/main/resources");
         assertTrue(Files.readString(resources.resolve("META-INF/neoforge.mods.toml"))
                 .contains("logoFile=\"roundwood-logo.png\""));
         var image = ImageIO.read(resources.resolve("roundwood-logo.png").toFile());

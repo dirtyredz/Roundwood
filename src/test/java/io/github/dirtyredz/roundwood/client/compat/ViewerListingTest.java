@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * ContentGameTests.everyItemIncludingBothArchwaysIsListedOnceAsItsOakDefault.
  */
 class ViewerListingTest {
-    private static final Path COMPAT = Path.of("src/main/java/io/github/dirtyredz/roundwood/client/compat");
+    private static final Path COMPAT = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/main/java/io/github/dirtyredz/roundwood/client/compat");
 
     @Test
     void noViewerAdapterAddsStacksOrCyclesLooks() throws Exception {

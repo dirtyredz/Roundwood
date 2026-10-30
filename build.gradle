@@ -162,10 +162,15 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    // FML's JUnit launcher writes config/, defaultconfigs/ and mods/ into its game directory (the working directory),
+    // so it runs under build/. Tests read checked-in trees through testsupport/ProjectFiles.
+    def junitRun = layout.buildDirectory.dir('moddev/junitRun').get().asFile
+    workingDir = junitRun
+    doFirst { junitRun.mkdirs() }
+    systemProperty 'roundwood.projectDir', projectDir.absolutePath
+    // The game bootstrap plus vanilla's data fixer (refund upgrade tests) exceed Gradle's default test heap.
+    maxHeapSize = '3G'
 }
-// GeneratedResourcesTest and friends read the checked-in trees relative to the project. FML's JUnit launcher
-// assigns its own game directory at configuration time, so the project directory is restored just before running.
-tasks.named('test', Test).configure { task -> task.doFirst { task.workingDir = projectDir } }
 
 // Optional compatibility check uses an existing local Sodium jar; never resolves or downloads a mod.
 tasks.register('checkEmbeddium', JavaExec) {

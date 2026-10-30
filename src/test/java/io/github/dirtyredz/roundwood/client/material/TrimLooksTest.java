@@ -25,7 +25,7 @@ class TrimLooksTest {
         MinecraftBootstrap.ensure(); // DyeColor needs the game marked as bootstrapped
     }
 
-    private static final Path TEXTURES = Path.of("src/main/resources/assets/roundwood/textures");
+    private static final Path TEXTURES = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/main/resources/assets/roundwood/textures");
 
     private static ResourceLocation vanilla(String path) {
         return ResourceLocation.fromNamespaceAndPath("minecraft", path);

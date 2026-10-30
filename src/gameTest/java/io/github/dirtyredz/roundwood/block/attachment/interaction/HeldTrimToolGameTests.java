@@ -443,7 +443,7 @@ public final class HeldTrimToolGameTests {
             ItemStack stack = new ItemStack(Items.SPRUCE_PLANKS, 2);
             if (key.equals("block_state")) stack.set(net.minecraft.core.component.DataComponents.BLOCK_STATE,
                     net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(net.minecraft.world.level.block.state.properties.BlockStateProperties.AXIS, net.minecraft.core.Direction.Axis.X));
-            else BlockItem.setBlockEntityData(stack, net.minecraft.world.level.block.entity.BlockEntityType.CHEST, new CompoundTag());
+            else BlockItem.setBlockEntityData(stack, net.minecraft.world.level.block.entity.BlockEntityType.CHEST, io.github.dirtyredz.roundwood.fixture.PlacedPayloads.contents());
             s.hold(stack, ItemStack.EMPTY);
             check(!s.claims(MAIN), key + ": claimed as a donor");
             if (directUse) {

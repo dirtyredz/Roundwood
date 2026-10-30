@@ -28,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 /** Checked-in resource reader and independent expected identifiers shared by resource guards. */
 public final class GeneratedFiles {
 
-    public static final Path GENERATED = Path.of("src/generated/resources");
-    public static final Path MAIN = Path.of("src/main/resources");
+    public static final Path GENERATED = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/generated/resources");
+    public static final Path MAIN = io.github.dirtyredz.roundwood.testsupport.ProjectFiles.path("src/main/resources");
     /** The 26 windows in creative order: the ten of 0.9.0, then the sixteen of 0.10.0 (plain, then crossed). */
     public static final List<String> WINDOWS = List.of("round_window", "round_window_cross", "round_window_arch_left",
             "round_window_arch_left_cross", "round_window_arch_right", "round_window_arch_right_cross",
