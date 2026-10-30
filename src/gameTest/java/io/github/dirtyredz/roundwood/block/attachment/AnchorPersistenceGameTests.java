@@ -412,9 +412,10 @@ public final class AnchorPersistenceGameTests {
 
         RoundWindowBlockEntity viaPacket = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), base.getBlockPos(), trimmed);
         check(viaPacket.setTrims(front(BRICK)) && viaPacket.setTrims(TrimSlot.SILL, front(BRICK)), "setup");
-        // An empty tag is how a packet without a tag is made: the packet stores it as null.
+        // An empty tag is how a packet without a tag is made (1.21 packets always carry a compound, possibly empty).
+        viaPacket.setLevel(helper.getLevel());
         ClientboundBlockEntityDataPacket packet = ClientboundBlockEntityDataPacket.create(viaPacket, (entity, registries) -> new CompoundTag());
-        check(packet.getTag() == null, "setup: the packet carries a tag");
+        check(packet.getTag().isEmpty(), "setup: the packet carries a tag");
         viaPacket.onDataPacket(null, packet, TestRegistries.get());
         check(viaPacket.trims().equals(FaceTrims.NONE) && viaPacket.trims(TrimSlot.SILL).equals(FaceTrims.NONE),
                 "a null packet kept or invented trims: " + viaPacket.trims() + " / " + viaPacket.trims(TrimSlot.SILL));

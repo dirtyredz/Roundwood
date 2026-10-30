@@ -1,0 +1,34 @@
+{
+  cases: [
+    {
+      name: "camouflaged spruce door anchor without depth",
+      state: {Name: "roundwood:round_door", Properties: {column: "left", facing: "north", half: "lower", hinge: "left", open: "false", powered: "false"}},
+      entity: {id: "roundwood:round_door", x: 0, y: 0, z: 0, RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:spruce_planks"}, DoorTrim: {Version: 1, Front: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:dark_oak_planks"}}}, Camouflage: {Material: {Name: "minecraft:stone"}, Refund: {id: "minecraft:stone", Count: 1b, tag: {display: {Name: '{"text":"Quarry"}'}, Enchantments: [{id: "minecraft:unbreaking", lvl: 1s}]}}}},
+      expect: {block: "roundwood:round_door", state: {depth: "front", column: "left"}, appearance: {Version: 1, Kind: "wood", Material: "minecraft:spruce_planks"}, trims: [{slot: "perimeter", front: {Version: 1, Kind: "wood", Material: "minecraft:dark_oak_planks"}}], camouflage: {material: "minecraft:stone", refund: "minecraft:stone", refundName: "Quarry", refundEnchantment: "minecraft:unbreaking"}}
+    },
+    {
+      name: "waterlogged mirrored round window with masonry trim",
+      state: {Name: "roundwood:round_window", Properties: {axis: "z", position: "north", north: "false", east: "false", south: "false", west: "false", waterlogged: "true", trimmed: "true", face_reversed: "true"}},
+      entity: {id: "roundwood:round_window", x: 0, y: 0, z: 0, RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:jungle_planks", Paint: "white"}, WindowTrim: {Version: 2, Front: {RoundwoodAppearance: {Version: 1, Kind: "masonry", Material: "minecraft:bricks"}}, Back: {}}, WindowGlass: {Version: 1, Color: "cyan"}},
+      expect: {block: "roundwood:round_window", state: {waterlogged: "true", face_reversed: "true", position: "north"}, appearance: {Version: 1, Kind: "wood", Material: "minecraft:jungle_planks", Paint: "white"}, trims: [{slot: "perimeter", front: {Version: 1, Kind: "masonry", Material: "minecraft:bricks"}, back: {}}], glass: "cyan"}
+    },
+    {
+      name: "trimmed window saved before trim payloads (0.7.0 shape)",
+      state: {Name: "roundwood:green_round_window", Properties: {axis: "x", position: "center", north: "false", east: "false", south: "false", west: "false", waterlogged: "false", trimmed: "true", face_reversed: "false"}},
+      entity: {id: "roundwood:round_window", x: 0, y: 0, z: 0},
+      expect: {block: "roundwood:green_round_window", defaultAppearance: 1b, trims: [{slot: "perimeter", front: {}, back: {}}]}
+    },
+    {
+      name: "masonry keyhole archway anchor with two casings",
+      state: {Name: "roundwood:keyhole_archway", Properties: {facing: "east", part: "lower_left"}},
+      entity: {id: "roundwood:archway", x: 0, y: 0, z: 0, RoundwoodAppearance: {Version: 1, Kind: "masonry", Material: "minecraft:deepslate_bricks"}, ArchwayTrim: {Version: 1, Front: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:birch_planks"}}, Back: {RoundwoodAppearance: {Version: 1, Kind: "masonry", Material: "minecraft:bricks"}}}},
+      expect: {block: "roundwood:keyhole_archway", appearance: {Version: 1, Kind: "masonry", Material: "minecraft:deepslate_bricks"}, trims: [{slot: "perimeter", front: {Version: 1, Kind: "wood", Material: "minecraft:birch_planks"}, back: {Version: 1, Kind: "masonry", Material: "minecraft:bricks"}}]}
+    },
+    {
+      name: "frozen mud-brick frame alias anchor",
+      state: {Name: "roundwood:mud_brick_round_trim", Properties: {facing: "west", part: "lower_left"}},
+      entity: {id: "roundwood:round_trim", x: 0, y: 0, z: 0},
+      expect: {block: "roundwood:mud_brick_round_trim", defaultAppearance: 1b}
+    }
+  ]
+}

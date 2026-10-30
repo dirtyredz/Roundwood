@@ -38,10 +38,12 @@ public final class DoorRaycast {
 
     private static BlockHitResult clip(Level level,Player player,Vec3 eye,Vec3 end,boolean emptyCorners) {
         // A whole-assembly outline can otherwise end traversal before a nearer neighbour is visited.
-        var nearest = level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, player) {
+        // 1.21's ClipContext no longer accepts a null entity; an absent player clips with the empty context.
+        CollisionContext collision = player == null ? CollisionContext.empty() : CollisionContext.of(player);
+        var nearest = level.clip(new ClipContext(eye, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, collision) {
             @Override public VoxelShape getBlockShape(BlockState state, BlockGetter world, BlockPos pos) {
                 var shape = state.getBlock() instanceof AssemblyDoorBlock
-                        ? DoorSelectionShapes.target(state,world,pos,CollisionContext.of(player),emptyCorners) : super.getBlockShape(state, world, pos);
+                        ? DoorSelectionShapes.target(state,world,pos,collision,emptyCorners) : super.getBlockShape(state, world, pos);
                 return state.getBlock() instanceof AssemblyDoorBlock ? DoorTargetShapes.cell(shape) : shape;
             }
         });
@@ -58,7 +60,7 @@ public final class DoorRaycast {
             var door = DoorLayout.of(pos, state);
             if (!visited.add(door.anchor()) || !door.loaded(level) || !door.complete(level, block)) continue;
             // betweenClosed reuses a mutable cursor; BlockHitResult retains its supplied position.
-            var hit = DoorSelectionShapes.target(state, level, pos, CollisionContext.of(player),emptyCorners).clip(eye, end, pos.immutable());
+            var hit = DoorSelectionShapes.target(state, level, pos, player == null ? CollisionContext.empty() : CollisionContext.of(player),emptyCorners).clip(eye, end, pos.immutable());
             if (hit == null || eye.distanceToSqr(hit.getLocation()) > distance + 1e-8) continue;
             var resolved = DoorHitResolver.resolve(level, hit);
             if (resolved.isEmpty()) continue;

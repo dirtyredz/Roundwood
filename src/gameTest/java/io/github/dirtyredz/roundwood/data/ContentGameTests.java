@@ -328,6 +328,7 @@ public final class ContentGameTests {
             net.minecraft.world.level.block.state.BlockState state = window.defaultBlockState().setValue(WindowPaneBlock.TRIMMED, true);
             io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity entity = new io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity(
                     io.github.dirtyredz.roundwood.registry.ModBlockEntities.roundWindow(), pos, state);
+            entity.setLevel(helper.getLevel()); // 1.21 loot copies block-entity data with the entity's level registries
             boolean trim=((WindowPaneBlock)window).profile().takesTrim();
             if(trim) check(entity.setTrims(io.github.dirtyredz.roundwood.block.attachment.FaceTrims.both(io.github.dirtyredz.roundwood.appearance.Appearance.DEFAULT)),"trim fixture");
             // an upper arch (0.10.0) with oak sills on both faces also drops one plain Arch Sill per face

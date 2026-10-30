@@ -58,7 +58,7 @@ public final class DoorSelectionGameTests {
     }
 
     private static BlockHitResult clip(GameTestHelper helper, Vec3 from, Vec3 to, Entity entity) {
-        return helper.getLevel().clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, entity));
+        return helper.getLevel().clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, entity == null ? CollisionContext.empty() : CollisionContext.of(entity)));
     }
 
     /** A ray from the player's side straight at the front face point (a, h). */

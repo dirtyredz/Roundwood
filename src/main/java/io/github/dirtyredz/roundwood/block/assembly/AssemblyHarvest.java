@@ -5,7 +5,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
@@ -38,13 +37,13 @@ public final class AssemblyHarvest {
     /**
      * From {@code onDestroyedByPlayer}: defers the removal of a harvesting survival break, otherwise
      * runs {@code removeNow} (the ordinary removal). Returns whether the block counts as removed.
+     * NeoForge 21.1 calls {@code playerWillDestroy} before this (Forge 1.20.1 called it from the default
+     * {@code onDestroyedByPlayer}), so it is never repeated here.
      */
-    public static boolean destroyedByPlayer(Block block, BlockState state, Level level, BlockPos pos, Player player,
-                                            boolean willHarvest, BooleanSupplier removeNow) {
+    public static boolean destroyedByPlayer(Level level, BlockPos pos, Player player, boolean willHarvest, BooleanSupplier removeNow) {
         if (level.isClientSide || !willHarvest || player.getAbilities().instabuild) {
             return removeNow.getAsBoolean();
         }
-        block.playerWillDestroy(level, pos, state, player);
         PENDING.add(new Pending(level, pos.immutable()));
         return true;
     }

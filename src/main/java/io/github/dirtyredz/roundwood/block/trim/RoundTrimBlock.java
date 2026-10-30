@@ -116,7 +116,7 @@ public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefa
     /** A survival harvest keeps the quarter until its loot has read the anchor ({@link AssemblyHarvest}). */
     @Override
     public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
-        return AssemblyHarvest.destroyedByPlayer(this, state, level, pos, player, willHarvest,
+        return AssemblyHarvest.destroyedByPlayer(level, pos, player, willHarvest,
                 () -> super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid));
     }
 

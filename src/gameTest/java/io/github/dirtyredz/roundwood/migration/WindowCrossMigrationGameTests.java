@@ -84,7 +84,10 @@ public final class WindowCrossMigrationGameTests {
         var drops = Block.getDrops(state, helper.getLevel(), pos, helper.getLevel().getBlockEntity(pos));
         check(drops.size() == 1 && drops.get(0).is(io.github.dirtyredz.roundwood.registry.ModItems.window(
                 ((io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock) state.getBlock()).design())), "pending block refunded attachments separately");
-        check(io.github.dirtyredz.roundwood.appearance.item.StackPayloads.blockEntityData(drops.get(0)).equals(before), "pending harvest lost custody");
+        // 1.21 item block-entity data is the entity's own payload plus its id, without coordinates.
+        var custody = before.copy();
+        custody.remove("x"); custody.remove("y"); custody.remove("z");
+        check(io.github.dirtyredz.roundwood.appearance.item.StackPayloads.blockEntityData(drops.get(0)).equals(custody), "pending harvest lost custody");
         helper.succeed();
     }
 

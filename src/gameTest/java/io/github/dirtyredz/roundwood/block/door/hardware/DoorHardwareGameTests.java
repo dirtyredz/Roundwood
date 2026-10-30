@@ -67,7 +67,8 @@ public final class DoorHardwareGameTests {
                         && (front?p.box().minZ()>=16:p.box().maxZ()<=13)).findFirst().orElseThrow();
                 var b=piece.box(); double x=(b.minX()+b.maxX())/2, y=(b.minY()+b.maxY())/2;
                 double z=front?b.maxZ():b.minZ();
-                double ex=x,ez=z+(front?32:-32);
+                // 1.5 blocks out: 1.21 encases the 9-wide template in barriers, which a 2-block eye can sit inside.
+                double ex=x,ez=z+(front?24:-24);
                 if(open){var a=DoorGeometry.turn(block.design(),x,z,DoorGeometry.openDegrees(side),side);
                     var e=DoorGeometry.turn(block.design(),ex,ez,DoorGeometry.openDegrees(side),side);x=a[0];z=a[1];ex=e[0];ez=e[1];}
                 var target=point(door,x/16,y/16,1-(z+depth.offset())/16);

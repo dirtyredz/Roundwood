@@ -118,7 +118,7 @@ public class ArchPieceBlock extends Block implements EntityBlock, AppearanceDefa
         super.onRemove(state, level, pos, newState, moving);
     }
     @Override public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
-        return AssemblyHarvest.destroyedByPlayer(this, state, level, pos, player, willHarvest,
+        return AssemblyHarvest.destroyedByPlayer(level, pos, player, willHarvest,
                 () -> super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid));
     }
     @Override public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity entity, ItemStack tool) {

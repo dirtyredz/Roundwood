@@ -71,7 +71,7 @@ public final class TrimInteractionGameTests {
     /** A ray from well in front of the frame, straight at the door's front plane at (a, h). */
     private static BlockHitResult ray(GameTestHelper helper, DoorLayout.Assembly door, double a, double h, Entity entity) {
         return helper.getLevel().clip(new ClipContext(point(door, a, h, -2.5), point(door, a, h, 0.5),
-                ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, entity));
+                ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, entity == null ? net.minecraft.world.phys.shapes.CollisionContext.empty() : net.minecraft.world.phys.shapes.CollisionContext.of(entity)));
     }
 
     private static boolean onDoor(GameTestHelper helper, BlockHitResult hit) {

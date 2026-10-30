@@ -82,6 +82,7 @@ public final class WindowBeamGameTests {
         var disk = window.saveWithFullMetadata(TestRegistries.get());
         check(disk.getCompound("WindowTrim").getAllKeys().equals(java.util.Set.of("Version")), "beam-only save invents perimeter trims");
         var copy = new RoundWindowBlockEntity(window.getType(), helper.absolutePos(AT), helper.getBlockState(AT));
+        copy.setLevel(helper.getLevel());
         copy.loadWithComponents(disk, TestRegistries.get());
         check(copy.trims().count() == 0 && copy.trims(TrimSlot.CROSS_BEAMS).count() == 1, "beam-only reload");
         WindowAttachmentState.store(helper.getLevel(), helper.absolutePos(AT), window, TrimSlot.CROSS_BEAMS, FaceTrims.NONE);

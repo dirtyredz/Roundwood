@@ -1,0 +1,34 @@
+{
+  cases: [
+    {
+      name: "tall double door with block-surface hardware",
+      stack: {id: "roundwood:tall_double_arched_door", Count: 1b, tag: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:dark_oak_planks"}, DoorHardware: {Version: 1, HINGES: {Version: 1, Kind: "block_surface", Material: "minecraft:gold_block"}, KNOBS: {Version: 1, Kind: "block_surface", Material: "minecraft:iron_block"}}}},
+      expect: {item: "roundwood:tall_double_arched_door", count: 1, appearance: {Version: 1, Kind: "wood", Material: "minecraft:dark_oak_planks"}, custom: {DoorHardware: {Version: 1, HINGES: {Version: 1, Kind: "block_surface", Material: "minecraft:gold_block"}, KNOBS: {Version: 1, Kind: "block_surface", Material: "minecraft:iron_block"}}}, hardwareReadable: 1b}
+    },
+    {
+      name: "door holding an opaque future frame",
+      stack: {id: "roundwood:round_door", Count: 1b, tag: {DoorArch: {Version: 99, Opaque: [I; 1, 2, 3]}}},
+      expect: {item: "roundwood:round_door", count: 1, custom: {DoorArch: {Version: 99, Opaque: [I; 1, 2, 3]}}, hardwareReadable: 0b}
+    },
+    {
+      name: "named thin arch in a block surface",
+      stack: {id: "roundwood:arch_top_2x3_thin", Count: 7b, tag: {RoundwoodAppearance: {Version: 1, Kind: "block_surface", Material: "minecraft:polished_andesite"}, display: {Name: '{"text":"Crown"}', Lore: ['{"text":"west wing"}']}}},
+      expect: {item: "roundwood:arch_top_2x3_thin", count: 7, appearance: {Version: 1, Kind: "block_surface", Material: "minecraft:polished_andesite"}, name: "Crown", lore: 1}
+    },
+    {
+      name: "tinted frameless window",
+      stack: {id: "roundwood:frameless_window", Count: 16b, tag: {WindowGlass: {Version: 1, Color: "lime"}}},
+      expect: {item: "roundwood:frameless_window", count: 16, glass: "lime"}
+    },
+    {
+      name: "styled cross beams and arch sill",
+      stack: {id: "roundwood:cross_beams", Count: 2b, tag: {RoundwoodAppearance: {Version: 1, Kind: "masonry", Material: "minecraft:mud_bricks"}}},
+      expect: {item: "roundwood:cross_beams", count: 2, appearance: {Version: 1, Kind: "masonry", Material: "minecraft:mud_bricks"}}
+    },
+    {
+      name: "enchanted keyhole shoulder",
+      stack: {id: "roundwood:keyhole_shoulder", Count: 1b, tag: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:cherry_planks"}, Enchantments: [{id: "minecraft:unbreaking", lvl: 2s}], RepairCost: 1}},
+      expect: {item: "roundwood:keyhole_shoulder", count: 1, appearance: {Version: 1, Kind: "wood", Material: "minecraft:cherry_planks"}, enchantment: "minecraft:unbreaking", repairCost: 1}
+    }
+  ]
+}

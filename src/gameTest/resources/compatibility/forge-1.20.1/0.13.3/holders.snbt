@@ -1,0 +1,16 @@
+{
+  player: {
+    DataVersion: 3465,
+    Inventory: [
+      {Slot: 0b, id: "roundwood:keyhole_archway", Count: 2b, tag: {RoundwoodAppearance: {Version: 1, Kind: "masonry", Material: "minecraft:bricks"}, display: {Name: '{"text":"Pack"}'}}},
+      {Slot: 1b, id: "roundwood:round_door", Count: 1b, tag: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:spruce_planks"}}}
+    ],
+    EnderItems: [
+      {Slot: 3b, id: "roundwood:archway", Count: 1b, tag: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:birch_planks"}}}
+    ]
+  },
+  chest: {id: "minecraft:chest", x: 0, y: 0, z: 0, Items: [{Slot: 4b, id: "roundwood:archway", Count: 3b, tag: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:spruce_planks"}}}]},
+  lootChest: {id: "minecraft:chest", x: 0, y: 0, z: 0, LootTable: "minecraft:chests/simple_dungeon", LootTableSeed: 7L, Items: [{Slot: 0b, id: "roundwood:archway", Count: 1b}]},
+  itemEntity: {id: "minecraft:item", Pos: [0.5d, 1.0d, 0.5d], Motion: [0.0d, 0.0d, 0.0d], Rotation: [0.0f, 0.0f], Item: {id: "roundwood:keyhole_archway", Count: 1b, tag: {RoundwoodAppearance: {Version: 1, Kind: "masonry", Material: "minecraft:stone_bricks"}}}},
+  minecart: {id: "minecraft:chest_minecart", Pos: [0.5d, 1.0d, 0.5d], Motion: [0.0d, 0.0d, 0.0d], Rotation: [0.0f, 0.0f], Items: [{Slot: 0b, id: "roundwood:keyhole_archway", Count: 1b, tag: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:acacia_planks"}}}]}
+}

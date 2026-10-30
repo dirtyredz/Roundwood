@@ -1,0 +1,46 @@
+{
+  cases: [
+    {
+      name: "tall double door anchor at the back depth with block-surface hardware",
+      state: {Name: "roundwood:tall_double_arched_door", Properties: {facing: "east", half: "lower", hinge: "right", open: "false", powered: "false", cell_x: "0", cell_y: "0", depth: "back"}},
+      entity: {id: "roundwood:round_door", x: 0, y: 0, z: 0, RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:acacia_planks"}, DoorHardware: {Version: 1, HINGES: {Version: 1, Kind: "block_surface", Material: "minecraft:gold_block"}, KNOBS: {Version: 1, Kind: "block_surface", Material: "minecraft:iron_block"}}, Camouflage: {Material: {Name: "minecraft:stone_bricks"}}},
+      expect: {block: "roundwood:tall_double_arched_door", state: {depth: "back", cell_y: "0"}, appearance: {Version: 1, Kind: "wood", Material: "minecraft:acacia_planks"}, hardware: {HINGES: {Version: 1, Kind: "block_surface", Material: "minecraft:gold_block"}, KNOBS: {Version: 1, Kind: "block_surface", Material: "minecraft:iron_block"}}, camouflage: {material: "minecraft:stone_bricks"}}
+    },
+    {
+      name: "round door with a fitted thin frame and a paid refund",
+      state: {Name: "roundwood:round_door", Properties: {column: "left", facing: "south", half: "lower", hinge: "left", open: "false", powered: "false", depth: "middle"}},
+      entity: {id: "roundwood:round_door", x: 0, y: 0, z: 0, DoorArch: {Version: 1, Product: "TOP_1X2", Thickness: "THIN", Depth: "MIDDLE", Appearance: {Version: 1, Kind: "wood", Material: "minecraft:spruce_planks"}, Casings: {Version: 1, Front: {RoundwoodAppearance: {Version: 1, Kind: "masonry", Material: "minecraft:bricks"}}}}, Camouflage: {Material: {Name: "minecraft:deepslate_bricks"}, Refund: {id: "minecraft:deepslate_bricks", Count: 1b}}},
+      expect: {block: "roundwood:round_door", state: {depth: "middle"}, arch: {product: "TOP_1X2", thickness: "THIN", depth: "MIDDLE"}, camouflage: {material: "minecraft:deepslate_bricks", refund: "minecraft:deepslate_bricks"}}
+    },
+    {
+      name: "door whose refund names a missing mod's block",
+      state: {Name: "roundwood:arched_door", Properties: {facing: "west", half: "lower", hinge: "left", open: "true", powered: "false", depth: "front"}},
+      entity: {id: "roundwood:round_door", x: 0, y: 0, z: 0, Camouflage: {Material: {Name: "minecraft:stone"}, Refund: {id: "othermod:marble", Count: 1b, tag: {Quarried: 1b}}}},
+      expect: {block: "roundwood:arched_door", camouflage: {material: "minecraft:stone", locked: 1b}}
+    },
+    {
+      name: "thin arch top in a block surface with independent casings",
+      state: {Name: "roundwood:arch_top_1x2_thin", Properties: {facing: "south", cell: "lower_left", side: "left", depth: "middle"}},
+      entity: {id: "roundwood:arch_piece", x: 0, y: 0, z: 0, RoundwoodAppearance: {Version: 1, Kind: "block_surface", Material: "minecraft:gold_block"}, ArchPieceTrim: {Version: 1, Front: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:spruce_planks"}}, Back: {RoundwoodAppearance: {Version: 1, Kind: "masonry", Material: "minecraft:stone_bricks"}}}},
+      expect: {block: "roundwood:arch_top_1x2_thin", state: {depth: "middle"}, appearance: {Version: 1, Kind: "block_surface", Material: "minecraft:gold_block"}, trims: [{slot: "perimeter", front: {Version: 1, Kind: "wood", Material: "minecraft:spruce_planks"}, back: {Version: 1, Kind: "masonry", Material: "minecraft:stone_bricks"}}]}
+    },
+    {
+      name: "waterlogged frameless window with cross beams and tint",
+      state: {Name: "roundwood:frameless_window", Properties: {orientation: "up_north", depth: "positive", north: "false", east: "false", south: "false", west: "false", waterlogged: "true", trimmed: "true", face_reversed: "false"}},
+      entity: {id: "roundwood:round_window", x: 0, y: 0, z: 0, WindowCrossBeams: {Version: 1, Front: {RoundwoodAppearance: {Version: 1, Kind: "masonry", Material: "minecraft:bricks"}}}, WindowGlass: {Version: 1, Color: "lime"}},
+      expect: {block: "roundwood:frameless_window", state: {waterlogged: "true", orientation: "up_north"}, trims: [{slot: "cross_beams", front: {Version: 1, Kind: "masonry", Material: "minecraft:bricks"}}], glass: "lime"}
+    },
+    {
+      name: "upper arch window with perimeter trim and independent sills",
+      state: {Name: "roundwood:round_window_arch_left", Properties: {orientation: "north", depth: "center", north: "false", east: "false", south: "false", west: "false", waterlogged: "false", trimmed: "true", face_reversed: "true"}},
+      entity: {id: "roundwood:round_window", x: 0, y: 0, z: 0, WindowTrim: {Version: 2, Front: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:cherry_planks"}}, Back: {}}, WindowSillTrim: {Version: 1, Front: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:birch_planks"}}, Back: {}}},
+      expect: {block: "roundwood:round_window_arch_left", trims: [{slot: "perimeter", front: {Version: 1, Kind: "wood", Material: "minecraft:cherry_planks"}, back: {}}, {slot: "sill", front: {Version: 1, Kind: "wood", Material: "minecraft:birch_planks"}, back: {}}]}
+    },
+    {
+      name: "window holding a future cross-beam payload",
+      state: {Name: "roundwood:round_window_top_left", Properties: {orientation: "east", depth: "negative", north: "false", east: "false", south: "false", west: "false", waterlogged: "false", trimmed: "true", face_reversed: "false"}},
+      entity: {id: "roundwood:round_window", x: 0, y: 0, z: 0, WindowCrossBeams: {Version: 99, Opaque: [I; 1, 2, 3]}},
+      expect: {block: "roundwood:round_window_top_left", locked: ["cross_beams"], keeps: {WindowCrossBeams: {Version: 99, Opaque: [I; 1, 2, 3]}}}
+    }
+  ]
+}

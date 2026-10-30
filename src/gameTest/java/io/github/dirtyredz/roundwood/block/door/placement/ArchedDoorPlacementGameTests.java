@@ -165,7 +165,9 @@ public final class ArchedDoorPlacementGameTests {
     @GameTest(template = TEMPLATE)
     public static void aCancelledPlacementRollsBackBothCellsAndTheItem(GameTestHelper helper) {
         floor(helper);
-        helper.setBlock(ANCHOR.above(), Blocks.SHORT_GRASS); // replaceable, so it is written and must come back
+        // Replaceable, so it is written and must come back. It stands in the lower cell: NeoForge's cancelled-placement
+        // restore notifies neighbours, so an unsupported plant in the upper cell would pop once the lower cell returns.
+        helper.setBlock(ANCHOR, Blocks.SHORT_GRASS);
         int eventsBefore = PlacementCanceller.multiPlaceEvents();
         ServerPlayer player = player(helper, "cancelled", GameType.SURVIVAL, Direction.NORTH);
         ItemStack stack = new ItemStack(arched().asItem());
@@ -174,7 +176,7 @@ public final class ArchedDoorPlacementGameTests {
         check(PlacementCanceller.multiPlaceEvents() == eventsBefore + 1, "expected exactly one multi-place event");
         check(player.getMainHandItem().getCount() == 1, "item not restored: " + player.getMainHandItem());
         assertNoDoor(helper, arched(helper, ANCHOR, Direction.NORTH, DoorHingeSide.LEFT));
-        check(helper.getBlockState(ANCHOR.above()).is(Blocks.SHORT_GRASS), "the replaced grass was not restored");
+        check(helper.getBlockState(ANCHOR).is(Blocks.SHORT_GRASS), "the replaced grass was not restored");
         helper.succeed();
     }
 

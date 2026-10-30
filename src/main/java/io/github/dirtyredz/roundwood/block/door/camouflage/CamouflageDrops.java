@@ -42,7 +42,7 @@ public final class CamouflageDrops {
      * Runs a creative player's removal of a part with refunds discarded for {@code level}. The scope
      * lives on this thread only for the duration of {@code removal}, never on the entity.
      */
-    public static boolean discardingRefunds(Level level, Supplier<Boolean> removal) {
+    public static <T> T discardingRefunds(Level level, Supplier<T> removal) {
         Deque<Level> scopes = DISCARDING.get();
         if (scopes.size() >= MAX_DEPTH) {
             LOGGER.warn("Roundwood: camouflage discard scopes nested {} deep; running without a new scope", scopes.size());

@@ -1,0 +1,44 @@
+{
+  cases: [
+    {
+      name: "styled spruce door",
+      stack: {id: "roundwood:round_door", Count: 2b, tag: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:spruce_planks"}}},
+      expect: {item: "roundwood:round_door", count: 2, appearance: {Version: 1, Kind: "wood", Material: "minecraft:spruce_planks"}}
+    },
+    {
+      name: "painted tinted arch window",
+      stack: {id: "roundwood:round_window_arch_left", Count: 1b, tag: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:oak_planks", Paint: "red"}, WindowGlass: {Version: 1, Color: "blue"}}},
+      expect: {item: "roundwood:round_window_arch_left", count: 1, appearance: {Version: 1, Kind: "wood", Material: "minecraft:oak_planks", Paint: "red"}, glass: "blue"}
+    },
+    {
+      name: "named masonry keyhole archway with foreign data",
+      stack: {id: "roundwood:keyhole_archway", Count: 3b, tag: {RoundwoodAppearance: {Version: 1, Kind: "masonry", Material: "minecraft:bricks"}, display: {Name: '{"text":"Gate"}'}, RepairCost: 3, OtherMod: {Kept: 1b}}},
+      expect: {item: "roundwood:keyhole_archway", count: 3, appearance: {Version: 1, Kind: "masonry", Material: "minecraft:bricks"}, name: "Gate", repairCost: 3, custom: {OtherMod: {Kept: 1b}}, archway: {tops: 3, shoulders: 6}}
+    },
+    {
+      name: "ordinary archway",
+      stack: {id: "roundwood:archway", Count: 2b, tag: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:birch_planks"}}},
+      expect: {item: "roundwood:archway", count: 2, appearance: {Version: 1, Kind: "wood", Material: "minecraft:birch_planks"}, archway: {tops: 2, shoulders: 0}}
+    },
+    {
+      name: "frozen brick frame alias",
+      stack: {id: "roundwood:brick_round_trim", Count: 5b},
+      expect: {item: "roundwood:brick_round_trim", count: 5}
+    },
+    {
+      name: "frozen oak door alias",
+      stack: {id: "roundwood:oak_round_door", Count: 1b},
+      expect: {item: "roundwood:oak_round_door", count: 1}
+    },
+    {
+      name: "crossed window carrying its contents",
+      stack: {id: "roundwood:round_window_cross", Count: 1b, tag: {BlockEntityTag: {id: "roundwood:round_window", RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:birch_planks"}, WindowGlass: {Version: 1, Color: "green"}}}},
+      expect: {item: "roundwood:round_window_cross", count: 1, blockEntity: {RoundwoodAppearance: {Version: 1, Kind: "wood", Material: "minecraft:birch_planks"}, WindowGlass: {Version: 1, Color: "green"}}, crossed: {appearance: {Version: 1, Kind: "wood", Material: "minecraft:birch_planks"}, glass: "green"}}
+    },
+    {
+      name: "hidden window trim item",
+      stack: {id: "roundwood:window_trim", Count: 4b, tag: {RoundwoodAppearance: {Version: 1, Kind: "masonry", Material: "minecraft:stone_bricks"}}},
+      expect: {item: "roundwood:window_trim", count: 4, appearance: {Version: 1, Kind: "masonry", Material: "minecraft:stone_bricks"}}
+    }
+  ]
+}

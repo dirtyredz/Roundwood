@@ -1,0 +1,13 @@
+{
+  player: {
+    DataVersion: 3465,
+    Inventory: [
+      {Slot: 0b, id: "roundwood:arch_top_2x3_thin", Count: 7b, tag: {RoundwoodAppearance: {Version: 1, Kind: "block_surface", Material: "minecraft:polished_andesite"}, display: {Name: '{"text":"Crown"}'}}},
+      {Slot: 1b, id: "roundwood:tall_double_arched_door", Count: 1b, tag: {DoorHardware: {Version: 1, HINGES: {Version: 1, Kind: "block_surface", Material: "minecraft:gold_block"}}}},
+      {Slot: 2b, id: "roundwood:round_window_edge_left_cross", Count: 1b}
+    ],
+    EnderItems: [
+      {Slot: 0b, id: "roundwood:frameless_window", Count: 16b, tag: {WindowGlass: {Version: 1, Color: "lime"}}}
+    ]
+  }
+}

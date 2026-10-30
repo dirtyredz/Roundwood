@@ -148,12 +148,24 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
      * A creative player's break discards stored camouflage instead of dropping it. A survival harvest
      * keeps the part in place until its loot has read the anchor ({@link AssemblyHarvest}).
      */
+    /**
+     * NeoForge 21.1 runs this before {@code onDestroyedByPlayer}. A creative break's partner removal (vanilla's
+     * door half handling) tears the assembly down here, so it runs inside the same refund-discarding scope.
+     */
+    @Override
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (player.getAbilities().instabuild) {
+            return CamouflageDrops.discardingRefunds(level, () -> super.playerWillDestroy(level, pos, state, player));
+        }
+        return super.playerWillDestroy(level, pos, state, player);
+    }
+
     @Override
     public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
         if (player.getAbilities().instabuild) {
             return CamouflageDrops.discardingRefunds(level, () -> super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid));
         }
-        return AssemblyHarvest.destroyedByPlayer(this, state, level, pos, player, willHarvest,
+        return AssemblyHarvest.destroyedByPlayer(level, pos, player, willHarvest,
                 () -> super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid));
     }
 

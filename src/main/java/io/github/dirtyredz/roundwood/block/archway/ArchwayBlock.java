@@ -122,7 +122,7 @@ public class ArchwayBlock extends Block implements EntityBlock, AppearanceDefaul
     /** A survival harvest keeps the cell until its loot has read the anchor ({@link AssemblyHarvest}). */
     @Override
     public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
-        return AssemblyHarvest.destroyedByPlayer(this, state, level, pos, player, willHarvest,
+        return AssemblyHarvest.destroyedByPlayer(level, pos, player, willHarvest,
                 () -> super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid));
     }
 

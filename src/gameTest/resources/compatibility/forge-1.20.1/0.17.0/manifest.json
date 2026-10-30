@@ -1,0 +1,614 @@
+{
+  "source": {
+    "version": "0.17.0",
+    "tag": "v0.17.0",
+    "commit": "4610a4b6daa468995bf825e56212a39d0e373d0f",
+    "jar": "roundwood-1.20.1-0.17.0.jar",
+    "jarSha256": "116432453c3e96c080454c5a3e2852463b9bb672a0db5af4b4084020d8d3c99d",
+    "minecraft": "1.20.1",
+    "dataVersion": 3465,
+    "captured": "registry ids from the release jar; contracts from the tagged registration and block classes"
+  },
+  "blocks": [
+    "acacia_round_door",
+    "acacia_round_trim",
+    "acacia_round_window",
+    "arch_top_1x1",
+    "arch_top_1x1_thin",
+    "arch_top_1x2",
+    "arch_top_1x2_thin",
+    "arch_top_2x3",
+    "arch_top_2x3_thin",
+    "arched_door",
+    "archway",
+    "bamboo_round_door",
+    "bamboo_round_trim",
+    "bamboo_round_window",
+    "birch_round_door",
+    "birch_round_trim",
+    "birch_round_window",
+    "blue_round_door",
+    "blue_round_trim",
+    "blue_round_window",
+    "brick_round_trim",
+    "cherry_round_door",
+    "cherry_round_trim",
+    "cherry_round_window",
+    "crimson_round_door",
+    "crimson_round_trim",
+    "crimson_round_window",
+    "dark_oak_round_door",
+    "dark_oak_round_trim",
+    "dark_oak_round_window",
+    "deepslate_brick_round_trim",
+    "double_arched_door",
+    "frameless_window",
+    "green_round_door",
+    "green_round_trim",
+    "green_round_window",
+    "jungle_round_door",
+    "jungle_round_trim",
+    "jungle_round_window",
+    "keyhole_archway",
+    "keyhole_shoulder",
+    "keyhole_shoulder_thin",
+    "mangrove_round_door",
+    "mangrove_round_trim",
+    "mangrove_round_window",
+    "mud_brick_round_trim",
+    "oak_round_door",
+    "oak_round_trim",
+    "oak_round_window",
+    "red_round_door",
+    "red_round_trim",
+    "red_round_window",
+    "round_door",
+    "round_trim",
+    "round_window",
+    "round_window_arch_bottom_left",
+    "round_window_arch_bottom_left_cross",
+    "round_window_arch_bottom_right",
+    "round_window_arch_bottom_right_cross",
+    "round_window_arch_left",
+    "round_window_arch_left_cross",
+    "round_window_arch_right",
+    "round_window_arch_right_cross",
+    "round_window_bottom_left",
+    "round_window_bottom_left_cross",
+    "round_window_bottom_right",
+    "round_window_bottom_right_cross",
+    "round_window_cross",
+    "round_window_edge_bottom",
+    "round_window_edge_bottom_cross",
+    "round_window_edge_left",
+    "round_window_edge_left_cross",
+    "round_window_edge_right",
+    "round_window_edge_right_cross",
+    "round_window_edge_top",
+    "round_window_edge_top_cross",
+    "round_window_top_left",
+    "round_window_top_left_cross",
+    "round_window_top_right",
+    "round_window_top_right_cross",
+    "spruce_round_door",
+    "spruce_round_trim",
+    "spruce_round_window",
+    "stone_brick_round_trim",
+    "tall_double_arched_door",
+    "warped_round_door",
+    "warped_round_trim",
+    "warped_round_window",
+    "yellow_round_door",
+    "yellow_round_trim",
+    "yellow_round_window"
+  ],
+  "items": [
+    "acacia_round_door",
+    "acacia_round_trim",
+    "acacia_round_window",
+    "arch_sill_trim",
+    "arch_top_1x1",
+    "arch_top_1x1_thin",
+    "arch_top_1x2",
+    "arch_top_1x2_thin",
+    "arch_top_2x3",
+    "arch_top_2x3_thin",
+    "arched_door",
+    "archway",
+    "bamboo_round_door",
+    "bamboo_round_trim",
+    "bamboo_round_window",
+    "birch_round_door",
+    "birch_round_trim",
+    "birch_round_window",
+    "blue_round_door",
+    "blue_round_trim",
+    "blue_round_window",
+    "brick_round_trim",
+    "cherry_round_door",
+    "cherry_round_trim",
+    "cherry_round_window",
+    "crimson_round_door",
+    "crimson_round_trim",
+    "crimson_round_window",
+    "cross_beams",
+    "dark_oak_round_door",
+    "dark_oak_round_trim",
+    "dark_oak_round_window",
+    "deepslate_brick_round_trim",
+    "double_arched_door",
+    "frameless_window",
+    "green_round_door",
+    "green_round_trim",
+    "green_round_window",
+    "jungle_round_door",
+    "jungle_round_trim",
+    "jungle_round_window",
+    "keyhole_archway",
+    "keyhole_shoulder",
+    "keyhole_shoulder_thin",
+    "mangrove_round_door",
+    "mangrove_round_trim",
+    "mangrove_round_window",
+    "mud_brick_round_trim",
+    "oak_round_door",
+    "oak_round_trim",
+    "oak_round_window",
+    "red_round_door",
+    "red_round_trim",
+    "red_round_window",
+    "round_door",
+    "round_trim",
+    "round_window",
+    "round_window_arch_bottom_left",
+    "round_window_arch_bottom_left_cross",
+    "round_window_arch_bottom_right",
+    "round_window_arch_bottom_right_cross",
+    "round_window_arch_left",
+    "round_window_arch_left_cross",
+    "round_window_arch_right",
+    "round_window_arch_right_cross",
+    "round_window_bottom_left",
+    "round_window_bottom_left_cross",
+    "round_window_bottom_right",
+    "round_window_bottom_right_cross",
+    "round_window_cross",
+    "round_window_edge_bottom",
+    "round_window_edge_bottom_cross",
+    "round_window_edge_left",
+    "round_window_edge_left_cross",
+    "round_window_edge_right",
+    "round_window_edge_right_cross",
+    "round_window_edge_top",
+    "round_window_edge_top_cross",
+    "round_window_top_left",
+    "round_window_top_left_cross",
+    "round_window_top_right",
+    "round_window_top_right_cross",
+    "spruce_round_door",
+    "spruce_round_trim",
+    "spruce_round_window",
+    "stone_brick_round_trim",
+    "tall_double_arched_door",
+    "warped_round_door",
+    "warped_round_trim",
+    "warped_round_window",
+    "window_trim",
+    "yellow_round_door",
+    "yellow_round_trim",
+    "yellow_round_window"
+  ],
+  "blockEntities": [
+    "arch_piece",
+    "archway",
+    "round_door",
+    "round_trim",
+    "round_window"
+  ],
+  "lootConditions": [
+    "trim_face"
+  ],
+  "recipeSerializers": [
+    "arch_thinning"
+  ],
+  "creativeTabs": [
+    "roundwood"
+  ],
+  "addedSince": {},
+  "families": {
+    "round_door": {
+      "members": [
+        "round_door",
+        "oak_round_door",
+        "spruce_round_door",
+        "birch_round_door",
+        "jungle_round_door",
+        "acacia_round_door",
+        "dark_oak_round_door",
+        "mangrove_round_door",
+        "cherry_round_door",
+        "bamboo_round_door",
+        "crimson_round_door",
+        "warped_round_door",
+        "green_round_door",
+        "yellow_round_door",
+        "red_round_door",
+        "blue_round_door"
+      ],
+      "properties": {
+        "facing": [
+          "north",
+          "south",
+          "west",
+          "east"
+        ],
+        "half": [
+          "upper",
+          "lower"
+        ],
+        "hinge": [
+          "left",
+          "right"
+        ],
+        "open": [
+          "true",
+          "false"
+        ],
+        "powered": [
+          "true",
+          "false"
+        ],
+        "column": [
+          "left",
+          "right"
+        ],
+        "depth": [
+          "front",
+          "middle",
+          "back"
+        ]
+      }
+    },
+    "arched_door": {
+      "members": [
+        "arched_door"
+      ],
+      "properties": {
+        "facing": [
+          "north",
+          "south",
+          "west",
+          "east"
+        ],
+        "half": [
+          "upper",
+          "lower"
+        ],
+        "hinge": [
+          "left",
+          "right"
+        ],
+        "open": [
+          "true",
+          "false"
+        ],
+        "powered": [
+          "true",
+          "false"
+        ],
+        "depth": [
+          "front",
+          "middle",
+          "back"
+        ]
+      }
+    },
+    "round_window": {
+      "members": [
+        "round_window",
+        "round_window_cross",
+        "oak_round_window",
+        "spruce_round_window",
+        "birch_round_window",
+        "jungle_round_window",
+        "acacia_round_window",
+        "dark_oak_round_window",
+        "mangrove_round_window",
+        "cherry_round_window",
+        "bamboo_round_window",
+        "crimson_round_window",
+        "warped_round_window",
+        "green_round_window",
+        "yellow_round_window",
+        "red_round_window",
+        "blue_round_window"
+      ],
+      "properties": {
+        "north": [
+          "true",
+          "false"
+        ],
+        "east": [
+          "true",
+          "false"
+        ],
+        "south": [
+          "true",
+          "false"
+        ],
+        "west": [
+          "true",
+          "false"
+        ],
+        "waterlogged": [
+          "true",
+          "false"
+        ],
+        "trimmed": [
+          "true",
+          "false"
+        ],
+        "face_reversed": [
+          "true",
+          "false"
+        ],
+        "axis": [
+          "x",
+          "z"
+        ],
+        "position": [
+          "center",
+          "north",
+          "east",
+          "south",
+          "west",
+          "up",
+          "down"
+        ]
+      }
+    },
+    "oriented_window": {
+      "members": [
+        "frameless_window",
+        "round_window_arch_bottom_left",
+        "round_window_arch_bottom_left_cross",
+        "round_window_arch_bottom_right",
+        "round_window_arch_bottom_right_cross",
+        "round_window_arch_left",
+        "round_window_arch_left_cross",
+        "round_window_arch_right",
+        "round_window_arch_right_cross",
+        "round_window_bottom_left",
+        "round_window_bottom_left_cross",
+        "round_window_bottom_right",
+        "round_window_bottom_right_cross",
+        "round_window_edge_bottom",
+        "round_window_edge_bottom_cross",
+        "round_window_edge_left",
+        "round_window_edge_left_cross",
+        "round_window_edge_right",
+        "round_window_edge_right_cross",
+        "round_window_edge_top",
+        "round_window_edge_top_cross",
+        "round_window_top_left",
+        "round_window_top_left_cross",
+        "round_window_top_right",
+        "round_window_top_right_cross"
+      ],
+      "properties": {
+        "north": [
+          "true",
+          "false"
+        ],
+        "east": [
+          "true",
+          "false"
+        ],
+        "south": [
+          "true",
+          "false"
+        ],
+        "west": [
+          "true",
+          "false"
+        ],
+        "waterlogged": [
+          "true",
+          "false"
+        ],
+        "trimmed": [
+          "true",
+          "false"
+        ],
+        "face_reversed": [
+          "true",
+          "false"
+        ],
+        "orientation": [
+          "north",
+          "east",
+          "south",
+          "west",
+          "up_north",
+          "up_east",
+          "up_south",
+          "up_west",
+          "down_north",
+          "down_east",
+          "down_south",
+          "down_west"
+        ],
+        "depth": [
+          "center",
+          "negative",
+          "positive"
+        ]
+      }
+    },
+    "frame": {
+      "members": [
+        "acacia_round_trim",
+        "bamboo_round_trim",
+        "birch_round_trim",
+        "blue_round_trim",
+        "brick_round_trim",
+        "cherry_round_trim",
+        "crimson_round_trim",
+        "dark_oak_round_trim",
+        "deepslate_brick_round_trim",
+        "green_round_trim",
+        "jungle_round_trim",
+        "mangrove_round_trim",
+        "mud_brick_round_trim",
+        "oak_round_trim",
+        "red_round_trim",
+        "round_trim",
+        "spruce_round_trim",
+        "stone_brick_round_trim",
+        "warped_round_trim",
+        "yellow_round_trim"
+      ],
+      "properties": {
+        "facing": [
+          "north",
+          "south",
+          "west",
+          "east"
+        ],
+        "part": [
+          "lower_left",
+          "upper_left",
+          "lower_right",
+          "upper_right"
+        ]
+      }
+    },
+    "archway": {
+      "members": [
+        "archway",
+        "keyhole_archway"
+      ],
+      "properties": {
+        "facing": [
+          "north",
+          "south",
+          "west",
+          "east"
+        ],
+        "part": [
+          "lower_left",
+          "upper_left",
+          "lower_right",
+          "upper_right"
+        ]
+      }
+    },
+    "paired_door": {
+      "members": [
+        "double_arched_door",
+        "tall_double_arched_door"
+      ],
+      "properties": {
+        "facing": [
+          "north",
+          "south",
+          "west",
+          "east"
+        ],
+        "half": [
+          "upper",
+          "lower"
+        ],
+        "hinge": [
+          "left",
+          "right"
+        ],
+        "open": [
+          "true",
+          "false"
+        ],
+        "powered": [
+          "true",
+          "false"
+        ],
+        "cell_x": [
+          "0",
+          "1",
+          "2"
+        ],
+        "cell_y": [
+          "0",
+          "1",
+          "2",
+          "3"
+        ],
+        "depth": [
+          "front",
+          "middle",
+          "back"
+        ]
+      }
+    },
+    "arch_piece": {
+      "members": [
+        "arch_top_1x1",
+        "arch_top_1x2",
+        "arch_top_2x3",
+        "keyhole_shoulder"
+      ],
+      "properties": {
+        "facing": [
+          "north",
+          "south",
+          "west",
+          "east"
+        ],
+        "cell": [
+          "lower_left",
+          "upper_left",
+          "lower_middle",
+          "upper_middle",
+          "lower_right",
+          "upper_right"
+        ],
+        "side": [
+          "left",
+          "right"
+        ]
+      }
+    },
+    "thin_arch_piece": {
+      "members": [
+        "arch_top_1x1_thin",
+        "arch_top_1x2_thin",
+        "arch_top_2x3_thin",
+        "keyhole_shoulder_thin"
+      ],
+      "properties": {
+        "facing": [
+          "north",
+          "south",
+          "west",
+          "east"
+        ],
+        "cell": [
+          "lower_left",
+          "upper_left",
+          "lower_middle",
+          "upper_middle",
+          "lower_right",
+          "upper_right"
+        ],
+        "side": [
+          "left",
+          "right"
+        ],
+        "depth": [
+          "front",
+          "middle",
+          "back"
+        ]
+      }
+    }
+  }
+}
