@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.placement;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorDepth;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
@@ -63,7 +65,7 @@ public final class DoorTargetsGameTests {
             check(trims.isEmpty(), "trim payment");
             check(anchorEntity(helper,assembly).trims().equals(FaceTrims.both(trimLook)),"both trims missing");
             var entity = anchorEntity(helper,assembly);
-            var loaded = BlockEntity.loadStatic(assembly.anchor(),level.getBlockState(assembly.anchor()),entity.saveWithFullMetadata());
+            var loaded = BlockEntity.loadStatic(assembly.anchor(),level.getBlockState(assembly.anchor()),entity.saveWithFullMetadata(TestRegistries.get()), TestRegistries.get());
             check(loaded instanceof RoundDoorBlockEntity copy
                     && copy.appearance().equals(look) && copy.trims().equals(entity.trims()),"look/trim reload");
             for (var part : assembly.parts()) {

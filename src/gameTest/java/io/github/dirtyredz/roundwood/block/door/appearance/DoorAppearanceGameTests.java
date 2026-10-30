@@ -224,7 +224,7 @@ public final class DoorAppearanceGameTests {
             check(picked.is(oakDoor().asItem()), part + ": picked " + picked);
             check(AppearanceStacks.read(picked).equals(SPRUCE.painted(DyeColor.CYAN)),
                     part + ": picked look " + AppearanceStacks.read(picked));
-            check(!picked.getOrCreateTag().contains("Camouflage"), part + ": the pick carries camouflage");
+            check(!io.github.dirtyredz.roundwood.appearance.item.StackPayloads.hasCustom(picked, "Camouflage"), part + ": the pick carries camouflage");
         }
         helper.succeed();
     }

@@ -7,22 +7,24 @@ import net.minecraft.nbt.CompoundTag;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * The custom-data half of the thinning policy (the native-component half needs registered items and is
+ * covered by {@code ArchThinningGameTests}): only a canonical TRIM appearance may ride in custom data.
+ */
 class ArchThinningRecipeTest {
-    @Test void knownMetadataIsReadOnlyAndFuturePayloadsRefuse() {
+    @Test void knownCustomDataIsReadOnlyAndFuturePayloadsRefuse() {
         var tag = new CompoundTag();
         AppearanceNbt.write(tag, Appearance.DEFAULT);
-        var display = new CompoundTag(); display.putString("Name", "\"A named arch\"");
-        tag.put("display", display);
-        tag.putInt("RepairCost", 3);
         var before = tag.copy();
-        assertTrue(ArchThinningRecipe.supportsMetadata(tag));
+        assertTrue(ArchThinningRecipe.supportsCustomData(tag));
         assertEquals(before, tag);
         tag.getCompound(AppearanceNbt.TAG).putInt("Version", 99);
-        assertFalse(ArchThinningRecipe.supportsMetadata(tag));
+        assertFalse(ArchThinningRecipe.supportsCustomData(tag));
         tag = before.copy(); tag.putString("FuturePayload", "keep me");
-        assertFalse(ArchThinningRecipe.supportsMetadata(tag));
-        tag = before.copy(); tag.putString("display", "invalid");
-        assertFalse(ArchThinningRecipe.supportsMetadata(tag));
-        assertTrue(ArchThinningRecipe.supportsMetadata(null));
+        assertFalse(ArchThinningRecipe.supportsCustomData(tag));
+        // 1.20.1 display metadata now lives in native components; left over in custom data it is unknown.
+        tag = before.copy(); tag.put("display", new CompoundTag());
+        assertFalse(ArchThinningRecipe.supportsCustomData(tag));
+        assertTrue(ArchThinningRecipe.supportsCustomData(null));
     }
 }

@@ -10,9 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ModLogoTest {
     @Test
-    void forgeLogoIsSquareTransparentAndCrispAtLauncherSize() throws Exception {
+    void modLogoIsSquareTransparentAndCrispAtLauncherSize() throws Exception {
         var resources = Path.of("src/main/resources");
-        assertTrue(Files.readString(resources.resolve("META-INF/mods.toml"))
+        assertTrue(Files.readString(resources.resolve("META-INF/neoforge.mods.toml"))
                 .contains("logoFile=\"roundwood-logo.png\""));
         var image = ImageIO.read(resources.resolve("roundwood-logo.png").toFile());
         assertNotNull(image);

@@ -101,7 +101,7 @@ public final class TrimNavigationGameTests {
                 check(state.getCollisionShape(helper.getLevel(), pos).isEmpty(), facing + ": collision shape not empty at " + pos);
                 check(state.getBlockSupportShape(helper.getLevel(), pos).isEmpty(), facing + ": support shape not empty at " + pos);
                 check(!state.isFaceSturdy(helper.getLevel(), pos, Direction.UP), facing + ": top face is sturdy at " + pos);
-                check(state.isPathfindable(helper.getLevel(), pos, PathComputationType.LAND), facing + ": not pathfindable at " + pos);
+                check(state.isPathfindable(PathComputationType.LAND), facing + ": not pathfindable at " + pos);
             }
             helper.setBlock(rel(helper, assembly.anchor()), Blocks.AIR);
         }

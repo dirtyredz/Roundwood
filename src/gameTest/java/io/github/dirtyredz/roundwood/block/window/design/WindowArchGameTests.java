@@ -174,7 +174,7 @@ public final class WindowArchGameTests {
         BlockState state = helper.getBlockState(at);
         check(state.is(right()) && state.getValue(BlockStateProperties.WATERLOGGED), "arch not waterlogged: " + state);
         BlockPos abs = helper.absolutePos(at);
-        check(right().pickupBlock(helper.getLevel(), abs, state).is(Items.WATER_BUCKET), "bucket did not drain the arch");
+        check(right().pickupBlock(null, helper.getLevel(), abs, state).is(Items.WATER_BUCKET), "bucket did not drain the arch");
         check(right().placeLiquid(helper.getLevel(), abs, helper.getBlockState(at), Fluids.WATER.getSource(false)), "bucket did not fill");
         player.gameMode.destroyBlock(abs);
         check(helper.getLevel().getFluidState(abs).isSource(), "water not left behind");

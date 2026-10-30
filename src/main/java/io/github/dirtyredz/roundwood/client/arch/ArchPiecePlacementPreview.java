@@ -35,20 +35,38 @@ import java.util.Optional;
 public final class ArchPiecePlacementPreview {
     private ArchPiecePlacementPreview() {}
 
-    // Discover by types, not a mapped method name: works in development and the reobfuscated jar.
-    private static final Method USE = Arrays.stream(BlockBehaviour.class.getDeclaredMethods())
-            .filter(method -> method.getReturnType() == InteractionResult.class
-                    && Arrays.equals(method.getParameterTypes(), new Class<?>[]{BlockState.class, Level.class,
-                    net.minecraft.core.BlockPos.class, Player.class, net.minecraft.world.InteractionHand.class, BlockHitResult.class}))
-            .findFirst().orElseThrow();
+    // 1.21 splits block use into the item callback (either hand, any stack) and the empty-hand callback (main
+    // hand, after the item callback passes). Both are found by their types on BlockBehaviour, never by running them.
+    private static final Method ITEM_USE = callback(net.minecraft.world.ItemInteractionResult.class, net.minecraft.world.item.ItemStack.class,
+            BlockState.class, Level.class, net.minecraft.core.BlockPos.class, Player.class, net.minecraft.world.InteractionHand.class, BlockHitResult.class);
+    private static final Method EMPTY_HAND_USE = callback(InteractionResult.class,
+            BlockState.class, Level.class, net.minecraft.core.BlockPos.class, Player.class, BlockHitResult.class);
     private static final ClassValue<Boolean> PASSIVE = new ClassValue<>() {
         @Override protected Boolean computeValue(Class<?> type) {
-            try { return type.getMethod(USE.getName(), USE.getParameterTypes()).getDeclaringClass() == BlockBehaviour.class; }
-            catch (ReflectiveOperationException exception) { return false; }
+            return declaredBy(type, ITEM_USE) == BlockBehaviour.class && declaredBy(type, EMPTY_HAND_USE) == BlockBehaviour.class;
         }
     };
 
-    /** An overridden callback may consume the click. Suppress success conservatively, without running it. */
+    private static Method callback(Class<?> result, Class<?>... parameters) {
+        return Arrays.stream(BlockBehaviour.class.getDeclaredMethods())
+                .filter(method -> method.getReturnType() == result && Arrays.equals(method.getParameterTypes(), parameters))
+                .findFirst().orElseThrow();
+    }
+
+    /** The nearest class declaring {@code callback} (both callbacks are protected, so {@code getMethod} cannot see them). */
+    private static Class<?> declaredBy(Class<?> type, Method callback) {
+        for (Class<?> current = type; current != null; current = current.getSuperclass()) {
+            try {
+                current.getDeclaredMethod(callback.getName(), callback.getParameterTypes());
+                return current;
+            } catch (NoSuchMethodException ignored) {
+                // keep walking up
+            }
+        }
+        return null;
+    }
+
+    /** Either overridden callback may consume the click. Suppress success conservatively, without running it. */
     static boolean passive(BlockState state) { return PASSIVE.get(state.getBlock().getClass()); }
 
     public static Optional<AssemblyPlacementPlan<ArchPieceCell, ArchPieceLayout.Assembly>> of(Player player, Level level, BlockHitResult hit) {

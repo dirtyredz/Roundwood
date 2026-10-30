@@ -34,8 +34,8 @@ class GeneratedRecipesTest {
         assertEquals(1, recipe.getAsJsonArray("ingredients").size());
         assertEquals("minecraft:glass_pane", recipe.getAsJsonArray("ingredients").get(0)
                 .getAsJsonObject().get("item").getAsString());
-        assertEquals("roundwood:frameless_window", recipe.getAsJsonObject("result").get("item").getAsString());
-        assertFalse(recipe.getAsJsonObject("result").has("count"));
+        assertEquals("roundwood:frameless_window", recipe.getAsJsonObject("result").get("id").getAsString());
+        assertEquals(1, recipe.getAsJsonObject("result").get("count").getAsInt());
     }
     @Test void thinningIsOneWayOneToOneAndUsesTheMetadataSerializer() {
         for (String full : List.of("arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder")) {
@@ -43,8 +43,8 @@ class GeneratedRecipesTest {
             assertEquals("roundwood:arch_thinning", thin.get("type").getAsString());
             assertEquals(1, thin.getAsJsonArray("ingredients").size());
             assertEquals("roundwood:" + full, thin.getAsJsonArray("ingredients").get(0).getAsJsonObject().get("item").getAsString());
-            assertEquals("roundwood:" + full + "_thin", thin.getAsJsonObject("result").get("item").getAsString());
-            assertFalse(thin.getAsJsonObject("result").has("count"));
+            assertEquals("roundwood:" + full + "_thin", thin.getAsJsonObject("result").get("id").getAsString());
+            assertEquals(1, thin.getAsJsonObject("result").get("count").getAsInt());
             assertEquals("minecraft:crafting_shaped", json(recipe(full)).get("type").getAsString());
         }
     }
@@ -63,19 +63,19 @@ class GeneratedRecipesTest {
     }
 
     private static Path recipe(String name) {
-        return DATA.resolve("recipes/" + name + ".json");
+        return DATA.resolve("recipe/" + name + ".json");
     }
 
     private static Set<String> recipeNames() throws IOException {
         Set<String> out = new TreeSet<>();
-        try (Stream<Path> files = Files.list(DATA.resolve("recipes"))) {
+        try (Stream<Path> files = Files.list(DATA.resolve("recipe"))) {
             files.forEach(f -> out.add(f.getFileName().toString().replace(".json", "")));
         }
         return out;
     }
 
     @Test
-    void thereAreExactlyTheTwentyTwoRecipes() throws IOException {
+    void thereAreExactlyTheTwentyNineRecipes() throws IOException {
         assertEquals(new TreeSet<>(List.of("round_door", "arched_door", "double_arched_door", "tall_double_arched_door", "round_window", "round_window_arch_left",
                 "round_window_arch_right", "round_window_bottom_left", "round_window_bottom_right",
                 "round_trim",
@@ -87,7 +87,7 @@ class GeneratedRecipesTest {
     }
 
     @Test
-    void theTwentyTwoRecipesAreExactlyAsDesigned() {
+    void theTwentyNineRecipesAreExactlyAsDesigned() {
         assertRecipe("cross_beams", "", List.of(" S ", "SSS", " S "), Map.of("S", STICK));
         assertRecipe("round_door", "roundwood:round_door", List.of("PPP", "PNP", "PPP"), Map.of("P", PLANKS, "N", NUGGET));
         assertRecipe("double_arched_door", "roundwood:double_arched_door", List.of("PNP", "PPP", "PNP"), Map.of("P", PLANKS, "N", NUGGET));
@@ -175,7 +175,7 @@ class GeneratedRecipesTest {
     void recipeAdvancementsUnlockTheirRecipeInTheRightCategory() throws IOException {
         Set<String> seen = new TreeSet<>();
         for (String category : List.of("redstone", "decorations")) {
-            Path dir = DATA.resolve("advancements/recipes/" + category);
+            Path dir = DATA.resolve("advancement/recipes/" + category);
             try (Stream<Path> files = Files.list(dir)) {
                 for (Path file : files.toList()) {
                     String name = file.getFileName().toString().replace(".json", "");
@@ -185,7 +185,7 @@ class GeneratedRecipesTest {
                     if (name.equals("cross_beams")) {
                         assertEquals("minecraft:stick", advancement.getAsJsonObject("criteria").getAsJsonObject("has_stick")
                                 .getAsJsonObject("conditions").getAsJsonArray("items").get(0).getAsJsonObject()
-                                .getAsJsonArray("items").get(0).getAsString());
+                                .get("items").getAsString());
                     }
                     assertEquals("roundwood:" + name, advancement.getAsJsonObject("rewards").getAsJsonArray("recipes")
                             .get(0).getAsString(), name);
@@ -232,7 +232,7 @@ class GeneratedRecipesTest {
         assertEquals(ingredients.keySet(), key.keySet(), name + ": ingredient symbols");
         ingredients.forEach((symbol, expected) -> assertEquals(expected, key.get(symbol).toString(), name + " " + symbol));
         JsonObject result = recipe.getAsJsonObject("result");
-        assertEquals("roundwood:" + name, result.get("item").getAsString(), name);
+        assertEquals("roundwood:" + name, result.get("id").getAsString(), name);
         assertFalse(result.has("count") && result.get("count").getAsInt() != 1, name + ": one per craft");
     }
 }

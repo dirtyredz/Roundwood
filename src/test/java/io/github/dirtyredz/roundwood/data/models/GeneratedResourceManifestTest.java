@@ -50,7 +50,7 @@ class GeneratedResourceManifestTest {
         for (String block : BLOCKS) {
             assertTrue(Files.isRegularFile(assets("blockstates/" + block + ".json")), "blockstate " + block);
             assertTrue(Files.isRegularFile(assets("models/item/" + block + ".json")), "item model " + block);
-            assertTrue(Files.isRegularFile(data("loot_tables/blocks/" + block + ".json")), "loot " + block);
+            assertTrue(Files.isRegularFile(data("loot_table/blocks/" + block + ".json")), "loot " + block);
             assertTrue(lang.has("block.roundwood." + block), "name " + block);
         }
         assertTrue(lang.has("itemGroup.roundwood"));
@@ -93,17 +93,17 @@ class GeneratedResourceManifestTest {
         assertEquals(stateBlocks, names(assets("blockstates")));
         var lootBlocks = new TreeSet<>(BLOCKS);
         lootBlocks.addAll(ARCH_PIECES);
-        assertEquals(lootBlocks, names(data("loot_tables/blocks")));
+        assertEquals(lootBlocks, names(data("loot_table/blocks")));
         Set<String> crafted = new TreeSet<>(CANONICAL);
         crafted.add("cross_beams");
         crafted.add(ARCH_SILL_TRIM); // crafted, but an item only
-        assertEquals(crafted, names(data("recipes")));
-        assertEquals(crafted, names(data("advancements/recipes")));
+        assertEquals(crafted, names(data("recipe")));
+        assertEquals(crafted, names(data("advancement/recipes")));
         assertEquals(91, allJson(assets("blockstates")).size());
         assertEquals(47 + 121, allJson(assets("models/block")).size());
         assertEquals(98, allJson(assets("models/item")).size());
-        assertEquals(29, allJson(data("recipes")).size());
-        assertEquals(91, allJson(data("loot_tables/blocks")).size());
-        assertEquals(29, allJson(data("advancements/recipes")).size());
+        assertEquals(29, allJson(data("recipe")).size());
+        assertEquals(91, allJson(data("loot_table/blocks")).size());
+        assertEquals(29, allJson(data("advancement/recipes")).size());
     }
 }

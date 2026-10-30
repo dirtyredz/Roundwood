@@ -37,7 +37,7 @@ class DoorArchBakedFacesTest {
     }
     @Test void bakedFacesRemainSeparatedThroughoutTheContinuousSwing() throws Exception {
         int poses=0;
-        try(var contents=new SpriteContents(TEXTURE,new FrameSize(16,16),new NativeImage(16,16,false),AnimationMetadataSection.EMPTY)) {
+        try(var contents=new SpriteContents(TEXTURE,new FrameSize(16,16),new NativeImage(16,16,false),net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var sprite=new Sprite(contents);
             for(var design:DoorDesign.values()) for(var hinge:DoorHingeSide.values()) {
                 var leaf=leaf(design,hinge,sprite);
@@ -80,7 +80,7 @@ class DoorArchBakedFacesTest {
         var bakery=new FaceBakery(); var out=new ArrayList<BakedQuad>();
         for(var element:model.getElements()) for(var face:element.faces.entrySet())
             out.add(bakery.bakeQuad(element.from,element.to,face.getValue(),sprite,face.getKey(),BlockModelRotation.X0_Y0,
-                    element.rotation,element.shade,TEXTURE));
+                    element.rotation,element.shade));
         return out;
     }
     private static List<Rect> casings(DoorDesign design,DoorDepth depth,Direction facing,TextureAtlasSprite sprite) {

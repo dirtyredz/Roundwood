@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.arch;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
@@ -138,15 +140,15 @@ public final class ArchPieceTrimGameTests {
         var anchor = entity(helper, piece);
         var looks = new FaceTrims(Optional.of(BIRCH), Optional.of(BRICKS));
         check(anchor.setTrims(looks), "fit");
-        var saved = anchor.saveWithFullMetadata();
+        var saved = anchor.saveWithFullMetadata(TestRegistries.get());
         check(saved.getCompound(ArchPieceTrimNbt.TAG).getInt("Version") == 1, "payload version");
         anchor.setTrims(FaceTrims.NONE);
-        anchor.load(saved);
+        anchor.loadWithComponents(saved, TestRegistries.get());
         check(anchor.trims().equals(looks) && anchor.appearance().equals(WARPED), "round trip");
         saved.getCompound(ArchPieceTrimNbt.TAG).putInt("Version", 99);
-        anchor.load(saved);
+        anchor.loadWithComponents(saved, TestRegistries.get());
         check(!anchor.trimsEditable() && !anchor.setTrims(looks), "future payload editable");
-        check(anchor.saveWithFullMetadata().get(ArchPieceTrimNbt.TAG).equals(saved.get(ArchPieceTrimNbt.TAG)), "future payload lost");
+        check(anchor.saveWithFullMetadata(TestRegistries.get()).get(ArchPieceTrimNbt.TAG).equals(saved.get(ArchPieceTrimNbt.TAG)), "future payload lost");
         helper.succeed();
     }
 }

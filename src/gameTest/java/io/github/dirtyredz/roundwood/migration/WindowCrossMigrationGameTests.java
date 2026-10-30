@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.migration;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
@@ -30,7 +32,7 @@ public final class WindowCrossMigrationGameTests {
         for (String id : CrossWindowCompatibility.IDS) {
             helper.getLevel().setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
             var block = (io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock) net.minecraft.core.registries.BuiltInRegistries.BLOCK
-                    .getValue(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("roundwood", id));
+                    .get(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("roundwood", id));
             var state = block.defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, true)
                     .setValue(io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock.FACE_REVERSED, true);
             helper.getLevel().setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
@@ -40,7 +42,7 @@ public final class WindowCrossMigrationGameTests {
             source.setGlass(java.util.Optional.of(net.minecraft.world.item.DyeColor.CYAN));
             source.setTrims(FaceTrims.both(Appearance.DEFAULT));
             source.setTrims(TrimSlot.SILL, FaceTrims.both(look));
-            var before = source.saveWithFullMetadata();
+            var before = source.saveWithFullMetadata(TestRegistries.get());
             check(io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion.convert(helper.getLevel(), pos)
                     == LegacyCells.Result.CONVERTED, id + " not converted");
             var after = (RoundWindowBlockEntity) helper.getLevel().getBlockEntity(pos);
@@ -63,26 +65,26 @@ public final class WindowCrossMigrationGameTests {
         var state = CrossWindowCompatibility.blocks().get(0).defaultBlockState();
         helper.getLevel().setBlock(pos, state, Block.UPDATE_CLIENTS);
         var source = (RoundWindowBlockEntity) helper.getLevel().getBlockEntity(pos);
-        var disk = source.saveWithFullMetadata();
+        var disk = source.saveWithFullMetadata(TestRegistries.get());
         var unknown = new CompoundTag();
         unknown.putInt("Version", 99);
         unknown.putString("Keep", "all contents");
         disk.put("WindowCrossBeams", unknown);
-        source.load(disk);
-        var before = source.saveWithFullMetadata();
+        source.loadWithComponents(disk, TestRegistries.get());
+        var before = source.saveWithFullMetadata(TestRegistries.get());
         check(io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion.convert(helper.getLevel(), pos)
                 == LegacyCells.Result.DEFERRED, "converted unknown beam data");
-        check(helper.getLevel().getBlockState(pos) == state && source.saveWithFullMetadata().equals(before), "refusal changed source");
+        check(helper.getLevel().getBlockState(pos) == state && source.saveWithFullMetadata(TestRegistries.get()).equals(before), "refusal changed source");
         check(!io.github.dirtyredz.roundwood.migration.conversion.WindowCellConversion.install(helper.getLevel(), pos, state, before),
                 "unchecked same-state write reported success");
         check(!io.github.dirtyredz.roundwood.migration.conversion.WindowCellConversion.install(helper.getLevel(), pos,
                 net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), before), "missing destination entity reported success");
         check(helper.getLevel().getBlockState(pos) == state
-                && helper.getLevel().getBlockEntity(pos).saveWithFullMetadata().equals(before), "rollback lost the source");
+                && helper.getLevel().getBlockEntity(pos).saveWithFullMetadata(TestRegistries.get()).equals(before), "rollback lost the source");
         var drops = Block.getDrops(state, helper.getLevel(), pos, helper.getLevel().getBlockEntity(pos));
         check(drops.size() == 1 && drops.get(0).is(io.github.dirtyredz.roundwood.registry.ModItems.window(
                 ((io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock) state.getBlock()).design())), "pending block refunded attachments separately");
-        check(drops.get(0).getTagElement("BlockEntityTag").equals(before), "pending harvest lost custody");
+        check(io.github.dirtyredz.roundwood.appearance.item.StackPayloads.blockEntityData(drops.get(0)).equals(before), "pending harvest lost custody");
         helper.succeed();
     }
 
@@ -100,13 +102,13 @@ public final class WindowCrossMigrationGameTests {
         future.putInt("Version", 99);
         future.putString("UnknownSill", "keep");
         disk.put("WindowSillTrim", future);
-        source.load(disk);
+        source.loadWithComponents(disk, TestRegistries.get());
         io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.clearDrops(helper);
         check(io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion.convert(helper.getLevel(), pos)
                 == LegacyCells.Result.CONVERTED, "historical defaults conversion failed");
         var after = (RoundWindowBlockEntity) helper.getLevel().getBlockEntity(pos);
         check(after.appearance().equals(Appearance.DEFAULT) && after.trims().equals(FaceTrims.both(Appearance.DEFAULT)), "0.7 omitted oak default lost");
-        check(after.trims(TrimSlot.CROSS_BEAMS).equals(beam) && after.saveWithFullMetadata().getCompound("WindowSillTrim").equals(future), "existing beam/unknown sill lost");
+        check(after.trims(TrimSlot.CROSS_BEAMS).equals(beam) && after.saveWithFullMetadata(TestRegistries.get()).getCompound("WindowSillTrim").equals(future), "existing beam/unknown sill lost");
         check(helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(pos).inflate(2)).isEmpty(), "migration spawned drops");
         var far = pos.offset(100000, 0, 100000);
         check(!helper.getLevel().isLoaded(far), "unloaded candidate fixture already loaded");
@@ -121,7 +123,7 @@ public final class WindowCrossMigrationGameTests {
         BlockPos pos = helper.absolutePos(new BlockPos(3, 2, 3));
         var state = CrossWindowCompatibility.blocks().get(0).defaultBlockState();
         level.setBlock(pos, state, Block.UPDATE_CLIENTS);
-        var before = level.getBlockEntity(pos).saveWithFullMetadata();
+        var before = level.getBlockEntity(pos).saveWithFullMetadata(TestRegistries.get());
         var outer = net.neoforged.neoforge.common.util.BlockSnapshot.create(level.dimension(), level, pos.east());
         int mark = level.capturedBlockSnapshots.size();
         boolean previousCapture = level.captureBlockSnapshots;
@@ -143,12 +145,12 @@ public final class WindowCrossMigrationGameTests {
         } catch (NullPointerException expected) {
             threw = true;
         }
-        check(threw && level.getBlockState(pos) == state && level.getBlockEntity(pos).saveWithFullMetadata().equals(before)
+        check(threw && level.getBlockState(pos) == state && level.getBlockEntity(pos).saveWithFullMetadata(TestRegistries.get()).equals(before)
                 && !level.restoringBlockSnapshots && level.captureBlockSnapshots == previousCapture, "exception did not restore exact source and flags");
         boolean[] accepted = {true};
         nested(level, 4, () -> accepted[0] = io.github.dirtyredz.roundwood.migration.conversion.WindowCellConversion.install(level, pos,
                 io.github.dirtyredz.roundwood.registry.ModBlocks.roundWindow().defaultBlockState(), before));
-        check(!accepted[0] && level.getBlockState(pos) == state && level.getBlockEntity(pos).saveWithFullMetadata().equals(before), "refused batch changed source");
+        check(!accepted[0] && level.getBlockState(pos) == state && level.getBlockEntity(pos).saveWithFullMetadata(TestRegistries.get()).equals(before), "refused batch changed source");
         helper.succeed();
     }
 
@@ -182,17 +184,17 @@ public final class WindowCrossMigrationGameTests {
         helper.getLevel().setBlock(pos, state, Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE);
         var source = (RoundWindowBlockEntity) helper.getLevel().getBlockEntity(pos);
         source.setTrims(TrimSlot.SILL, FaceTrims.NONE.with(AttachmentFace.BACK, Appearance.DEFAULT));
-        CompoundTag disk = source.saveWithFullMetadata();
+        CompoundTag disk = source.saveWithFullMetadata(TestRegistries.get());
         CompoundTag unknown = new CompoundTag();
         unknown.putInt("Version", 99);
         unknown.putString("Custody", "keep me");
         disk.put("WindowTrim", unknown);
-        source.load(disk);
+        source.loadWithComponents(disk, TestRegistries.get());
         check(LegacyWindowConversion.convert(helper.getLevel(), pos, state) == LegacyCells.Result.CONVERTED,
                 "alias conversion refused");
         var converted = (RoundWindowBlockEntity) helper.getLevel().getBlockEntity(pos);
         check(converted.trims(TrimSlot.SILL).has(AttachmentFace.BACK), "migration lost the sill");
-        check(converted.saveWithFullMetadata().getCompound("WindowTrim").equals(unknown), "migration lost unknown custody");
+        check(converted.saveWithFullMetadata(TestRegistries.get()).getCompound("WindowTrim").equals(unknown), "migration lost unknown custody");
         helper.succeed();
     }
 }

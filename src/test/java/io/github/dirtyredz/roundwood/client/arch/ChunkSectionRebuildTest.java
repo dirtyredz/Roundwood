@@ -52,7 +52,7 @@ class ChunkSectionRebuildTest {
 
     @Test void censusStaticGeometryIsCollectedByItsActualOwningSection() throws Exception {
         try (var input = getClass().getResourceAsStream("/fps/static-census.json");
-             var contents = new SpriteContents(TEXTURE, new FrameSize(16,16), new NativeImage(16,16,false), AnimationMetadataSection.EMPTY)) {
+             var contents = new SpriteContents(TEXTURE, new FrameSize(16,16), new NativeImage(16,16,false), net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             assertNotNull(input);
             var samples = new Gson().fromJson(new InputStreamReader(input, StandardCharsets.UTF_8), Sample[].class);
             var sprite = new Sprite(contents);

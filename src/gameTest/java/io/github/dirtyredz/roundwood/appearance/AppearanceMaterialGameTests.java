@@ -60,9 +60,7 @@ public final class AppearanceMaterialGameTests {
     }
 
     private static ItemStack withTag(Item item, String key) {
-        ItemStack stack = new ItemStack(item);
-        stack.getOrCreateTag().put(key, new CompoundTag());
-        return stack;
+        return io.github.dirtyredz.roundwood.fixture.PlacedPayloads.with(item, key);
     }
 
     @GameTest(template = TEMPLATE)

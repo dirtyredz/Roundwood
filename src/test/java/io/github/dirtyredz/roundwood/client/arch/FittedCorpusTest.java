@@ -12,7 +12,6 @@ import io.github.dirtyredz.roundwood.client.door.arch.DoorArchModels;
 import io.github.dirtyredz.roundwood.testsupport.MinecraftBootstrap;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -36,7 +35,7 @@ class FittedCorpusTest {
             assertNotNull(input);
             var cases = new Gson().fromJson(new InputStreamReader(input, StandardCharsets.UTF_8), Sample[].class);
             assertEquals(135, cases.length);
-            try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), AnimationMetadataSection.EMPTY)) {
+            try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
                 var sprite = new Sprite(contents);
                 int total = 0, bodies = 0;
                 long started = System.nanoTime();

@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.migration;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.migration.retired.ArchwayStackMigration;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
@@ -64,7 +66,7 @@ public final class ArchwayMigrationGameTests {
                 check(entity.getPersistentData().getString("MigrationGuard").equals("keep"), "persistent metadata lost");
                 check(entity.trims().get(AttachmentFace.FRONT).orElseThrow().equals(Appearance.DEFAULT), "front trim lost");
                 check(entity.trims().get(AttachmentFace.BACK).orElseThrow().equals(Appearance.masonry(id("bricks"))), "back trim lost");
-                var disk = entity.saveWithFullMetadata();
+                var disk = entity.saveWithFullMetadata(TestRegistries.get());
                 for (var side : Side.values()) {
                     var bottom = anchor.relative(Direction.EAST, side == Side.LEFT ? 0 : 1);
                     if (anchor.equals(ordinary)) check(level.getBlockState(bottom).isAir(), "ordinary jamb remains");
@@ -81,7 +83,7 @@ public final class ArchwayMigrationGameTests {
                     check(ArchwayConversion.convert(level, bottom) == LegacyCells.Result.NOT_LEGACY, "repeat converted bottom");
                 }
                 check(ArchwayConversion.convert(level, top.anchor()) == LegacyCells.Result.NOT_LEGACY, "repeat converted top");
-                check(disk.equals(entity.saveWithFullMetadata()), "repeat changed payload");
+                check(disk.equals(entity.saveWithFullMetadata(TestRegistries.get())), "repeat changed payload");
                 check(level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
                         new net.minecraft.world.phys.AABB(anchor).expandTowards(2, 2, 1)).isEmpty(), "conversion dropped duplicate items");
             }
@@ -94,11 +96,11 @@ public final class ArchwayMigrationGameTests {
         var level = helper.getLevel();
         var pos = helper.absolutePos(new BlockPos(1, 2, 1));
         var entity = (ArchwayBlockEntity) level.getBlockEntity(pos);
-        var disk = entity.saveWithFullMetadata();
+        var disk = entity.saveWithFullMetadata(TestRegistries.get());
         disk.getCompound("ArchwayTrim").putInt("Version", 99);
-        entity.load(disk);
+        entity.loadWithComponents(disk, TestRegistries.get());
         check(ArchwayConversion.convert(level, pos) == LegacyCells.Result.DEFERRED, "unknown trim converted");
-        check(disk.equals(entity.saveWithFullMetadata()), "unknown trim changed");
+        check(disk.equals(entity.saveWithFullMetadata(TestRegistries.get())), "unknown trim changed");
         var keyhole = helper.absolutePos(new BlockPos(5, 2, 1));
         level.captureBlockSnapshots = true;
         try { check(ArchwayConversion.convert(level, keyhole) == LegacyCells.Result.DEFERRED, "converted inside placement capture"); }
@@ -113,23 +115,23 @@ public final class ArchwayMigrationGameTests {
         var chest = (ChestBlockEntity) helper.getBlockEntity(new BlockPos(1, 1, 1));
         var ordinary = AppearanceStacks.create(ModItems.archway(ArchwayDesign.ORDINARY), wood("spruce_planks"));
         ordinary.setCount(3);
-        ordinary.getOrCreateTag().putString("OwnerData", "preserved");
+        io.github.dirtyredz.roundwood.appearance.item.StackPayloads.putCustom(ordinary, "OwnerData", net.minecraft.nbt.StringTag.valueOf("preserved"));
         chest.setItem(0, ordinary);
         var keyhole = AppearanceStacks.create(ModItems.archway(ArchwayDesign.KEYHOLE), wood("cherry_planks"));
         keyhole.setCount(40);
         chest.setItem(1, keyhole);
-        chest.load(chest.saveWithFullMetadata());
+        chest.loadWithComponents(chest.saveWithFullMetadata(TestRegistries.get()), TestRegistries.get());
         var player = player(helper, "arch_migration", GameType.SURVIVAL, Direction.NORTH);
         player.getInventory().setItem(0, keyhole.copy());
         player.getInventory().load(player.getInventory().save(new net.minecraft.nbt.ListTag()));
         player.tickCount = 0;
-        ArchwayStackMigration.onPlayerTick(new net.minecraftforge.event.TickEvent.PlayerTickEvent(net.minecraftforge.event.TickEvent.Phase.END, player));
+        ArchwayStackMigration.onPlayerTick(new net.neoforged.neoforge.event.tick.PlayerTickEvent.Post(player));
         ArchwayStackMigration.onChunkLoad(new net.neoforged.neoforge.event.level.ChunkEvent.Load(
                 helper.getLevel().getChunkAt(chest.getBlockPos()), false));
         helper.runAfterDelay(25, () -> {
             check(chest.countItem(ModItems.archPiece(ArchPieceDesign.TOP_1X2)) == 43, "chest tops");
             check(chest.countItem(ModItems.archPiece(ArchPieceDesign.KEYHOLE_SHOULDER)) == 80, "chest shoulders");
-            check(chest.getItem(0).getTag().getString("OwnerData").equals("preserved"), "metadata lost");
+            check(io.github.dirtyredz.roundwood.appearance.item.StackPayloads.custom(chest.getItem(0), "OwnerData") instanceof net.minecraft.nbt.StringTag owner && owner.getAsString().equals("preserved"), "metadata lost");
             check(AppearanceStacks.read(chest.getItem(0)).equals(wood("spruce_planks")), "ordinary look lost");
             check(player.getInventory().countItem(ModItems.archPiece(ArchPieceDesign.TOP_1X2)) == 40, "inventory tops");
             check(player.getInventory().countItem(ModItems.archPiece(ArchPieceDesign.KEYHOLE_SHOULDER)) == 80, "inventory shoulders");
@@ -203,11 +205,11 @@ public final class ArchwayMigrationGameTests {
         var relative = new BlockPos(1, 1, 1);
         helper.setBlock(relative, Blocks.CHEST);
         var chest = (ChestBlockEntity) helper.getBlockEntity(relative);
-        chest.setLootTable(id("chests/simple_dungeon"), 1234);
-        var before = chest.saveWithFullMetadata();
+        chest.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, id("chests/simple_dungeon")), 1234);
+        var before = chest.saveWithFullMetadata(TestRegistries.get());
         check(!ArchwayStackMigration.convert(helper.getLevel(), chest, net.minecraft.world.phys.Vec3.atCenterOf(chest.getBlockPos())),
                 "unopened loot was converted");
-        check(before.equals(chest.saveWithFullMetadata()), "migration rolled unopened loot");
+        check(before.equals(chest.saveWithFullMetadata(TestRegistries.get())), "migration rolled unopened loot");
         helper.succeed();
     }
 

@@ -21,7 +21,7 @@ class StaticCamouflageGeometryTest {
         Sprite(SpriteContents contents) { super(TEXTURE, contents, 256, 256, 32, 64); }
     }
     @Test void tintedCornerQuadsPreserveGeometryFlagsAndOriginalDonorIndices() {
-        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16,16), new NativeImage(16,16,false), AnimationMetadataSection.EMPTY)) {
+        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16,16), new NativeImage(16,16,false), net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var sprite = new Sprite(contents);
             var bindings = new TintBindings<String>();
             int tinted = 0, untinted = 0;

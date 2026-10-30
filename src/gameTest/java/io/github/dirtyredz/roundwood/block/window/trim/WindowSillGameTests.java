@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.window.trim;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
@@ -199,7 +201,7 @@ public final class WindowSillGameTests {
                 && WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.SILL, AttachmentFace.FRONT, sillFront)
                 && WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.SILL, AttachmentFace.BACK, sillBack), "installs");
         ItemStack pick = AppearanceFixtures.pick(helper, abs);
-        check(pick.is(ModItems.window(WindowDesign.plain(design.profile()))) && AppearanceStacks.read(pick).equals(frame) && !pick.getOrCreateTag().contains("WindowSillTrim"),
+        check(pick.is(ModItems.window(WindowDesign.plain(design.profile()))) && AppearanceStacks.read(pick).equals(frame) && !io.github.dirtyredz.roundwood.appearance.item.StackPayloads.hasCustom(pick, "WindowSillTrim"),
                 "pick-block gives the pane only: " + pick);
         clearDrops(helper);
         player.gameMode.destroyBlock(abs);
@@ -232,32 +234,32 @@ public final class WindowSillGameTests {
         RoundWindowBlockEntity window = entity(helper);
         check(WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.SILL, AttachmentFace.FRONT, BRICKS), "sill");
         check(WindowPaneBlock.trimmed(helper.getBlockState(AT)), "a sill sets the summary");
-        CompoundTag saved = window.saveWithFullMetadata();
+        CompoundTag saved = window.saveWithFullMetadata(TestRegistries.get());
         check(saved.getCompound("WindowTrim").getInt("Version") == 2 && !saved.getCompound("WindowTrim").contains("Front")
                 && !saved.getCompound("WindowTrim").contains("Back"), "explicit empty perimeter payload: " + saved);
         check(saved.getCompound("WindowSillTrim").getInt("Version") == 1, "sill payload: " + saved);
         RoundWindowBlockEntity copy = new RoundWindowBlockEntity(window.getType(), abs, helper.getBlockState(AT));
-        copy.load(saved);
+        copy.loadWithComponents(saved, TestRegistries.get());
         check(!copy.trims().any(), "a sill-only window reloaded with a perimeter trim: " + copy.trims());
         check(copy.trims(TrimSlot.SILL).equals(FaceTrims.NONE.with(AttachmentFace.FRONT, BRICKS)), "sill reloaded " + copy.trims(TrimSlot.SILL));
         WindowAttachmentState.store(helper.getLevel(), abs, window, TrimSlot.SILL, FaceTrims.NONE);
         check(!WindowPaneBlock.trimmed(helper.getBlockState(AT)), "summary cleared with the last sill");
-        copy.handleUpdateTag(window.getUpdateTag());
+        copy.handleUpdateTag(window.getUpdateTag(TestRegistries.get()), TestRegistries.get());
         check(!copy.trims(TrimSlot.SILL).any(), "client kept a removed sill");
 
-        CompoundTag future = window.saveWithFullMetadata();
+        CompoundTag future = window.saveWithFullMetadata(TestRegistries.get());
         CompoundTag payload = new CompoundTag();
         payload.putInt("Version", 9);
         payload.put("Front", new CompoundTag());
         future.put("WindowSillTrim", payload);
-        window.load(future);
+        window.loadWithComponents(future, TestRegistries.get());
         check(!window.trims(TrimSlot.SILL).any() && !window.trimsEditable(TrimSlot.SILL) && window.trimsEditable(), "unknown sill custody");
         ItemStack sill = sills(SPRUCE, 1);
         AppearanceFixtures.use(helper, player, sill, ItemStack.EMPTY, hit(helper, player, SILL, Direction.SOUTH), false);
         check(sill.getCount() == 1, "a sill was fitted over an unknown payload");
         check(WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.PERIMETER, AttachmentFace.FRONT, SPRUCE),
                 "the perimeter stays editable beside an unknown sill");
-        check(window.saveWithFullMetadata().getCompound("WindowSillTrim").equals(payload), "unknown sill payload not kept");
+        check(window.saveWithFullMetadata(TestRegistries.get()).getCompound("WindowSillTrim").equals(payload), "unknown sill payload not kept");
         helper.setBlock(AT, Blocks.AIR);
         helper.succeed();
     }
@@ -296,11 +298,11 @@ public final class WindowSillGameTests {
         RoundWindowBlockEntity window = entity(helper);
         check(sill.getCount() == 0 && window.trims(TrimSlot.SILL).count() == 1 && !window.trims().any(), "sill fit " + window.trims(TrimSlot.SILL));
         check(WindowPaneBlock.trimmed(helper.getBlockState(AT)), "a sill-only window is not trimmed");
-        CompoundTag saved = window.saveWithoutMetadata();
+        CompoundTag saved = window.saveWithoutMetadata(TestRegistries.get());
         check(saved.getCompound("WindowTrim").getInt("Version") == 2 && saved.getCompound("WindowTrim").getAllKeys().size() == 1,
                 "perimeter payload " + saved.getCompound("WindowTrim"));
         check(saved.getCompound("WindowSillTrim").contains("Front"), "sill payload " + saved);
-        CompoundTag update = window.getUpdateTag();
+        CompoundTag update = window.getUpdateTag(TestRegistries.get());
         check(update.getCompound("WindowTrim").getInt("Version") == 2 && update.getCompound("WindowSillTrim").contains("Front"),
                 "update tag " + update);
         helper.setBlock(AT, Blocks.AIR);
@@ -330,12 +332,12 @@ public final class WindowSillGameTests {
         helper.setBlock(AT, window(WindowDesign.plain(WindowProfile.ARCH_LEFT), SOUTH));
         BlockPos abs = helper.absolutePos(AT);
         RoundWindowBlockEntity window = entity(helper);
-        CompoundTag future = window.saveWithFullMetadata();
+        CompoundTag future = window.saveWithFullMetadata(TestRegistries.get());
         CompoundTag payload = new CompoundTag();
         payload.putInt("Version", version);
         payload.putString("Mystery", "kept");
         future.put(key, payload);
-        window.load(future);
+        window.loadWithComponents(future, TestRegistries.get());
         check(!window.attachmentsEditable(), key + ": the unknown payload is not held");
         check(!WindowPaneBlock.trimmed(helper.getBlockState(AT)), key + ": loading changed the summary");
 
@@ -349,7 +351,7 @@ public final class WindowSillGameTests {
         check(WindowAttachmentState.store(helper.getLevel(), abs, window, edited, FaceTrims.NONE), key + ": " + edited + " removal refused");
         check(!window.trims(edited).any(), key + ": " + edited + " not removed");
         check(WindowPaneBlock.trimmed(helper.getBlockState(AT)), key + ": the summary was reconciled to clear while a payload is unknown");
-        check(window.saveWithFullMetadata().getCompound(key).equals(payload), key + ": the unknown payload was not kept");
+        check(window.saveWithFullMetadata(TestRegistries.get()).getCompound(key).equals(payload), key + ": the unknown payload was not kept");
         helper.setBlock(AT, Blocks.AIR);
     }
 }

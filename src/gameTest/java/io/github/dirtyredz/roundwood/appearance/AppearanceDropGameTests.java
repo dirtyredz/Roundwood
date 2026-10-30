@@ -215,7 +215,7 @@ public final class AppearanceDropGameTests {
         List<ItemStack> first = Block.getDrops(state, helper.getLevel(), part, null);
         List<ItemStack> second = Block.getDrops(state, helper.getLevel(), part, null);
         check(first.size() == 1 && second.size() == 1 && AppearanceStacks.read(first.get(0)).equals(look)
-                && ItemStack.isSameItemSameTags(first.get(0), second.get(0)), "loot differs: " + first + " / " + second);
+                && ItemStack.isSameItemSameComponents(first.get(0), second.get(0)), "loot differs: " + first + " / " + second);
         check(anchorEntity(helper, door).appearance().equals(look), "computing loot changed the door");
         helper.succeed();
     }

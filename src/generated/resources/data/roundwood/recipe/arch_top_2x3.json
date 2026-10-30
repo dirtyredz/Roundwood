@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "roundwood:arch_piece",
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "pattern": [
+    "PPP",
+    "P P",
+    "S S"
+  ],
+  "result": {
+    "count": 1,
+    "id": "roundwood:arch_top_2x3"
+  }
+}

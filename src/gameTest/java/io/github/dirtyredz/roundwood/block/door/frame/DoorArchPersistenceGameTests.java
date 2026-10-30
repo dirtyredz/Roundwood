@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.frame;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth;
@@ -33,20 +35,20 @@ public final class DoorArchPersistenceGameTests {
                     ArchPieceDepth.FRONT, frame, FaceTrims.both(frame));
             check(entity.setArch(attachment), "known attachment refused");
             var copy = new RoundDoorBlockEntity(ModBlockEntities.roundDoor(), BlockPos.ZERO, block.defaultBlockState());
-            copy.load(entity.saveWithoutMetadata());
+            copy.loadWithComponents(entity.saveWithoutMetadata(TestRegistries.get()), TestRegistries.get());
             check(copy.arch().orElseThrow().equals(attachment) && copy.appearance().equals(leaf)
                     && copy.trims().equals(FaceTrims.both(casing)), "independent custody lost on reload");
             entity.setArch(null);
-            copy.load(entity.getUpdateTag());
+            copy.loadWithComponents(entity.getUpdateTag(TestRegistries.get()), TestRegistries.get());
             check(copy.arch().isEmpty() && copy.archEditable(), "explicit clear did not reach client");
             var unknown = new CompoundTag(); var payload = DoorArchStore.encode(attachment);
             payload.putInt("Version", 99); unknown.put(DoorArchStore.TAG, payload);
-            copy.load(unknown);
+            copy.loadWithComponents(unknown, TestRegistries.get());
             check(!copy.setArch(attachment) && !copy.setArch(null), "unknown frame accepted edit");
-            check(copy.saveWithoutMetadata().get(DoorArchStore.TAG).equals(payload), "unknown frame lost custody");
-            entity.load(copy.getUpdateTag());
+            check(copy.saveWithoutMetadata(TestRegistries.get()).get(DoorArchStore.TAG).equals(payload), "unknown frame lost custody");
+            entity.loadWithComponents(copy.getUpdateTag(TestRegistries.get()), TestRegistries.get());
             check(!entity.archEditable() && entity.arch().isEmpty(), "client did not receive refusal marker");
-            copy.load(new CompoundTag());
+            copy.loadWithComponents(new CompoundTag(), TestRegistries.get());
             check(copy.arch().isEmpty() && copy.archEditable(), "legacy empty store changed");
         }
         helper.succeed();

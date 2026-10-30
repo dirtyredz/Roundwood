@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.assembly.placement;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlockEntity;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
@@ -274,7 +276,7 @@ public final class AssemblyPlacementGameTests {
         level.setBlock(signed, Blocks.OAK_SIGN.defaultBlockState(), Block.UPDATE_CLIENTS);
         SignBlockEntity sign = (SignBlockEntity) level.getBlockEntity(signed);
         sign.updateText(text -> text.setMessage(0, Component.literal("kept")), true);
-        CompoundTag signData = sign.saveWithoutMetadata();
+        CompoundTag signData = sign.saveWithoutMetadata(TestRegistries.get());
         // The last cell already holds its planned state, so its write is refused (nothing changes there).
         AssemblyMutationBatch.run(level, List.of(taken), () -> level.setBlock(taken, plan.states().get(ArchwayPart.UPPER_RIGHT),
                 Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE));
@@ -284,7 +286,7 @@ public final class AssemblyPlacementGameTests {
         check(level.getBlockState(archway.pos(ArchwayPart.LOWER_LEFT)).isAir(), "the anchor was not put back");
         check(level.getBlockState(archway.pos(ArchwayPart.UPPER_LEFT)).isAir(), "the upper left cell was not put back");
         check(level.getBlockState(signed).is(Blocks.OAK_SIGN), "the sign was not put back: " + level.getBlockState(signed));
-        check(level.getBlockEntity(signed) instanceof SignBlockEntity restored && restored.saveWithoutMetadata().equals(signData),
+        check(level.getBlockEntity(signed) instanceof SignBlockEntity restored && restored.saveWithoutMetadata(TestRegistries.get()).equals(signData),
                 "the sign's text was not put back");
         check(level.getBlockState(taken).equals(plan.states().get(ArchwayPart.UPPER_RIGHT)), "the refused cell changed");
         check(DoorFixtures.dropped(helper, ArchwayFixtures.block(ArchwayDesign.ORDINARY).asItem()) == 0

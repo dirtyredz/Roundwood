@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.placement;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
@@ -233,8 +235,8 @@ public final class ArchedDoorGameTests {
         anchor.setCamouflage(CamouflageData.free(Blocks.STONE_BRICKS.defaultBlockState()));
         arched().setOpen(null, helper.getLevel(), helper.getLevel().getBlockState(door.anchor()), door.anchor(), true);
         BlockState state = helper.getLevel().getBlockState(door.anchor());
-        CompoundTag tag = anchor.saveWithFullMetadata();
-        BlockEntity copy = BlockEntity.loadStatic(door.anchor(), state, tag);
+        CompoundTag tag = anchor.saveWithFullMetadata(TestRegistries.get());
+        BlockEntity copy = BlockEntity.loadStatic(door.anchor(), state, tag, TestRegistries.get());
         check(copy instanceof RoundDoorBlockEntity && copy.getType() == ModBlockEntities.ROUND_DOOR.get(), "did not load back: " + copy);
         RoundDoorBlockEntity loaded = (RoundDoorBlockEntity) copy;
         check(loaded.appearance().equals(SPRUCE), "look " + loaded.appearance());

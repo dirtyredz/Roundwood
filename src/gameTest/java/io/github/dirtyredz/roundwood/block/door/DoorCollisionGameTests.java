@@ -174,7 +174,7 @@ public final class DoorCollisionGameTests {
                         name + ": ray at the hinge-side slab did not hit the door");
                 // Across the plane through the projection region (d = 1.5): nothing there to hit.
                 BlockHitResult projection = helper.getLevel().clip(new ClipContext(point(assembly, -1.0, 1.0, 1.5), point(assembly, 3.0, 1.0, 1.5),
-                        ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, null));
+                        ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, net.minecraft.world.phys.shapes.CollisionContext.empty()));
                 check(projection.getType() == HitResult.Type.MISS
                                 || !(helper.getLevel().getBlockState(projection.getBlockPos()).getBlock() instanceof RoundDoorBlock),
                         name + ": ray through the projection region hit the door");
@@ -227,6 +227,6 @@ public final class DoorCollisionGameTests {
     private static BlockHitResult ray(GameTestHelper helper, DoorLayout.Assembly assembly, double a, double h) {
         Vec3 from = point(assembly, a, h, -1.0);
         Vec3 to = point(assembly, a, h, 1.5);
-        return helper.getLevel().clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, null));
+        return helper.getLevel().clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, net.minecraft.world.phys.shapes.CollisionContext.empty()));
     }
 }

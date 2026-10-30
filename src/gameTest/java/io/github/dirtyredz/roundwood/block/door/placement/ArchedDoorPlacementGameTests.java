@@ -165,7 +165,7 @@ public final class ArchedDoorPlacementGameTests {
     @GameTest(template = TEMPLATE)
     public static void aCancelledPlacementRollsBackBothCellsAndTheItem(GameTestHelper helper) {
         floor(helper);
-        helper.setBlock(ANCHOR.above(), Blocks.GRASS); // replaceable, so it is written and must come back
+        helper.setBlock(ANCHOR.above(), Blocks.SHORT_GRASS); // replaceable, so it is written and must come back
         int eventsBefore = PlacementCanceller.multiPlaceEvents();
         ServerPlayer player = player(helper, "cancelled", GameType.SURVIVAL, Direction.NORTH);
         ItemStack stack = new ItemStack(arched().asItem());
@@ -174,7 +174,7 @@ public final class ArchedDoorPlacementGameTests {
         check(PlacementCanceller.multiPlaceEvents() == eventsBefore + 1, "expected exactly one multi-place event");
         check(player.getMainHandItem().getCount() == 1, "item not restored: " + player.getMainHandItem());
         assertNoDoor(helper, arched(helper, ANCHOR, Direction.NORTH, DoorHingeSide.LEFT));
-        check(helper.getBlockState(ANCHOR.above()).is(Blocks.GRASS), "the replaced grass was not restored");
+        check(helper.getBlockState(ANCHOR.above()).is(Blocks.SHORT_GRASS), "the replaced grass was not restored");
         helper.succeed();
     }
 

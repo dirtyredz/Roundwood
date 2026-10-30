@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.data;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
 import io.github.dirtyredz.roundwood.block.attachment.item.ArchSillTrimItem;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
@@ -64,8 +66,8 @@ public final class ContentGameTests {
 
     @GameTest(template = TEMPLATE)
     public static void canonicalEntriesAndFortyNineHiddenAliasesAreRegistered(GameTestHelper helper) {
-        long blocks = BuiltInRegistries.BLOCK.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
-        long items = BuiltInRegistries.ITEM.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
+        long blocks = BuiltInRegistries.BLOCK.keySet().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
+        long items = BuiltInRegistries.ITEM.keySet().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         check(blocks == 91, "expected 20 + 8 modular (4 full, 4 thin) + 13 + 49 blocks, found " + blocks);
         check(items == 94, "expected 20 + 8 modular + two attachments + 13 + 49 + the window trim items, found " + items);
         for (String id : List.of("arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder")) {
@@ -222,19 +224,19 @@ public final class ContentGameTests {
         expect(level, grid(e, s, o, e, g, w, e, e, o), ModItems.ROUND_WINDOW_ARCH_LEFT.get(), "mirrored left arch");
         expect(level, grid(o, s, w, e, g, e, e, o, e), ModItems.ROUND_WINDOW_ARCH_RIGHT.get(), "mixed-plank right arch");
         expect(level, grid(s, e, s, e, e, e, s, e, s), ModItems.ROUND_TRIM.get(), "spruce trim");
-        check(find(level, grid(o, o, o, o, e, o, o, o, o)).map(r -> !r.getId().getNamespace().equals(Roundwood.MOD_ID)).orElse(true),
+        check(find(level, grid(o, o, o, o, e, o, o, o, o)).map(r -> !r.id().getNamespace().equals(Roundwood.MOD_ID)).orElse(true),
                 "a ring of eight makes a trim");
         ItemStack b = new ItemStack(Items.BRICKS);
         check(find(level, grid(b, e, b, e, e, e, b, e, b)).isEmpty(), "bricks still craft a trim");
         check(find(level, grid(new ItemStack(ModItems.ROUND_DOOR.get()), new ItemStack(Items.RED_DYE), e, e, e, e, e, e, e)).isEmpty(),
                 "a painting recipe is still loaded");
         long count = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
-                .filter(r -> r.getId().getNamespace().equals(Roundwood.MOD_ID)).count();
+                .filter(r -> r.id().getNamespace().equals(Roundwood.MOD_ID)).count();
         check(count == 29, "expected 29 roundwood crafting recipes, loaded " + count);
         ItemStack k = new ItemStack(Items.STICK);
         var ladder = find(level, grid(k, e, k, k, k, k, k, e, k)).orElseThrow();
-        check(ladder.assemble(grid(k, e, k, k, k, k, k, e, k), level.registryAccess()).is(Items.LADDER), "beams collided with the vanilla ladder");
-        check(find(level, grid(e, o, e, s, k, w, e, o, e)).map(r -> !r.getId().getNamespace().equals(Roundwood.MOD_ID)).orElse(true),
+        check(ladder.value().assemble(grid(k, e, k, k, k, k, k, e, k).asCraftInput(), level.registryAccess()).is(Items.LADDER), "beams collided with the vanilla ladder");
+        check(find(level, grid(e, o, e, s, k, w, e, o, e)).map(r -> !r.id().getNamespace().equals(Roundwood.MOD_ID)).orElse(true),
                 "the 0.8.0 window trim recipe is still loaded");
         helper.succeed();
     }
@@ -273,7 +275,7 @@ public final class ContentGameTests {
         expectShape(level, ModItems.archPiece(ArchPieceDesign.KEYHOLE_SHOULDER), "PP", " P");
         for (Item retired : ModItems.archways()) {
             check(level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
-                    .noneMatch(recipe -> recipe.getResultItem(level.registryAccess()).is(retired)), "retired archway recipe remains");
+                    .noneMatch(recipe -> recipe.value().getResultItem(level.registryAccess()).is(retired)), "retired archway recipe remains");
         }
         helper.succeed();
     }
@@ -316,7 +318,7 @@ public final class ContentGameTests {
         BlockPos pos = helper.absolutePos(new BlockPos(1, 1, 1));
         for (Block block : ModBlocks.canonical()) {
             List<ItemStack> drops = Block.getDrops(block.defaultBlockState(), helper.getLevel(), pos, null);
-            check(drops.size() == 1 && drops.get(0).is(block.asItem()) && drops.get(0).getCount() == 1 && !drops.get(0).hasTag(),
+            check(drops.size() == 1 && drops.get(0).is(block.asItem()) && drops.get(0).getCount() == 1 && drops.get(0).getComponentsPatch().isEmpty(),
                     block + " loot is " + drops);
         }
         // A window (canonical or alias) with oak trims on both faces also drops one plain oak Universal Trim per face (0.8.0 face pools).
@@ -334,8 +336,8 @@ public final class ContentGameTests {
                 entity.setTrims(TrimSlot.SILL, io.github.dirtyredz.roundwood.block.attachment.FaceTrims.both(Appearance.DEFAULT));
             }
             List<ItemStack> drops = Block.getDrops(state, helper.getLevel(), pos, entity);
-            check(drops.size() == 1+(trim?2:0)+(sills?2:0) && drops.stream().filter(d -> d.is(ModItems.ROUND_TRIM.get()) && !d.hasTag()).count() == (trim?2:0)
-                            && drops.stream().filter(d -> d.is(ModItems.ARCH_SILL_TRIM.get()) && !d.hasTag()).count() == (sills ? 2 : 0),
+            check(drops.size() == 1+(trim?2:0)+(sills?2:0) && drops.stream().filter(d -> d.is(ModItems.ROUND_TRIM.get()) && d.getComponentsPatch().isEmpty()).count() == (trim?2:0)
+                            && drops.stream().filter(d -> d.is(ModItems.ARCH_SILL_TRIM.get()) && d.getComponentsPatch().isEmpty()).count() == (sills ? 2 : 0),
                     window + " trimmed loot is " + drops);
         }
         for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
@@ -352,14 +354,14 @@ public final class ContentGameTests {
     public static void creativeTabHoldsExactlyTheAdvertisedDefaults(GameTestHelper helper) {
         CreativeModeTab tab = ModCreativeTab.ROUNDWOOD.get();
         tab.buildContents(new CreativeModeTab.ItemDisplayParameters(helper.getLevel().enabledFeatures(), false,
-                helper.getLevel().registryAccess()));
+                TestRegistries.get()));
         List<ItemStack> shown = List.copyOf(tab.getDisplayItems());
         List<String> expected = new java.util.ArrayList<>(CANONICAL_BLOCKS);
         expected.add("arch_sill_trim");
         expected.add("cross_beams");
         check(shown.stream().map(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath()).toList().equals(expected),
                 "tab is not the three doors, 13 plain windows, four full and four thin arch pieces, Universal Trim, Arch Sill and Cross Beams: " + shown);
-        check(shown.stream().noneMatch(ItemStack::hasTag), "tab entries carry an appearance: " + shown);
+        check(shown.stream().noneMatch(s -> !s.getComponentsPatch().isEmpty()), "tab entries carry an appearance: " + shown);
         check(AppearanceStacks.read(shown.get(0)).equals(Appearance.DEFAULT), "the tab's door is not oak");
         helper.succeed();
     }
@@ -369,13 +371,13 @@ public final class ContentGameTests {
     public static void everyAdvertisedItemIsListedOnceAsItsOakDefault(GameTestHelper helper) {
         CreativeModeTab tab = ModCreativeTab.ROUNDWOOD.get();
         tab.buildContents(new CreativeModeTab.ItemDisplayParameters(helper.getLevel().enabledFeatures(), false,
-                helper.getLevel().registryAccess()));
+                TestRegistries.get()));
         List<ItemStack> shown = List.copyOf(tab.getDisplayItems());
         for (Item item : ModItems.all()) {
             List<ItemStack> listed = shown.stream().filter(stack -> stack.getItem() == item).toList();
             check(listed.size() == 1, item + " is listed " + listed.size() + " times in the tab");
             ItemStack stack = listed.get(0);
-            check(!stack.hasTag() && AppearanceStacks.read(stack).equals(AppearanceDefaults.of(item))
+            check(stack.getComponentsPatch().isEmpty() && AppearanceStacks.read(stack).equals(AppearanceDefaults.of(item))
                     && WindowGlassStacks.key(stack).equals(AppearanceDefaults.of(item).key()), item + " is not its plain default: " + stack);
         }
         check(ModItems.all().size() == 29 && shown.size() == 29, "tab lists " + shown.size() + " items, not the 29 of 0.17.0");
@@ -438,17 +440,17 @@ public final class ContentGameTests {
         return grid;
     }
 
-    private static Optional<CraftingRecipe> find(ServerLevel level, TransientCraftingContainer grid) {
-        return level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, grid, level);
+    private static Optional<net.minecraft.world.item.crafting.RecipeHolder<CraftingRecipe>> find(ServerLevel level, TransientCraftingContainer grid) {
+        return level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, grid.asCraftInput(), level);
     }
 
     private static void expect(ServerLevel level, TransientCraftingContainer grid, Item result, String what) {
         var matches = level.getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
-                .filter(candidate -> candidate.matches(grid, level)).toList();
-        check(matches.size() == 1, what + ": expected one matching recipe, got " + matches.stream().map(CraftingRecipe::getId).toList());
-        Optional<CraftingRecipe> recipe = find(level, grid);
+                .filter(candidate -> candidate.value().matches(grid.asCraftInput(), level)).toList();
+        check(matches.size() == 1, what + ": expected one matching recipe, got " + matches.stream().map(net.minecraft.world.item.crafting.RecipeHolder::id).toList());
+        var recipe = find(level, grid);
         check(recipe.isPresent(), what + ": no recipe matched");
-        ItemStack out = recipe.get().assemble(grid, level.registryAccess());
-        check(out.is(result) && out.getCount() == 1 && !out.hasTag(), what + ": produced " + out);
+        ItemStack out = recipe.get().value().assemble(grid.asCraftInput(), level.registryAccess());
+        check(out.is(result) && out.getCount() == 1 && out.getComponentsPatch().isEmpty(), what + ": produced " + out);
     }
 }

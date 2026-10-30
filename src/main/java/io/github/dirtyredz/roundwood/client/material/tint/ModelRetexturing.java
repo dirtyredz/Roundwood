@@ -56,8 +56,8 @@ public final class ModelRetexturing {
         for (int i = 0; i + STRIDE <= vertices.length; i += STRIDE) {
             float[] st = uv.at(Float.intBitsToFloat(vertices[i]), Float.intBitsToFloat(vertices[i + 1]),
                     Float.intBitsToFloat(vertices[i + 2]));
-            vertices[i + UV] = Float.floatToRawIntBits(target.getU(st[0]));
-            vertices[i + UV + 1] = Float.floatToRawIntBits(target.getV(st[1]));
+            vertices[i + UV] = Float.floatToRawIntBits(target.getU(st[0] / 16F)); // 1.21 sprite coordinates are 0..1
+            vertices[i + UV + 1] = Float.floatToRawIntBits(target.getV(st[1] / 16F));
         }
         return new BakedQuad(vertices, -1, quad.getDirection(), target, quad.isShade(), quad.hasAmbientOcclusion());
     }

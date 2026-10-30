@@ -171,8 +171,7 @@ public final class CamouflageInteractionGameTests {
             BlockPos front = assembly.anchor().relative(Direction.SOUTH);
             check(helper.getLevel().getBlockState(front).isAir(), item + " was placed in front of the door");
         }
-        ItemStack tagged = new ItemStack(Items.STONE);
-        tagged.getOrCreateTag().put("BlockStateTag", new CompoundTag());
+        ItemStack tagged = io.github.dirtyredz.roundwood.fixture.PlacedPayloads.with(Items.STONE, "BlockStateTag");
         hold(player, tagged, ItemStack.EMPTY);
         use(helper, player, corner);
         check(material(helper, assembly).isEmpty(), "an item with a BlockStateTag was accepted");

@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.assembly;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.block.door.adapter.DoorRenderExtras;
 
 import io.github.dirtyredz.roundwood.Roundwood;
@@ -107,7 +109,7 @@ public final class StaticRenderLifecycleGameTests {
         entity.setTrims(FaceTrims.both(AppearanceFixtures.SPRUCE));
         var edited = entity.staticRenderPublication().current();
         check(edited.revision() > first.revision() && edited.trims().any() && !first.trims().any(), "immutable retained revision");
-        entity.handleUpdateTag(new net.minecraft.nbt.CompoundTag());
+        entity.handleUpdateTag(new net.minecraft.nbt.CompoundTag(), TestRegistries.get());
         check(!entity.staticRenderPublication().current().trims().any(), "tagless clearing publishes");
         level.destroyBlock(assembly.pos(ArchPieceCell.UPPER_RIGHT), false);
         check(!entity.staticRenderPublication().current().available(), "removal retires published data");

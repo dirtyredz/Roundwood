@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.frame.fitting;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore;
 import io.github.dirtyredz.roundwood.block.door.frame.DoorArchFitPlan;
 import io.github.dirtyredz.roundwood.block.door.frame.DoorArchClearance;
@@ -135,7 +137,7 @@ public final class DoorArchFittingGameTests {
                     if (!intoArch) anchorEntity(helper,door).setHardware(anchorEntity(helper,door).hardware().with(DoorHardwareSlot.HINGES,java.util.Optional.of(AppearanceFixtures.SPRUCE)));
                     var player = player(helper, "fit_orders", GameType.SURVIVAL, facing);
                     var stack = styled(intoArch ? doorBlock.asItem() : archBlock.asItem(), intoArch ? AppearanceFixtures.WARPED : AppearanceFixtures.BRICKS); stack.setCount(2);
-                    if(intoArch) stack.getOrCreateTag().put(DoorHardwareStore.TAG,DoorHardwareStore.encode(DoorHardware.DEFAULT.with(DoorHardwareSlot.HINGES,java.util.Optional.of(AppearanceFixtures.SPRUCE))));
+                    if(intoArch) io.github.dirtyredz.roundwood.appearance.item.StackPayloads.putCustom(stack,DoorHardwareStore.TAG,DoorHardwareStore.encode(DoorHardware.DEFAULT.with(DoorHardwareSlot.HINGES,java.util.Optional.of(AppearanceFixtures.SPRUCE))));
                     var hit = intoArch ? new BlockHitResult(Vec3.atCenterOf(arch.anchor()).relative(facing.getOpposite(), .5).add(0,-.375,0), facing.getOpposite(),arch.anchor(),false)
                             : frontHit(door, .5, depth == io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.MIDDLE ? .5 : .875);
                     boolean offhand = facing == Direction.SOUTH;
@@ -169,18 +171,18 @@ public final class DoorArchFittingGameTests {
             if (!intoArch) anchorEntity(helper, door).setCamouflage(io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData.paid(
                     net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(), new ItemStack(net.minecraft.world.item.Items.STONE)));
             if(!intoArch) anchorEntity(helper,door).setHardware(anchorEntity(helper,door).hardware().with(DoorHardwareSlot.KNOBS,java.util.Optional.of(AppearanceFixtures.BIRCH)));
-            var owner=intoArch?arch.anchor():door.anchor(); var before=level.getBlockEntity(owner).saveWithFullMetadata();
+            var owner=intoArch?arch.anchor():door.anchor(); var before=level.getBlockEntity(owner).saveWithFullMetadata(TestRegistries.get());
             var states=door.positions().stream().map(level::getBlockState).toList();
             var player=player(helper,"cancelled",GameType.SURVIVAL,Direction.NORTH);
             var stack=new ItemStack(intoArch?ModBlocks.archedDoor().asItem():ModBlocks.archPiece(arch.design()).asItem(),2);
-            if(intoArch) stack.getOrCreateTag().put(DoorHardwareStore.TAG,DoorHardwareStore.encode(DoorHardware.DEFAULT.with(DoorHardwareSlot.KNOBS,java.util.Optional.of(AppearanceFixtures.BIRCH))));
+            if(intoArch) io.github.dirtyredz.roundwood.appearance.item.StackPayloads.putCustom(stack,DoorHardwareStore.TAG,DoorHardwareStore.encode(DoorHardware.DEFAULT.with(DoorHardwareSlot.KNOBS,java.util.Optional.of(AppearanceFixtures.BIRCH))));
             var stackBefore=stack.copy();
             var hit=new BlockHitResult(Vec3.atLowerCornerOf(owner).add(.03,.95,1),Direction.SOUTH,owner,false);
             int events=io.github.dirtyredz.roundwood.fixture.PlacementCanceller.multiPlaceEvents();
             AppearanceFixtures.use(helper,player,stack,ItemStack.EMPTY,hit,false);
             check(io.github.dirtyredz.roundwood.fixture.PlacementCanceller.multiPlaceEvents()==events+1,"expected one cancellable event: intoArch="+intoArch+" before="+events+" after="+io.github.dirtyredz.roundwood.fixture.PlacementCanceller.multiPlaceEvents());
             check(ItemStack.matches(stack,stackBefore),"cancelled hardware/payment");
-            check(level.getBlockEntity(owner).saveWithFullMetadata().equals(before),"full NBT rollback");
+            check(level.getBlockEntity(owner).saveWithFullMetadata(TestRegistries.get()).equals(before),"full NBT rollback");
             check(door.positions().stream().map(level::getBlockState).toList().equals(states),"state rollback");
             level.removeBlock(owner,false); clearDrops(helper);
         }
@@ -197,18 +199,18 @@ public final class DoorArchFittingGameTests {
         for(var denied : door.positions()) {
             var player=io.github.dirtyredz.roundwood.fixture.assembly.DenyingPlayer.create(helper,"fit",Direction.NORTH,java.util.Set.of(denied));
             var stack=new ItemStack(ModBlocks.archPiece(ArchPieceDesign.TOP_1X2).asItem(),2);
-            var before=entity.saveWithFullMetadata();
+            var before=entity.saveWithFullMetadata(TestRegistries.get());
             AppearanceFixtures.use(helper,player,stack,ItemStack.EMPTY,frontHit(door,1,.8),false);
-            check(stack.getCount()==2 && entity.saveWithFullMetadata().equals(before) && door.complete(level,ModBlocks.roundDoor()),"denied cell changed assembly");
+            check(stack.getCount()==2 && entity.saveWithFullMetadata(TestRegistries.get()).equals(before) && door.complete(level,ModBlocks.roundDoor()),"denied cell changed assembly");
         }
         var player=player(helper,"fit_refuse",GameType.SURVIVAL,Direction.NORTH);
         var thin=new ItemStack(ModBlocks.archPiece(ArchPieceDesign.TOP_1X2,io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.THIN).asItem(),2);
         AppearanceFixtures.use(helper,player,thin,ItemStack.EMPTY,frontHit(door,1,.875),false);
         check(thin.getCount()==2 && entity.arch().isEmpty(),"coplanar fit accepted");
-        var unknown=entity.saveWithFullMetadata(); var payload=new net.minecraft.nbt.CompoundTag();payload.putInt("Version",99);payload.putString("Unknown","kept");unknown.put(DoorArchStore.TAG,payload);entity.load(unknown);
+        var unknown=entity.saveWithFullMetadata(TestRegistries.get()); var payload=new net.minecraft.nbt.CompoundTag();payload.putInt("Version",99);payload.putString("Unknown","kept");unknown.put(DoorArchStore.TAG,payload);entity.loadWithComponents(unknown, TestRegistries.get());
         var full=new ItemStack(ModBlocks.archPiece(ArchPieceDesign.TOP_1X2).asItem(),2);
         AppearanceFixtures.use(helper,player,full,ItemStack.EMPTY,frontHit(door,1,.8),false);
-        check(full.getCount()==2 && entity.saveWithFullMetadata().equals(unknown),"unknown attachment overwritten");
+        check(full.getCount()==2 && entity.saveWithFullMetadata(TestRegistries.get()).equals(unknown),"unknown attachment overwritten");
         helper.succeed();
     }
 }

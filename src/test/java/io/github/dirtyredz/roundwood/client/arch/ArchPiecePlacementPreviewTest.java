@@ -17,6 +17,10 @@ class ArchPiecePlacementPreviewTest {
     @Test void interactiveTargetsCannotPromisePlacement() {
         for (var block : new net.minecraft.world.level.block.Block[]{Blocks.CHEST, Blocks.LEVER, Blocks.OAK_DOOR, Blocks.OAK_FENCE_GATE, Blocks.CRAFTING_TABLE})
             assertFalse(ArchPiecePlacementPreview.passive(block.defaultBlockState()), block.toString());
+        // 1.21 split use: the cauldron answers only the item callback, the lever and crafting table only the empty hand.
+        assertFalse(ArchPiecePlacementPreview.passive(Blocks.CAULDRON.defaultBlockState()), "item-only interactive block");
+        assertFalse(ArchPiecePlacementPreview.passive(Blocks.WATER_CAULDRON.defaultBlockState()), "item-only interactive subclass");
+        assertFalse(ArchPiecePlacementPreview.passive(Blocks.LEVER.defaultBlockState()), "empty-hand-only interactive block");
         assertTrue(ArchPiecePlacementPreview.passive(Blocks.STONE.defaultBlockState()));
         assertTrue(ArchPiecePlacementPreview.passive(Blocks.OAK_PLANKS.defaultBlockState()));
     }

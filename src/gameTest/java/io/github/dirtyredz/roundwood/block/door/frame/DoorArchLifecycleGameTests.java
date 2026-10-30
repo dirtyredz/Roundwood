@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.frame;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.arch.assembly.*;
 import io.github.dirtyredz.roundwood.block.arch.geometry.*;
@@ -43,7 +45,7 @@ public final class DoorArchLifecycleGameTests {
             for(var part:DoorLayout.Part.of(block.design())) {
                 var door=fitted(helper,block,thickness,depth);
                 var entity=anchorEntity(helper,door);
-                var loaded=net.minecraft.world.level.block.entity.BlockEntity.loadStatic(door.anchor(),entity.getBlockState(),entity.saveWithFullMetadata());
+                var loaded=net.minecraft.world.level.block.entity.BlockEntity.loadStatic(door.anchor(),entity.getBlockState(),entity.saveWithFullMetadata(TestRegistries.get()), TestRegistries.get());
                 check(loaded instanceof RoundDoorBlockEntity copy && copy.arch().equals(entity.arch()) && copy.trims().equals(entity.trims()),"reload custody");
                 var player=player(helper,"frame_break",GameType.SURVIVAL,Direction.NORTH);
                 check(player.gameMode.destroyBlock(door.pos(part)),"harvest refused"); assertNoDoor(helper,door);
@@ -114,15 +116,15 @@ public final class DoorArchLifecycleGameTests {
     public static void unknownFrameSurvivesAsOpaqueDoorItemAndCannotBePlacedLossily(GameTestHelper helper) {
         floor(helper);var level=helper.getLevel();
         var door=fitted(helper,ModBlocks.archedDoor(),ArchPieceThickness.FULL,ArchPieceDepth.FRONT);
-        var entity=anchorEntity(helper,door);var saved=entity.saveWithFullMetadata();
-        var future=saved.getCompound(DoorArchStore.TAG).copy();future.putInt("Version",99);future.putString("Mystery","keep");saved.put(DoorArchStore.TAG,future);entity.load(saved);
+        var entity=anchorEntity(helper,door);var saved=entity.saveWithFullMetadata(TestRegistries.get());
+        var future=saved.getCompound(DoorArchStore.TAG).copy();future.putInt("Version",99);future.putString("Mystery","keep");saved.put(DoorArchStore.TAG,future);entity.loadWithComponents(saved, TestRegistries.get());
         var player=player(helper,"opaque_frame",GameType.SURVIVAL,Direction.NORTH);player.gameMode.destroyBlock(door.anchor());
         var drops=level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,new net.minecraft.world.phys.AABB(door.anchor()).inflate(5));
         var returned=drops.stream().map(net.minecraft.world.entity.item.ItemEntity::getItem).filter(stack->stack.is(ModBlocks.archedDoor().asItem())).findFirst().orElseThrow();
-        check(returned.getTag().get(DoorArchStore.TAG).equals(future),"opaque custody lost on harvest");
+        check(io.github.dirtyredz.roundwood.appearance.item.StackPayloads.custom(returned, DoorArchStore.TAG).equals(future),"opaque custody lost on harvest");
         check(dropped(helper,ModBlocks.archPiece(ArchPieceDesign.TOP_1X1).asItem())==0,"unknown frame decoded into refund");
         check(!placeDoor(helper,player,returned,new BlockPos(3,1,3),DoorHingeSide.LEFT).consumesAction(),"unknown item placed lossily");
-        check(returned.getCount()==1 && returned.getTag().get(DoorArchStore.TAG).equals(future),"refusal consumed opaque item");
+        check(returned.getCount()==1 && io.github.dirtyredz.roundwood.appearance.item.StackPayloads.custom(returned, DoorArchStore.TAG).equals(future),"refusal consumed opaque item");
         helper.succeed();
     }
 }

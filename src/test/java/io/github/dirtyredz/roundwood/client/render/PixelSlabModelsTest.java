@@ -10,7 +10,6 @@ import io.github.dirtyredz.roundwood.testsupport.MinecraftBootstrap;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -26,7 +25,7 @@ class PixelSlabModelsTest {
     private static final PixelSlabModels.Extent EXTENT = new PixelSlabModels.Extent(32, 32, 32);
 
     @Test void everySeparatedDoorCasingBakesWithoutLosingItsNormalSeparation() {
-        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16,16), new NativeImage(16,16,false), AnimationMetadataSection.EMPTY)) {
+        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16,16), new NativeImage(16,16,false), net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var sprite = new Sprite(contents);
             for (var design : io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.values())
                 for (var face : AttachmentFace.values()) for (var part : io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout.Part.of(design)) {
@@ -53,7 +52,7 @@ class PixelSlabModelsTest {
     @Test
     void everyArchwayQuadHasVanillaOrientationAndOneUvUnitPerPixel() {
         try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16),
-                new NativeImage(16, 16, false), AnimationMetadataSection.EMPTY)) {
+                new NativeImage(16, 16, false), net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var sprite = new Sprite(contents);
             var seen = EnumSet.noneOf(Direction.class);
             for (ArchwayDesign design : ArchwayDesign.values()) {
@@ -120,10 +119,10 @@ class PixelSlabModelsTest {
             double uvMin = Double.POSITIVE_INFINITY, uvMax = Double.NEGATIVE_INFINITY;
             for (int vertex = 0; vertex < 4; vertex++) {
                 double atlasUv = Float.intBitsToFloat(vertices[vertex * stride + 4 + axis]);
-                double uv = axis == 0 ? sprite.getUOffset((float) atlasUv) : sprite.getVOffset((float) atlasUv);
+                double uv = axis == 0 ? 16 * sprite.getUOffset((float) atlasUv) : 16 * sprite.getVOffset((float) atlasUv);
                 // FaceBakery shrinks toward the centre, then fillVertex mixes 0.999 of this corner
                 // with 0.001 of the opposite corner. Undo both vanilla anti-bleed insets only.
-                double unshrunk = centre + (uv - centre) / ((1 - sprite.uvShrinkRatio()) * 0.998);
+                double unshrunk = centre + (uv - centre) / (1 - sprite.uvShrinkRatio());
                 assertEquals(projected[vertex][axis] - offset, unshrunk, 0.0001,
                         quad.getDirection() + " vertex " + vertex + " UV axis " + axis);
                 assertTrue(uv >= 0 && uv <= 16, "UV stays inside its sprite");

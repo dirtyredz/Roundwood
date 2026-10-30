@@ -20,7 +20,7 @@ class DoorSurfaceModelsTest {
         Sprite(SpriteContents contents){super(TEXTURE,contents,256,256,32,64);}
     }
     @Test void donorPanelsTileAtAuthoredScaleIncludingCompressedTallModels() {
-        try(var contents=new SpriteContents(TEXTURE,new FrameSize(16,16),new NativeImage(16,16,false),AnimationMetadataSection.EMPTY)) {
+        try(var contents=new SpriteContents(TEXTURE,new FrameSize(16,16),new NativeImage(16,16,false),net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var sprite=new Sprite(contents);
             for(var design:DoorDesign.values()) for(var hinge:DoorHingeSide.values()) {
                 double frontArea=0;
@@ -38,11 +38,11 @@ class DoorSurfaceModelsTest {
                             case UP -> new double[]{x,z};case DOWN -> new double[]{x,-z};
                             case EAST -> new double[]{-z,-y};case WEST -> new double[]{z,-y};
                         };
-                        double[] uv={sprite.getUOffset(Float.intBitsToFloat(data[i+4])),sprite.getVOffset(Float.intBitsToFloat(data[i+5]))};
+                        double[] uv={16 * sprite.getUOffset(Float.intBitsToFloat(data[i+4])),16 * sprite.getVOffset(Float.intBitsToFloat(data[i+5]))};
                         if(first==null){first=p;firstUv=uv;}
                         for(int a=0;a<2;a++) {
                             assertTrue(uv[a]>=0 && uv[a]<=16,"donor atlas bleed");
-                            assertEquals(p[a]-first[a],(uv[a]-firstUv[a])/((1-sprite.uvShrinkRatio())*.998),.0002);
+                            assertEquals(p[a]-first[a],(uv[a]-firstUv[a])/(1-sprite.uvShrinkRatio()),.0002);
                         }
                     }
                     if(q.getDirection()==Direction.SOUTH) frontArea+=(maxX-minX)*(maxY-minY);

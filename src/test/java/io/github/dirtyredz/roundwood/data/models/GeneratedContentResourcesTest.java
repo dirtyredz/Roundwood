@@ -32,7 +32,7 @@ import static io.github.dirtyredz.roundwood.data.GeneratedFiles.*;
 class GeneratedContentResourcesTest {
     @Test void modularArchLootKeepsThreeIndependentLooks() {
         for (String id : ARCH_PIECES) {
-            var pools = json(data("loot_tables/blocks/" + id + ".json")).getAsJsonArray("pools");
+            var pools = json(data("loot_table/blocks/" + id + ".json")).getAsJsonArray("pools");
             assertEquals(3, pools.size());
             assertEquals(JsonParser.parseString(ownItemPool("roundwood:" + id)), pools.get(0));
             assertEquals(JsonParser.parseString(trimFacePool("front", "roundwood:round_trim", "ArchPieceTrim.Front")), pools.get(1));
@@ -48,9 +48,9 @@ class GeneratedContentResourcesTest {
         JsonObject model = json(assets("models/item/" + WINDOW_TRIM + ".json"));
         assertEquals(Set.of("parent"), model.keySet(), "item model has only a parent");
         assertEquals("roundwood:item/round_trim", model.get("parent").getAsString());
-        assertFalse(Files.exists(data("recipes/" + WINDOW_TRIM + ".json")), "no recipe");
+        assertFalse(Files.exists(data("recipe/" + WINDOW_TRIM + ".json")), "no recipe");
         assertFalse(Files.exists(assets("blockstates/" + WINDOW_TRIM + ".json")), "no blockstate");
-        assertFalse(Files.exists(data("loot_tables/blocks/" + WINDOW_TRIM + ".json")), "no loot table");
+        assertFalse(Files.exists(data("loot_table/blocks/" + WINDOW_TRIM + ".json")), "no loot table");
         assertFalse(Files.exists(assets("models/block/" + WINDOW_TRIM + ".json")), "no block model");
     }
 
@@ -63,7 +63,7 @@ class GeneratedContentResourcesTest {
         assertTrue(lang.has("message.roundwood.sill_upper_arch_only"), "upper-arch-only message");
         assertFalse(lang.has("block.roundwood." + ARCH_SILL_TRIM), "no block name");
         assertFalse(Files.exists(assets("blockstates/" + ARCH_SILL_TRIM + ".json")), "no blockstate");
-        assertFalse(Files.exists(data("loot_tables/blocks/" + ARCH_SILL_TRIM + ".json")), "no loot table");
+        assertFalse(Files.exists(data("loot_table/blocks/" + ARCH_SILL_TRIM + ".json")), "no loot table");
         assertFalse(Files.exists(assets("models/block/" + ARCH_SILL_TRIM + ".json")), "no block model");
     }
 
@@ -77,17 +77,17 @@ class GeneratedContentResourcesTest {
         blockDoors.add("roundwood:tall_double_arched_door");
         ModelExpectations.aliasDoors().forEach(d -> blockDoors.add("roundwood:" + d));
         assertEquals(19, blockDoors.size());
-        for (String tag : List.of("blocks/doors", "blocks/wooden_doors")) {
+        for (String tag : List.of("block/doors", "block/wooden_doors")) {
             assertEquals(blockDoors, tagValues(tags.resolve(tag + ".json")), tag);
         }
-        for (String tag : List.of("items/doors", "items/wooden_doors")) {
+        for (String tag : List.of("item/doors", "item/wooden_doors")) {
             assertEquals(Set.of("roundwood:round_door", "roundwood:arched_door", "roundwood:double_arched_door", "roundwood:tall_double_arched_door"), tagValues(tags.resolve(tag + ".json")), tag);
         }
     }
 
     @Test
     void everyBlockIsMineableWithTheAxeAndNothingWithThePickaxe() {
-        Path tags = GENERATED.resolve("data/minecraft/tags/blocks/mineable");
+        Path tags = GENERATED.resolve("data/minecraft/tags/block/mineable");
         Set<String> axe = new TreeSet<>();
         BLOCKS.forEach(b -> axe.add("roundwood:" + b));
         assertEquals(axe, tagValues(tags.resolve("axe.json")));
@@ -100,30 +100,30 @@ class GeneratedContentResourcesTest {
     @Test
     void familyTagsListOnlyTheCanonicalBlocks() {
         Path tags = GENERATED.resolve("data/roundwood/tags");
-        for (String kind : List.of("blocks", "items")) {
+        for (String kind : List.of("block", "item")) {
             assertEquals(Set.of("roundwood:round_door", "roundwood:arched_door", "roundwood:double_arched_door", "roundwood:tall_double_arched_door"), tagValues(tags.resolve(kind + "/round_doors.json")), kind);
             Set<String> windows = new TreeSet<>();
             WINDOWS.forEach(w -> windows.add("roundwood:" + w));
             assertEquals(27, windows.size());
             assertEquals(windows, tagValues(tags.resolve(kind + "/round_windows.json")), kind);
         }
-        for (String kind : List.of("blocks", "items")) {
+        for (String kind : List.of("block", "item")) {
             assertEquals(Set.of("roundwood:archway", "roundwood:keyhole_archway"),
                     tagValues(tags.resolve(kind + "/archways.json")), kind + " archways");
         }
-        for (String kind : List.of("blocks", "items")) {
+        for (String kind : List.of("block", "item")) {
             assertEquals(ARCH_PIECES.stream().map(id -> "roundwood:" + id).collect(java.util.stream.Collectors.toSet()),
                     tagValues(tags.resolve(kind + "/arch_pieces.json")), kind + " modular pieces");
         }
-        assertEquals(Set.of("roundwood:round_trim"), tagValues(tags.resolve("blocks/round_trims.json")), "block trims");
+        assertEquals(Set.of("roundwood:round_trim"), tagValues(tags.resolve("block/round_trims.json")), "block trims");
         assertEquals(Set.of("roundwood:round_trim", "roundwood:window_trim"),
-                tagValues(tags.resolve("items/round_trims.json")), "item trims");
+                tagValues(tags.resolve("item/round_trims.json")), "item trims");
     }
 
     @Test
     void lootDropsTheCanonicalItemOfTheBlocksFamily() {
         for (String block : BLOCKS) {
-            JsonObject loot = json(data("loot_tables/blocks/" + block + ".json"));
+            JsonObject loot = json(data("loot_table/blocks/" + block + ".json"));
             assertEquals("minecraft:block", loot.get("type").getAsString(), block);
             JsonArray pools = loot.getAsJsonArray("pools");
             if (RETIRED.contains(block)) {
@@ -153,11 +153,11 @@ class GeneratedContentResourcesTest {
             }
         }
         for (String canonical : CANONICAL) { // canonical blocks drop themselves
-            assertEquals("roundwood:" + canonical, json(data("loot_tables/blocks/" + canonical + ".json"))
+            assertEquals("roundwood:" + canonical, json(data("loot_table/blocks/" + canonical + ".json"))
                     .getAsJsonArray("pools").get(0).getAsJsonObject().getAsJsonArray("entries").get(0)
                     .getAsJsonObject().get("name").getAsString());
         }
-        assertEquals("roundwood:round_window", json(data("loot_tables/blocks/oak_round_window.json"))
+        assertEquals("roundwood:round_window", json(data("loot_table/blocks/oak_round_window.json"))
                 .getAsJsonArray("pools").get(0).getAsJsonObject().getAsJsonArray("entries").get(0)
                 .getAsJsonObject().get("name").getAsString());
     }

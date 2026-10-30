@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.migration;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
@@ -21,9 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraftforge.event.TickEvent;
 import net.neoforged.neoforge.event.level.ChunkEvent;
-import net.neoforged.fml.LogicalSide;
 import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.HashSet;
@@ -63,7 +63,7 @@ final class LegacyMigrationFixtures {
             tag.putInt("x", pos.getX());
             tag.putInt("y", pos.getY());
             tag.putInt("z", pos.getZ());
-            BlockEntity entity = BlockEntity.loadStatic(pos, helper.getLevel().getBlockState(pos), tag);
+            BlockEntity entity = BlockEntity.loadStatic(pos, helper.getLevel().getBlockState(pos), tag, TestRegistries.get());
             if (entity == null) {
                 throw new IllegalStateException("no block entity loaded from " + snbt);
             }
@@ -124,7 +124,7 @@ final class LegacyMigrationFixtures {
                 ChunkMigrations.onChunkLoad(new ChunkEvent.Load(chunk, false));
             }
         }
-        ChunkMigrations.onLevelTick(new TickEvent.LevelTickEvent(LogicalSide.SERVER, TickEvent.Phase.END, level, () -> true));
+        ChunkMigrations.onLevelTick(new net.neoforged.neoforge.event.tick.LevelTickEvent.Post(() -> true, level));
     }
 
     static boolean isCanonicalDoor(BlockState state) {

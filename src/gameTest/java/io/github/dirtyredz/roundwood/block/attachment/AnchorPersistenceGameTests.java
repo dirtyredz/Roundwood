@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.attachment;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
@@ -139,28 +141,28 @@ public final class AnchorPersistenceGameTests {
     @GameTest(template = TEMPLATE)
     public static void doorKeySetsDefaultAndStyled(GameTestHelper helper) {
         RoundDoorBlockEntity door = door(helper);
-        assertKeys("untrimmed default door saved", door.saveWithoutMetadata());
-        assertKeys("untrimmed default door update", door.getUpdateTag(), io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore.TAG, io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
+        assertKeys("untrimmed default door saved", door.saveWithoutMetadata(TestRegistries.get()));
+        assertKeys("untrimmed default door update", door.getUpdateTag(TestRegistries.get()), io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore.TAG, io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
         door.setAppearance(BLUE);
-        assertKeys("painted door saved", door.saveWithoutMetadata(), AppearanceNbt.TAG);
-        assertKeys("painted door update", door.getUpdateTag(), io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore.TAG, io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, AppearanceNbt.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
+        assertKeys("painted door saved", door.saveWithoutMetadata(TestRegistries.get()), AppearanceNbt.TAG);
+        assertKeys("painted door update", door.getUpdateTag(TestRegistries.get()), io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore.TAG, io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, AppearanceNbt.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
         check(door.setTrims(front(BRICK)), "trims refused");
         door.setCamouflage(CamouflageData.free(Blocks.STONE.defaultBlockState()));
-        assertKeys("styled door saved", door.saveWithoutMetadata(), AppearanceNbt.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
-        assertKeys("styled door update", door.getUpdateTag(), io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore.TAG, io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, AppearanceNbt.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
+        assertKeys("styled door saved", door.saveWithoutMetadata(TestRegistries.get()), AppearanceNbt.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
+        assertKeys("styled door update", door.getUpdateTag(TestRegistries.get()), io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStore.TAG, io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG, AppearanceNbt.TAG, CamouflageData.TAG, DoorTrimNbt.TAG);
         helper.succeed();
     }
 
     @GameTest(template = TEMPLATE)
     public static void archwayKeySetsDefaultAndStyled(GameTestHelper helper) {
         ArchwayBlockEntity archway = archway(helper);
-        assertKeys("untrimmed default archway saved", archway.saveWithoutMetadata());
-        assertKeys("untrimmed default archway update", archway.getUpdateTag(), ArchwayTrimNbt.TAG);
+        assertKeys("untrimmed default archway saved", archway.saveWithoutMetadata(TestRegistries.get()));
+        assertKeys("untrimmed default archway update", archway.getUpdateTag(TestRegistries.get()), ArchwayTrimNbt.TAG);
         archway.setAppearance(BRICK);
-        assertKeys("styled archway saved", archway.saveWithoutMetadata(), AppearanceNbt.TAG);
+        assertKeys("styled archway saved", archway.saveWithoutMetadata(TestRegistries.get()), AppearanceNbt.TAG);
         check(archway.setTrims(front(SPRUCE)), "trims refused");
-        assertKeys("trimmed archway saved", archway.saveWithoutMetadata(), AppearanceNbt.TAG, ArchwayTrimNbt.TAG);
-        assertKeys("trimmed archway update", archway.getUpdateTag(), AppearanceNbt.TAG, ArchwayTrimNbt.TAG);
+        assertKeys("trimmed archway saved", archway.saveWithoutMetadata(TestRegistries.get()), AppearanceNbt.TAG, ArchwayTrimNbt.TAG);
+        assertKeys("trimmed archway update", archway.getUpdateTag(TestRegistries.get()), AppearanceNbt.TAG, ArchwayTrimNbt.TAG);
         helper.succeed();
     }
 
@@ -168,16 +170,16 @@ public final class AnchorPersistenceGameTests {
     public static void windowKeySetsDefaultAndStyled(GameTestHelper helper) {
         RoundWindowBlockEntity window = window(helper);
         BlockPos abs = helper.absolutePos(WINDOW_AT);
-        assertKeys("default window saved", window.saveWithoutMetadata(), WindowTrimNbt.TAG);
-        check(window.saveWithoutMetadata().getCompound(WindowTrimNbt.TAG).getInt("Version") == 2
-                && !window.saveWithoutMetadata().getCompound(WindowTrimNbt.TAG).contains("Front"), "empty perimeter payload v2");
-        assertKeys("default window update", window.getUpdateTag(), WindowTrimNbt.TAG, WindowSillNbt.TAG, "WindowCrossBeams");
+        assertKeys("default window saved", window.saveWithoutMetadata(TestRegistries.get()), WindowTrimNbt.TAG);
+        check(window.saveWithoutMetadata(TestRegistries.get()).getCompound(WindowTrimNbt.TAG).getInt("Version") == 2
+                && !window.saveWithoutMetadata(TestRegistries.get()).getCompound(WindowTrimNbt.TAG).contains("Front"), "empty perimeter payload v2");
+        assertKeys("default window update", window.getUpdateTag(TestRegistries.get()), WindowTrimNbt.TAG, WindowSillNbt.TAG, "WindowCrossBeams");
         check(WindowTrimActions.install(helper.getLevel(), abs, TrimSlot.SILL, AttachmentFace.FRONT, BRICK), "sill");
-        assertKeys("sill window saved", window.saveWithoutMetadata(), WindowTrimNbt.TAG, WindowSillNbt.TAG);
+        assertKeys("sill window saved", window.saveWithoutMetadata(TestRegistries.get()), WindowTrimNbt.TAG, WindowSillNbt.TAG);
         window.setAppearance(BLUE);
         window.setGlass(Optional.of(DyeColor.RED));
-        assertKeys("styled window saved", window.saveWithoutMetadata(), AppearanceNbt.TAG, WindowGlassNbt.TAG, WindowTrimNbt.TAG, WindowSillNbt.TAG);
-        assertKeys("styled window update", window.getUpdateTag(), AppearanceNbt.TAG, WindowGlassNbt.TAG, WindowTrimNbt.TAG, WindowSillNbt.TAG, "WindowCrossBeams");
+        assertKeys("styled window saved", window.saveWithoutMetadata(TestRegistries.get()), AppearanceNbt.TAG, WindowGlassNbt.TAG, WindowTrimNbt.TAG, WindowSillNbt.TAG);
+        assertKeys("styled window update", window.getUpdateTag(TestRegistries.get()), AppearanceNbt.TAG, WindowGlassNbt.TAG, WindowTrimNbt.TAG, WindowSillNbt.TAG, "WindowCrossBeams");
         helper.setBlock(WINDOW_AT, Blocks.AIR);
         helper.succeed();
     }
@@ -185,11 +187,11 @@ public final class AnchorPersistenceGameTests {
     @GameTest(template = TEMPLATE)
     public static void frameKeySetsDefaultAndStyled(GameTestHelper helper) {
         RoundTrimBlockEntity frame = frame(helper);
-        assertKeys("default frame saved", frame.saveWithoutMetadata());
-        assertKeys("default frame update", frame.getUpdateTag());
+        assertKeys("default frame saved", frame.saveWithoutMetadata(TestRegistries.get()));
+        assertKeys("default frame update", frame.getUpdateTag(TestRegistries.get()));
         frame.setAppearance(BRICK);
-        assertKeys("styled frame saved", frame.saveWithoutMetadata(), AppearanceNbt.TAG);
-        assertKeys("styled frame update", frame.getUpdateTag(), AppearanceNbt.TAG);
+        assertKeys("styled frame saved", frame.saveWithoutMetadata(TestRegistries.get()), AppearanceNbt.TAG);
+        assertKeys("styled frame update", frame.getUpdateTag(TestRegistries.get()), AppearanceNbt.TAG);
         helper.succeed();
     }
 
@@ -221,7 +223,7 @@ public final class AnchorPersistenceGameTests {
     }
 
     private static void load(BlockEntity entity, CompoundTag tag) {
-        entity.load(tag);
+        entity.loadWithComponents(tag, TestRegistries.get());
     }
 
     @GameTest(template = TEMPLATE)
@@ -270,10 +272,10 @@ public final class AnchorPersistenceGameTests {
                     anchor.name() + ": masonry read as " + anchor.look().apply(fresh));
 
             anchor.set().accept(anchor.placed(), BLUE);
-            check(anchor.placed().saveWithoutMetadata().contains(AppearanceNbt.TAG), anchor.name() + ": a painted look is not saved");
+            check(anchor.placed().saveWithoutMetadata(TestRegistries.get()).contains(AppearanceNbt.TAG), anchor.name() + ": a painted look is not saved");
             anchor.set().accept(anchor.placed(), def);
-            check(!anchor.placed().saveWithoutMetadata().contains(AppearanceNbt.TAG), anchor.name() + ": the default look was stored");
-            check(!anchor.placed().getUpdateTag().contains(AppearanceNbt.TAG), anchor.name() + ": the default look was sent");
+            check(!anchor.placed().saveWithoutMetadata(TestRegistries.get()).contains(AppearanceNbt.TAG), anchor.name() + ": the default look was stored");
+            check(!anchor.placed().getUpdateTag(TestRegistries.get()).contains(AppearanceNbt.TAG), anchor.name() + ": the default look was sent");
         }
         helper.setBlock(WINDOW_AT, Blocks.AIR);
         helper.succeed();
@@ -287,14 +289,14 @@ public final class AnchorPersistenceGameTests {
         CompoundTag tag = future(DoorTrimNbt.TAG, 99);
         CompoundTag payload = tag.getCompound(DoorTrimNbt.TAG).copy();
         RoundDoorBlockEntity unknown = new RoundDoorBlockEntity(ModBlockEntities.roundDoor(), door.getBlockPos(), door.getBlockState());
-        unknown.load(tag);
+        unknown.loadWithComponents(tag, TestRegistries.get());
         check(unknown.trims().equals(FaceTrims.NONE) && !unknown.trimsEditable(), "an unknown payload was read or is editable");
         check(!unknown.setTrims(front(BRICK)), "an unknown payload accepted an edit");
-        check(unknown.saveWithoutMetadata().getCompound(DoorTrimNbt.TAG).equals(payload), "the unknown payload was not kept");
-        CompoundTag update = unknown.getUpdateTag().getCompound(DoorTrimNbt.TAG);
+        check(unknown.saveWithoutMetadata(TestRegistries.get()).getCompound(DoorTrimNbt.TAG).equals(payload), "the unknown payload was not kept");
+        CompoundTag update = unknown.getUpdateTag(TestRegistries.get()).getCompound(DoorTrimNbt.TAG);
         check(update.getInt("Version") == DoorTrimNbt.VERSION && !update.contains("Front") && !update.contains("Back") && !update.contains("Mystery"),
                 "clients were sent the unknown payload: " + update);
-        unknown.load(new CompoundTag());
+        unknown.loadWithComponents(new CompoundTag(), TestRegistries.get());
         check(unknown.trimsEditable() && unknown.setTrims(front(BRICK)), "loading a clean tag did not release custody");
         helper.succeed();
     }
@@ -305,16 +307,16 @@ public final class AnchorPersistenceGameTests {
         CompoundTag perimeterTag = future(WindowTrimNbt.TAG, 99);
         CompoundTag perimeterPayload = perimeterTag.getCompound(WindowTrimNbt.TAG).copy();
         RoundWindowBlockEntity unknownPerimeter = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), base.getBlockPos(), base.getBlockState());
-        unknownPerimeter.load(perimeterTag);
+        unknownPerimeter.loadWithComponents(perimeterTag, TestRegistries.get());
         check(!unknownPerimeter.trimsEditable() && unknownPerimeter.trimsEditable(TrimSlot.SILL), "perimeter custody flags");
         check(!unknownPerimeter.trims().any(), "an unknown perimeter was read");
         check(!unknownPerimeter.setTrims(front(BRICK)) && !unknownPerimeter.setTrims(TrimSlot.PERIMETER, front(BRICK)), "perimeter edit accepted");
         check(unknownPerimeter.setTrims(TrimSlot.SILL, front(BRICK)), "sill edit refused beside an unknown perimeter");
-        CompoundTag saved = unknownPerimeter.saveWithoutMetadata();
+        CompoundTag saved = unknownPerimeter.saveWithoutMetadata(TestRegistries.get());
         check(saved.getCompound(WindowTrimNbt.TAG).equals(perimeterPayload), "the unknown perimeter payload was not kept");
         check(saved.getCompound(WindowSillNbt.TAG).getInt("Version") == WindowSillNbt.VERSION && saved.getCompound(WindowSillNbt.TAG).contains("Front"),
                 "the sill was not saved beside an unknown perimeter");
-        CompoundTag update = unknownPerimeter.getUpdateTag();
+        CompoundTag update = unknownPerimeter.getUpdateTag(TestRegistries.get());
         check(update.getCompound(WindowTrimNbt.TAG).getInt("Version") == WindowTrimNbt.VERSION
                 && !update.getCompound(WindowTrimNbt.TAG).contains("Front") && !update.getCompound(WindowTrimNbt.TAG).contains("Mystery"),
                 "clients were sent the unknown perimeter payload");
@@ -323,14 +325,14 @@ public final class AnchorPersistenceGameTests {
         CompoundTag sillTag = future(WindowSillNbt.TAG, 99);
         CompoundTag sillPayload = sillTag.getCompound(WindowSillNbt.TAG).copy();
         RoundWindowBlockEntity unknownSill = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), base.getBlockPos(), base.getBlockState());
-        unknownSill.load(sillTag);
+        unknownSill.loadWithComponents(sillTag, TestRegistries.get());
         check(unknownSill.trimsEditable() && !unknownSill.trimsEditable(TrimSlot.SILL), "sill custody flags");
         check(!unknownSill.setTrims(TrimSlot.SILL, front(BRICK)), "sill edit accepted over an unknown payload");
         check(unknownSill.setTrims(TrimSlot.PERIMETER, front(SPRUCE)), "perimeter edit refused beside an unknown sill");
-        saved = unknownSill.saveWithoutMetadata();
+        saved = unknownSill.saveWithoutMetadata(TestRegistries.get());
         check(saved.getCompound(WindowSillNbt.TAG).equals(sillPayload), "the unknown sill payload was not kept");
         check(saved.getCompound(WindowTrimNbt.TAG).contains("Front"), "the perimeter was not saved beside an unknown sill");
-        update = unknownSill.getUpdateTag();
+        update = unknownSill.getUpdateTag(TestRegistries.get());
         check(update.getCompound(WindowSillNbt.TAG).getInt("Version") == WindowSillNbt.VERSION
                 && !update.getCompound(WindowSillNbt.TAG).contains("Front") && !update.getCompound(WindowSillNbt.TAG).contains("Mystery"),
                 "clients were sent the unknown sill payload");
@@ -347,21 +349,21 @@ public final class AnchorPersistenceGameTests {
         FaceTrims sill = FaceTrims.NONE.with(AttachmentFace.BACK, SPRUCE);
         RoundWindowBlockEntity source = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), base.getBlockPos(), base.getBlockState());
         check(source.setTrims(TrimSlot.PERIMETER, perimeter) && source.setTrims(TrimSlot.SILL, sill), "setup");
-        CompoundTag saved = source.saveWithoutMetadata();
+        CompoundTag saved = source.saveWithoutMetadata(TestRegistries.get());
         RoundWindowBlockEntity copy = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), base.getBlockPos(), base.getBlockState());
-        copy.load(saved);
+        copy.loadWithComponents(saved, TestRegistries.get());
         check(copy.trims().equals(perimeter) && copy.trims(TrimSlot.SILL).equals(sill), "both slots round trip");
 
         CompoundTag perimeterOnly = saved.copy();
         perimeterOnly.remove(WindowSillNbt.TAG);
-        copy.load(perimeterOnly);
+        copy.loadWithComponents(perimeterOnly, TestRegistries.get());
         check(copy.trims().equals(perimeter) && !copy.trims(TrimSlot.SILL).any(), "a missing sill payload kept the old sill or lost the perimeter");
 
         CompoundTag sillOnly = new CompoundTag();
         sillOnly.put(WindowSillNbt.TAG, saved.getCompound(WindowSillNbt.TAG).copy());
-        copy.load(sillOnly);
+        copy.loadWithComponents(sillOnly, TestRegistries.get());
         check(!copy.trims().any() && copy.trims(TrimSlot.SILL).equals(sill), "a missing perimeter payload (state not trimmed) kept the old perimeter");
-        check(copy.saveWithoutMetadata().getCompound(WindowTrimNbt.TAG).getInt("Version") == WindowTrimNbt.VERSION, "empty perimeter not written");
+        check(copy.saveWithoutMetadata(TestRegistries.get()).getCompound(WindowTrimNbt.TAG).getInt("Version") == WindowTrimNbt.VERSION, "empty perimeter not written");
         helper.succeed();
     }
 
@@ -372,31 +374,31 @@ public final class AnchorPersistenceGameTests {
         RoundDoorBlockEntity door = door(helper);
         BlockState stone = Blocks.STONE.defaultBlockState();
         door.setCamouflage(CamouflageData.paid(stone, new ItemStack(Items.STONE)));
-        check(door.saveWithoutMetadata().getCompound(CamouflageData.TAG).contains("Refund"), "disk camouflage lacks the refund");
-        CompoundTag update = door.getUpdateTag().getCompound(CamouflageData.TAG);
+        check(door.saveWithoutMetadata(TestRegistries.get()).getCompound(CamouflageData.TAG).contains("Refund"), "disk camouflage lacks the refund");
+        CompoundTag update = door.getUpdateTag(TestRegistries.get()).getCompound(CamouflageData.TAG);
         check(update.contains("Material") && !update.contains("Refund"), "update camouflage: " + update);
 
         RoundDoorBlockEntity copy = new RoundDoorBlockEntity(ModBlockEntities.roundDoor(), door.getBlockPos(), door.getBlockState());
-        copy.load(door.saveWithoutMetadata());
+        copy.loadWithComponents(door.saveWithoutMetadata(TestRegistries.get()), TestRegistries.get());
         check(copy.camouflage().map(CamouflageData::paid).orElse(false), "the refund did not survive a save");
-        copy.load(door.getUpdateTag());
+        copy.loadWithComponents(door.getUpdateTag(TestRegistries.get()), TestRegistries.get());
         check(copy.camouflage().isPresent() && !copy.camouflage().get().paid(), "a client copy kept a refund");
 
         Optional<CamouflageData> taken = door.takeCamouflage();
         check(taken.isPresent() && taken.get().paid() && door.camouflage().isEmpty(), "takeCamouflage did not return and clear");
-        check(!door.saveWithoutMetadata().contains(CamouflageData.TAG), "a taken camouflage was still saved");
-        check(door.getUpdateTag().getCompound(CamouflageData.TAG).isEmpty() && door.getUpdateTag().contains(CamouflageData.TAG),
+        check(!door.saveWithoutMetadata(TestRegistries.get()).contains(CamouflageData.TAG), "a taken camouflage was still saved");
+        check(door.getUpdateTag(TestRegistries.get()).getCompound(CamouflageData.TAG).isEmpty() && door.getUpdateTag(TestRegistries.get()).contains(CamouflageData.TAG),
                 "a cleared camouflage is not an explicit empty compound");
         check(door.takeCamouflage().isEmpty(), "a second take returned something");
-        copy.load(door.getUpdateTag());
+        copy.loadWithComponents(door.getUpdateTag(TestRegistries.get()), TestRegistries.get());
         check(copy.camouflage().isEmpty(), "the clear did not reach the client copy");
 
         DoorSwing swing = copy.swing();
         swing.retarget(true, 100);
         check(swing.progress(1000) == 1, "setup swing");
-        copy.load(door.saveWithoutMetadata());
-        copy.load(door.getUpdateTag());
-        copy.load(new CompoundTag());
+        copy.loadWithComponents(door.saveWithoutMetadata(TestRegistries.get()), TestRegistries.get());
+        copy.loadWithComponents(door.getUpdateTag(TestRegistries.get()), TestRegistries.get());
+        copy.loadWithComponents(new CompoundTag(), TestRegistries.get());
         check(copy.swing() == swing && swing.progress(1000) == 1 && !swing.moving(1000), "a load replaced or disturbed the swing");
         helper.succeed();
     }
@@ -411,25 +413,25 @@ public final class AnchorPersistenceGameTests {
         RoundWindowBlockEntity viaPacket = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), base.getBlockPos(), trimmed);
         check(viaPacket.setTrims(front(BRICK)) && viaPacket.setTrims(TrimSlot.SILL, front(BRICK)), "setup");
         // An empty tag is how a packet without a tag is made: the packet stores it as null.
-        ClientboundBlockEntityDataPacket packet = ClientboundBlockEntityDataPacket.create(viaPacket, entity -> new CompoundTag());
+        ClientboundBlockEntityDataPacket packet = ClientboundBlockEntityDataPacket.create(viaPacket, (entity, registries) -> new CompoundTag());
         check(packet.getTag() == null, "setup: the packet carries a tag");
-        viaPacket.onDataPacket(null, packet);
+        viaPacket.onDataPacket(null, packet, TestRegistries.get());
         check(viaPacket.trims().equals(FaceTrims.NONE) && viaPacket.trims(TrimSlot.SILL).equals(FaceTrims.NONE),
                 "a null packet kept or invented trims: " + viaPacket.trims() + " / " + viaPacket.trims(TrimSlot.SILL));
 
         RoundWindowBlockEntity explicit = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), base.getBlockPos(), trimmed);
         CompoundTag emptyPayload = new CompoundTag();
         WindowTrimNbt.write(emptyPayload, FaceTrims.NONE);
-        explicit.load(emptyPayload);
+        explicit.loadWithComponents(emptyPayload, TestRegistries.get());
         check(explicit.trims().equals(FaceTrims.NONE), "an explicit empty perimeter read as trims on a trimmed state");
 
         RoundWindowBlockEntity legacy = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), base.getBlockPos(), trimmed);
-        legacy.load(new CompoundTag());
+        legacy.loadWithComponents(new CompoundTag(), TestRegistries.get());
         check(legacy.trims().equals(FaceTrims.both(Appearance.DEFAULT)), "the 0.7.0 reading of a trimmed state: " + legacy.trims());
         check(!legacy.trims(TrimSlot.SILL).any(), "the legacy reading invented a sill");
 
         RoundWindowBlockEntity untrimmedLegacy = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), base.getBlockPos(), base.getBlockState());
-        untrimmedLegacy.load(new CompoundTag());
+        untrimmedLegacy.loadWithComponents(new CompoundTag(), TestRegistries.get());
         check(untrimmedLegacy.trims().equals(FaceTrims.NONE), "a missing payload on an untrimmed state read as trims");
         helper.setBlock(WINDOW_AT, Blocks.AIR);
         helper.succeed();
@@ -443,24 +445,24 @@ public final class AnchorPersistenceGameTests {
         ArchwayBlockEntity archway = archway(helper);
         RoundWindowBlockEntity window = window(helper);
 
-        door.load(future(DoorTrimNbt.TAG, 99));
-        CompoundTag doorBefore = door.saveWithoutMetadata();
+        door.loadWithComponents(future(DoorTrimNbt.TAG, 99), TestRegistries.get());
+        CompoundTag doorBefore = door.saveWithoutMetadata(TestRegistries.get());
         check(!door.setTrims(front(BRICK)) && !door.setTrims(FaceTrims.NONE), "door accepted a write");
-        check(door.saveWithoutMetadata().equals(doorBefore) && door.trims().equals(FaceTrims.NONE), "a refused door write changed the entity");
+        check(door.saveWithoutMetadata(TestRegistries.get()).equals(doorBefore) && door.trims().equals(FaceTrims.NONE), "a refused door write changed the entity");
 
-        archway.load(future(ArchwayTrimNbt.TAG, 99));
-        CompoundTag archwayBefore = archway.saveWithoutMetadata();
+        archway.loadWithComponents(future(ArchwayTrimNbt.TAG, 99), TestRegistries.get());
+        CompoundTag archwayBefore = archway.saveWithoutMetadata(TestRegistries.get());
         check(!archway.setTrims(front(BRICK)), "archway accepted a write");
-        check(archway.saveWithoutMetadata().equals(archwayBefore), "a refused archway write changed the entity");
+        check(archway.saveWithoutMetadata(TestRegistries.get()).equals(archwayBefore), "a refused archway write changed the entity");
 
         CompoundTag windowTag = future(WindowTrimNbt.TAG, 99);
         windowTag.put(WindowSillNbt.TAG, future(WindowSillNbt.TAG, 99).getCompound(WindowSillNbt.TAG));
-        window.load(windowTag);
-        CompoundTag windowBefore = window.saveWithoutMetadata();
+        window.loadWithComponents(windowTag, TestRegistries.get());
+        CompoundTag windowBefore = window.saveWithoutMetadata(TestRegistries.get());
         check(!window.setTrims(front(BRICK)) && !window.setTrims(TrimSlot.SILL, front(BRICK)), "window accepted a write");
         check(!WindowTrimActions.install(helper.getLevel(), helper.absolutePos(WINDOW_AT), TrimSlot.SILL, AttachmentFace.FRONT, BRICK),
                 "the production install fitted over an unknown payload");
-        check(window.saveWithoutMetadata().equals(windowBefore), "a refused window write changed the entity");
+        check(window.saveWithoutMetadata(TestRegistries.get()).equals(windowBefore), "a refused window write changed the entity");
         helper.setBlock(WINDOW_AT, Blocks.AIR);
         helper.succeed();
     }

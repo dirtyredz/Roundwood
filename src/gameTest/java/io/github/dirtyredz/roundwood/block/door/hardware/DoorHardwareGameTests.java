@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.hardware;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.assembly.*;
 import io.github.dirtyredz.roundwood.block.door.interaction.*;
@@ -45,8 +47,8 @@ public final class DoorHardwareGameTests {
         var door=placeOakDoor(helper,new BlockPos(3,1,3),Direction.NORTH,DoorHingeSide.LEFT,"opaque_hardware");
         var entity=anchorEntity(helper,door);
         var raw=new CompoundTag();raw.putInt("Version",42);raw.putString("Future","keep");
-        var saved=entity.saveWithFullMetadata();saved.put("DoorHardware",raw.copy());entity.load(saved);
-        check(raw.equals(entity.saveWithFullMetadata().get("DoorHardware")),"unknown hardware custody lost on reload");
+        var saved=entity.saveWithFullMetadata(TestRegistries.get());saved.put("DoorHardware",raw.copy());entity.loadWithComponents(saved, TestRegistries.get());
+        check(raw.equals(entity.saveWithFullMetadata(TestRegistries.get()).get("DoorHardware")),"unknown hardware custody lost on reload");
         helper.succeed();
     }
 
@@ -93,7 +95,7 @@ public final class DoorHardwareGameTests {
                 check(level.getBlockState(door.anchor()).getValue(DoorBlock.OPEN)==open,"hardware toggled door");
                 rays++;
             }
-            var saved=entity.saveWithFullMetadata();var looks=entity.hardware();entity.load(saved);
+            var saved=entity.saveWithFullMetadata(TestRegistries.get());var looks=entity.hardware();entity.loadWithComponents(saved, TestRegistries.get());
             check(entity.hardware().equals(looks),"hardware reload");
             var item=DoorHardwareStacks.decorate(new ItemStack(block),entity);
             check(DoorHardwareStacks.readable(item) && DoorHardwareStacks.read(item).equals(looks),"item codec");
@@ -159,9 +161,9 @@ public final class DoorHardwareGameTests {
         check(placeDoor(helper,player,picked,relative,DoorHingeSide.LEFT).consumesAction(),"replacement refused");
         entity=anchorEntity(helper,door);check(entity.hardware().equals(expected),"placement lost slots");
         var raw=new CompoundTag();raw.putInt("Version",42);raw.putString("Future","keep");
-        var saved=entity.saveWithFullMetadata();saved.put(DoorHardwareStore.TAG,raw);entity.load(saved);
+        var saved=entity.saveWithFullMetadata(TestRegistries.get());saved.put(DoorHardwareStore.TAG,raw);entity.loadWithComponents(saved, TestRegistries.get());
         var opaque=oakDoor().getCloneItemStack(level.getBlockState(door.anchor()),hit,level,door.anchor(),player);
-        check(raw.equals(opaque.getTag().get(DoorHardwareStore.TAG)) && !DoorHardwareStacks.readable(opaque),"opaque item custody");
+        check(raw.equals(io.github.dirtyredz.roundwood.appearance.item.StackPayloads.custom(opaque, DoorHardwareStore.TAG)) && !DoorHardwareStacks.readable(opaque),"opaque item custody");
         level.removeBlock(door.anchor(),false);clearDrops(helper);
         placeDoor(helper,player,opaque,relative,DoorHingeSide.LEFT);
         check(opaque.getCount()==1 && level.getBlockState(door.anchor()).isAir(),"opaque placement was lossy");
@@ -180,7 +182,7 @@ public final class DoorHardwareGameTests {
                 io.github.dirtyredz.roundwood.block.attachment.AttachmentFace.FRONT,AppearanceFixtures.BIRCH),"casing fixture");
         entity.setCamouflage(io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData.paid(
                 net.minecraft.world.level.block.Blocks.STONE.defaultBlockState(),new ItemStack(Items.STONE)));
-        var before=entity.saveWithFullMetadata();
+        var before=entity.saveWithFullMetadata(TestRegistries.get());
         var player=player(helper,"hardware_frame_ray",GameType.SURVIVAL,Direction.NORTH);
         var stack=new ItemStack(Items.GOLD_BLOCK,3);hold(player,stack,ItemStack.EMPTY);
         var eye=point(door,6.5/16,8.5/16,-1);player.setPos(eye.x,eye.y-player.getEyeHeight(),eye.z);
@@ -189,11 +191,11 @@ public final class DoorHardwareGameTests {
         check(proposal.eligible() && proposal.slot()==DoorHardwareSlot.HINGES,"exposed spear target");
         use(helper,player,hit);
         check(stack.getCount()==2 && entity.hardware().hinges().isPresent(),"exposed spear edit");
-        var after=entity.saveWithFullMetadata();after.remove(DoorHardwareStore.TAG);
+        var after=entity.saveWithFullMetadata(TestRegistries.get());after.remove(DoorHardwareStore.TAG);
         check(before.equals(after),"hardware changed body/frame/casing/camouflage custody");
-        var update=entity.getUpdateTag();entity.setHardware(DoorHardware.DEFAULT);entity.handleUpdateTag(update);
+        var update=entity.getUpdateTag(TestRegistries.get());entity.setHardware(DoorHardware.DEFAULT);entity.handleUpdateTag(update, TestRegistries.get());
         check(entity.hardware().hinges().isPresent(),"slot sync");
-        entity.setHardware(DoorHardware.DEFAULT);var clear=entity.getUpdateTag();entity.handleUpdateTag(update);entity.handleUpdateTag(clear);
+        entity.setHardware(DoorHardware.DEFAULT);var clear=entity.getUpdateTag(TestRegistries.get());entity.handleUpdateTag(update, TestRegistries.get());entity.handleUpdateTag(clear, TestRegistries.get());
         check(entity.hardware().equals(DoorHardware.DEFAULT),"explicit sync clear");
         helper.succeed();
     }

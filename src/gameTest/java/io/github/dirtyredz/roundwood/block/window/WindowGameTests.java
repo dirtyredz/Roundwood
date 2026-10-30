@@ -147,7 +147,7 @@ public final class WindowGameTests {
         for (double[] corner : new double[][] {{0.05, 0.05}, {0.95, 0.05}, {0.05, 0.95}, {0.95, 0.95}}) {
             Vec3 from = new Vec3(abs.getX() + corner[0], abs.getY() + corner[1], abs.getZ() - 1.0);
             Vec3 to = new Vec3(abs.getX() + corner[0], abs.getY() + corner[1], abs.getZ() + 2.0);
-            BlockHitResult hit = helper.getLevel().clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, null));
+            BlockHitResult hit = helper.getLevel().clip(new ClipContext(from, to, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, net.minecraft.world.phys.shapes.CollisionContext.empty()));
             check(hit.getType() == HitResult.Type.BLOCK && helper.getLevel().getBlockState(hit.getBlockPos()).is(window()),
                     "ray through the wooden corner " + corner[0] + "," + corner[1] + " missed the window: " + hit);
         }
@@ -282,7 +282,7 @@ public final class WindowGameTests {
         check(at(helper, pos).is(window()) && at(helper, pos).getValue(BlockStateProperties.WATERLOGGED), "not waterlogged in a source");
         // Bucket out, bucket in.
         BlockPos abs = helper.absolutePos(pos);
-        ItemStack bucket = window().pickupBlock(helper.getLevel(), abs, at(helper, pos));
+        ItemStack bucket = window().pickupBlock(null, helper.getLevel(), abs, at(helper, pos));
         check(bucket.is(Items.WATER_BUCKET) && !at(helper, pos).getValue(BlockStateProperties.WATERLOGGED), "bucket did not drain the window");
         check(window().placeLiquid(helper.getLevel(), abs, at(helper, pos), Fluids.WATER.getSource(false)), "bucket did not fill the window");
         check(at(helper, pos).getValue(BlockStateProperties.WATERLOGGED), "window not waterlogged after filling");

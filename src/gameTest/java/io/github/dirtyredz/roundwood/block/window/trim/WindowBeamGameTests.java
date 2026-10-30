@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.window.trim;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.attachment.*;
@@ -77,26 +79,26 @@ public final class WindowBeamGameTests {
         WindowFixtures.setWindow(helper, AT, WindowDesign.plain(WindowProfile.ROUND), WindowPose.upright(Direction.SOUTH, WindowDepth.CENTER));
         var window = entity(helper);
         WindowTrimActions.install(helper.getLevel(), helper.absolutePos(AT), TrimSlot.CROSS_BEAMS, AttachmentFace.BACK, AppearanceFixtures.SPRUCE);
-        var disk = window.saveWithFullMetadata();
+        var disk = window.saveWithFullMetadata(TestRegistries.get());
         check(disk.getCompound("WindowTrim").getAllKeys().equals(java.util.Set.of("Version")), "beam-only save invents perimeter trims");
         var copy = new RoundWindowBlockEntity(window.getType(), helper.absolutePos(AT), helper.getBlockState(AT));
-        copy.load(disk);
+        copy.loadWithComponents(disk, TestRegistries.get());
         check(copy.trims().count() == 0 && copy.trims(TrimSlot.CROSS_BEAMS).count() == 1, "beam-only reload");
         WindowAttachmentState.store(helper.getLevel(), helper.absolutePos(AT), window, TrimSlot.CROSS_BEAMS, FaceTrims.NONE);
-        copy.handleUpdateTag(window.getUpdateTag());
+        copy.handleUpdateTag(window.getUpdateTag(TestRegistries.get()), TestRegistries.get());
         check(!copy.trims(TrimSlot.CROSS_BEAMS).any(), "removal packet kept beams");
-        copy.load(disk);
-        copy.onDataPacket(null, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(copy, entity -> new CompoundTag()));
+        copy.loadWithComponents(disk, TestRegistries.get());
+        copy.onDataPacket(null, net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket.create(copy, (entity, registries) -> new CompoundTag()), TestRegistries.get());
         check(!copy.trims(TrimSlot.CROSS_BEAMS).any() && !copy.trims().any(), "tagless update kept attachments");
         CompoundTag future = new CompoundTag();
         future.putInt("Version", 99);
         future.putString("Data", "custody");
         disk.put(WindowBeamNbt.TAG, future);
-        window.load(disk);
+        window.loadWithComponents(disk, TestRegistries.get());
         check(!window.setTrims(TrimSlot.CROSS_BEAMS, FaceTrims.NONE), "edited unknown beam data");
         check(window.setTrims(FaceTrims.both(Appearance.DEFAULT)), "unknown beams blocked perimeter");
-        check(window.saveWithFullMetadata().getCompound(WindowBeamNbt.TAG).equals(future), "unknown beam data lost");
-        check(!window.getUpdateTag().getCompound(WindowBeamNbt.TAG).contains("Data"), "unknown data leaked in update");
+        check(window.saveWithFullMetadata(TestRegistries.get()).getCompound(WindowBeamNbt.TAG).equals(future), "unknown beam data lost");
+        check(!window.getUpdateTag(TestRegistries.get()).getCompound(WindowBeamNbt.TAG).contains("Data"), "unknown data leaked in update");
         helper.succeed();
     }
 
@@ -163,9 +165,9 @@ public final class WindowBeamGameTests {
         neighbour.onChunkUnloaded();
         check(!io.github.dirtyredz.roundwood.block.window.pane.WindowPaneState.neighbours(helper.getLevel(), abs).containsKey(Direction.EAST), "unavailable neighbour culled faces");
         neighbour.onLoad();
-        var disk = neighbour.saveWithFullMetadata();
+        var disk = neighbour.saveWithFullMetadata(TestRegistries.get());
         disk.putString(WindowBeamNbt.TAG, "unsupported");
-        neighbour.load(disk);
+        neighbour.loadWithComponents(disk, TestRegistries.get());
         check(!io.github.dirtyredz.roundwood.block.window.pane.WindowPaneState.neighbours(helper.getLevel(), abs).containsKey(Direction.EAST), "unknown neighbour culled faces");
         helper.succeed();
     }

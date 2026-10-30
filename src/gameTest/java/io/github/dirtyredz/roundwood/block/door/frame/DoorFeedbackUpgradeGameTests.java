@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.frame;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
@@ -36,11 +38,11 @@ public final class DoorFeedbackUpgradeGameTests {
                 check(state.getValue(DoorBlock.OPEN)==(i==3) && state.getValue(DoorBlock.POWERED)==(i==3), "historical power/open " + ids[i] + " " + state);
                 var entity = (RoundDoorBlockEntity) helper.getLevel().getBlockEntity(pos);
                 check(entity.appearance().material().toString().equals("minecraft:spruce_planks"), "historical panel look");
-                var before = entity.saveWithFullMetadata();
+                var before = entity.saveWithFullMetadata(TestRegistries.get());
                 check(before.getCompound("DoorTrim").getCompound("Front").getCompound("RoundwoodAppearance")
                         .getString("Material").equals("minecraft:bricks"), "historical trim");
-                entity.load(before);
-                check(before.equals(entity.saveWithFullMetadata()), "reload changed saved possession");
+                entity.loadWithComponents(before, TestRegistries.get());
+                check(before.equals(entity.saveWithFullMetadata(TestRegistries.get())), "reload changed saved possession");
                 if (i==0) check(entity.camouflage().orElseThrow().paid(), "camouflage refund lost");
                 if (i>=2) {
                     check(entity.arch().isPresent(), "historical fitted top");

@@ -84,8 +84,6 @@ def runtimeViewers = (project.findProperty('withViewers') ?: '').toString().spli
 neoForge {
     version = neo_version
     addModdingDependenciesTo(sourceSets.gameTest)
-    // Pure JUnit tests use Minecraft math, NBT and model types without a game bootstrap.
-    addModdingDependenciesTo(sourceSets.test)
 
     runs {
         configureEach {
@@ -124,6 +122,13 @@ neoForge {
             sourceSet sourceSets.gameTest
         }
     }
+
+    // Unit tests run under FML's JUnit launcher: registries, blocks and items are bootstrapped as in the game,
+    // without a world or a server. Tests still read checked-in resources relative to the project directory.
+    unitTest {
+        enable()
+        testedMod = mods."${mod_id}"
+    }
 }
 
 repositories {
@@ -157,9 +162,10 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    // GeneratedResourcesTest reads the checked-in generated tree relative to the project.
-    workingDir = projectDir
 }
+// GeneratedResourcesTest and friends read the checked-in trees relative to the project. FML's JUnit launcher
+// assigns its own game directory at configuration time, so the project directory is restored just before running.
+tasks.named('test', Test).configure { task -> task.doFirst { task.workingDir = projectDir } }
 
 // Optional compatibility check uses an existing local Sodium jar; never resolves or downloads a mod.
 tasks.register('checkEmbeddium', JavaExec) {

@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.camouflage;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
@@ -71,7 +73,7 @@ public final class CamouflageLifecycleGameTests {
 
     /** The entity's saved tag with its Camouflage compound replaced. */
     private static CompoundTag withCamouflage(RoundDoorBlockEntity entity, CompoundTag camouflage) {
-        CompoundTag tag = entity.saveWithFullMetadata();
+        CompoundTag tag = entity.saveWithFullMetadata(TestRegistries.get());
         tag.put(CamouflageData.TAG, camouflage);
         return tag;
     }
@@ -82,20 +84,20 @@ public final class CamouflageLifecycleGameTests {
         CompoundTag tag = new CompoundTag();
         tag.put("Material", state);
         if (!refund.isEmpty()) {
-            tag.put("Refund", refund.save(new CompoundTag()));
+            tag.put("Refund", refund.save(TestRegistries.get()));
         }
         return tag;
     }
 
     private static void sendUpdate(RoundDoorBlockEntity server, RoundDoorBlockEntity client) {
-        client.onDataPacket(null, ClientboundBlockEntityDataPacket.create(server));
+        client.onDataPacket(null, ClientboundBlockEntityDataPacket.create(server), TestRegistries.get());
     }
 
     @GameTest(template = TEMPLATE)
     public static void camouflageSurvivesASaveLoadRoundTrip(GameTestHelper helper) {
         RoundDoorBlockEntity entity = placed(helper, "camo_roundtrip");
         entity.setCamouflage(paidStone());
-        BlockEntity copy = BlockEntity.loadStatic(entity.getBlockPos(), entity.getBlockState(), entity.saveWithFullMetadata());
+        BlockEntity copy = BlockEntity.loadStatic(entity.getBlockPos(), entity.getBlockState(), entity.saveWithFullMetadata(TestRegistries.get()), TestRegistries.get());
         check(copy instanceof RoundDoorBlockEntity, "saved entity did not load back: " + copy);
         CamouflageData data = ((RoundDoorBlockEntity) copy).camouflage().orElse(null);
         check(data != null, "camouflage lost across the round trip");
@@ -108,9 +110,9 @@ public final class CamouflageLifecycleGameTests {
     public static void aTagWithoutCamouflageLoadsAsNone(GameTestHelper helper) {
         RoundDoorBlockEntity entity = placed(helper, "camo_absent");
         entity.setCamouflage(paidStone());
-        CompoundTag tag = entity.saveWithFullMetadata();
+        CompoundTag tag = entity.saveWithFullMetadata(TestRegistries.get());
         tag.remove(CamouflageData.TAG);
-        entity.load(tag);
+        entity.loadWithComponents(tag, TestRegistries.get());
         check(entity.camouflage().isEmpty(), "a tag without Camouflage kept the old camouflage");
         helper.succeed();
     }
@@ -119,7 +121,7 @@ public final class CamouflageLifecycleGameTests {
     public static void unknownOrInvalidMaterialsLoadAsNone(GameTestHelper helper) {
         RoundDoorBlockEntity entity = placed(helper, "camo_badmaterial");
         for (String material : new String[] {"minecraft:nope", "minecraft:glass"}) {
-            entity.load(withCamouflage(entity, camouflageTag(material, ItemStack.EMPTY)));
+            entity.loadWithComponents(withCamouflage(entity, camouflageTag(material, ItemStack.EMPTY)), TestRegistries.get());
             check(entity.camouflage().isEmpty(), material + " loaded as a camouflage");
         }
         helper.succeed();
@@ -128,7 +130,7 @@ public final class CamouflageLifecycleGameTests {
     @GameTest(template = TEMPLATE)
     public static void aRefundThatDoesNotMatchTheMaterialIsDropped(GameTestHelper helper) {
         RoundDoorBlockEntity entity = placed(helper, "camo_badrefund");
-        entity.load(withCamouflage(entity, camouflageTag("minecraft:stone", new ItemStack(Items.DIAMOND))));
+        entity.loadWithComponents(withCamouflage(entity, camouflageTag("minecraft:stone", new ItemStack(Items.DIAMOND))), TestRegistries.get());
         CamouflageData data = entity.camouflage().orElse(null);
         check(data != null && data.material() == Blocks.STONE.defaultBlockState(), "valid material was not loaded");
         check(!data.paid(), "a mismatched refund was kept: " + data.refund());
@@ -138,11 +140,11 @@ public final class CamouflageLifecycleGameTests {
     @GameTest(template = TEMPLATE)
     public static void updateTagCarriesTheMaterialOnly(GameTestHelper helper) {
         RoundDoorBlockEntity entity = placed(helper, "camo_updatetag");
-        CompoundTag empty = entity.getUpdateTag();
+        CompoundTag empty = entity.getUpdateTag(TestRegistries.get());
         check(empty.contains(CamouflageData.TAG) && empty.getCompound(CamouflageData.TAG).isEmpty(),
                 "an uncamouflaged update tag must carry an empty Camouflage compound: " + empty);
         entity.setCamouflage(paidStone());
-        CompoundTag camouflage = entity.getUpdateTag().getCompound(CamouflageData.TAG);
+        CompoundTag camouflage = entity.getUpdateTag(TestRegistries.get()).getCompound(CamouflageData.TAG);
         check(camouflage.contains("Material"), "update tag has no material");
         check(!camouflage.contains("Refund"), "update tag leaks the refund: " + camouflage);
         helper.succeed();
@@ -179,7 +181,7 @@ public final class CamouflageLifecycleGameTests {
         entity.setCamouflage(paidStone());
         BlockState bricks = Blocks.BRICKS.defaultBlockState();
         entity.setCamouflage(CamouflageData.paid(bricks, new ItemStack(Items.BRICKS)));
-        entity.load(entity.saveWithFullMetadata());
+        entity.loadWithComponents(entity.saveWithFullMetadata(TestRegistries.get()), TestRegistries.get());
         check(entity.camouflage().map(CamouflageData::material).orElse(null) == bricks, "reload did not show the new material");
         RoundDoorBlockEntity client = clientCopy(entity);
         sendUpdate(entity, client);
@@ -196,7 +198,7 @@ public final class CamouflageLifecycleGameTests {
         double now = 1000.0;
         double before = open.swing().progress(now);
         open.setCamouflage(paidStone());
-        open.load(open.saveWithFullMetadata());
+        open.loadWithComponents(open.saveWithFullMetadata(TestRegistries.get()), TestRegistries.get());
         check(open.swing().progress(now) == before, "load changed the swing: " + before + " -> " + open.swing().progress(now));
         RoundDoorBlockEntity client = clientCopy(open);
         double fresh = client.swing().progress(now);

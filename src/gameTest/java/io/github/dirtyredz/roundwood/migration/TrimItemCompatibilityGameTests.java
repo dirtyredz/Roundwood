@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.migration;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
@@ -77,8 +79,8 @@ public final class TrimItemCompatibilityGameTests {
 
     private static void checkSame(ItemStack before, ItemStack after, String where) {
         check(BuiltInRegistries.ITEM.getKey(after.getItem()).equals(BuiltInRegistries.ITEM.getKey(before.getItem()))
-                && after.getCount() == before.getCount() && ItemStack.isSameItemSameTags(before, after),
-                where + ": " + before + " " + before.getTag() + " came back as " + after + " " + after.getTag());
+                && after.getCount() == before.getCount() && ItemStack.isSameItemSameComponents(before, after),
+                where + ": " + before + " " + before.getComponentsPatch() + " came back as " + after + " " + after.getComponentsPatch());
     }
 
     @GameTest(template = TEMPLATE)
@@ -89,11 +91,11 @@ public final class TrimItemCompatibilityGameTests {
         for (int i = 0; i < stacks.size(); i++) {
             chest.setItem(i, stacks.get(i).copy());
         }
-        CompoundTag saved = chest.saveWithFullMetadata();
+        CompoundTag saved = chest.saveWithFullMetadata(TestRegistries.get());
         helper.setBlock(CHEST, Blocks.AIR);
         helper.setBlock(CHEST, Blocks.CHEST);
         ChestBlockEntity reloaded = (ChestBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(CHEST));
-        reloaded.load(saved);
+        reloaded.loadWithComponents(saved, TestRegistries.get());
         for (int i = 0; i < stacks.size(); i++) {
             checkSame(stacks.get(i), reloaded.getItem(i), "chest slot " + i);
         }
@@ -115,8 +117,8 @@ public final class TrimItemCompatibilityGameTests {
     public static void aReloadedOldStackFitsAndRecoversAsTheUniversalTrim(GameTestHelper helper) {
         ItemStack old = new ItemStack(LegacyContent.windowTrim(), 2);
         AppearanceStacks.write(old, BRICKS);
-        ItemStack stack = ItemStack.of(old.save(new CompoundTag()));
-        check(stack.is(LegacyContent.windowTrim()) && AppearanceStacks.read(stack).equals(BRICKS), "reloaded " + stack + " " + stack.getTag());
+        ItemStack stack = ItemStack.parseOptional(TestRegistries.get(), (CompoundTag) old.save(TestRegistries.get()));
+        check(stack.is(LegacyContent.windowTrim()) && AppearanceStacks.read(stack).equals(BRICKS), "reloaded " + stack + " " + stack.getComponentsPatch());
         WindowPose pose = WindowPose.upright(Direction.SOUTH, WindowDepth.CENTER);
         BlockState window = ShowcaseWindow.of(WindowDesign.plain(WindowProfile.ROUND), pose, 0, 0, 0, Appearance.DEFAULT).state();
         helper.setBlock(WINDOW, window);

@@ -127,7 +127,7 @@ public final class WindowPlacementGameTests {
         floor(helper);
         ServerPlayer player = player(helper, "partial", GameType.CREATIVE, Direction.NORTH);
         BlockPos grass = new BlockPos(1, 1, 1);
-        helper.setBlock(grass, Blocks.GRASS);
+        helper.setBlock(grass, Blocks.SHORT_GRASS);
         placeAndCompare(helper, player, WindowFixtures.hit(helper, grass, Direction.UP, 0.5, 0.05), grass, WindowPosition.NORTH,
                 "tall grass");
         BlockPos slab = new BlockPos(4, 1, 1);

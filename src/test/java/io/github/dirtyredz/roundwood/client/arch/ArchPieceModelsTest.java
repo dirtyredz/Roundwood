@@ -11,7 +11,6 @@ import io.github.dirtyredz.roundwood.testsupport.MinecraftBootstrap;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -28,7 +27,7 @@ class ArchPieceModelsTest {
     }
 
     @Test void fittedRebatesBakeWithBoundedDonorUvsAndOutwardWinding() {
-        try(var contents=new SpriteContents(TEXTURE,new FrameSize(16,16),new NativeImage(16,16,false),AnimationMetadataSection.EMPTY)) {
+        try(var contents=new SpriteContents(TEXTURE,new FrameSize(16,16),new NativeImage(16,16,false),net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var sprite=new Sprite(contents);
             for(var door:io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign.values())
                 for(var thickness:io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness.values())
@@ -49,7 +48,7 @@ class ArchPieceModelsTest {
     }
 
     @Test void thinBodiesStayExactAndCasingFacesSeparateWithoutTextureBleed() {
-        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), AnimationMetadataSection.EMPTY)) {
+        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var sprite = new Sprite(contents);
             for (var design : ArchPieceDesign.values()) for (var side : Side.values()) for (var cell : ArchPieceCell.of(design))
                 for (var depth : io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth.values())
@@ -73,7 +72,7 @@ class ArchPieceModelsTest {
     }
 
     @Test void bodyAndCasingsTileTheDonorAtBlockScaleInEveryFacingAndSide() {
-        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), AnimationMetadataSection.EMPTY)) {
+        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var sprite = new Sprite(contents);
             var seen = EnumSet.noneOf(Direction.class);
             for (var design : ArchPieceDesign.values()) for (var side : Side.values()) for (var cell : ArchPieceCell.of(design))
@@ -100,7 +99,7 @@ class ArchPieceModelsTest {
     }
 
     @Test void masonryBodyCasingsAndItemsShareTheSamePartitionAndUvScale() {
-        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), AnimationMetadataSection.EMPTY)) {
+        try (var contents = new SpriteContents(TEXTURE, new FrameSize(16, 16), new NativeImage(16, 16, false), net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var sprite = new Sprite(contents);
             int mortarQuads = 0;
             for (var design : ArchPieceDesign.values()) for (var side : Side.values()) for (var cell : ArchPieceCell.of(design))
@@ -175,11 +174,11 @@ class ArchPieceModelsTest {
                 case WEST -> new double[]{z,-y}; case EAST -> new double[]{-z,-y};
                 case UP -> new double[]{x,z}; case DOWN -> new double[]{x,-z};
             };
-            double[] uv = {sprite.getUOffset(Float.intBitsToFloat(data[i + 4])), sprite.getVOffset(Float.intBitsToFloat(data[i + 5]))};
+            double[] uv = {16 * sprite.getUOffset(Float.intBitsToFloat(data[i + 4])), 16 * sprite.getVOffset(Float.intBitsToFloat(data[i + 5]))};
             if (first == null) { first = projection; firstUv = uv; }
             for (int axis = 0; axis < 2; axis++) {
                 assertTrue(uv[axis] >= -.0001 && uv[axis] <= 16.0001);
-                assertEquals(projection[axis] - first[axis], (uv[axis] - firstUv[axis]) / ((1 - sprite.uvShrinkRatio()) * .998), .0002);
+                assertEquals(projection[axis] - first[axis], (uv[axis] - firstUv[axis]) / (1 - sprite.uvShrinkRatio()), .0002);
             }
         }
     }

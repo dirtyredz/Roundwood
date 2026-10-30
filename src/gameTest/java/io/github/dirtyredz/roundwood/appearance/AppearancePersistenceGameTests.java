@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.appearance;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
@@ -72,7 +74,7 @@ public final class AppearancePersistenceGameTests {
 
     private static ItemStack withAppearanceTag(Item item, CompoundTag appearance) {
         ItemStack stack = new ItemStack(item);
-        stack.getOrCreateTag().put(AppearanceNbt.TAG, appearance);
+        io.github.dirtyredz.roundwood.appearance.item.StackPayloads.putCustom(stack, AppearanceNbt.TAG, appearance);
         return stack;
     }
 
@@ -112,12 +114,12 @@ public final class AppearancePersistenceGameTests {
     public static void defaultStacksCarryNoTagAndStackWithPlainItems(GameTestHelper helper) {
         for (Item item : canonicalItems()) {
             ItemStack made = AppearanceStacks.create(item, Appearance.DEFAULT);
-            check(!made.hasTag(), item + ": a default stack has a tag " + made.getTag());
-            check(ItemStack.isSameItemSameTags(new ItemStack(item), made), item + ": default stack does not stack with a plain one");
+            check(made.getComponentsPatch().isEmpty(), item + ": a default stack has a tag " + made.getComponentsPatch());
+            check(ItemStack.isSameItemSameComponents(new ItemStack(item), made), item + ": default stack does not stack with a plain one");
             ItemStack styled = AppearanceStacks.create(item, SPRUCE);
-            check(styled.hasTag(), item + ": a styled stack has no tag");
+            check(!styled.getComponentsPatch().isEmpty(), item + ": a styled stack has no tag");
             AppearanceStacks.write(styled, Appearance.DEFAULT);
-            check(!styled.hasTag(), item + ": writing the default left a tag " + styled.getTag());
+            check(styled.getComponentsPatch().isEmpty(), item + ": writing the default left a tag " + styled.getComponentsPatch());
         }
         helper.succeed();
     }
@@ -191,19 +193,19 @@ public final class AppearancePersistenceGameTests {
         BlockPos pos = entity.getBlockPos();
         BlockState state = entity.getBlockState();
 
-        BlockEntity loaded = BlockEntity.loadStatic(pos, state, entity.saveWithFullMetadata());
+        BlockEntity loaded = BlockEntity.loadStatic(pos, state, entity.saveWithFullMetadata(TestRegistries.get()), TestRegistries.get());
         check(loaded != null && look(loaded).equals(oakPainted(DyeColor.RED)), what + ": save/load lost the look");
 
         BlockEntity client = fresh(entity);
-        client.load(entity.getUpdateTag());
+        client.loadWithComponents(entity.getUpdateTag(TestRegistries.get()), TestRegistries.get());
         check(look(client).equals(oakPainted(DyeColor.RED)), what + ": update tag lost the look");
 
         style(entity, Appearance.DEFAULT);
-        CompoundTag cleared = entity.getUpdateTag();
+        CompoundTag cleared = entity.getUpdateTag(TestRegistries.get());
         check(!cleared.contains(AppearanceNbt.TAG), what + ": a default look is still in the update tag " + cleared);
-        client.load(cleared);
+        client.loadWithComponents(cleared, TestRegistries.get());
         check(look(client).equals(Appearance.DEFAULT), what + ": paint removal did not reach the client, shows " + look(client).key());
-        check(!entity.saveWithFullMetadata().contains(AppearanceNbt.TAG), what + ": a default look is still saved");
+        check(!entity.saveWithFullMetadata(TestRegistries.get()).contains(AppearanceNbt.TAG), what + ": a default look is still saved");
     }
 
     @GameTest(template = TEMPLATE)
@@ -244,7 +246,7 @@ public final class AppearancePersistenceGameTests {
         DoorSwing swing = entity.swing();
         double now = helper.getLevel().getGameTime();
         double before = swing.progress(now);
-        entity.load(entity.getUpdateTag());
+        entity.loadWithComponents(entity.getUpdateTag(TestRegistries.get()), TestRegistries.get());
         check(entity.swing() == swing, "loading an update replaced the swing object");
         check(swing.progress(now) == before, "loading an update changed the swing progress");
         check(entity.appearance().equals(oakPainted(DyeColor.BLUE)), "the update lost the look");

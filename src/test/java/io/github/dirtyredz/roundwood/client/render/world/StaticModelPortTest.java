@@ -5,7 +5,6 @@ import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.FaceTrims;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +15,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class StaticModelPortTest {
     static { io.github.dirtyredz.roundwood.testsupport.MinecraftBootstrap.ensure(); }
 
-    private static final class Family extends Block { Family() { super(BlockBehaviour.Properties.of()); } }
-
     @Test void registeredBlocksResolveTheirExplicitSourcesAndUnboundBlocksHaveNone() {
         StaticModelSource source = (state, snapshot) -> List.of();
-        var bound = new Family();
-        var other = new Family();
+        // Registries are frozen under FML's test launcher, so two registered blocks stand in for host families.
+        Block bound = net.minecraft.world.level.block.Blocks.STONE;
+        Block other = net.minecraft.world.level.block.Blocks.DIRT;
         var sources = StaticModelSources.builder().bind(bound, source).build();
         assertSame(source, sources.find(bound).orElseThrow());
         assertTrue(sources.find(other).isEmpty());

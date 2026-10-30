@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.window.trim;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.Roundwood;
@@ -300,19 +302,19 @@ public final class WindowTrimGameTests {
         RoundWindowBlockEntity window = entity(helper, AT);
         window.setAppearance(SPRUCE);
         WindowTrimActions.install(helper.getLevel(), helper.absolutePos(AT), AttachmentFace.BACK, BRICKS);
-        CompoundTag saved = window.saveWithFullMetadata();
+        CompoundTag saved = window.saveWithFullMetadata(TestRegistries.get());
         check(saved.getCompound("WindowTrim").getInt("Version") == 2 && saved.getCompound("WindowTrim").contains("Back")
                 && !saved.getCompound("WindowTrim").contains("Front"), "saved " + saved);
         RoundWindowBlockEntity copy = new RoundWindowBlockEntity(window.getType(), helper.absolutePos(AT), helper.getBlockState(AT));
-        copy.load(saved);
+        copy.loadWithComponents(saved, TestRegistries.get());
         check(copy.appearance().equals(SPRUCE) && copy.trims().equals(FaceTrims.NONE.with(AttachmentFace.BACK, BRICKS)), "reloaded " + copy.trims());
         WindowAttachmentState.store(helper.getLevel(), helper.absolutePos(AT), window, TrimSlot.PERIMETER, FaceTrims.NONE);
-        CompoundTag update = window.getUpdateTag();
+        CompoundTag update = window.getUpdateTag(TestRegistries.get());
         check(update.contains("WindowTrim") && update.getCompound("WindowTrim").getInt("Version") == 2, "a removal must be sent: " + update);
-        copy.handleUpdateTag(update);
+        copy.handleUpdateTag(update, TestRegistries.get());
         check(!copy.trims().any(), "client kept a removed trim");
         ItemStack pick = AppearanceFixtures.pick(helper, helper.absolutePos(AT));
-        check(pick.is(ModBlocks.window(WindowDesign.plain(WindowProfile.ARCH_LEFT)).asItem()) && !pick.getOrCreateTag().contains("WindowTrim"), "pick " + pick);
+        check(pick.is(ModBlocks.window(WindowDesign.plain(WindowProfile.ARCH_LEFT)).asItem()) && !io.github.dirtyredz.roundwood.appearance.item.StackPayloads.hasCustom(pick, "WindowTrim"), "pick " + pick);
         helper.succeed();
     }
 

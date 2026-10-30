@@ -299,7 +299,7 @@ public final class DoorFixtures {
 
     /** The largest template (17 x 6 x 9) plus a 1-block margin; tests are spaced further apart than that. */
     private static AABB area(GameTestHelper helper) {
-        return new AABB(helper.absolutePos(BlockPos.ZERO), helper.absolutePos(new BlockPos(17, 6, 9))).inflate(1);
+        return new AABB(net.minecraft.world.phys.Vec3.atLowerCornerOf(helper.absolutePos(BlockPos.ZERO)), net.minecraft.world.phys.Vec3.atLowerCornerOf(helper.absolutePos(new BlockPos(17, 6, 9)))).inflate(1);
     }
 
     /** Removes every dropped item in the area, so a test can count from zero. */

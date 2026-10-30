@@ -138,7 +138,7 @@ public final class GeneratedFiles {
     public static String trimFacePool(String face, String item, String source) {
         return "{\"bonus_rolls\":0.0,\"conditions\":[{\"condition\":\"roundwood:trim_face\",\"face\":\"" + face + "\"},"
                 + "{\"condition\":\"minecraft:survives_explosion\"}],"
-                + "\"entries\":[{\"type\":\"minecraft:item\",\"functions\":[{\"function\":\"minecraft:copy_nbt\","
+                + "\"entries\":[{\"type\":\"minecraft:item\",\"functions\":[{\"function\":\"minecraft:copy_custom_data\","
                 + "\"ops\":[{\"op\":\"replace\",\"source\":\"" + source + ".RoundwoodAppearance\","
                 + "\"target\":\"RoundwoodAppearance\"}],\"source\":\"block_entity\"}],"
                 + "\"name\":\"" + item + "\"}],\"rolls\":1.0}";
@@ -151,7 +151,7 @@ public final class GeneratedFiles {
     public static String sillFacePool(String face, String source) {
         return "{\"bonus_rolls\":0.0,\"conditions\":[{\"condition\":\"roundwood:trim_face\",\"face\":\"" + face + "\","
                 + "\"slot\":\"sill\"},{\"condition\":\"minecraft:survives_explosion\"}],"
-                + "\"entries\":[{\"type\":\"minecraft:item\",\"functions\":[{\"function\":\"minecraft:copy_nbt\","
+                + "\"entries\":[{\"type\":\"minecraft:item\",\"functions\":[{\"function\":\"minecraft:copy_custom_data\","
                 + "\"ops\":[{\"op\":\"replace\",\"source\":\"" + source + ".RoundwoodAppearance\","
                 + "\"target\":\"RoundwoodAppearance\"}],\"source\":\"block_entity\"}],"
                 + "\"name\":\"roundwood:arch_sill_trim\"}],\"rolls\":1.0}";

@@ -155,7 +155,7 @@ public final class ShowcaseGameTests {
                 }
             }
         }
-        AABB area = new AABB(helper.absolutePos(BlockPos.ZERO), helper.absolutePos(new BlockPos(SIZE, HEIGHT, SIZE))).inflate(2);
+        AABB area = new AABB(net.minecraft.world.phys.Vec3.atLowerCornerOf(helper.absolutePos(BlockPos.ZERO)), net.minecraft.world.phys.Vec3.atLowerCornerOf(helper.absolutePos(new BlockPos(SIZE, HEIGHT, SIZE)))).inflate(2);
         helper.getLevel().getEntitiesOfClass(Entity.class, area, entity -> !(entity instanceof Player)).forEach(Entity::discard);
     }
 

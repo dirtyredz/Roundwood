@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.arch;
 
+
+import net.minecraft.core.component.DataComponents;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
@@ -36,26 +38,37 @@ public final class ArchThinningGameTests {
     @GameTest(template = TEMPLATE)
     public static void oneWayCraftingPreservesMetadataAndRefusesUnknownData(GameTestHelper helper) {
         var level = helper.getLevel();
+        var unbreaking = level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                .getOrThrow(net.minecraft.world.item.enchantment.Enchantments.UNBREAKING);
         for (var design : ArchPieceDesign.values()) for (int slot = 0; slot < 9; slot++) {
             var input = AppearanceStacks.create(ModItems.archPiece(design), WARPED);
             input.setCount(4);
-            input.setHoverName(Component.literal("Named arch"));
-            input.getOrCreateTag().putInt("RepairCost", 7);
-            var before = input.serializeNBT();
+            // The native equivalents of 1.20.1's approved display, RepairCost, Enchantments and Unbreakable.
+            input.set(DataComponents.CUSTOM_NAME, Component.literal("Named arch"));
+            input.set(DataComponents.REPAIR_COST, 7);
+            input.enchant(unbreaking, 2);
+            input.set(DataComponents.UNBREAKABLE, new net.minecraft.world.item.component.Unbreakable(false));
+            var before = input.copy();
             var grid = grid(); grid.setItem(slot, input);
-            var recipe = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, grid, level).orElseThrow();
-            var output = recipe.assemble(grid, level.registryAccess());
+            var recipe = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, grid.asCraftInput(), level).orElseThrow().value();
+            var output = recipe.assemble(grid.asCraftInput(), level.registryAccess());
             check(output.is(ModItems.archPiece(design, ArchPieceThickness.THIN)) && output.getCount() == 1, "wrong thinning output");
-            check(output.getTag().equals(input.getTag()) && AppearanceStacks.read(output).equals(WARPED), "metadata lost");
-            check(input.serializeNBT().equals(before), "recipe mutated input");
+            check(output.getComponentsPatch().equals(input.getComponentsPatch()) && AppearanceStacks.read(output).equals(WARPED), "metadata lost");
+            check(ItemStack.matches(input, before), "recipe mutated input");
             grid.setItem(slot, output);
-            check(level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, grid, level).isEmpty(), "reverse/thin conversion exists");
+            check(level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, grid.asCraftInput(), level).isEmpty(), "reverse/thin conversion exists");
             grid.setItem(slot, input);
-            input.getOrCreateTag().putString("FuturePayload", "opaque");
-            check(!recipe.matches(grid, level) && recipe.assemble(grid, level.registryAccess()).isEmpty(), "unknown payload converted");
-            input.getOrCreateTag().remove("FuturePayload");
-            input.getOrCreateTag().getCompound(AppearanceNbt.TAG).putInt("Version", 99);
-            check(!recipe.matches(grid, level), "future appearance converted");
+            io.github.dirtyredz.roundwood.appearance.item.StackPayloads.putCustom(input, "FuturePayload", net.minecraft.nbt.StringTag.valueOf("opaque"));
+            check(!recipe.matches(grid.asCraftInput(), level) && recipe.assemble(grid.asCraftInput(), level.registryAccess()).isEmpty(), "unknown payload converted");
+            io.github.dirtyredz.roundwood.appearance.item.StackPayloads.removeCustom(input, "FuturePayload");
+            io.github.dirtyredz.roundwood.appearance.item.StackPayloads.editCustom(input, tag -> tag.getCompound(AppearanceNbt.TAG).putInt("Version", 99));
+            check(!recipe.matches(grid.asCraftInput(), level), "future appearance converted");
+            AppearanceStacks.write(input, WARPED);
+            check(recipe.matches(grid.asCraftInput(), level), "restored input no longer converts");
+            input.set(DataComponents.RARITY, net.minecraft.world.item.Rarity.EPIC);
+            check(!recipe.matches(grid.asCraftInput(), level), "an unsupported component change converted");
+            input.remove(DataComponents.RARITY);
+            check(!recipe.matches(grid.asCraftInput(), level), "a removed default converted");
         }
         helper.succeed();
     }

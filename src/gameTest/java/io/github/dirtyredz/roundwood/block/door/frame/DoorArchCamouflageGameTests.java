@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.frame;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceDepth;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceThickness;
@@ -53,8 +55,8 @@ public final class DoorArchCamouflageGameTests {
                 AppearanceFixtures.use(helper, player, stone, ItemStack.EMPTY, DoorRays.through(helper, player, door, .03125, .03125, true), false);
             }
             check(stone.getCount() == 1 && entity.camouflage().isPresent(), "lower corner acquisition/payment");
-            var saved = entity.saveWithFullMetadata();
-            entity.load(saved);
+            var saved = entity.saveWithFullMetadata(TestRegistries.get());
+            entity.loadWithComponents(saved, TestRegistries.get());
             check(entity.camouflage().orElseThrow().paid() && entity.arch().isPresent(), "reload lost custody");
             player.getInventory().clearContent();
             hold(player, ItemStack.EMPTY, ItemStack.EMPTY);

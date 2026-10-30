@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "roundwood:round_trim",
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "P P",
+    "   ",
+    "P P"
+  ],
+  "result": {
+    "count": 1,
+    "id": "roundwood:round_trim"
+  }
+}

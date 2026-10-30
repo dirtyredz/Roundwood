@@ -37,7 +37,7 @@ public final class DoorSectionsChecks {
         BlockState lever = level.getBlockState(leverPos);
         check(lever.is(Blocks.LEVER) && !lever.getValue(LeverBlock.POWERED), "lever missing or already on");
         check(!level.getBlockState(door).getValue(DoorBlock.OPEN), "redstone door starts open");
-        ((LeverBlock) Blocks.LEVER).pull(lever, level, leverPos);
+        ((LeverBlock) Blocks.LEVER).pull(lever, level, leverPos, null);
         check(level.getBlockState(door).getValue(DoorBlock.OPEN), "flipping the lever did not open the door");
     }
 }

@@ -131,7 +131,7 @@ public final class HeldTrimToolGameTests {
 
         InteractionResult use(InteractionHand hand) {
             BlockHitResult hit = aim.get();
-            return helper.getLevel().getBlockState(hit.getBlockPos()).use(helper.getLevel(), player, hand, hit);
+            return io.github.dirtyredz.roundwood.fixture.BlockUses.use(helper.getLevel().getBlockState(hit.getBlockPos()), helper.getLevel(), player, hand, hit);
         }
     }
 
@@ -300,7 +300,7 @@ public final class HeldTrimToolGameTests {
 
     /** The main-hand use on the cell's current state (a toggled door has new states). */
     private static InteractionResult useAt(GameTestHelper helper, ServerPlayer player, BlockHitResult hit) {
-        return helper.getLevel().getBlockState(hit.getBlockPos()).use(helper.getLevel(), player, MAIN, hit);
+        return io.github.dirtyredz.roundwood.fixture.BlockUses.use(helper.getLevel().getBlockState(hit.getBlockPos()), helper.getLevel(), player, MAIN, hit);
     }
 
     private static boolean open(GameTestHelper helper, DoorLayout.Assembly door) {
@@ -379,12 +379,12 @@ public final class HeldTrimToolGameTests {
         BlockHitResult off = DoorFixtures.frontHit(door, 1.0, 1.0);
         BlockState state = helper.getLevel().getBlockState(off.getBlockPos());
         check(!claims(helper, player, state, off), "an open door claimed a trim aimed off the ring");
-        check(state.use(helper.getLevel(), player, MAIN, off) == InteractionResult.FAIL, "an off-ring fit on an open door is not FAIL");
+        check(io.github.dirtyredz.roundwood.fixture.BlockUses.use(state, helper.getLevel(), player, MAIN, off) == InteractionResult.FAIL, "an off-ring fit on an open door is not FAIL");
         check(!DoorFixtures.anchorEntity(helper, door).trims().any() && stack.getCount() == 2 && open(helper, door), "off-ring click changed things");
         BlockHitResult ring = DoorRays.through(helper, player, door, RING_A, RING_H, true);
         BlockState ringState = helper.getLevel().getBlockState(ring.getBlockPos());
         check(claims(helper, player, ringState, ring), "an open door did not claim a trim aimed at a ring target");
-        check(ringState.use(helper.getLevel(), player, MAIN, ring).consumesAction(), "the ring-target fit was not handled");
+        check(io.github.dirtyredz.roundwood.fixture.BlockUses.use(ringState, helper.getLevel(), player, MAIN, ring).consumesAction(), "the ring-target fit was not handled");
         check(DoorFixtures.anchorEntity(helper, door).trims().equals(FaceTrims.NONE.with(AttachmentFace.FRONT, SPRUCE))
                 && stack.getCount() == 1 && open(helper, door), "ring-target fit: " + DoorFixtures.anchorEntity(helper, door).trims());
         helper.succeed();
@@ -433,15 +433,17 @@ public final class HeldTrimToolGameTests {
     // ---- 7. rejected donor stacks ----------------------------------------------------------------------------------
 
     /**
-     * A plank stack carrying BlockEntityTag or BlockStateTag is no donor: not claimed and no restyle (a non-door host
+     * A plank stack carrying native block-entity data or blockstate overrides is no donor: not claimed and no restyle (a non-door host
      * passes). Plain planks restyle the installed trim and cost one.
      */
     private static void rejectedDonors(Scene s, boolean directUse) {
         FaceTrims before = s.trims.get();
         Appearance look = s.look.get();
-        for (String key : List.of(BlockItem.BLOCK_ENTITY_TAG, BlockItem.BLOCK_STATE_TAG)) {
+        for (String key : List.of("block_entity_data", "block_state")) {
             ItemStack stack = new ItemStack(Items.SPRUCE_PLANKS, 2);
-            stack.getOrCreateTag().put(key, new CompoundTag());
+            if (key.equals("block_state")) stack.set(net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                    net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(net.minecraft.world.level.block.state.properties.BlockStateProperties.AXIS, net.minecraft.core.Direction.Axis.X));
+            else BlockItem.setBlockEntityData(stack, net.minecraft.world.level.block.entity.BlockEntityType.CHEST, new CompoundTag());
             s.hold(stack, ItemStack.EMPTY);
             check(!s.claims(MAIN), key + ": claimed as a donor");
             if (directUse) {

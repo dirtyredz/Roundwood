@@ -102,6 +102,7 @@
   "message.roundwood.masonry_unpaintable": "Masonry trims cannot be painted",
   "message.roundwood.sill_upper_arch_only": "An arch sill fits only an upper window arch",
   "message.roundwood.unknown_arch_item": "This door carries an unknown frame payload; placement would lose it.",
+  "message.roundwood.unknown_camouflage_item": "This door carries a camouflage refund this version cannot read; placement would lose it.",
   "tooltip.roundwood.arch_piece": "Size is height x width; landing cell is the lower-left anchor; all cells must be dry and clear",
   "tooltip.roundwood.arch_sill_trim": "Fits under the clicked face of an upper window arch; restyle with planks, masonry or dye, remove with shears",
   "tooltip.roundwood.cross_beams": "Fits across one window pane; aim at a beam to restyle it or remove it with shears",

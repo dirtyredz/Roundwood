@@ -24,7 +24,7 @@ class DoorHardwareModelsTest {
         Sprite(SpriteContents contents,int x){super(ID,contents,256,256,x,64);}
     }
     @Test void bakedMarkersDistinguishSlotsSharingBrassAndKeepAuthoredUvScale() throws Exception {
-        try(var contents=new SpriteContents(ID,new FrameSize(16,16),new NativeImage(16,16,false),AnimationMetadataSection.EMPTY)) {
+        try(var contents=new SpriteContents(ID,new FrameSize(16,16),new NativeImage(16,16,false),net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var brass=new Sprite(contents,0);var iron=new Sprite(contents,32);var gold=new Sprite(contents,64);
             var a=Appearance.surface(ResourceLocation.fromNamespaceAndPath("minecraft","iron_block"));
             var b=Appearance.surface(ResourceLocation.fromNamespaceAndPath("minecraft","gold_block"));
@@ -33,10 +33,10 @@ class DoorHardwareModelsTest {
                 var model=BlockModel.fromString(Files.readString(Path.of("src/generated/resources/assets/roundwood/models/block/template_"+design.id()+"_leaf_"+hinge.getSerializedName()+".json")));
                 int hinges=0,knobs=0;
                 for(var element:model.getElements()) for(var face:element.faces.entrySet()) {
-                    var q=new FaceBakery().bakeQuad(element.from,element.to,face.getValue(),brass,face.getKey(),BlockModelRotation.X0_Y0,element.rotation,element.shade,ID);
+                    var q=new FaceBakery().bakeQuad(element.from,element.to,face.getValue(),brass,face.getKey(),BlockModelRotation.X0_Y0,element.rotation,element.shade);
                     var mapped=DoorHardwareModels.retexture(q,looks,look->look.equals(a)?iron:gold);
-                    if(face.getValue().texture.equals("#panel")){assertSame(q,mapped);continue;}
-                    boolean isHinge=face.getValue().texture.equals("#hinges");
+                    if(face.getValue().texture().equals("#panel")){assertSame(q,mapped);continue;}
+                    boolean isHinge=face.getValue().texture().equals("#hinges");
                     assertEquals(isHinge?1:2,q.getTintIndex());
                     assertSame(isHinge?iron:gold,mapped.getSprite());assertFalse(mapped.isTinted());
                     assertSame(brass,DoorHardwareModels.retexture(q,DoorHardware.DEFAULT,look->iron).getSprite());
@@ -51,9 +51,9 @@ class DoorHardwareModelsTest {
                             case SOUTH -> new double[]{x,-y};case NORTH -> new double[]{-x,-y};
                             case UP -> new double[]{x,z};case DOWN -> new double[]{x,-z};
                             case EAST -> new double[]{-z,-y};case WEST -> new double[]{z,-y};};
-                        double[] uv={brass.getUOffset(Float.intBitsToFloat(data[i+4])),brass.getVOffset(Float.intBitsToFloat(data[i+5]))};
+                        double[] uv={16 * brass.getUOffset(Float.intBitsToFloat(data[i+4])),16 * brass.getVOffset(Float.intBitsToFloat(data[i+5]))};
                         if(first==null){first=p;uv0=uv;}
-                        for(int axis=0;axis<2;axis++)assertEquals(p[axis]-first[axis],(uv[axis]-uv0[axis])/((1-brass.uvShrinkRatio())*.998),.0003,"hardware tile scale");
+                        for(int axis=0;axis<2;axis++)assertEquals(p[axis]-first[axis],(uv[axis]-uv0[axis])/(1-brass.uvShrinkRatio()),.0003,"hardware tile scale");
                     }
                 }
                 assertTrue(hinges>0 && knobs>0);

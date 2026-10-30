@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.window;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
@@ -97,7 +99,7 @@ public final class WindowSaveCompatibilityGameTests {
         look.putString("Material", "minecraft:spruce_planks");
         CompoundTag entity = new CompoundTag();
         entity.put("RoundwoodAppearance", look);
-        helper.getLevel().getBlockEntity(pos).load(entity);
+        helper.getLevel().getBlockEntity(pos).loadWithComponents(entity, TestRegistries.get());
         check(SPRUCE.equals(windowLook(helper, pos)), "saved look not read: " + windowLook(helper, pos));
         check(helper.getLevel().getBlockState(pos).getValue(RoundWindowBlock.POSITION) == WindowPosition.CENTER, "not centred");
         check(!Appearance.DEFAULT.equals(windowLook(helper, pos)), "look reset to oak");
@@ -132,7 +134,7 @@ public final class WindowSaveCompatibilityGameTests {
         look.putString("Material", "minecraft:spruce_planks");
         CompoundTag entity = new CompoundTag();
         entity.put("RoundwoodAppearance", look);
-        helper.getLevel().getBlockEntity(pos).load(entity);
+        helper.getLevel().getBlockEntity(pos).loadWithComponents(entity, TestRegistries.get());
         check(SPRUCE.equals(windowLook(helper, pos)), "saved look not read");
         check(!((RoundWindowBlockEntity) helper.getLevel().getBlockEntity(pos)).trims().any(), "an untrimmed 0.6 window shows a trim");
         helper.succeed();

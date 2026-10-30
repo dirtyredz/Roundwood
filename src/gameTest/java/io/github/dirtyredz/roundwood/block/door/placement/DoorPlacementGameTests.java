@@ -233,7 +233,7 @@ public final class DoorPlacementGameTests {
     public static void cancelledPlacementRollsBackAllCellsAndTheItem(GameTestHelper helper) {
         floor(helper);
         helper.setBlock(new BlockPos(2, 0, 1), Blocks.DIRT);
-        helper.setBlock(new BlockPos(2, 1, 1), Blocks.GRASS); // a replaceable cell must come back too
+        helper.setBlock(new BlockPos(2, 1, 1), Blocks.SHORT_GRASS); // a replaceable cell must come back too
         int eventsBefore = PlacementCanceller.multiPlaceEvents();
         ServerPlayer player = player(helper, "cancelled", GameType.SURVIVAL, Direction.NORTH);
         ItemStack stack = new ItemStack(oakDoor().asItem());
@@ -242,7 +242,7 @@ public final class DoorPlacementGameTests {
         check(PlacementCanceller.multiPlaceEvents() == eventsBefore + 1, "expected exactly one multi-place event");
         check(player.getMainHandItem().getCount() == 1, "item not restored: " + player.getMainHandItem());
         assertNoDoor(helper, assembly(helper, new BlockPos(1, 1, 1), Direction.NORTH));
-        check(helper.getBlockState(new BlockPos(2, 1, 1)).is(Blocks.GRASS), "replaced grass not restored");
+        check(helper.getBlockState(new BlockPos(2, 1, 1)).is(Blocks.SHORT_GRASS), "replaced grass not restored");
         helper.succeed();
     }
 

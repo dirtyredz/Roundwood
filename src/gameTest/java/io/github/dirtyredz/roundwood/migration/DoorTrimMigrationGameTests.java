@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.migration;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
@@ -66,7 +68,7 @@ public final class DoorTrimMigrationGameTests {
     }
 
     private static int items(GameTestHelper helper) {
-        AABB box = new AABB(helper.absolutePos(new BlockPos(-2, -2, -2)), helper.absolutePos(new BlockPos(16, 8, 12)));
+        AABB box = new AABB(net.minecraft.world.phys.Vec3.atLowerCornerOf(helper.absolutePos(new BlockPos(-2, -2, -2))), net.minecraft.world.phys.Vec3.atLowerCornerOf(helper.absolutePos(new BlockPos(16, 8, 12))));
         return helper.getLevel().getEntitiesOfClass(ItemEntity.class, box).size();
     }
 
@@ -149,12 +151,12 @@ public final class DoorTrimMigrationGameTests {
     public static void anUnknownDoorPayloadKeepsTheFrameAndThePayload(GameTestHelper helper) {
         DoorLayout.Assembly door = door(helper, "unknown_payload");
         RoundDoorBlockEntity anchor = anchor(helper, door);
-        CompoundTag tag = anchor.saveWithoutMetadata();
+        CompoundTag tag = anchor.saveWithoutMetadata(TestRegistries.get());
         CompoundTag future = new CompoundTag();
         future.putInt("Version", 7);
         future.putString("Shape", "gothic");
         tag.put("DoorTrim", future);
-        anchor.load(tag);
+        anchor.loadWithComponents(tag, TestRegistries.get());
         check(!anchor.trimsEditable(), "an unknown payload was understood");
         TrimLayout.Assembly frame = fitted(door);
         check(TrimPlacement.placeAt(helper.getLevel(), ModBlocks.roundTrim(), frame, SPRUCE), "frame");
@@ -163,7 +165,7 @@ public final class DoorTrimMigrationGameTests {
         helper.runAfterDelay(2, () -> {
             check(frame.complete(helper.getLevel(), ModBlocks.roundTrim()), "the frame was removed onto an uneditable door");
             check(items(helper) == before, "migration dropped items");
-            check(anchor(helper, door).saveWithoutMetadata().getCompound("DoorTrim").equals(future), "the unknown payload changed");
+            check(anchor(helper, door).saveWithoutMetadata(TestRegistries.get()).getCompound("DoorTrim").equals(future), "the unknown payload changed");
             helper.succeed();
         });
     }

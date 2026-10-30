@@ -1,0 +1,14 @@
+{
+  "type": "roundwood:arch_thinning",
+  "category": "misc",
+  "group": "roundwood:arch_thinning",
+  "ingredients": [
+    {
+      "item": "roundwood:keyhole_shoulder"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "roundwood:keyhole_shoulder_thin"
+  }
+}

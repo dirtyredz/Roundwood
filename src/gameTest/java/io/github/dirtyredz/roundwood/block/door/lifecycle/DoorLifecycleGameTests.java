@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.lifecycle;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlock;
 import io.github.dirtyredz.roundwood.Roundwood;
@@ -95,8 +97,8 @@ public final class DoorLifecycleGameTests {
             BlockState state = helper.getLevel().getBlockState(anchor);
             BlockEntity entity = helper.getLevel().getBlockEntity(anchor);
             check(entity instanceof RoundDoorBlockEntity, hinge + ": no block entity at the anchor");
-            CompoundTag tag = entity.saveWithFullMetadata();
-            BlockEntity copy = BlockEntity.loadStatic(anchor, state, tag);
+            CompoundTag tag = entity.saveWithFullMetadata(TestRegistries.get());
+            BlockEntity copy = BlockEntity.loadStatic(anchor, state, tag, TestRegistries.get());
             check(copy instanceof RoundDoorBlockEntity, hinge + ": saved entity did not load back as a round door entity: " + copy);
             check(copy.getType() == ModBlockEntities.ROUND_DOOR.get(), hinge + ": wrong block entity type after load");
             check(copy.getBlockState().getValue(DoorBlock.OPEN) && copy.getBlockState().getValue(DoorBlock.HINGE) == hinge,

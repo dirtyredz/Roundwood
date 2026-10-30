@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.door.trim;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
@@ -112,7 +114,7 @@ public final class DoorTrimGameTests {
                 check(anchorEntity(helper, door).camouflage().isEmpty(), what + ": camouflaged");
                 check(collision.equals(collision(helper, door)), what + ": collision changed");
                 // The ring stays inside the render bounds on both sides.
-                AABB bounds = anchorEntity(helper, door).getRenderBoundingBox();
+                AABB bounds = anchorEntity(helper, door).renderBoundingBox();
                 check(bounds.contains(DoorFixtures.point(door, RING_A, RING_H, -0.9 / 16))
                         && bounds.contains(DoorFixtures.point(door, RING_A, RING_H, 3.9 / 16)), what + ": rings outside the render bounds " + bounds);
                 for (BlockPos cell : door.positions()) {
@@ -182,16 +184,16 @@ public final class DoorTrimGameTests {
         check(DoorTrimActions.install(helper.getLevel(), door.anchor(), AttachmentFace.FRONT, BRICKS)
                 && DoorTrimActions.install(helper.getLevel(), door.anchor(), AttachmentFace.BACK, back), "install");
         RoundDoorBlockEntity anchor = anchorEntity(helper, door);
-        CompoundTag saved = anchor.saveWithFullMetadata();
+        CompoundTag saved = anchor.saveWithFullMetadata(TestRegistries.get());
         check(saved.getCompound("DoorTrim").getInt("Version") == 1, "saved " + saved);
         RoundDoorBlockEntity copy = new RoundDoorBlockEntity(anchor.getType(), door.anchor(), helper.getLevel().getBlockState(door.anchor()));
-        copy.load(saved);
+        copy.loadWithComponents(saved, TestRegistries.get());
         check(copy.trims().equals(new FaceTrims(Optional.of(BRICKS), Optional.of(back))), "reloaded " + copy.trims());
         check(anchor.setTrims(FaceTrims.NONE), "clear");
-        check(!anchor.saveWithFullMetadata().contains("DoorTrim"), "an untrimmed door wrote a payload");
-        CompoundTag update = anchor.getUpdateTag();
+        check(!anchor.saveWithFullMetadata(TestRegistries.get()).contains("DoorTrim"), "an untrimmed door wrote a payload");
+        CompoundTag update = anchor.getUpdateTag(TestRegistries.get());
         check(update.contains("DoorTrim"), "a removal must be sent: " + update);
-        copy.load(update);
+        copy.loadWithComponents(update, TestRegistries.get());
         check(!copy.trims().any(), "client kept a removed trim");
         helper.succeed();
     }

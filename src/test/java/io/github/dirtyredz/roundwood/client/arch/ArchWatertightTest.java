@@ -27,7 +27,7 @@ class ArchWatertightTest {
     }
     record Edge(Point a,Point b) {}
     @Test void fittedLayersShareEveryEdgeExactly() {
-        try(var contents=new SpriteContents(TEXTURE,new FrameSize(16,16),new NativeImage(16,16,false),AnimationMetadataSection.EMPTY)) {
+        try(var contents=new SpriteContents(TEXTURE,new FrameSize(16,16),new NativeImage(16,16,false),net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var sprite=new Sprite(contents);
             for(var design:DoorDesign.values()) for(var thickness:ArchPieceThickness.values()) for(var depth:ArchPieceDepth.values())
                 for(var layer:DoorArchGeometry.Layer.values()) for(boolean masonry:new boolean[]{false,true}) {
@@ -54,7 +54,7 @@ class ArchWatertightTest {
         check(edges,"separated cuboid without any T-junctions");
     }
     @Test void standaloneLayersShareEveryEdgeExactly() {
-        try(var contents=new SpriteContents(TEXTURE,new FrameSize(16,16),new NativeImage(16,16,false),AnimationMetadataSection.EMPTY)) {
+        try(var contents=new SpriteContents(TEXTURE,new FrameSize(16,16),new NativeImage(16,16,false),net.minecraft.server.packs.resources.ResourceMetadata.EMPTY)) {
             var sprite=new Sprite(contents);
             for(var design:ArchPieceDesign.values()) for(var side:KeyholeShoulderProfile.Side.values())
                 for(var thickness:ArchPieceThickness.values()) for(var depth:ArchPieceDepth.values())

@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.migration;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.Roundwood;
@@ -57,18 +59,18 @@ public final class CrossWindowItemCompatibilityGameTests {
             var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation
                     .fromNamespaceAndPath("roundwood", CrossWindowCompatibility.IDS.get(i)));
             var stack = new ItemStack(item, i + 2);
-            stack.getOrCreateTag().putString("Arbitrary", "kept " + i);
-            stack.getOrCreateTag().put("BlockEntityTag", net.minecraft.nbt.TagParser.parseTag("{WindowCrossBeams:{Version:99,Opaque:[I;1,2,3]}}"));
+            io.github.dirtyredz.roundwood.appearance.item.StackPayloads.putCustom(stack, "Arbitrary", net.minecraft.nbt.StringTag.valueOf("kept " + i));
+            net.minecraft.world.item.BlockItem.setBlockEntityData(stack, io.github.dirtyredz.roundwood.registry.ModBlockEntities.roundWindow(), net.minecraft.nbt.TagParser.parseTag("{WindowCrossBeams:{Version:99,Opaque:[I;1,2,3]}}"));
             expected.add(stack.copy());
             owner.getInventory().items.set(i, stack.copy());
             chest.setItem(i, stack.copy());
         }
         var inventory = owner.getInventory().save(new net.minecraft.nbt.ListTag());
-        var savedChest = chest.saveWithoutMetadata();
+        var savedChest = chest.saveWithoutMetadata(TestRegistries.get());
         owner.getInventory().clearContent();
         chest.clearContent();
         owner.getInventory().load(inventory);
-        chest.load(savedChest);
+        chest.loadWithComponents(savedChest, TestRegistries.get());
         for (int i = 0; i < expected.size(); i++) {
             check(ItemStack.matches(expected.get(i), owner.getInventory().items.get(i)), "inventory changed hidden stack " + i);
             check(ItemStack.matches(expected.get(i), chest.getItem(i)), "chest changed hidden stack " + i);
@@ -87,7 +89,7 @@ public final class CrossWindowItemCompatibilityGameTests {
         var future = new net.minecraft.nbt.CompoundTag();
         future.putInt("Version", 99);
         disk.put("WindowCrossBeams", future);
-        stack.getOrCreateTag().put("BlockEntityTag", disk);
+        net.minecraft.world.item.BlockItem.setBlockEntityData(stack, io.github.dirtyredz.roundwood.registry.ModBlockEntities.roundWindow(), disk);
         var before = stack.copy();
         var hit = WindowFixtures.zone(helper, at.below(), Direction.UP, WindowTargetZones.Zone.CENTER);
         check(!WindowFixtures.place(owner, stack, hit).consumesAction(), "accepted unsupported beam payload");
@@ -112,7 +114,7 @@ public final class CrossWindowItemCompatibilityGameTests {
         var trims = io.github.dirtyredz.roundwood.block.attachment.FaceTrims.both(Appearance.DEFAULT);
         io.github.dirtyredz.roundwood.block.window.trim.WindowTrimNbt.write(disk, trims);
         io.github.dirtyredz.roundwood.block.window.trim.WindowSillNbt.write(disk, trims);
-        stack.getOrCreateTag().put("BlockEntityTag", disk);
+        net.minecraft.world.item.BlockItem.setBlockEntityData(stack, io.github.dirtyredz.roundwood.registry.ModBlockEntities.roundWindow(), disk);
         var hit = WindowFixtures.zone(helper, at.below(), Direction.UP, WindowTargetZones.Zone.CENTER);
         owner.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
         var context = new net.minecraft.world.item.context.BlockPlaceContext(owner, net.minecraft.world.InteractionHand.MAIN_HAND, stack, hit);
@@ -123,7 +125,7 @@ public final class CrossWindowItemCompatibilityGameTests {
         check(entity.appearance().equals(AppearanceFixtures.SPRUCE) && entity.glass().equals(java.util.Optional.of(DyeColor.CYAN)), "disk-only frame/tint lost");
         check(entity.trims(io.github.dirtyredz.roundwood.block.attachment.TrimSlot.PERIMETER).equals(trims)
                 && entity.trims(io.github.dirtyredz.roundwood.block.attachment.TrimSlot.SILL).equals(trims), "disk face attachments lost");
-        check(!net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(plan.selection(), state.getShape(helper.getLevel(), helper.absolutePos(at)),
+        check(!net.minecraft.world.phys.shapes.Shapes.joinIsNotEmpty(plan.selection(TestRegistries.get()), state.getShape(helper.getLevel(), helper.absolutePos(at)),
                 net.minecraft.world.phys.shapes.BooleanOp.NOT_SAME), "legacy placement preview differs from fitted result");
         helper.succeed();
     }

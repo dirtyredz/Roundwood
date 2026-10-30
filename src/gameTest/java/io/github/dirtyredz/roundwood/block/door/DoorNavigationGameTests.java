@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.gametest.GameTestHolder;
@@ -167,8 +167,8 @@ public final class DoorNavigationGameTests {
                 BlockState state = helper.getLevel().getBlockState(pos);
                 check(DoorBlock.isWoodenDoor(state), "not a wooden door to vanilla at " + pos);
                 check(state.is(BlockTags.WOODEN_DOORS) && state.is(BlockTags.DOORS), "missing door tags at " + pos);
-                BlockPathTypes type = WalkNodeEvaluator.getBlockPathTypeStatic(helper.getLevel(), pos.mutable());
-                BlockPathTypes expected = open ? BlockPathTypes.DOOR_OPEN : BlockPathTypes.DOOR_WOOD_CLOSED;
+                PathType type = WalkNodeEvaluator.getPathTypeStatic(net.minecraft.world.entity.EntityType.VILLAGER.create(helper.getLevel()), pos);
+                PathType expected = open ? PathType.DOOR_OPEN : PathType.DOOR_WOOD_CLOSED;
                 check(type == expected, "path type at " + pos + " is " + type + ", expected " + expected);
             }
         }

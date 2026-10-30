@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.appearance;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.material.SurfaceMaterials;
 import io.github.dirtyredz.roundwood.fixture.AppearanceFixtures;
@@ -38,11 +40,11 @@ public final class SurfaceFinishGameTests {
             var dye=new ItemStack(Items.RED_DYE,2);
             AppearanceFixtures.use(helper,player,dye,ItemStack.EMPTY,hit,false);
             check(dye.getCount()==2 && entity.appearance().equals(look),"unpaintable finish consumed dye");
-            var saved=entity.saveWithFullMetadata();entity.load(saved);
+            var saved=entity.saveWithFullMetadata(TestRegistries.get());entity.loadWithComponents(saved, TestRegistries.get());
             check(entity.appearance().equals(look),"finish reload");
         }
         var payload=new ItemStack(Items.IRON_BLOCK);
-        payload.getOrCreateTag().putString("BlockEntityTag","keep");
+        net.minecraft.world.item.BlockItem.setBlockEntityData(payload,net.minecraft.world.level.block.entity.BlockEntityType.CHEST,new net.minecraft.nbt.CompoundTag());
         check(SurfaceMaterials.fromStack(payload).isEmpty(),"payload donor accepted");
         for(var item:new Item[]{Items.CUT_COPPER,Items.WAXED_CUT_COPPER,Items.QUARTZ_SLAB,Items.SMOOTH_QUARTZ_STAIRS})
             check(SurfaceMaterials.fromStack(new ItemStack(item)).isEmpty(),"unsupported shape accepted");

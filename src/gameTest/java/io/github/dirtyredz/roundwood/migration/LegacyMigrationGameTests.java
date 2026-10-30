@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.migration;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
@@ -90,7 +92,7 @@ public final class LegacyMigrationGameTests {
     }
 
     private static int items(GameTestHelper helper) {
-        AABB area = new AABB(helper.absolutePos(BlockPos.ZERO), helper.absolutePos(new BlockPos(17, 6, 9))).inflate(1);
+        AABB area = new AABB(net.minecraft.world.phys.Vec3.atLowerCornerOf(helper.absolutePos(BlockPos.ZERO)), net.minecraft.world.phys.Vec3.atLowerCornerOf(helper.absolutePos(new BlockPos(17, 6, 9)))).inflate(1);
         return helper.getLevel().getEntitiesOfClass(ItemEntity.class, area).size();
     }
 
@@ -152,7 +154,7 @@ public final class LegacyMigrationGameTests {
             check(items(helper) == 0, "conversion dropped items");
 
             // Saved and reloaded, the converted anchor keeps look and paid camouflage.
-            BlockEntity reloaded = BlockEntity.loadStatic(spruce.anchor(), spruceAnchor, spruceEntity.saveWithFullMetadata());
+            BlockEntity reloaded = BlockEntity.loadStatic(spruce.anchor(), spruceAnchor, spruceEntity.saveWithFullMetadata(TestRegistries.get()), TestRegistries.get());
             check(reloaded instanceof RoundDoorBlockEntity copy && copy.appearance().equals(planks("spruce"))
                     && copy.camouflage().map(CamouflageData::paid).orElse(false), "save/reload lost the converted door's data");
 

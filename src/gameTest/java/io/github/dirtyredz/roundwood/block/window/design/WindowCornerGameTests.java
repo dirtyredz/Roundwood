@@ -96,7 +96,7 @@ public final class WindowCornerGameTests {
     private static void hideEachOther(GameTestHelper helper, BlockPos a, BlockPos b, Direction aToB) {
         BlockState sa = helper.getBlockState(a);
         BlockState sb = helper.getBlockState(b);
-        check(sa.getBlock().skipRendering(sa, sb, aToB) && sb.getBlock().skipRendering(sb, sa, aToB.getOpposite()),
+        check(sa.skipRendering(sb, aToB) && sb.skipRendering(sa, aToB.getOpposite()),
                 "faces between " + a + " and " + b + " are not hidden: a seam would show");
     }
 

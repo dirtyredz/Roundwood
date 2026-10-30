@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "roundwood:arch_piece",
+  "key": {
+    "P": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "PP",
+    " P"
+  ],
+  "result": {
+    "count": 1,
+    "id": "roundwood:keyhole_shoulder"
+  }
+}

@@ -1,5 +1,7 @@
 package io.github.dirtyredz.roundwood.block.window;
 
+
+import io.github.dirtyredz.roundwood.fixture.TestRegistries;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowTrimGameTests;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import io.github.dirtyredz.roundwood.Roundwood;
@@ -102,11 +104,11 @@ public final class WindowGlassGameTests {
         entity(helper).setGlass(Optional.of(DyeColor.PURPLE));
         ItemStack pick = AppearanceFixtures.pick(helper, helper.absolutePos(AT));
         check(WindowGlassStacks.read(pick).equals(Optional.of(DyeColor.PURPLE)) && AppearanceStacks.read(pick).equals(frame), "pick " + pick);
-        CompoundTag update = entity(helper).getUpdateTag();
+        CompoundTag update = entity(helper).getUpdateTag(TestRegistries.get());
         RoundWindowBlockEntity copy = new RoundWindowBlockEntity(entity(helper).getType(), helper.absolutePos(AT), helper.getBlockState(AT));
-        copy.handleUpdateTag(update);
+        copy.handleUpdateTag(update, TestRegistries.get());
         check(copy.glass().equals(Optional.of(DyeColor.PURPLE)), "update tag");
-        copy.load(entity(helper).saveWithFullMetadata());
+        copy.loadWithComponents(entity(helper).saveWithFullMetadata(TestRegistries.get()), TestRegistries.get());
         check(copy.glass().equals(Optional.of(DyeColor.PURPLE)), "save");
         clearDrops(helper);
         player.gameMode.destroyBlock(helper.absolutePos(AT));
@@ -127,7 +129,7 @@ public final class WindowGlassGameTests {
         // A clear window carries no glass tag and stacks with a crafted one.
         ItemStack clear = AppearanceStacks.create(ModItems.window(arch), Appearance.DEFAULT);
         WindowGlassStacks.write(clear, Optional.empty());
-        check(clear.getTag() == null && ItemStack.isSameItemSameTags(clear, new ItemStack(ModItems.window(arch))), "clear stack " + clear.getTag());
+        check(clear.getComponentsPatch().isEmpty() && ItemStack.isSameItemSameComponents(clear, new ItemStack(ModItems.window(arch))), "clear stack " + clear.getComponentsPatch());
         helper.succeed();
     }
 }
