@@ -485,11 +485,18 @@ leaf's depth (z 13..16), fixed in the closed door plane whatever the hinge or `o
 (`camouflage/CamouflageGeometry`). Decorative only: no collision, occlusion, light or redstone
 change; the 0.2.0 passage is unchanged.
 
-- **Data**: the anchor `RoundDoorBlockEntity` holds `CamouflageData(material, refund)`, saved as
-  `Camouflage: {Material: <block state>, Refund: <item>}`. `getUpdateTag` carries the material only
-  and always the key (empty when clear), and `onDataPacket` treats a missing tag as clear, so clears
-  reach clients. Loading replaces the value and never touches `DoorSwing`. Reading fails closed
-  (unknown/invalid material, or a refund that does not match it, reads as nothing).
+- **Data**: the anchor `RoundDoorBlockEntity` owns a `CamouflageStore`, the custody boundary:
+  absent, a decoded camouflage (free or paid), or **locked**. `CamouflageData(material, refund)` is
+  only the decoded value and its encoding, saved as
+  `Camouflage: {Material: <block state>, Refund: <item>}`; legacy (pre-component) refunds are
+  upgraded by `CamouflageRefundCodec`. Outcomes on load: an unknown/invalid material reads as
+  absent; a refund that decodes but does not match the material reads as free (no refund); a refund
+  that cannot be decoded here (e.g. a removed mod's item), or whose material is no longer an
+  acceptable donor, makes the store **locked**: the raw compound is kept byte for byte, replace /
+  clear / take are refused, and it travels on the door's drop (that item refuses placement).
+  `getUpdateTag` carries the material only and always the key (empty when clear), and
+  `onDataPacket` treats a missing tag as clear, so clears reach clients. Loading replaces the
+  value and never touches `DoorSwing`. See `docs/SAVE-COMPATIBILITY.md`.
 - **Materials** (`CamouflageMaterial`): a `BlockItem` whose default state is a full, opaque,
   ordinary cube (full collision and occlusion, MODEL render shape, no fluid, no block entity, no
   light), not air or a Roundwood door, without `BlockEntityTag`/`BlockStateTag`. Appearance only.
