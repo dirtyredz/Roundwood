@@ -2,6 +2,12 @@
 
 The complete content and controls are in [README](../README.md).
 
+## NeoForge 1.21.1 line
+
+The same content on Minecraft 1.21.1 / NeoForge 21.1.265 (branch `neoforge-1.21.1`), loading worlds from Forge
+0.13.3 and 0.17.0 ([save compatibility](SAVE-COMPATIBILITY.md)). Status: implemented and verified headless
+(unit tests, GameTests, jar guard); the in-game client check and the pack's world conversion are pending.
+
 ## Static chunk rendering
 
 Static frames, casings, camouflage, windows' attachments and compatibility pieces use cached chunk geometry exclusively.

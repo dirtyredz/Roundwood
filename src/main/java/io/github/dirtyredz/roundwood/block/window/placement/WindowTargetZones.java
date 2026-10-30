@@ -52,13 +52,17 @@ public final class WindowTargetZones {
         };
     }
 
+    private static final double DIAGONAL_TIE = 1e-7;
+
     public static Zone classify(FacePoint point) {
         double du = point.u() - 0.5;
         double dv = point.v() - 0.5;
         if (Math.abs(du) <= INNER_MAX - 0.5 && Math.abs(dv) <= INNER_MAX - 0.5) {
             return Zone.CENTER;
         }
-        if (Math.abs(du) >= Math.abs(dv)) {
+        // A diagonal tie is judged with a rounding tolerance: hit points are world coordinates minus the cell corner,
+        // and far from the origin that subtraction moves an exact tie by about 1e-10 (GameTests run near x = 10^6).
+        if (Math.abs(du) >= Math.abs(dv) - DIAGONAL_TIE) {
             return du < 0 ? Zone.U_MIN : Zone.U_MAX;
         }
         return dv < 0 ? Zone.V_MIN : Zone.V_MAX;

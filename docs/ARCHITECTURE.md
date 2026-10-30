@@ -1,5 +1,26 @@
 # Architecture - Roundwood
 
+## NeoForge 1.21.1 boundary
+
+**Stacks.** Roundwood's stack payloads keep their NBT shape inside `minecraft:custom_data`; vanilla metadata
+(names, lore, enchantments, repair cost, unbreakability, adventure predicates, tooltip hiding) lives in native
+components and placed-block data in `block_entity_data` / `block_state`. `appearance/item/StackPayloads` is the
+only representation access: reads copy (or read in place for hot paths), writes replace the component, a family
+removes only its own keys, empty custom data disappears so default items stack. Acceptance stays with the
+families: door placement (`DoorHardwareStacks.readable`) refuses any component change besides custom data;
+thinning (`ArchThinningRecipe`) admits the native equivalents of its 1.20.1 key list and carries the whole patch.
+
+**Persistence.** `AppearanceAnchorBlockEntity` threads `HolderLookup.Provider` through
+`saveAdditional`/`loadAdditional`/`getUpdateTag`/`handleUpdateTag`/`onDataPacket` and the family hooks;
+rollbacks and probes use `loadWithComponents` with the level's (or caller's) registries. Disk and update
+payloads stay distinct. The door's camouflage is a `CamouflageStore` (free, paid, locked); its one nested stack
+goes through `CamouflageRefundCodec` (legacy fixer, then target decode). Migrations, rendering and fitting
+authorities are unchanged. See [SAVE-COMPATIBILITY](SAVE-COMPATIBILITY.md).
+
+**Interaction and transport.** Blocks answer `useItemOn` only (`BlockUseResults`); the sneak-gesture bridge
+sets `TriState` use flags. Projected leaf use is the serverbound `DoorUsePayload` (`roundwood:door_use`,
+protocol 2, main thread), re-validated by `ProjectedDoorUse` and dispatched through the normal game mode.
+
 ## Static chunk publication (0.17.0)
 
 Arch layers share a connected render displacement: shared XY coordinates move together, outer

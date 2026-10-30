@@ -2,6 +2,33 @@
 
 Newest first.
 
+## 2026-10-29 - NeoForge 1.21.1 line: same ids, payloads in custom data, locked refunds
+
+The `neoforge-1.21.1` branch ports the 0.17.0 source line to Minecraft 1.21.1 / NeoForge 21.1.265
+(ModDevGradle 2.0.148, Java 21). Forge 1.20.1 stays on `main` as a maintenance line; fixes are cherry-picked
+deliberately, never merged across loaders.
+
+- **Every historical registration stays.** All 0.13.3 and 0.17.0 block, item, block-entity, loot-condition and
+  serializer ids (49 aliases, 13 crossed windows, retired archways, `window_trim`) remain registered as
+  themselves. Registry aliases are not used: they resolve names but cannot supply geometry, appearance or
+  multi-item conversion, which the existing migrations own.
+- **Roundwood's stack payloads stay NBT, inside `minecraft:custom_data`.** Vanilla's 1.20.5 conversion already
+  leaves them there, the strict/opaque codecs stay the single authority, and no second (component) schema
+  competes with them. `StackPayloads` is the copy-on-write bridge; native components carry vanilla metadata and
+  placed-block data. Rejected: one data component per payload (a second authority, a conversion per key, and
+  unknown future payloads could no longer ride along unchanged).
+- **The nested camouflage refund is converted explicitly.** Vanilla never fixes items inside a modded block
+  entity. `CamouflageRefundCodec` runs vanilla's ItemStack fixer on the legacy shape only. A refund that still
+  cannot be decoded is locked custody (`CamouflageStore`): kept raw, edits refused, carried on the door drop,
+  placement refused. Tradeoff: such a door cannot be re-camouflaged or re-placed until the missing content
+  returns, but nothing is deleted and no refund is manufactured.
+- **Block use routes through `useItemOn`.** 1.21 splits use into item and empty-hand callbacks; the per-hand
+  routers keep their 1.20.1 contract through `BlockUseResults`, so a click never runs a router twice.
+- **Unit tests run under FML's JUnit launcher** (`neoForge.unitTest`), giving them real registries; tests read
+  checked-in files through `testsupport/ProjectFiles`.
+- **Version stays 0.17.0** for the first build of the line; the loader-qualified tag
+  (`neoforge-1.21.1-v0.17.0`) and jar name (`roundwood-1.21.1-neoforge-0.17.0.jar`) distinguish it.
+
 ## 2026-10-28 - Static rendering reaches families through ports
 
 The structure review found the shared snapshot publication (`AssemblyRenderUpdates.layout`/`refresh`)

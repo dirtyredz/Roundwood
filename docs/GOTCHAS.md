@@ -1,5 +1,33 @@
 # Gotchas - Roundwood
 
+- **Custom block-entity item stacks are not upgraded by vanilla.** The 1.20.5 item fixer visits vanilla block
+  entities' known item paths only; `Camouflage.Refund` keeps `{id, Count, tag}` until
+  `CamouflageRefundCodec` fixes it. Never feed a legacy compound to `ItemStack.parse` (it drops the `tag`),
+  never fix an already-converted stack again, and never turn a decode failure into `ItemStack.EMPTY`.
+- **An empty `block_entity_data` is no payload.** `BlockItem.setBlockEntityData` removes the component for an
+  empty compound, and the component requires an `id`. Tests that need a "carries contents" stack put a key in.
+- **1.21 sprite coordinates are 0..1.** `TextureAtlasSprite.getU/getV` and `getUOffset` no longer use 0..16
+  (`BlockFaceUV` still does); `ModelRetexturing` divides position UVs by 16. NeoForge's `FaceBakery` applies
+  only `uvShrinkRatio`, without Forge 1.20.1's extra 0.998 inset.
+- **`ClipContext` no longer accepts a null entity.** Pass `CollisionContext.empty()` for player-less rays.
+- **NeoForge calls `playerWillDestroy` before `onDestroyedByPlayer`.** Forge 1.20.1 called it from the
+  default `onDestroyedByPlayer`. Vanilla's creative door-half removal therefore runs before the creative
+  refund-discarding scope unless `AssemblyDoorBlock.playerWillDestroy` opens it; `AssemblyHarvest` must not
+  call `playerWillDestroy` again.
+- **Block use is split and protected.** `useItemOn` (any hand, empty stacks too) then, only after
+  `PASS_TO_DEFAULT_BLOCK_INTERACTION` on the main hand, `useWithoutItem`. Both are protected, so reflection
+  must walk the class hierarchy with `getDeclaredMethod` (`ArchPiecePlacementPreview`).
+- **`IShapedRecipe` does not exist in NeoForge 21.1**; recipes take `CraftingInput` and identity comes from the
+  `RecipeHolder`.
+- **Fixtures must survive cleanup.** `runGameTestServer` deletes `run/gametest/world`; save-compatibility
+  fixtures are SNBT on the GameTest classpath, never an imported world under the run directory.
+- **GameTest structures are walled in by barriers on 1.21.** A ray or player placed outside the template's
+  bounds (the 9-wide `empty` template) hits the barrier; keep eyes and targets inside.
+- **GameTests run near x = 10^6.** World-minus-cell subtraction moves an exact geometric tie by about 1e-10;
+  window zone ties use a 1e-7 tolerance (`WindowTargetZones`). Never build a test on an exact float tie.
+- **NeoForge restores a cancelled placement's snapshots with neighbour updates**, so an unsupported plant written
+  over by the placement pops when the cell below returns.
+
 - **Independent face-normal offsets open the arch mesh.** Even a single cuboid acquires gaps.
   Keep an arch layer's XY displacement connected, expand exterior minimum boundaries and the shared Z interval, then restore
   shared edge vertices after masonry clipping. A rectangle-only watertightness check misses the
@@ -26,16 +54,14 @@
   donor state and original index at the owning cell, including synthetic biome-colored donors.
   Ordinary paint remains untinted. Camouflage retains quad shade/AO flags with host-state lighting;
   owner screenshots, not headless timing, decide whether flat-light corners are needed.
-- **Embeddium uses Forge's five-argument `getQuads`.** The static model path uses that public API,
+- **Sodium (NeoForge) uses the five-argument `getQuads`.** The static model path uses that public API,
   `getModelData` and render types, not vanilla tessellator internals. The separate mining-crack
-  adapter targets Forge's dispatcher overload. A class-load check is not a client rendering test.
+  adapter targets NeoForge's dispatcher overload. A class-load check is not a client rendering test.
 
-- **Plain JUnit is not a Forge lighting harness.** With version detection enabled, strict
-  `Bootstrap.bootStrap()` fails in network initialization with
-  `NoSuchMethodException: net.minecraftforge.network.NetworkEvent.<init>()`: this runner has no
-  Forge event-class transformation. Without version detection it first fails with `Game version not set`.
-  `MinecraftBootstrap.ensure()` deliberately swallows bootstrap errors for pure geometry tests;
-  it does not prove real AO/flat tessellation works. The owner accepted owning-cell lighting;
+- **The JUnit runtime is not a lighting harness.** Unit tests run under FML's JUnit launcher (real
+  registries, no world or client); `MinecraftBootstrap.ensure()` stays a harmless no-op there. Registries are
+  frozen, so tests use registered blocks instead of constructing new ones. It does not prove real AO/flat
+  tessellation works. The owner accepted owning-cell lighting;
   do not build a transformed lighting harness. Compare geometry/tint/flags headlessly; the owner
   accepted the owning-cell result in game before the old renderers were removed.
 

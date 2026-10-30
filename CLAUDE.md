@@ -4,9 +4,18 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
 [README.md](README.md), [STRUCTURE.md](STRUCTURE.md), [docs/](docs/).
 
 - **Commit identity:** `dirtyredz <dirtyredz@live.com>`.
-- **Headless only.** Never run `runClient`. Verification is `node tools/generate-textures.mjs`, `runData`, `test build`,
-  `runGameTestServer`, `git diff --check`, and `..\..\tools\sync-mod-files.ps1 -Check` from the
-  workspace. The owner checks visuals and client behaviour in game.
+- **Loader lines.** `main` is Forge 1.20.1; the `neoforge-1.21.1` branch is NeoForge 21.1.265 (ModDevGradle,
+  Java 21; profile `neoforge-1.21.1` in `.ci/mod.json`, provenance in `.ci/port-provenance.json`). Fixes move
+  between lines by deliberate cherry-pick, never a merge.
+- **Headless only.** Never run `runClient`. Verification is `node tools/generate-textures.mjs`, `runData`,
+  `./gradlew test build verifyReleaseJar` (unit tests run under FML's JUnit launcher), `runGameTestServer`
+  (then `node .ci/scripts/verify-gametest.mjs <log>`), `git diff --check`, and
+  `..\..\tools\sync-mod-files.ps1 -Check -Mod <worktree>` from the workspace. The owner checks visuals and
+  client behaviour in game.
+- **Save compatibility:** `./gradlew --offline runGameTestServer -PcompatTargets` runs the Forge 1.20.1
+  (0.13.3, 0.17.0) fixture suites (`docs/SAVE-COMPATIBILITY.md`). Fixture manifests come from the release jars
+  through `node tools/compat/historical-manifest.mjs`; never regenerate them from this build. While the pack
+  holds ANU for the migration, the NeoForge line's full GameTest suite runs locally (about five minutes).
 - **Focused door targeting:** `./gradlew --offline runGameTestServer -PdoorTargets` compiles
   only fixtures, door depth/placement, fitted-arch transaction/lifecycle, thin acquisition, arch placement,
   the bounded new showcase sections, body/hand routing, anchor persistence, content custody and environment checks. Full showcase/navigation/migration suites run on ANU.
@@ -15,7 +24,7 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
 - **Focused static rendering:** `./gradlew --offline runGameTestServer -PrenderingTargets` selects
   assembly snapshot lifecycle, fitting/persistence, arch and window attachments, and environment checks.
   Combine with `-PdoorTargets` after shared transaction or leaf changes.
-- **Optional local Embeddium check:** `./gradlew --offline checkEmbeddium -PembeddiumJar=<existing jar>`
+- **Optional local renderer check:** `./gradlew --offline checkEmbeddium -PembeddiumJar=<existing Sodium jar>`
   class-loads its block renderer and Roundwood's wrapper without initialization. It never starts a client.
 - **Focused villager repeats:** `./gradlew --offline runGameTestServer -PnavigationRepeats=20`
   compiles only navigation tests, fixtures and environment checks, with 20 independent required

@@ -162,4 +162,13 @@ class WindowTargetZonesTest {
         assertTrue(sum > 0, "polygon is not counter-clockwise");
         return sum / 2;
     }
+
+    /** A diagonal tie far from the origin (where GameTests run) still goes to the u edge despite subtraction rounding. */
+    @Test
+    void diagonalTiesSurviveWorldCoordinateRounding() {
+        for (double origin : new double[]{0, 1260619, -6122030, 30_000_000}) {
+            double x = (origin + 0.1) - origin, z = (origin + 0.1) - origin;
+            assertEquals(Zone.U_MIN, WindowTargetZones.classify(WindowTargetZones.facePoint(Direction.UP, x, 1, z)), "origin " + origin);
+        }
+    }
 }

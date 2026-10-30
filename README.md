@@ -1,6 +1,6 @@
 # Roundwood
 
-Forge 1.20.1 mod: a round 2x2 wooden door, an arched 1x2 door and double arched 3x3 and 3x4 doors, a round window with arch, corner and edge profiles with optional Cross Beams attachments, three modular arch tops and a mirrored keyhole shoulder, a Universal Trim for all of them and an Arch Sill, hobbit-hole style. Each is one item you
+NeoForge 1.21.1 mod (this `neoforge-1.21.1` line; Forge 1.20.1 lives on `main`): a round 2x2 wooden door, an arched 1x2 door and double arched 3x3 and 3x4 doors, a round window with arch, corner and edge profiles with optional Cross Beams attachments, three modular arch tops and a mirrored keyhole shoulder, a Universal Trim for all of them and an Arch Sill, hobbit-hole style. Each is one item you
 restyle in the world: any planks (vanilla or modded) set the wood, any of the 16 dyes paints it,
 and trims can also be faced with radial brick. Install on **both** the server and every client.
 Generic: not tied to any modpack.
@@ -18,9 +18,15 @@ doors keep both finishes. Body, frame, casing and camouflage remain independent.
 
 | Component | Version |
 |---|---|
-| Minecraft | 1.20.1 |
-| Forge | 47.x (built and tested on 47.4.10) |
-| Dependencies | none (EMI and JEI optional, client side) |
+| Minecraft | 1.21.1 |
+| NeoForge | 21.1.265 or newer 21.1 (built and tested on 21.1.265) |
+| Java | 21 |
+| Dependencies | none (EMI 1.1.24+1.21.1 and JEI 19.70.0.464 optional, client side) |
+| Worlds from | Forge 1.20.1 Roundwood 0.13.3 and 0.17.0 ([save compatibility](docs/SAVE-COMPATIBILITY.md)) |
+
+Open an older world only with Roundwood installed: Minecraft converts it once and Roundwood's own
+migrations (archways to modular pieces, crossed windows, aliases) run as before. A camouflage refund naming
+an item that no longer exists stays locked on the door rather than disappearing.
 
 ## Content
 
@@ -464,21 +470,25 @@ limitation (camouflage is lost when mirroring).
 node tools/generate-textures.mjs        # original textures (deterministic)
 node tools/generate-test-structures.mjs # GameTest templates incl. the 0.4.0 fixture
 ./gradlew runData                       # regenerate src/generated/resources (checked in)
-./gradlew test build                    # unit tests + reobfuscated release jar
-./gradlew --offline runGameTestServer -PdoorTargets # bounded door/arch placement gate
-./gradlew runGameTestServer             # headless Forge server GameTests (fresh world each run)
+./gradlew test build verifyReleaseJar   # unit tests (FML JUnit launcher) + release jar + jar guard
+./gradlew --offline runGameTestServer -PdoorTargets   # bounded door/arch placement gate
+./gradlew --offline runGameTestServer -PcompatTargets # Forge 1.20.1 save-compatibility suites
+./gradlew runGameTestServer             # headless NeoForge server GameTests (fresh world each run)
+node .ci/scripts/verify-gametest.mjs <log>  # requires a positive passed count
 git diff --check
 ```
 
-`-PwithViewers=emi|jei|jei,emi` puts the optional viewers on the dev runtime; `-PpackModsDir=<mods
-folder>` adds Double Doors, Collective and Dramatic Doors from a pack instance for compatibility runs.
-The release jar is `build/libs/roundwood-1.20.1-<version>.jar`.
+`-PwithViewers=emi|jei|jei,emi` puts the optional viewers on the dev runtime. The Forge-only
+`-PpackModsDir` door-mod option is not part of this line. The release jar is
+`build/libs/roundwood-1.21.1-neoforge-<version>.jar`, released under the loader-qualified tag
+`neoforge-1.21.1-v<version>`.
 
 ## Release
 
 Bump `mod_version` in `gradle.properties` and commit non-empty `docs/releases/<version>.md`.
-Push, land on main, and wait for green CI (tests, build, final-jar guard and datagen).
-With the owner's go-ahead, the agent runs `gh workflow run release.yml --ref main`.
+Push, land on the line's release branch (`neoforge-1.21.1` here, `main` for Forge), and wait for green CI
+(tests, build, final-jar guard and datagen). With the owner's go-ahead, the agent runs
+`gh workflow run release.yml --ref neoforge-1.21.1` (`--ref main` on the Forge line).
 The release workflow verifies again, gates on GameTests, builds the release jar, creates its
 version tag, uploads a draft, reads back and hashes every asset, then **publishes** the release
 with the jar, its `.sha256` and `roundwood.pw.toml`. The pack session consumes the published

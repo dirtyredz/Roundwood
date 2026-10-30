@@ -1,0 +1,44 @@
+{
+  "repository": "dirtyredz/roundwood",
+  "line": "neoforge-1.21.1",
+  "branchStart": {
+    "commit": "4a3bdfbcb9d146328a94c3ca5c2eb54b5ef05238",
+    "description": "Forge 1.20.1 main at the start of the NeoForge line (0.17.0 plus structure cleanups and docs; no registry or payload changes since 0.17.0)"
+  },
+  "baseline": {
+    "tag": "v0.17.0",
+    "commit": "4610a4b6daa468995bf825e56212a39d0e373d0f",
+    "jar": "roundwood-1.20.1-0.17.0.jar",
+    "sha256": "116432453c3e96c080454c5a3e2852463b9bb672a0db5af4b4084020d8d3c99d",
+    "description": "Latest Forge 1.20.1 release; the source line this port carries"
+  },
+  "packBaseline": {
+    "tag": "v0.13.3",
+    "commit": "4f4776ec709107a7372aedea4609cac7700561d0",
+    "jar": "roundwood-1.20.1-0.13.3.jar",
+    "sha256": "150874f1a48c88c8af0995cb33aa2970cdfb83dc828cd0b049a8b635f7f206e4",
+    "description": "Forge 1.20.1 release installed in the Evil Eye pack; its worlds must load (see docs/SAVE-COMPATIBILITY.md)"
+  },
+  "upstream": null,
+  "dependencies": [
+    {
+      "name": "NeoForge",
+      "coordinate": "net.neoforged:neoforge:21.1.265:universal",
+      "sha256": "c12cf1a6cb0aa7792b13174b06088a4f54d8bcc92f6a32fcb03310b456936847",
+      "inspected": "BlockRenderDispatcher#renderBreakingTexture(BlockState, BlockPos, BlockAndTintGetter, PoseStack, VertexConsumer, ModelData) resolves model data at its head (BreakingModelDataMixin); ServerPlayerGameMode#destroyBlock calls playerWillDestroy before onDestroyedByPlayer; CommonHooks#onPlaceItemIntoWorld captures snapshots and restores them with neighbour updates on cancellation; ClipContext requires a non-null entity or a CollisionContext"
+    },
+    {
+      "name": "JEI",
+      "coordinate": "mezz.jei:jei-1.21.1-neoforge:19.70.0.464",
+      "sha256": "df3883c1f53780eacfb670c1c4252a4b9e3da3fea8469571aac5efc815459949",
+      "inspected": "ISubtypeRegistration#registerSubtypeInterpreter(IIngredientTypeWithSubtypes, B, ISubtypeInterpreter), ISubtypeInterpreter#getSubtypeData / getLegacyStringSubtypeInfo, IIngredientManager#removeIngredientsAtRuntime"
+    },
+    {
+      "name": "EMI",
+      "coordinate": "dev.emi:emi-neoforge:1.1.24+1.21.1",
+      "sha256": "b68691f94f0727fc517cac2ab55bd6658d1179cc8cc715fe610b60c37469bc4c",
+      "inspected": "EmiRegistry#removeEmiStacks, EmiRegistry#setDefaultComparison(Object, Comparison), Comparison#compareData"
+    }
+  ],
+  "communityPatches": []
+}
