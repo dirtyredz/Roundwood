@@ -4,7 +4,7 @@ import io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderSnapsho
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
 import java.util.List;
 

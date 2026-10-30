@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.data.client;
 
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraftforge.client.model.generators.ItemModelBuilder;
+import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 

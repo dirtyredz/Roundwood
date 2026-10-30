@@ -6,8 +6,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
@@ -30,7 +30,7 @@ public final class AssemblyCapturedPlacement {
         level.captureBlockSnapshots = true;
         try {
             success = AssemblyWriteTransaction.write(level, states, initialize,
-                    () -> player == null || !ForgeEventFactory.onMultiBlockPlace(player, before, face));
+                    () -> player == null || !EventHooks.onMultiBlockPlace(player, before, face));
         } finally {
             level.captureBlockSnapshots = capturing;
             if (level.capturedBlockSnapshots.size() > mark) level.capturedBlockSnapshots.subList(mark, level.capturedBlockSnapshots.size()).clear();
@@ -38,7 +38,7 @@ public final class AssemblyCapturedPlacement {
         if (!success) return false;
         installed.run();
         for (var snapshot : before) level.markAndNotifyBlock(snapshot.getPos(), level.getChunkAt(snapshot.getPos()),
-                snapshot.getReplacedBlock(), level.getBlockState(snapshot.getPos()), Block.UPDATE_ALL, Block.UPDATE_LIMIT);
+                snapshot.getState(), level.getBlockState(snapshot.getPos()), Block.UPDATE_ALL, Block.UPDATE_LIMIT);
         return true;
     }
 }

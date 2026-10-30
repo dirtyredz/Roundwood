@@ -6,10 +6,10 @@ import io.github.dirtyredz.roundwood.block.door.leaf.DoorGeometry;
 import io.github.dirtyredz.roundwood.data.client.ItemModelTransforms;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
-import net.minecraftforge.client.model.generators.ItemModelBuilder;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.joml.Vector3f;
 
 import io.github.dirtyredz.roundwood.client.door.leaf.DoorLeafModels;

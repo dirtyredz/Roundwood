@@ -8,7 +8,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShearsItem;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.Optional;
 
@@ -43,7 +43,7 @@ public record HeldTrimTool(Kind kind, InteractionHand hand, ItemStack stack, Opt
         if (slot.isPresent()) {
             return new HeldTrimTool(Kind.ATTACHMENT, hand, stack, slot, Optional.empty());
         }
-        if (stack.getItem() instanceof ShearsItem || stack.is(Tags.Items.SHEARS)) {
+        if (stack.getItem() instanceof ShearsItem || stack.is(Tags.Items.TOOLS_SHEAR)) {
             return new HeldTrimTool(Kind.SHEARS, hand, stack, Optional.empty(), Optional.empty());
         }
         Optional<AppearanceGestures.Gesture> donor = AppearanceGestures.donor(AppearanceFamily.TRIM, player, hand);

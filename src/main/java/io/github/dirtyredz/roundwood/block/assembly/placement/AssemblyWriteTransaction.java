@@ -54,7 +54,7 @@ public final class AssemblyWriteTransaction {
         List<Captured> captured = new ArrayList<>(cells.size());
         for (BlockPos pos : cells) {
             BlockEntity entity = level.getBlockEntity(pos);
-            captured.add(new Captured(pos.immutable(), level.getBlockState(pos), entity == null ? null : entity.saveWithFullMetadata()));
+            captured.add(new Captured(pos.immutable(), level.getBlockState(pos), entity == null ? null : entity.saveWithFullMetadata(level.registryAccess())));
         }
         return captured;
     }
@@ -100,7 +100,7 @@ public final class AssemblyWriteTransaction {
         if (cell.entity() != null) {
             BlockEntity entity = level.getBlockEntity(cell.pos());
             if (entity != null) {
-                entity.load(cell.entity());
+                entity.loadWithComponents(cell.entity(), level.registryAccess());
                 entity.setChanged();
             }
         }

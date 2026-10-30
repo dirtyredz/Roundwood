@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.door.arch;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting;
 import io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchProposal;
 import io.github.dirtyredz.roundwood.Roundwood;
@@ -16,14 +17,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import java.util.Optional;
 
 /** The same complete proposal as server fitting; rejected combinations draw a red occupied cell. */
-@Mod.EventBusSubscriber(modid=Roundwood.MOD_ID,bus=Mod.EventBusSubscriber.Bus.FORGE,value=Dist.CLIENT)
+@EventBusSubscriber(modid=Roundwood.MOD_ID,value=Dist.CLIENT)
 public final class DoorArchPlacementPreview {
     private record Attempt(BlockHitResult hit, Optional<DoorArchProposal> proposal) {}
     private DoorArchPlacementPreview() {}

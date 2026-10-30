@@ -8,13 +8,12 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.*;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.ChunkRenderTypeSet;
-import net.minecraftforge.client.model.BakedModelWrapper;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.ChunkRenderTypeSet;
+import net.neoforged.neoforge.client.model.BakedModelWrapper;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import java.util.*;
 
 /**
@@ -32,7 +31,7 @@ public final class StaticWorldModel extends BakedModelWrapper<BakedModel> implem
     }
 
     /** Wraps every blockstate model of each Roundwood block that has a bound static source. */
-    public static void wrapBlocks(Map<ResourceLocation, BakedModel> models, StaticModelSources sources) {
+    public static void wrapBlocks(Map<net.minecraft.client.resources.model.ModelResourceLocation, BakedModel> models, StaticModelSources sources) {
         sources.forEach((block, source) -> {
             for (var state : block.getStateDefinition().getPossibleStates()) {
                 var location = BlockModelShaper.stateToModelLocation(state);

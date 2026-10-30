@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.arch;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceItem;
 import io.github.dirtyredz.roundwood.block.arch.assembly.ArchPieceCell;
@@ -22,16 +23,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Optional;
 
 /** Read-only placement proposal, landing face and shoulder split. Never invokes a use callback. */
-@Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Roundwood.MOD_ID, value = Dist.CLIENT)
 public final class ArchPiecePlacementPreview {
     private ArchPiecePlacementPreview() {}
 

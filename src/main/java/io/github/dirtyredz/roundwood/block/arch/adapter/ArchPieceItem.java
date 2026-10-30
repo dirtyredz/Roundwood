@@ -10,8 +10,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /** Styled modular product; item use recomputes and installs one complete placement proposal. */
@@ -24,8 +22,8 @@ public final class ArchPieceItem extends AppearanceBlockItem {
         return io.github.dirtyredz.roundwood.block.arch.adapter.ArchDoorFitting.claims(context) ? io.github.dirtyredz.roundwood.block.arch.adapter.ArchDoorFitting.use(context) : super.useOn(context);
     }
     @Override public InteractionResult place(BlockPlaceContext context) { return ArchPiecePlacement.place(this, context); }
-    @Override public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, level, tooltip, flag);
+    @Override public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, context, tooltip, flag);
         tooltip.add(Component.translatable("tooltip.roundwood.arch_piece").withStyle(ChatFormatting.GRAY));
         if (piece().design().shoulder()) {
             tooltip.add(Component.translatable("tooltip.roundwood.keyhole_shoulder").withStyle(ChatFormatting.GRAY));

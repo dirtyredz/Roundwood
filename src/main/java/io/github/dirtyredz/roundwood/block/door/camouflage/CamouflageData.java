@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.door.camouflage;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -15,8 +16,7 @@ import java.util.Optional;
  * back exactly once; it is saved with the world but never sent to clients.
  *
  * <p>NBT (inside the anchor block entity): {@code Camouflage: {Material: <block state>, Refund: <item>}}.
- * Reading fails closed: unknown or unacceptable materials, and refunds that do not match the
- * material, read as nothing rather than as an item.
+ * Reading, and custody of a refund that cannot be decoded, belong to {@link CamouflageStore}.
  */
 public record CamouflageData(BlockState material, ItemStack refund) {
     public static final String TAG = "Camouflage";
@@ -47,31 +47,26 @@ public record CamouflageData(BlockState material, ItemStack refund) {
     }
 
     /** The compound stored under {@link #TAG}; {@code withRefund} false for what clients receive. */
-    public CompoundTag write(boolean withRefund) {
+    public CompoundTag write(boolean withRefund, HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
         tag.put(MATERIAL, NbtUtils.writeBlockState(material));
         if (withRefund && paid()) {
-            tag.put(REFUND, refund.save(new CompoundTag()));
+            tag.put(REFUND, CamouflageRefundCodec.encode(refund, registries));
         }
         return tag;
     }
 
-    /** Reads the {@link #TAG} compound of a block-entity tag; empty when absent or not acceptable. */
-    public static Optional<CamouflageData> read(CompoundTag entityTag) {
-        if (!entityTag.contains(TAG, Tag.TAG_COMPOUND)) {
-            return Optional.empty();
-        }
-        CompoundTag tag = entityTag.getCompound(TAG);
-        if (!tag.contains(MATERIAL, Tag.TAG_COMPOUND)) {
-            return Optional.empty();
-        }
+    /** The material a saved {@link #TAG} compound names, when it is an acceptable donor. */
+    static Optional<BlockState> readMaterial(CompoundTag tag) {
+        if (!tag.contains(MATERIAL, Tag.TAG_COMPOUND)) return Optional.empty();
         BlockState material = NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag.getCompound(MATERIAL));
-        if (!CamouflageMaterial.isValid(material)) {
-            return Optional.empty();
-        }
-        ItemStack refund = tag.contains(REFUND, Tag.TAG_COMPOUND) ? ItemStack.of(tag.getCompound(REFUND)) : ItemStack.EMPTY;
-        boolean matches = refund.getCount() == 1
-                && CamouflageMaterial.fromStack(refund).filter(state -> state == material).isPresent();
-        return Optional.of(new CamouflageData(material, matches ? refund : ItemStack.EMPTY));
+        return CamouflageMaterial.isValid(material) ? Optional.of(material) : Optional.empty();
     }
+
+    /** Whether a decoded refund pays for {@code material}: exactly one item of that donor. */
+    static boolean pays(ItemStack refund, BlockState material) {
+        return refund.getCount() == 1 && CamouflageMaterial.fromStack(refund).filter(state -> state == material).isPresent();
+    }
+
+    static final String REFUND_KEY = REFUND;
 }

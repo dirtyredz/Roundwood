@@ -2,7 +2,6 @@ package io.github.dirtyredz.roundwood.block.door.camouflage;
 
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -28,8 +27,7 @@ public final class CamouflageMaterial {
         if (stack.isEmpty() || !(stack.getItem() instanceof BlockItem item)) {
             return Optional.empty();
         }
-        CompoundTag tag = stack.getTag();
-        if (tag != null && (tag.contains(BlockItem.BLOCK_ENTITY_TAG) || tag.contains(BlockItem.BLOCK_STATE_TAG))) {
+        if (io.github.dirtyredz.roundwood.appearance.item.StackPayloads.hasPlacedBlockPayload(stack)) {
             return Optional.empty(); // stored contents or a non-default state: never copied
         }
         BlockState state = item.getBlock().defaultBlockState();

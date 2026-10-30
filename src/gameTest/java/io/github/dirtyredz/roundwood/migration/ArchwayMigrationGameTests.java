@@ -27,8 +27,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.*;
@@ -124,7 +124,7 @@ public final class ArchwayMigrationGameTests {
         player.getInventory().load(player.getInventory().save(new net.minecraft.nbt.ListTag()));
         player.tickCount = 0;
         ArchwayStackMigration.onPlayerTick(new net.minecraftforge.event.TickEvent.PlayerTickEvent(net.minecraftforge.event.TickEvent.Phase.END, player));
-        ArchwayStackMigration.onChunkLoad(new net.minecraftforge.event.level.ChunkEvent.Load(
+        ArchwayStackMigration.onChunkLoad(new net.neoforged.neoforge.event.level.ChunkEvent.Load(
                 helper.getLevel().getChunkAt(chest.getBlockPos()), false));
         helper.runAfterDelay(25, () -> {
             check(chest.countItem(ModItems.archPiece(ArchPieceDesign.TOP_1X2)) == 43, "chest tops");

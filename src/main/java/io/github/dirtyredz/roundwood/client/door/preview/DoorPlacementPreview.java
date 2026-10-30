@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.door.preview;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.dirtyredz.roundwood.client.render.PlacementHighlights;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.assembly.placement.AssemblyPlacementPlan;
@@ -21,10 +22,9 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +39,7 @@ import java.util.Optional;
  * Receives cancelled highlight events (the door highlight cancels its own) and never changes their
  * cancellation. Client-only, on the Forge bus.
  */
-@Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Roundwood.MOD_ID, value = Dist.CLIENT)
 public final class DoorPlacementPreview {
     private static final float[] LEAF = {0.35F, 0.8F, 1F, 0.9F};
     private static final float[] CELLS = {0F, 0F, 0F, 0.35F};

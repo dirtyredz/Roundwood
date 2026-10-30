@@ -1,7 +1,6 @@
 package io.github.dirtyredz.roundwood.block.archway;
 
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
-import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayLayout;
 import io.github.dirtyredz.roundwood.block.archway.trim.ArchwayTrimNbt;
 import io.github.dirtyredz.roundwood.block.attachment.TrimAttachmentSource;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
@@ -9,7 +8,6 @@ import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntit
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 
 import java.util.Map;
 
@@ -23,12 +21,5 @@ import java.util.Map;
 public class ArchwayBlockEntity extends AppearanceAnchorBlockEntity implements TrimAttachmentSource {
     public ArchwayBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state, AppearanceFamily.TRIM, Map.of(TrimSlot.PERIMETER, ArchwayTrimNbt.FORMAT));
-    }
-
-    /** The four cells and the casings standing proud of them, so the archway is drawn whenever any of it is in view. */
-    @Override
-    public AABB getRenderBoundingBox() {
-        BlockState state = getBlockState();
-        return state.getBlock() instanceof ArchwayBlock ? ArchwayLayout.of(getBlockPos(), state).renderBounds() : new AABB(getBlockPos());
     }
 }

@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.client.arch.ArchPieceWorldModel;
 import io.github.dirtyredz.roundwood.client.arch.archway.ArchwayWorldModel;
@@ -24,17 +25,17 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.ModelEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import io.github.dirtyredz.roundwood.client.door.DoorParticles;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.Map;
 import java.util.stream.Stream;
-import net.minecraft.resources.ResourceLocation;
 
 /**
  * Client-only wiring on the mod bus: the animated door renderer, the source models it draws (no
@@ -43,7 +44,7 @@ import net.minecraft.resources.ResourceLocation;
  * panel tint, and dropping every appearance, donor and camouflage cache whenever models are re-baked.
  * Never loaded on a server.
  */
-@Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Roundwood.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class RoundwoodClient {
     private RoundwoodClient() {
     }
@@ -58,23 +59,23 @@ public final class RoundwoodClient {
     public static void registerSourceModels(ModelEvent.RegisterAdditional event) {
         for (DoorDesign design : DoorDesign.values()) {
             for (DoorHingeSide hinge : DoorHingeSide.values()) {
-                event.register(DoorLeafModels.location(design, hinge));
+                event.register(ModelResourceLocation.standalone(DoorLeafModels.location(design, hinge)));
             }
         }
         for (Quarter part : Quarter.values()) {
-            event.register(RingModelNames.quarterLocation(part, false));
-            event.register(RingModelNames.quarterLocation(part, true));
+            event.register(ModelResourceLocation.standalone(RingModelNames.quarterLocation(part, false)));
+            event.register(ModelResourceLocation.standalone(RingModelNames.quarterLocation(part, true)));
         }
     }
 
     /** Windows read their appearance through model data; every family item resolves its stack's appearance. */
     @SubscribeEvent
     public static void wrapModels(ModelEvent.ModifyBakingResult event) {
-        Map<ResourceLocation, BakedModel> models = event.getModels();
+        Map<ModelResourceLocation, BakedModel> models = event.getModels();
         WindowAppearanceModel.wrapBlocks(models);
         StaticWorldModel.wrapBlocks(models, staticSources());
         for (Item item : Stream.of(ModItems.all().stream(), LegacyContent.items().stream()).flatMap(stream -> stream).distinct().toList()) {
-            ModelResourceLocation location = new ModelResourceLocation(ForgeRegistries.ITEMS.getKey(item), "inventory");
+            ModelResourceLocation location = ModelResourceLocation.inventory(BuiltInRegistries.ITEM.getKey(item));
             BakedModel model = models.get(location);
             if (model == null) {
                 continue;
@@ -103,6 +104,13 @@ public final class RoundwoodClient {
 
     @SubscribeEvent public static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
         io.github.dirtyredz.roundwood.client.material.tint.StaticBlockColors.register(event);
+    }
+
+    /** Break and hit particles from each door cell's own piece, not from the whole-door outline. */
+    @SubscribeEvent
+    public static void registerClientExtensions(RegisterClientExtensionsEvent event) {
+        event.registerBlock(DoorParticles.INSTANCE, Stream.concat(ModBlocks.doors().stream(), LegacyContent.doors().stream())
+                .toArray(net.minecraft.world.level.block.Block[]::new));
     }
 
     @SubscribeEvent

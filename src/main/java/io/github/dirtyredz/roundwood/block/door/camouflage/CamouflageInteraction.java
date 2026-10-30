@@ -120,13 +120,16 @@ public final class CamouflageInteraction {
         return InteractionResult.CONSUME;
     }
 
-    /** The anchor entity, if the player may edit and the assembly is whole and loaded. */
+    /**
+     * The anchor entity, if the player may edit, the assembly is whole and loaded, and its camouflage is not
+     * locked custody (an undecodable refund is never replaced or cleared).
+     */
     private static Optional<RoundDoorBlockEntity> editable(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos,
                                                            Player player) {
         if (!player.mayBuild() || !level.mayInteract(player, pos)) {
             return Optional.empty();
         }
-        return anchorEntity(block, state, level, pos);
+        return anchorEntity(block, state, level, pos).filter(RoundDoorBlockEntity::camouflageEditable);
     }
 
     private static Optional<RoundDoorBlockEntity> anchorEntity(AssemblyDoorBlock block, BlockState state, Level level, BlockPos pos) {

@@ -37,8 +37,8 @@ import io.github.dirtyredz.roundwood.migration.retired.CrossWindowCompatibility;
  * evaluated with its anchor's entity from whichever cell broke.
  */
 public class RoundwoodBlockLoot extends BlockLootSubProvider {
-    public RoundwoodBlockLoot() {
-        super(Set.of(), FeatureFlags.REGISTRY.allFlags());
+    public RoundwoodBlockLoot(net.minecraft.core.HolderLookup.Provider registries) {
+        super(Set.of(), FeatureFlags.REGISTRY.allFlags(), registries);
     }
 
     @Override

@@ -18,7 +18,6 @@ import net.minecraft.client.renderer.block.model.FaceBakery;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import org.joml.Vector3f;
 
@@ -34,7 +33,6 @@ import java.util.List;
  */
 public final class CamouflageModels {
     private static final int MAX_MODELS = 256;
-    private static final ResourceLocation NAME = ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, "camouflage");
     private static final FaceBakery BAKERY = new FaceBakery();
 
     private record Key(BlockState donor, DoorDesign design, Direction facing, DoorLayout.Part part, CamouflageCoverage coverage) {
@@ -68,7 +66,7 @@ public final class CamouflageModels {
             quads.add(BAKERY.bakeQuad(
                     new Vector3f((float) box.minX(), (float) box.minY(), (float) box.minZ()),
                     new Vector3f((float) box.maxX(), (float) box.maxY(), (float) box.maxZ()),
-                    element, material.sprite(), side, BlockModelRotation.X0_Y0, null, true, NAME));
+                    element, material.sprite(), side, BlockModelRotation.X0_Y0, null, true));
         }
         return List.copyOf(quads);
     }

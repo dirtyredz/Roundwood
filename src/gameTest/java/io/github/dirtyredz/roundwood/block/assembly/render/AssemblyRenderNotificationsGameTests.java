@@ -13,7 +13,7 @@ import net.minecraft.core.*;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
-import net.minecraftforge.gametest.*;
+import net.neoforged.neoforge.gametest.*;
 import java.util.*;
 import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 

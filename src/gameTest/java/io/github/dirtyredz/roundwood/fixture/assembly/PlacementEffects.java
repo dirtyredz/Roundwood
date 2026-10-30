@@ -1,12 +1,12 @@
 package io.github.dirtyredz.roundwood.fixture.assembly;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.dirtyredz.roundwood.Roundwood;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraftforge.event.PlayLevelSoundEvent;
-import net.minecraftforge.event.VanillaGameEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.PlayLevelSoundEvent;
+import net.neoforged.neoforge.event.VanillaGameEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  * when each effect fired. Keyed by absolute position, so tests running in parallel never mix.
  * Records only; never changes an event.
  */
-@Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = Roundwood.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class PlacementEffects {
     private record Watch(Supplier<String> probe, List<String> log) {
     }

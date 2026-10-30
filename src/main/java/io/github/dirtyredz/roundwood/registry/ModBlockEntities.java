@@ -13,9 +13,9 @@ import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowBlockEntity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 /**
  * The anchors: the doors' (id {@code round_door}, unchanged since 0.2.0 so saved camouflage loads; it also
@@ -27,26 +27,26 @@ import net.minecraftforge.registries.RegistryObject;
  */
 public final class ModBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
-            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Roundwood.MOD_ID);
+            DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, Roundwood.MOD_ID);
 
     @SuppressWarnings("DataFlowIssue") // the data fixer type is unused for mod block entities
-    public static final RegistryObject<BlockEntityType<RoundDoorBlockEntity>> ROUND_DOOR = BLOCK_ENTITIES.register("round_door",
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RoundDoorBlockEntity>> ROUND_DOOR = BLOCK_ENTITIES.register("round_door",
             () -> BlockEntityType.Builder.of((pos, state) -> new RoundDoorBlockEntity(roundDoor(), pos, state),
                     blocksOf(AssemblyDoorBlock.class)).build(null));
 
     @SuppressWarnings("DataFlowIssue")
-    public static final RegistryObject<BlockEntityType<RoundWindowBlockEntity>> ROUND_WINDOW = BLOCK_ENTITIES.register("round_window",
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RoundWindowBlockEntity>> ROUND_WINDOW = BLOCK_ENTITIES.register("round_window",
             () -> BlockEntityType.Builder.of((pos, state) -> new RoundWindowBlockEntity(roundWindow(), pos, state),
                     blocksOf(WindowPaneBlock.class)).build(null));
 
     @SuppressWarnings("DataFlowIssue")
-    public static final RegistryObject<BlockEntityType<RoundTrimBlockEntity>> ROUND_TRIM = BLOCK_ENTITIES.register("round_trim",
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RoundTrimBlockEntity>> ROUND_TRIM = BLOCK_ENTITIES.register("round_trim",
             () -> BlockEntityType.Builder.of((pos, state) -> new RoundTrimBlockEntity(roundTrim(), pos, state),
                     blocksOf(RoundTrimBlock.class)).build(null));
 
     /** The archways' anchor (0.12.0), for both designs; archways have no aliases. */
     @SuppressWarnings("DataFlowIssue")
-    public static final RegistryObject<BlockEntityType<ArchwayBlockEntity>> ARCHWAY = BLOCK_ENTITIES.register("archway",
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ArchwayBlockEntity>> ARCHWAY = BLOCK_ENTITIES.register("archway",
             () -> BlockEntityType.Builder.of((pos, state) -> new ArchwayBlockEntity(archway(), pos, state),
                     ModBlocks.archways().toArray(ArchwayBlock[]::new)).build(null));
 
@@ -54,7 +54,7 @@ public final class ModBlockEntities {
     }
 
     @SuppressWarnings("DataFlowIssue")
-    public static final RegistryObject<BlockEntityType<ArchPieceBlockEntity>> ARCH_PIECE = BLOCK_ENTITIES.register("arch_piece",
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ArchPieceBlockEntity>> ARCH_PIECE = BLOCK_ENTITIES.register("arch_piece",
             () -> BlockEntityType.Builder.of((pos, state) -> new ArchPieceBlockEntity(archPiece(), pos, state),
                     blocksOf(ArchPieceBlock.class)).build(null));
 
@@ -78,6 +78,6 @@ public final class ModBlockEntities {
 
     /** All entries share this deferred register, including aliases added by bootstrap before registration fires. */
     private static <T extends Block> Block[] blocksOf(Class<T> type) {
-        return ModBlocks.BLOCKS.getEntries().stream().map(RegistryObject::get).filter(type::isInstance).toArray(Block[]::new);
+        return ModBlocks.BLOCKS.getEntries().stream().map(DeferredHolder::get).filter(type::isInstance).toArray(Block[]::new);
     }
 }

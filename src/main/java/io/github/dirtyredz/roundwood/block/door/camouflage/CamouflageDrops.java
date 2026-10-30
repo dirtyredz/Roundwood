@@ -4,16 +4,21 @@ import com.mojang.logging.LogUtils;
 import io.github.dirtyredz.roundwood.block.door.adapter.AssemblyDoorBlock;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
+import io.github.dirtyredz.roundwood.appearance.item.StackPayloads;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.slf4j.Logger;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -73,6 +78,28 @@ public final class CamouflageDrops {
             return;
         }
         Block.popResource(level, pos, taken.get().refundStack()); // honours doTileDrops
+    }
+
+    /**
+     * Ordinary harvest of the initiating cell: a locked camouflage (an undecodable refund,
+     * {@link CamouflageStore}) rides opaquely in the custom data of the door item drop, under the same
+     * {@code Camouflage} key, and is never decoded into a refund here. {@code RoundDoorItem} refuses to place
+     * such a stack, so the custody is neither manufactured nor lost.
+     */
+    public static void carryLocked(List<ItemStack> drops, RoundDoorBlockEntity entity, Item doorItem) {
+        CompoundTag raw = entity.lockedCamouflage();
+        if (raw == null) return;
+        for (ItemStack stack : drops) {
+            if (stack.getItem() == doorItem) {
+                StackPayloads.putCustom(stack, CamouflageData.TAG, raw);
+                return;
+            }
+        }
+    }
+
+    /** Whether {@code stack} carries locked camouflage custody (placement must refuse it). */
+    public static boolean carriesLocked(ItemStack stack) {
+        return StackPayloads.hasCustom(stack, CamouflageData.TAG);
     }
 
     /** Gives a refund back to the player who replaced or cleared it: into the inventory, overflow dropped. */

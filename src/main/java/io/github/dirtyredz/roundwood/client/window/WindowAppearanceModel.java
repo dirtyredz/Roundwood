@@ -29,8 +29,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.BakedModelWrapper;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.BakedModelWrapper;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -51,7 +51,7 @@ import io.github.dirtyredz.roundwood.migration.item.RetiredCrossWindowItem;
  */
 public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
     /** Wrap each canonical, alias and retired window blockstate model once at bake time. */
-    public static void wrapBlocks(Map<ResourceLocation, BakedModel> models) {
+    public static void wrapBlocks(Map<net.minecraft.client.resources.model.ModelResourceLocation, BakedModel> models) {
         List<Block> windows = new ArrayList<>(LegacyContent.windows());
         windows.addAll(ModBlocks.windows());
         windows.addAll(CrossWindowCompatibility.blocks());
@@ -81,11 +81,11 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
     private record WorldKey(BlockState state, Direction side, RenderType layer, WindowAppearanceData snapshot) {}
     private static final AppearanceModelCache<WorldKey, List<BakedQuad>> WORLD = new AppearanceModelCache<>(AppearanceModelCache.MODELS);
 
-    @Override public net.minecraftforge.client.ChunkRenderTypeSet getRenderTypes(BlockState state, RandomSource random, ModelData data) {
+    @Override public net.neoforged.neoforge.client.ChunkRenderTypeSet getRenderTypes(BlockState state, RandomSource random, ModelData data) {
         var base = super.getRenderTypes(state, random, data);
         var snapshot = data.get(WindowAppearanceData.PROPERTY);
         if (snapshot == null || !snapshot.trims().any() && !snapshot.sills().any()) return base;
-        return net.minecraftforge.client.ChunkRenderTypeSet.union(base, net.minecraftforge.client.ChunkRenderTypeSet.of(RenderType.solid()));
+        return net.neoforged.neoforge.client.ChunkRenderTypeSet.union(base, net.neoforged.neoforge.client.ChunkRenderTypeSet.of(RenderType.solid()));
     }
 
     /** The frame's artwork for {@code appearance}: its plank sprite, its paint, or oak when unavailable. */
@@ -151,7 +151,7 @@ public final class WindowAppearanceModel extends BakedModelWrapper<BakedModel> {
             var pane = (WindowPaneBlock) retired.getBlock();
             var state = pane.defaultBlockState();
             var geometry = new WindowPaneState.Snapshot(retired.design(), pane.pose(state));
-            var fitted = WindowBeamNbt.read(stack.getTagElement("BlockEntityTag")).trims()
+            var fitted = WindowBeamNbt.read(io.github.dirtyredz.roundwood.appearance.item.StackPayloads.blockEntityData(stack)).trims()
                     .get(AttachmentFace.FRONT).orElse(appearance);
             return ITEMS.get(new ItemKey(oakItem, wood, glass, TrimLooks.beams(fitted).face()), key ->
                     WindowBeamModels.item(key.source(), WindowBeamModels.quads(geometry, wood, glass, fitted, java.util.Map.of()), DonorSprites.atlas(wood)));

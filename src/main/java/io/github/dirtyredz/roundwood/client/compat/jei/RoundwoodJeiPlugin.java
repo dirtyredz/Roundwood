@@ -8,12 +8,15 @@ import io.github.dirtyredz.roundwood.registry.ModItems;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -34,14 +37,28 @@ public final class RoundwoodJeiPlugin implements IModPlugin {
 
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
-        IIngredientSubtypeInterpreter<ItemStack> byAppearance = (stack, context) -> {
-            String key = stack.getItem() instanceof io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorItem
-                    ? io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.key(stack) : WindowGlassStacks.key(stack);
-            return key.equals(AppearanceDefaults.of(stack.getItem()).key()) ? IIngredientSubtypeInterpreter.NONE : key;
+        ISubtypeInterpreter<ItemStack> byAppearance = new ISubtypeInterpreter<>() {
+            @Override
+            public @Nullable Object getSubtypeData(ItemStack stack, UidContext context) {
+                return subtype(stack);
+            }
+
+            @Override
+            public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
+                String key = subtype(stack);
+                return key == null ? "" : key;
+            }
         };
         for (Item item : ModItems.all()) {
             registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, item, byAppearance);
         }
+    }
+
+    /** The appearance (plus glass or hardware) key, or null for the default oak stack (no subtype). */
+    private static @Nullable String subtype(ItemStack stack) {
+        String key = stack.getItem() instanceof io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorItem
+                ? io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.key(stack) : WindowGlassStacks.key(stack);
+        return key.equals(AppearanceDefaults.of(stack.getItem()).key()) ? null : key;
     }
 
     @Override

@@ -5,8 +5,8 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 /**
  * Guards the world every other GameTest runs in (gradle/gametest-world.gradle): superflat with no
@@ -15,11 +15,11 @@ import net.minecraftforge.gametest.PrefixGameTestTemplate;
  */
 @GameTestHolder(Roundwood.MOD_ID)
 @PrefixGameTestTemplate(false)
-@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = Roundwood.MOD_ID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Roundwood.MOD_ID)
 public final class TestWorldGameTests {
     /** Natural spawning off before any batch runs; tests spawn every mob they use. */
-    @net.minecraftforge.eventbus.api.SubscribeEvent
-    public static void quiet(net.minecraftforge.event.server.ServerStartedEvent event) {
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void quiet(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         event.getServer().getGameRules().getRule(GameRules.RULE_DOMOBSPAWNING).set(false, event.getServer());
     }
 

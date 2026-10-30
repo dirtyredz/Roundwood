@@ -55,6 +55,6 @@ final class DoorIntoArchProposal {
 
     /** Only an arch whose entity holds nothing beyond its look and trims can hand its custody over losslessly. */
     private static boolean knownArchEntity(ArchPieceBlockEntity entity) {
-        return Set.of(AppearanceNbt.TAG, ArchPieceTrimNbt.TAG).containsAll(entity.saveWithoutMetadata().getAllKeys());
+        return Set.of(AppearanceNbt.TAG, ArchPieceTrimNbt.TAG).containsAll(entity.saveWithoutMetadata(entity.getLevel().registryAccess()).getAllKeys());
     }
 }

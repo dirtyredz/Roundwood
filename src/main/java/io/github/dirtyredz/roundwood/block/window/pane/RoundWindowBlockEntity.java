@@ -3,7 +3,6 @@ package io.github.dirtyredz.roundwood.block.window.pane;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.interaction.AppearanceActions;
-import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import io.github.dirtyredz.roundwood.block.attachment.TrimAttachmentSource;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntity;
@@ -19,8 +18,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -34,7 +32,6 @@ import java.util.Optional;
  */
 public class RoundWindowBlockEntity extends AppearanceAnchorBlockEntity implements AppearanceActions.Target, TrimAttachmentSource {
     /** How far a projecting trim reaches past the cell, in blocks. */
-    private static final double TRIM_REACH = AttachmentFace.PROUD / 16.0;
 
     @Nullable
     private DyeColor glass;
@@ -95,17 +92,17 @@ public class RoundWindowBlockEntity extends AppearanceAnchorBlockEntity implemen
     }
 
     @Override
-    protected void saveFamily(CompoundTag tag) {
+    protected void saveFamily(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
         WindowGlassNbt.write(tag, glass());
     }
 
     @Override
-    protected void writeFamilyUpdate(CompoundTag tag) {
+    protected void writeFamilyUpdate(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
         WindowGlassNbt.write(tag, glass());
     }
 
     @Override
-    protected void loadFamily(CompoundTag tag) {
+    protected void loadFamily(CompoundTag tag, net.minecraft.core.HolderLookup.Provider registries) {
         glass = WindowGlassNbt.read(tag).orElse(null);
     }
 
@@ -162,11 +159,5 @@ public class RoundWindowBlockEntity extends AppearanceAnchorBlockEntity implemen
     @Override
     public ModelData getModelData() {
         return renderData;
-    }
-
-    /** The cell plus the one pixel a trim may stand proud of it on any side. */
-    @Override
-    public AABB getRenderBoundingBox() {
-        return new AABB(worldPosition).inflate(TRIM_REACH);
     }
 }

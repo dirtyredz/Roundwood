@@ -8,9 +8,9 @@ import io.github.dirtyredz.roundwood.geometry.PixelSlab;
 import io.github.dirtyredz.roundwood.geometry.Surface;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.client.model.generators.ItemModelBuilder;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.joml.Vector3f;
 
 import java.util.List;

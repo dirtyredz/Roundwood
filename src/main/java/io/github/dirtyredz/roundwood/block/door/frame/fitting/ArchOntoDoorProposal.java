@@ -38,7 +38,7 @@ final class ArchOntoDoorProposal {
         if (candidate.isEmpty()) return Optional.empty();
         var attachment = new DoorArchAttachment(item.piece().design(), item.piece().thickness(), depth,
                 AppearanceStacks.read(context.getItemInHand()), FaceTrims.NONE);
-        return DoorArchProposal.validated(context, candidate.get(), block, attachment, entity.saveWithFullMetadata(),
+        return DoorArchProposal.validated(context, candidate.get(), block, attachment, entity.saveWithFullMetadata(level.registryAccess()),
                 source.getValue(DoorBlock.OPEN), source.getValue(DoorBlock.POWERED), false);
     }
 }

@@ -1,0 +1,24 @@
+import groovy.json.JsonSlurper
+
+// Node is already a CI prerequisite. Keep Gradle a thin consumer of the one profile resolver rather
+// than reimplementing defaults, branch rules, table validation or release-identity formulas here.
+if (!project.ext.has('buildProfile')) {
+    def output = providers.exec {
+        workingDir projectDir
+        commandLine 'node', '.ci/scripts/build-profile.mjs', 'resolve', projectDir.absolutePath
+    }.standardOutput.asText.get()
+    def resolved = new JsonSlurper().parseText(output)
+    if (!(resolved.profile instanceof Map) || !(resolved.identity instanceof Map)) {
+        throw new GradleException('Profile resolver returned invalid JSON')
+    }
+    def selected = resolved.profile
+    if (!pluginManager.hasPlugin(selected.gradlePlugin.toString())) {
+        throw new GradleException("Build profile ${selected.name} requires the ${selected.gradlePlugin} plugin")
+    }
+    def toolchain = java.toolchain.languageVersion.getOrNull()
+    if (toolchain == null || toolchain.asInt() != selected.java) {
+        throw new GradleException("Build profile ${selected.name} requires a Java ${selected.java} toolchain, found ${toolchain}")
+    }
+    ext.buildProfile = selected
+    ext.releaseIdentity = resolved.identity
+}

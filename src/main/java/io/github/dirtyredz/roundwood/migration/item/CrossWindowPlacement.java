@@ -18,6 +18,8 @@ import io.github.dirtyredz.roundwood.migration.conversion.WindowCellConversion;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import io.github.dirtyredz.roundwood.appearance.item.StackPayloads;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
@@ -35,11 +37,14 @@ public final class CrossWindowPlacement {
         public Plan { pos = pos.immutable(); contents = contents.copy(); }
         @Override public CompoundTag contents() { return contents.copy(); }
 
-        /** Exact selection geometry from the preflight contents, without reading a destination entity. */
-        public VoxelShape selection() {
+        /**
+         * Exact selection geometry from the preflight contents, without reading a destination entity. The
+         * temporary entity is never attached to a level, so the caller supplies the registries.
+         */
+        public VoxelShape selection(HolderLookup.Provider registries) {
             var pane = (WindowPaneBlock) state.getBlock();
             var window = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), pos, state);
-            window.load(contents.copy());
+            window.loadWithComponents(contents.copy(), registries);
             var design = new WindowDesign(pane.profile(), WindowPattern.CROSS);
             return WindowShapes.selection(design, pane.pose(state),
                     sides(window, TrimSlot.PERIMETER), sides(window, TrimSlot.SILL));
@@ -67,21 +72,21 @@ public final class CrossWindowPlacement {
                 || !player.mayUseItemAt(pos, context.getClickedFace(), stack))) return Optional.empty();
         var state = item.getBlock().getStateForPlacement(context);
         if (state == null) return Optional.empty();
-        var properties = stack.getTagElement("BlockStateTag");
+        var properties = StackPayloads.blockState(stack);
         if (properties != null) {
-            for (String key : properties.getAllKeys()) {
-                Property<?> property = state.getBlock().getStateDefinition().getProperty(key);
-                if (property != null) state = property(state, property, properties.getString(key));
+            for (var entry : properties.properties().entrySet()) {
+                Property<?> property = state.getBlock().getStateDefinition().getProperty(entry.getKey());
+                if (property != null) state = property(state, property, entry.getValue());
             }
         }
         if (!state.canSurvive(level, pos) || !level.isUnobstructed(state, pos,
                 player == null ? CollisionContext.empty() : CollisionContext.of(player))) return Optional.empty();
-        CompoundTag disk = stack.getTagElement("BlockEntityTag");
-        disk = disk == null ? new CompoundTag() : disk.copy();
+        CompoundTag disk = StackPayloads.blockEntityData(stack);
+        disk = disk == null ? new CompoundTag() : disk;
         WindowGlassNbt.write(disk, CrossWindowCompatibility.glass(stack));
-        var contents = WindowCellConversion.contents(pos, state, disk, CrossWindowCompatibility.appearance(stack), true);
+        var contents = WindowCellConversion.contents(pos, state, disk, CrossWindowCompatibility.appearance(stack), true, level.registryAccess());
         if (contents.isEmpty()) return Optional.empty();
-        return Optional.of(new Plan(pos, WindowCellConversion.summary(pos, state, contents.get()), contents.get()));
+        return Optional.of(new Plan(pos, WindowCellConversion.summary(pos, state, contents.get(), level.registryAccess()), contents.get()));
     }
 
     private static <T extends Comparable<T>> BlockState property(BlockState state, Property<T> property, String value) {

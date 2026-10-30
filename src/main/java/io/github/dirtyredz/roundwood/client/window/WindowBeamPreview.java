@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.window;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.window.interaction.WindowBeamFitPlan;
 import io.github.dirtyredz.roundwood.block.window.geometry.WindowPaneGeometry;
@@ -12,13 +13,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 /** Draws exactly the clipped cross accepted by the shared fit proposal, at the pane's real depth. */
-@Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Roundwood.MOD_ID, value = Dist.CLIENT)
 public final class WindowBeamPreview {
     private WindowBeamPreview() { }
 

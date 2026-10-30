@@ -14,8 +14,8 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.check;
 import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
@@ -29,7 +29,7 @@ public final class WindowCrossMigrationGameTests {
         BlockPos pos = helper.absolutePos(new BlockPos(3, 2, 3));
         for (String id : CrossWindowCompatibility.IDS) {
             helper.getLevel().setBlock(pos, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS);
-            var block = (io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock) net.minecraftforge.registries.ForgeRegistries.BLOCKS
+            var block = (io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock) net.minecraft.core.registries.BuiltInRegistries.BLOCK
                     .getValue(net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("roundwood", id));
             var state = block.defaultBlockState().setValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.WATERLOGGED, true)
                     .setValue(io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock.FACE_REVERSED, true);
@@ -122,7 +122,7 @@ public final class WindowCrossMigrationGameTests {
         var state = CrossWindowCompatibility.blocks().get(0).defaultBlockState();
         level.setBlock(pos, state, Block.UPDATE_CLIENTS);
         var before = level.getBlockEntity(pos).saveWithFullMetadata();
-        var outer = net.minecraftforge.common.util.BlockSnapshot.create(level.dimension(), level, pos.east());
+        var outer = net.neoforged.neoforge.common.util.BlockSnapshot.create(level.dimension(), level, pos.east());
         int mark = level.capturedBlockSnapshots.size();
         boolean previousCapture = level.captureBlockSnapshots;
         level.captureBlockSnapshots = true;

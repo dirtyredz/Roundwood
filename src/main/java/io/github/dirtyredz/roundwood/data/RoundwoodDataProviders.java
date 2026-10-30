@@ -20,8 +20,8 @@ import io.github.dirtyredz.roundwood.data.server.RoundwoodRecipeProvider;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -50,8 +50,8 @@ public final class RoundwoodDataProviders {
         generator.addProvider(event.includeClient(), new LegacyModelProvider(output, existingFiles));
         generator.addProvider(event.includeClient(), new RoundwoodLanguageProvider(output));
 
-        generator.addProvider(event.includeServer(), new RoundwoodRecipeProvider(output));
-        generator.addProvider(event.includeServer(), RoundwoodLootProvider.create(output));
+        generator.addProvider(event.includeServer(), new RoundwoodRecipeProvider(output, lookup));
+        generator.addProvider(event.includeServer(), RoundwoodLootProvider.create(output, lookup));
         RoundwoodBlockTagsProvider blockTags = generator.addProvider(event.includeServer(),
                 new RoundwoodBlockTagsProvider(output, lookup, existingFiles));
         generator.addProvider(event.includeServer(),

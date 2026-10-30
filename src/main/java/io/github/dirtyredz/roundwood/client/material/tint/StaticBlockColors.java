@@ -4,7 +4,7 @@ import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import java.util.ArrayList;
 
 /** No live BE reads. Resolve the donor at the chunk's owning position through BlockColors. */

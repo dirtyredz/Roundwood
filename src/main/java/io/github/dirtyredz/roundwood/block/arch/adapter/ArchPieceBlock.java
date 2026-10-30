@@ -127,14 +127,18 @@ public class ArchPieceBlock extends Block implements EntityBlock, AppearanceDefa
     @Override public boolean claimsUse(BlockState state, BlockGetter level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         return state.getValue(CELL).in(design) && ArchPieceInteraction.claims(state, level, pos, player, hand, hit);
     }
-    @Override public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    @Override protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return io.github.dirtyredz.roundwood.block.BlockUseResults.itemUse(route(state, level, pos, player, hand, hit));
+    }
+
+    private InteractionResult route(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         return state.getValue(CELL).in(design) ? ArchPieceInteraction.use(this, state, level, pos, player, hand, hit) : InteractionResult.PASS;
     }
     @Override public List<ItemStack> getDrops(BlockState state, LootParams.Builder builder) {
         ArchPieceAppearance.ANCHORS.forLoot(builder, state).ifPresent(anchor -> builder.withParameter(LootContextParams.BLOCK_ENTITY, anchor));
         return AppearanceDrops.decorate(super.getDrops(state, builder), asItem(), ArchPieceAppearance.forDrops(builder, state));
     }
-    @Override public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    @Override public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
         return AppearanceStacks.create(asItem(), ArchPieceAppearance.of(level, pos, state));
     }
 }

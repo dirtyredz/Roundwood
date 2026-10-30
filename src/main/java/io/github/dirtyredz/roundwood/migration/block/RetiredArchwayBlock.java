@@ -30,10 +30,10 @@ public final class RetiredArchwayBlock extends ArchwayBlock {
         if (result == LegacyCells.Result.INCOMPLETE) super.tick(state, level, pos, random);
         else if (result == LegacyCells.Result.DEFERRED) level.scheduleTick(pos, this, 20);
     }
-    @Override public InteractionResult use(BlockState state,
+    @Override protected net.minecraft.world.ItemInteractionResult useItemOn(net.minecraft.world.item.ItemStack held, BlockState state,
             Level level, BlockPos pos, Player player,
             InteractionHand hand, BlockHitResult hit) {
-        return InteractionResult.FAIL;
+        return io.github.dirtyredz.roundwood.block.BlockUseResults.itemUse(InteractionResult.FAIL);
     }
     @Override public boolean claimsUse(BlockState state, BlockGetter level,
             BlockPos pos, Player player, InteractionHand hand,

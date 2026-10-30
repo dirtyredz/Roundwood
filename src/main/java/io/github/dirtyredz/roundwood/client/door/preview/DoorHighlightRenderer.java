@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.door.preview;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.dirtyredz.roundwood.Roundwood;
@@ -17,10 +18,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 /**
  * Replaces the vanilla block highlight for round doors. Vanilla outlines the block's
@@ -34,7 +34,7 @@ import net.minecraftforge.fml.common.Mod;
  * filled corners stay where they are: the outline never runs ahead of the leaf. An incomplete
  * assembly draws nothing, like the leaf renderer. Client-only, on the Forge bus.
  */
-@Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Roundwood.MOD_ID, value = Dist.CLIENT)
 public final class DoorHighlightRenderer {
     private static final float ALPHA = 0.4F;
 
@@ -62,7 +62,7 @@ public final class DoorHighlightRenderer {
         double z = pos.getZ() - camera.z;
         PoseStack pose = event.getPoseStack();
         VertexConsumer lines = event.getMultiBufferSource().getBuffer(RenderType.lines());
-        double now = level.getGameTime() + event.getPartialTick();
+        double now = level.getGameTime() + event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         if (level.getBlockEntity(DoorLayout.of(pos, state).anchor()) instanceof RoundDoorBlockEntity anchor
                 && anchor.swing().moving(now)) {
             OutlineLines.edges(pose, lines, DoorSelectionShapes.visibleStatic(state, level, pos), x, y, z, 0F, 0F, 0F, ALPHA);

@@ -47,12 +47,12 @@ public final class ArchwayConversion {
         for (var cell : assembly.positions()) {
             before.put(cell, level.getBlockState(cell));
             var entity = level.getBlockEntity(cell);
-            if (entity != null) saved.put(cell, entity.saveWithFullMetadata());
+            if (entity != null) saved.put(cell, entity.saveWithFullMetadata(level.registryAccess()));
             writes.put(cell, Blocks.AIR.defaultBlockState());
         }
         CompoundTag body = new CompoundTag();
         AppearanceNbt.write(body, old.appearance());
-        CompoundTag disk = old.saveWithFullMetadata();
+        CompoundTag disk = old.saveWithFullMetadata(level.registryAccess());
         CompoundTag top = disk.copy();
         for (String metadata : java.util.List.of("id", "x", "y", "z", ArchwayTrimNbt.TAG)) top.remove(metadata);
         AppearanceNbt.write(top, old.appearance());
@@ -72,8 +72,8 @@ public final class ArchwayConversion {
                 }
                 for (var entry : contents.entrySet()) {
                     if (!(level.getBlockEntity(entry.getKey()) instanceof ArchPieceBlockEntity entity)) return;
-                    entity.load(entry.getValue().copy());
-                    var actual = entity.saveWithFullMetadata();
+                    entity.loadWithComponents(entry.getValue().copy(), level.registryAccess());
+                    var actual = entity.saveWithFullMetadata(level.registryAccess());
                     if (!entry.getValue().getAllKeys().stream().allMatch(key -> entry.getValue().get(key).equals(actual.get(key)))) return;
                     entity.setChanged();
                 }
@@ -112,7 +112,7 @@ public final class ArchwayConversion {
             saved.forEach((cell, data) -> {
                 var entity = level.getBlockEntity(cell);
                 if (entity == null) throw new IllegalStateException("Unable to restore archway entity at " + cell);
-                entity.load(data);
+                entity.loadWithComponents(data, level.registryAccess());
                 entity.setChanged();
             });
         } finally {

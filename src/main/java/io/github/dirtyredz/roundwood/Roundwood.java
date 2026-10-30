@@ -14,27 +14,25 @@ import io.github.dirtyredz.roundwood.registry.ModCreativeTab;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import io.github.dirtyredz.roundwood.registry.ModLootConditions;
 import io.github.dirtyredz.roundwood.showcase.ShowcaseCommand;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
 
 /**
- * Bootstrap only: registers content (the three canonical entries and the hidden 0.4.0 aliases), the
- * datagen listener, the showcase command and the game-bus hooks (restyling gestures, deferred
- * harvests, legacy migration).
+ * Bootstrap only: registers content (the canonical entries, the hidden 0.4.0 aliases and retired
+ * compatibility blocks), the door-use payload, the datagen listener, the showcase command and the
+ * game-bus hooks (restyling gestures, deferred harvests, legacy migration).
  */
 @Mod(Roundwood.MOD_ID)
 public final class Roundwood {
     public static final String MOD_ID = "roundwood";
 
-    public Roundwood() {
+    public Roundwood(IEventBus modBus) {
         io.github.dirtyredz.roundwood.block.arch.adapter.ArchDoorFitting.bind(
                 io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting::claims,
                 io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting::use);
-        DoorUseChannel.register();
+        DoorUseChannel.register(modBus);
         CrossWindowCompatibility.registerWindowHandler();
-        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         LegacyContent.register(ModBlocks.BLOCKS, ModItems.ITEMS);
         ModBlocks.BLOCKS.register(modBus);
         ModBlockEntities.BLOCK_ENTITIES.register(modBus);
@@ -44,7 +42,7 @@ public final class Roundwood {
         io.github.dirtyredz.roundwood.registry.ModRecipeSerializers.SERIALIZERS.register(modBus);
         modBus.addListener(RoundwoodDataProviders::gatherData);
 
-        IEventBus gameBus = MinecraftForge.EVENT_BUS;
+        IEventBus gameBus = NeoForge.EVENT_BUS;
         gameBus.addListener(ShowcaseCommand::register);
         gameBus.addListener(AppearanceUseEvents::onRightClickBlock);
         gameBus.addListener(AssemblyHarvest::onLevelTick);

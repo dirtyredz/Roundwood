@@ -76,7 +76,7 @@ public final class TrimFitting {
             if (!player.getInventory().add(returned)) {
                 player.drop(returned, false);
             }
-            shears.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
+            shears.hurtAndBreak(1, player, net.minecraft.world.entity.LivingEntity.getSlotForHand(hand));
         }
         announce(level, player, found.get().origin(), look.get(), false);
         return InteractionResult.CONSUME;

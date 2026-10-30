@@ -16,12 +16,12 @@ public final class ProjectedDoorUse {
     private ProjectedDoorUse() {
     }
 
-    /** Re-raycast before dispatching through the ordinary Forge/vanilla interaction router. */
+    /** Re-raycast before dispatching through the ordinary NeoForge/vanilla interaction router. */
     public static InteractionResult use(ServerPlayer player, BlockHitResult requested) {
         var level = player.serverLevel();
         var pos = requested.getBlockPos();
         if (!player.isAlive() || player.isSpectator() || player.isUsingItem()
-                || !level.isLoaded(pos) || !player.canReach(requested.getLocation(), 0)) {
+                || !level.isLoaded(pos) || !Reach.within(player, requested.getLocation())) {
             return InteractionResult.FAIL;
         }
         var state = level.getBlockState(pos);

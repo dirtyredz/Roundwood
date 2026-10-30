@@ -19,9 +19,9 @@ import io.github.dirtyredz.roundwood.block.window.pane.RoundWindowItem;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowDesign;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,36 +36,36 @@ import java.util.Map;
  * Looks travel in stack data.
  */
 public final class ModItems {
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Roundwood.MOD_ID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, Roundwood.MOD_ID);
 
-    public static final RegistryObject<RoundDoorItem> ROUND_DOOR = ITEMS.register("round_door",
+    public static final DeferredHolder<Item, RoundDoorItem> ROUND_DOOR = ITEMS.register("round_door",
             () -> new RoundDoorItem(ModBlocks.roundDoor(), new Item.Properties()));
-    public static final RegistryObject<RoundDoorItem> ARCHED_DOOR = ITEMS.register("arched_door",
+    public static final DeferredHolder<Item, RoundDoorItem> ARCHED_DOOR = ITEMS.register("arched_door",
             () -> new RoundDoorItem(ModBlocks.archedDoor(), new Item.Properties()));
-    public static final RegistryObject<RoundDoorItem> TALL_DOUBLE_ARCHED_DOOR = ITEMS.register("tall_double_arched_door",
+    public static final DeferredHolder<Item, RoundDoorItem> TALL_DOUBLE_ARCHED_DOOR = ITEMS.register("tall_double_arched_door",
             () -> new RoundDoorItem(ModBlocks.tallDoubleArchedDoor(), new Item.Properties()));
-    public static final RegistryObject<RoundDoorItem> DOUBLE_ARCHED_DOOR = ITEMS.register("double_arched_door",
+    public static final DeferredHolder<Item, RoundDoorItem> DOUBLE_ARCHED_DOOR = ITEMS.register("double_arched_door",
             () -> new RoundDoorItem(ModBlocks.doubleArchedDoor(), new Item.Properties()));
-    private static final Map<WindowDesign, RegistryObject<RoundWindowItem>> WINDOWS = registerWindows();
-    public static final RegistryObject<RoundWindowItem> ROUND_WINDOW = WINDOWS.get(WindowDesign.plain(WindowProfile.ROUND));
-    public static final RegistryObject<RoundWindowItem> ROUND_WINDOW_ARCH_LEFT = WINDOWS.get(WindowDesign.plain(WindowProfile.ARCH_LEFT));
-    public static final RegistryObject<RoundWindowItem> ROUND_WINDOW_ARCH_RIGHT = WINDOWS.get(WindowDesign.plain(WindowProfile.ARCH_RIGHT));
-    private static final Map<ArchwayDesign, RegistryObject<ArchwayItem>> ARCHWAYS = registerArchways();
-    private static final Map<ArchPieceDesign, RegistryObject<ArchPieceItem>> ARCH_PIECES = registerArchPieces(ArchPieceThickness.FULL);
-    private static final Map<ArchPieceDesign, RegistryObject<ArchPieceItem>> THIN_ARCH_PIECES = registerArchPieces(ArchPieceThickness.THIN);
-    public static final RegistryObject<UniversalTrimItem> ROUND_TRIM = ITEMS.register(UniversalTrimItem.ID,
+    private static final Map<WindowDesign, DeferredHolder<Item, RoundWindowItem>> WINDOWS = registerWindows();
+    public static final DeferredHolder<Item, RoundWindowItem> ROUND_WINDOW = WINDOWS.get(WindowDesign.plain(WindowProfile.ROUND));
+    public static final DeferredHolder<Item, RoundWindowItem> ROUND_WINDOW_ARCH_LEFT = WINDOWS.get(WindowDesign.plain(WindowProfile.ARCH_LEFT));
+    public static final DeferredHolder<Item, RoundWindowItem> ROUND_WINDOW_ARCH_RIGHT = WINDOWS.get(WindowDesign.plain(WindowProfile.ARCH_RIGHT));
+    private static final Map<ArchwayDesign, DeferredHolder<Item, ArchwayItem>> ARCHWAYS = registerArchways();
+    private static final Map<ArchPieceDesign, DeferredHolder<Item, ArchPieceItem>> ARCH_PIECES = registerArchPieces(ArchPieceThickness.FULL);
+    private static final Map<ArchPieceDesign, DeferredHolder<Item, ArchPieceItem>> THIN_ARCH_PIECES = registerArchPieces(ArchPieceThickness.THIN);
+    public static final DeferredHolder<Item, UniversalTrimItem> ROUND_TRIM = ITEMS.register(UniversalTrimItem.ID,
             () -> new UniversalTrimItem(ModBlocks.roundTrim(), new Item.Properties()));
-    public static final RegistryObject<ArchSillTrimItem> ARCH_SILL_TRIM = ITEMS.register(ArchSillTrimItem.ID,
+    public static final DeferredHolder<Item, ArchSillTrimItem> ARCH_SILL_TRIM = ITEMS.register(ArchSillTrimItem.ID,
             () -> new ArchSillTrimItem(new Item.Properties()));
 
-    public static final RegistryObject<StyledAttachmentItem> CROSS_BEAMS = ITEMS.register("cross_beams",
+    public static final DeferredHolder<Item, StyledAttachmentItem> CROSS_BEAMS = ITEMS.register("cross_beams",
             () -> new StyledAttachmentItem(TrimSlot.CROSS_BEAMS, new Item.Properties()));
 
     private ModItems() {
     }
 
-    private static Map<WindowDesign, RegistryObject<RoundWindowItem>> registerWindows() {
-        Map<WindowDesign, RegistryObject<RoundWindowItem>> out = new LinkedHashMap<>();
+    private static Map<WindowDesign, DeferredHolder<Item, RoundWindowItem>> registerWindows() {
+        Map<WindowDesign, DeferredHolder<Item, RoundWindowItem>> out = new LinkedHashMap<>();
         for (WindowDesign design : ModBlocks.WindowProducts.all()) {
             out.put(design, ITEMS.register(design.id(), () -> design.pattern() == WindowPattern.CROSS
                     ? new RetiredCrossWindowItem(design, new Item.Properties())
@@ -74,16 +74,16 @@ public final class ModItems {
         return Collections.unmodifiableMap(out);
     }
 
-    private static Map<ArchwayDesign, RegistryObject<ArchwayItem>> registerArchways() {
-        Map<ArchwayDesign, RegistryObject<ArchwayItem>> out = new LinkedHashMap<>();
+    private static Map<ArchwayDesign, DeferredHolder<Item, ArchwayItem>> registerArchways() {
+        Map<ArchwayDesign, DeferredHolder<Item, ArchwayItem>> out = new LinkedHashMap<>();
         for (ArchwayDesign design : ArchwayDesign.values()) {
             out.put(design, ITEMS.register(design.id(), () -> new RetiredArchwayItem(ModBlocks.archway(design), new Item.Properties())));
         }
         return Collections.unmodifiableMap(out);
     }
 
-    private static Map<ArchPieceDesign, RegistryObject<ArchPieceItem>> registerArchPieces(ArchPieceThickness thickness) {
-        Map<ArchPieceDesign, RegistryObject<ArchPieceItem>> out = new LinkedHashMap<>();
+    private static Map<ArchPieceDesign, DeferredHolder<Item, ArchPieceItem>> registerArchPieces(ArchPieceThickness thickness) {
+        Map<ArchPieceDesign, DeferredHolder<Item, ArchPieceItem>> out = new LinkedHashMap<>();
         for (ArchPieceDesign design : ArchPieceDesign.values()) {
             out.put(design, ITEMS.register(thickness.id(design), () -> new ArchPieceItem(ModBlocks.archPiece(design, thickness), new Item.Properties())));
         }
@@ -102,7 +102,7 @@ public final class ModItems {
 
     /** The two archway items, ordinary then keyhole. */
     public static List<Item> archways() {
-        return ARCHWAYS.values().stream().map(RegistryObject::get).map(Item.class::cast).toList();
+        return ARCHWAYS.values().stream().map(DeferredHolder::get).map(Item.class::cast).toList();
     }
 
     /** The window item with {@code design}. */

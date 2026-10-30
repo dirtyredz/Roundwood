@@ -35,9 +35,9 @@ public final class OutlineLines {
         dx /= length;
         dy /= length;
         dz /= length;
-        lines.vertex(last.pose(), (float) x1, (float) y1, (float) z1).color(r, g, b, a)
-                .normal(last.normal(), dx, dy, dz).endVertex();
-        lines.vertex(last.pose(), (float) x2, (float) y2, (float) z2).color(r, g, b, a)
-                .normal(last.normal(), dx, dy, dz).endVertex();
+        lines.addVertex(last, (float) x1, (float) y1, (float) z1).setColor(r, g, b, a)
+                .setNormal(last, dx, dy, dz);
+        lines.addVertex(last, (float) x2, (float) y2, (float) z2).setColor(r, g, b, a)
+                .setNormal(last, dx, dy, dz);
     }
 }

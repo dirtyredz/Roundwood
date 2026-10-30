@@ -2,7 +2,7 @@ package io.github.dirtyredz.roundwood.block.window.pane;
 
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import net.minecraft.world.item.DyeColor;
-import net.minecraftforge.client.model.data.ModelProperty;
+import net.neoforged.neoforge.client.model.data.ModelProperty;
 
 import java.util.Optional;
 import java.util.Map;

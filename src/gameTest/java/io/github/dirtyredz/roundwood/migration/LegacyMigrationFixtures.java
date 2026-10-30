@@ -22,9 +22,9 @@ import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.ChunkEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.fml.LogicalSide;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -40,7 +40,7 @@ final class LegacyMigrationFixtures {
     }
 
     static Block legacy(String id) {
-        Block block = ForgeRegistries.BLOCKS.getValue(ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, id));
+        Block block = BuiltInRegistries.BLOCK.get(ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, id));
         if (block == null || block == Blocks.AIR) {
             throw new IllegalStateException("0.4.0 id not registered: " + id);
         }

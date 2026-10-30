@@ -1,39 +1,41 @@
 package io.github.dirtyredz.roundwood.block.door.adapter;
 
-import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.interaction.ProjectedDoorUse;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.HandlerThread;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-/** One serverbound use request for real leaf hits beyond vanilla's per-cell packet limit. */
+/**
+ * Registration and transport of {@link DoorUsePayload}, the one serverbound use request for real leaf hits beyond
+ * vanilla's per-cell packet limit. Protocol {@value #PROTOCOL} is the NeoForge wire format; Roundwood is required
+ * on both sides, so the payload is not optional. Handling runs on the server thread and re-validates everything
+ * ({@link ProjectedDoorUse}).
+ */
 public final class DoorUseChannel {
-    private static final String VERSION = "1";
-    private static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-            ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, "door_use"), () -> VERSION, VERSION::equals, VERSION::equals);
+    public static final String PROTOCOL = "2";
 
     private DoorUseChannel() {
     }
 
-    public static void register() {
-        CHANNEL.messageBuilder(Use.class, 0, NetworkDirection.PLAY_TO_SERVER)
-                .encoder((message, buffer) -> buffer.writeBlockHitResult(message.hit()))
-                .decoder(buffer -> new Use(buffer.readBlockHitResult()))
-                .consumerMainThread((message, context) -> {
-                    var player = context.get().getSender();
-                    if (player != null) {
-                        ProjectedDoorUse.use(player, message.hit());
-                    }
-                    context.get().setPacketHandled(true);
-                }).add();
+    public static void register(IEventBus modBus) {
+        modBus.addListener(RegisterPayloadHandlersEvent.class, DoorUseChannel::onRegister);
     }
 
+    private static void onRegister(RegisterPayloadHandlersEvent event) {
+        PayloadRegistrar registrar = event.registrar(PROTOCOL).executesOn(HandlerThread.MAIN);
+        registrar.playToServer(DoorUsePayload.TYPE, DoorUsePayload.STREAM_CODEC, (payload, context) -> {
+            if (context.player() instanceof ServerPlayer player) {
+                ProjectedDoorUse.use(player, payload.hit());
+            }
+        });
+    }
+
+    /** Client: asks the server to use the door at the real leaf hit. */
     public static void send(BlockHitResult hit) {
-        CHANNEL.sendToServer(new Use(hit));
-    }
-
-    private record Use(BlockHitResult hit) {
+        PacketDistributor.sendToServer(new DoorUsePayload(hit));
     }
 }

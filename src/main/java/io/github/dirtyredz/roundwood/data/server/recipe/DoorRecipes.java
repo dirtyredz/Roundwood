@@ -3,13 +3,13 @@ package io.github.dirtyredz.roundwood.data.server.recipe;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 
-import java.util.function.Consumer;
 
 /**
  * The door recipes, any planks (mixed types allowed) and a gold nugget for the hardware: the round
@@ -21,7 +21,7 @@ public final class DoorRecipes {
     private DoorRecipes() {
     }
 
-    public static void build(Consumer<FinishedRecipe> writer, InventoryChangeTrigger.TriggerInstance unlock) {
+    public static void build(RecipeOutput writer, Criterion<InventoryChangeTrigger.TriggerInstance> unlock) {
         ShapedRecipeBuilder.shaped(RecipeCategory.REDSTONE, ModItems.ROUND_DOOR.get())
                 .pattern("PPP").pattern("PNP").pattern("PPP")
                 .define('P', ItemTags.PLANKS)

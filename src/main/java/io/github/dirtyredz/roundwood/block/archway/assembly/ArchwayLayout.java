@@ -2,12 +2,10 @@ package io.github.dirtyredz.roundwood.block.archway.assembly;
 
 import io.github.dirtyredz.roundwood.block.archway.ArchwayBlock;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
-import io.github.dirtyredz.roundwood.block.attachment.AttachmentFace;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 
 import java.util.List;
 
@@ -50,16 +48,6 @@ public final class ArchwayLayout {
         @Override
         public boolean isPart(BlockState state, Block block, ArchwayPart part) {
             return state.is(block) && state.getValue(ArchwayBlock.FACING) == facing && state.getValue(ArchwayBlock.PART) == part;
-        }
-
-        /** The four cells, plus the one pixel each face casing stands proud of them (drawn whenever any of it shows). */
-        public AABB renderBounds() {
-            AABB box = new AABB(anchor);
-            for (BlockPos pos : positions()) {
-                box = box.minmax(new AABB(pos));
-            }
-            double proud = AttachmentFace.PROUD / 16.0;
-            return box.inflate(Math.abs(facing.getStepX()) * proud, 0, Math.abs(facing.getStepZ()) * proud);
         }
     }
 

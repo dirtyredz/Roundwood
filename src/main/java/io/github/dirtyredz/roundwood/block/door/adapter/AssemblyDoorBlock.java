@@ -18,7 +18,6 @@ import io.github.dirtyredz.roundwood.block.door.interaction.DoorInteraction;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorDesign;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorShapes;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorSelectionShapes;
-import io.github.dirtyredz.roundwood.client.door.DoorParticles;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -49,11 +48,9 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -72,7 +69,7 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
     private final Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType;
 
     protected AssemblyDoorBlock(Properties properties, BlockSetType type, Supplier<BlockEntityType<RoundDoorBlockEntity>> entityType) {
-        super(properties, type);
+        super(type, properties);
         this.entityType = entityType;
     }
 
@@ -118,12 +115,6 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
         return DoorShapes.shape(state);
     }
 
-    /** Break and hit particles from this cell's own piece, not from the whole-door outline. */
-    @Override
-    public void initializeClient(Consumer<IClientBlockExtensions> consumer) {
-        consumer.accept(DoorParticles.INSTANCE); // only ever called on the client
-    }
-
     /** Assemblies are placed only through {@link RoundDoorItem}; there is no single-cell placement. */
     @Override
     @Nullable
@@ -145,7 +136,11 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
 
     /** Door trim, then restyling, then camouflage, then the toggle ({@link DoorInteraction}). */
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return io.github.dirtyredz.roundwood.block.BlockUseResults.itemUse(route(state, level, pos, player, hand, hit));
+    }
+
+    private InteractionResult route(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         return DoorInteraction.use(this, state, level, pos, player, hand, hit);
     }
 
@@ -180,20 +175,23 @@ public abstract class AssemblyDoorBlock extends DoorBlock implements EntityBlock
         var ordinary = AppearanceDrops.decorate(super.getDrops(state, builder), AppearanceFamily.DOOR, appearance);
         DoorAppearance.ANCHORS.forLoot(builder,state).ifPresent(anchor -> ordinary.stream().filter(stack -> stack.getItem()==familyItem())
                 .forEach(stack -> io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.decorate(stack,anchor)));
-        return DoorAppearance.ANCHORS.forLoot(builder, state).map(anchor ->
-                io.github.dirtyredz.roundwood.block.door.frame.DoorArchLoot.append(ordinary, anchor, this, builder)).orElse(ordinary);
+        return DoorAppearance.ANCHORS.forLoot(builder, state).map(anchor -> {
+            var drops = io.github.dirtyredz.roundwood.block.door.frame.DoorArchLoot.append(ordinary, anchor, this, builder);
+            io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageDrops.carryLocked(drops, anchor, familyItem());
+            return drops;
+        }).orElse(ordinary);
     }
 
     /** Picking any part gives the door in its appearance. */
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
         var stack = AppearanceStacks.create(familyItem(), DoorAppearance.of(level, pos, state));
         DoorAppearance.ANCHORS.anchor(level,pos,state).ifPresent(entity -> io.github.dirtyredz.roundwood.block.door.hardware.DoorHardwareStacks.decorate(stack,entity));
         return stack;
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, net.minecraft.world.phys.HitResult target, BlockGetter level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(BlockState state, net.minecraft.world.phys.HitResult target, net.minecraft.world.level.LevelReader level, BlockPos pos, Player player) {
         if (target instanceof BlockHitResult hit) {
             var frame = io.github.dirtyredz.roundwood.block.door.frame.DoorArchInteraction.hit(level, pos, state, hit);
             if (frame.isPresent()) {

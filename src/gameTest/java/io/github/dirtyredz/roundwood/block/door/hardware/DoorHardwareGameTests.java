@@ -17,7 +17,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
-import net.minecraftforge.gametest.*;
+import net.neoforged.neoforge.gametest.*;
 import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.*;
 
 @GameTestHolder(Roundwood.MOD_ID)

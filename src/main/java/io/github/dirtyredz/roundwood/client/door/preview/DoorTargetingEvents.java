@@ -1,16 +1,16 @@
 package io.github.dirtyredz.roundwood.client.door.preview;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.adapter.DoorUseChannel;
 import io.github.dirtyredz.roundwood.block.door.selection.DoorHitResolver;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.Optional;
 
@@ -20,7 +20,7 @@ import java.util.Optional;
  * accepts it. Projected leaf use keeps its real point through a dedicated validated server request;
  * mining and picking that unoccupied projection remain refused. Client-only, on the Forge bus.
  */
-@Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Roundwood.MOD_ID, value = Dist.CLIENT)
 public final class DoorTargetingEvents {
     private record RayKey(Object level,Object player,long tick,Object eye,Object end,Object main,Object mainTag,
                           Object off,Object offTag,boolean secondary,Object targetState,Object targetRevision) {}
@@ -32,17 +32,17 @@ public final class DoorTargetingEvents {
     @SubscribeEvent
     public static void onWorldRender(RenderLevelStageEvent event) {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) return;
-        acquire(Minecraft.getInstance(), event.getPartialTick(),false);
+        acquire(Minecraft.getInstance(), event.getPartialTick().getGameTimeDeltaPartialTick(false),false);
     }
 
     @SubscribeEvent
-    public static void unload(net.minecraftforge.event.level.LevelEvent.Unload event){if(event.getLevel().isClientSide())RAYS.clear();}
+    public static void unload(net.neoforged.neoforge.event.level.LevelEvent.Unload event){if(event.getLevel().isClientSide())RAYS.clear();}
 
     private static void acquire(Minecraft minecraft, float partialTick,boolean fresh) {
         if (minecraft.level == null || minecraft.player == null || minecraft.gameMode == null
                 || minecraft.getCameraEntity() != minecraft.player) return;
         var eye = minecraft.player.getEyePosition(partialTick);
-        var end = eye.add(minecraft.player.getViewVector(partialTick).scale(minecraft.gameMode.getPickRange()));
+        var end = eye.add(minecraft.player.getViewVector(partialTick).scale(minecraft.player.blockInteractionRange()));
         var main=minecraft.player.getMainHandItem();var off=minecraft.player.getOffhandItem();
         Object targetState=null,targetRevision=null;
         if(minecraft.hitResult instanceof BlockHitResult previous) {
@@ -54,7 +54,7 @@ public final class DoorTargetingEvents {
             }
         }
         var key=new RayKey(minecraft.level,minecraft.player,minecraft.level.getGameTime(),eye,end,
-                main.getItem(),main.getTag()==null?null:main.getTag().copy(),off.getItem(),off.getTag()==null?null:off.getTag().copy(),
+                main.getItem(),main.getComponentsPatch(),off.getItem(),off.getComponentsPatch(),
                 minecraft.player.isSecondaryUseActive(),targetState,targetRevision);
         if(fresh)RAYS.clear(); // input always validates the live world, even inside a rendered tick
         var hit = RAYS.get(key,()->io.github.dirtyredz.roundwood.block.door.selection.DoorRaycast.clip(minecraft.level, minecraft.player, eye, end));

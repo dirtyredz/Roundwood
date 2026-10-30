@@ -4,7 +4,7 @@ import io.github.dirtyredz.roundwood.Roundwood;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.Locale;
 
@@ -52,7 +52,7 @@ public enum TrimSlot implements StringRepresentable {
 
     /** The canonical item a removed or dropped attachment of this slot becomes. */
     public Item item() {
-        return ForgeRegistries.ITEMS.getValue(ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, itemId));
+        return BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, itemId));
     }
 
     @Override

@@ -27,9 +27,12 @@ public class RoundDoorItem extends AppearanceBlockItem {
     }
 
     @Override public InteractionResult useOn(net.minecraft.world.item.context.UseOnContext context) {
-        if (context.getItemInHand().hasTag() && context.getItemInHand().getTag().contains(io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG)) {
+        String refusal = io.github.dirtyredz.roundwood.appearance.item.StackPayloads.hasCustom(context.getItemInHand(), io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore.TAG)
+                ? "message.roundwood.unknown_arch_item"
+                : io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageDrops.carriesLocked(context.getItemInHand()) ? "message.roundwood.unknown_camouflage_item" : null;
+        if (refusal != null) {
             if (!context.getLevel().isClientSide && context.getPlayer() != null) context.getPlayer().displayClientMessage(
-                    net.minecraft.network.chat.Component.translatable("message.roundwood.unknown_arch_item"), true);
+                    net.minecraft.network.chat.Component.translatable(refusal), true);
             return InteractionResult.FAIL;
         }
         return io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting.claims(context) ? io.github.dirtyredz.roundwood.block.door.frame.fitting.DoorArchFitting.use(context) : super.useOn(context);

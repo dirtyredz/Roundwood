@@ -5,7 +5,7 @@ import io.github.dirtyredz.roundwood.block.attachment.AppearanceAnchorBlockEntit
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.*;
+import net.neoforged.neoforge.client.model.data.*;
 
 /** Worker-safe: use only the supplied region and a single immutable published revision. */
 public final class AssemblyModelData {

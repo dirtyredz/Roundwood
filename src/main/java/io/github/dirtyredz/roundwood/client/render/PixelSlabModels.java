@@ -1,6 +1,5 @@
 package io.github.dirtyredz.roundwood.client.render;
 
-import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.client.material.DonorSprites;
 import io.github.dirtyredz.roundwood.client.material.tint.ModelRetexturing;
 import io.github.dirtyredz.roundwood.client.material.TrimLooks;
@@ -41,7 +40,6 @@ import java.util.function.Function;
  * ({@link AssemblyFaceUv}), the back mirrored. The caller caches the result.
  */
 public final class PixelSlabModels {
-    private static final ResourceLocation NAME = ResourceLocation.fromNamespaceAndPath(Roundwood.MOD_ID, "pixel_slab");
     private static final FaceBakery BAKERY = new FaceBakery();
 
     /**
@@ -154,6 +152,6 @@ public final class PixelSlabModels {
         return BAKERY.bakeQuad(
                 new Vector3f((float) box.minX(), (float) box.minY(), (float) box.minZ()),
                 new Vector3f((float) box.maxX(), (float) box.maxY(), (float) box.maxZ()),
-                element, sprite, side, BlockModelRotation.X0_Y0, null, true, NAME);
+                element, sprite, side, BlockModelRotation.X0_Y0, null, true);
     }
 }

@@ -7,7 +7,7 @@ import io.github.dirtyredz.roundwood.block.attachment.TrimFaceCondition;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.functions.CopyNbtFunction;
+import net.minecraft.world.level.storage.loot.functions.CopyCustomDataFunction;
 import net.minecraft.world.level.storage.loot.providers.nbt.ContextNbtProvider;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
@@ -19,8 +19,8 @@ import java.util.function.UnaryOperator;
  * The loot pools of face-trim attachments (0.8.0), shared by windows and doors: one pool per face of
  * one slot (0.9.0), rolled once only while that face carries a trim ({@link TrimFaceCondition}, read
  * from the captured block entity), dropping the slot's item with that face's look copied from the saved
- * payload ({@code <payload>.<Front|Back>.RoundwoodAppearance}; an oak face has none, so the item
- * stays plain oak). The host's ordinary explosion rule is applied by the caller.
+ * payload ({@code <payload>.<Front|Back>.RoundwoodAppearance}) into the item's custom data (an oak face has
+ * none, so the item stays plain oak). Generic block-entity component copying cannot express this per-face path. The host's ordinary explosion rule is applied by the caller.
  */
 final class AttachmentLootPools {
     private AttachmentLootPools() {
@@ -38,7 +38,7 @@ final class AttachmentLootPools {
                     .setRolls(ConstantValue.exactly(1))
                     .when(TrimFaceCondition.hasTrim(slot, face))
                     .add(LootItem.lootTableItem(trimItem)
-                            .apply(CopyNbtFunction.copyData(ContextNbtProvider.BLOCK_ENTITY)
+                            .apply(CopyCustomDataFunction.copyData(ContextNbtProvider.BLOCK_ENTITY)
                                     .copy(payload + "." + face.key() + "." + AppearanceNbt.TAG, AppearanceNbt.TAG)))));
         }
         return pools;

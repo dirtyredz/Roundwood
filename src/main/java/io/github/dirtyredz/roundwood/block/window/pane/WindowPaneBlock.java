@@ -175,7 +175,11 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
 
     @Override
     @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return io.github.dirtyredz.roundwood.block.BlockUseResults.itemUse(route(state, level, pos, player, hand, hit));
+    }
+
+    private InteractionResult route(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         return WindowInteraction.use(state, level, pos, player, hand, hit);
     }
 
@@ -202,7 +206,7 @@ public abstract class WindowPaneBlock extends IronBarsBlock implements EntityBlo
 
     /** The window in its frame look and glass colour (never its trims). */
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
         RoundWindowBlockEntity window = level.getBlockEntity(pos) instanceof RoundWindowBlockEntity found ? found : null;
         ItemStack stack = AppearanceStacks.create(familyItem(), window != null ? window.appearance() : defaultAppearance());
         if (window != null) {

@@ -24,9 +24,9 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -142,7 +142,7 @@ public final class AppearancePersistenceGameTests {
         check(AppearanceStacks.read(withAppearanceTag(trim, raw("wood", null, null))).equals(Appearance.DEFAULT),
                 "a missing material did not read as the default");
         ResourceLocation fancy = ResourceLocation.fromNamespaceAndPath("othermod", "fancy_planks");
-        check(!ForgeRegistries.BLOCKS.containsKey(fancy), "othermod:fancy_planks is unexpectedly registered");
+        check(!BuiltInRegistries.BLOCK.containsKey(fancy), "othermod:fancy_planks is unexpectedly registered");
         Appearance kept = AppearanceStacks.read(withAppearanceTag(trim, raw("wood", "othermod:fancy_planks", null)));
         check(kept.equals(Appearance.wood(fancy)), "an unavailable donor was not preserved: " + kept.key());
         Appearance unpainted = AppearanceStacks.read(withAppearanceTag(trim, raw("wood", "minecraft:spruce_planks", "neon")));

@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
-import net.minecraftforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
  * Draws the whole leaf of an assembly from its anchor: the leaf model for the door's design (round or,
@@ -97,5 +97,11 @@ public class RoundDoorRenderer implements BlockEntityRenderer<RoundDoorBlockEnti
     @Override
     public boolean shouldRenderOffScreen(RoundDoorBlockEntity entity) {
         return true;
+    }
+
+    /** Both resting poses and the sweep between them (NeoForge culls by the renderer's box, not the entity's). */
+    @Override
+    public net.minecraft.world.phys.AABB getRenderBoundingBox(RoundDoorBlockEntity entity) {
+        return entity.renderBoundingBox();
     }
 }

@@ -101,7 +101,11 @@ public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefa
     /** Sneak + planks or masonry, or dye, restyles the whole frame; everything else is the item's own use. */
     @Override
     @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return io.github.dirtyredz.roundwood.block.BlockUseResults.itemUse(route(state, level, pos, player, hand, hit));
+    }
+
+    private InteractionResult route(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         Optional<AppearanceGestures.Gesture> gesture = AppearanceGestures.of(AppearanceFamily.TRIM, player, hand);
         if (gesture.isEmpty()) {
             return InteractionResult.PASS;
@@ -128,7 +132,7 @@ public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefa
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
         return AppearanceStacks.create(familyItem(), TrimAppearance.of(level, pos, state));
     }
 
@@ -153,7 +157,7 @@ public class RoundTrimBlock extends Block implements EntityBlock, AppearanceDefa
 
     @Override
     @SuppressWarnings("deprecation")
-    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
+    protected boolean isPathfindable(BlockState state, PathComputationType type) {
         return true;
     }
 

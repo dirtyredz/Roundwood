@@ -68,7 +68,7 @@ public final class DoorHardwareTarget {
         var selected=hit.get();
         boolean eligible=current && !selected.blocked && entity.hardwareEditable() && !entity.swing().moving(level.getGameTime())
                 && player.isAlive() && !player.isSpectator() && player.mayBuild() && door.mayEditAll(level,player)
-                && door.positions().stream().allMatch(pos->player.mayUseItemAt(pos,requested.getDirection(),player.getItemInHand(hand))) && player.canReach(requested.getLocation(),0);
+                && door.positions().stream().allMatch(pos->player.mayUseItemAt(pos,requested.getDirection(),player.getItemInHand(hand))) && Reach.within(player,requested.getLocation());
         if(eligible) {
             var worldEnd=requested.getLocation().add(requested.getLocation().subtract(player.getEyePosition()).normalize().scale(.01));
             var obstruction=level.clip(new ClipContext(player.getEyePosition(),worldEnd,ClipContext.Block.OUTLINE,ClipContext.Fluid.NONE,player){

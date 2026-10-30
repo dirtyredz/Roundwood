@@ -3,8 +3,8 @@ package io.github.dirtyredz.roundwood.appearance.interaction;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.common.util.TriState;
 
 /**
  * The one narrow exception to Forge's sneak-use bypass. A sneaking player holding anything never
@@ -21,7 +21,7 @@ public final class AppearanceUseEvents {
 
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         Player player = event.getEntity();
-        if (event.isCanceled() || event.getUseBlock() == Event.Result.DENY || !player.isSecondaryUseActive()) {
+        if (event.isCanceled() || event.getUseBlock().isFalse() || !player.isSecondaryUseActive()) {
             return;
         }
         BlockState state = event.getLevel().getBlockState(event.getPos());
@@ -32,8 +32,8 @@ public final class AppearanceUseEvents {
                 ? target.claimsUse(state, event.getLevel(), event.getPos(), player, event.getHand(), event.getHitVec())
                 : AppearanceGestures.of(bearer.appearanceFamily(), player, event.getHand()).isPresent();
         if (claimed) {
-            event.setUseBlock(Event.Result.ALLOW);
-            event.setUseItem(Event.Result.DENY);
+            event.setUseBlock(TriState.TRUE);
+            event.setUseItem(TriState.FALSE);
         }
     }
 }

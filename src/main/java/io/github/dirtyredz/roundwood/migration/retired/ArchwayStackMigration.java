@@ -8,10 +8,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.level.ChunkEvent;
-import net.minecraftforge.event.level.LevelEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 import net.minecraft.world.level.chunk.LevelChunk;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +31,8 @@ public final class ArchwayStackMigration {
         if (event.getLevel().isClientSide() || !(event.getChunk() instanceof LevelChunk chunk)) return;
         for (var pos : chunk.getBlockEntitiesPos()) QUEUE.add(event.getLevel(), pos, pos);
     }
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level)) return;
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof ServerLevel level)) return;
         QUEUE.drain(level, work -> {
             if (level.isLoaded(work.pos()) && level.getBlockEntity(work.pos()) instanceof Container container)
                 convert(level, container, Vec3.atCenterOf(work.pos()));
@@ -41,7 +42,7 @@ public final class ArchwayStackMigration {
             var entity = entities.poll();
             if (entity == null) break;
             // Join events can still be cancelled. Never split a stack before the holder actually exists.
-            if (!entity.isAlive() || !entity.isAddedToWorld()) continue;
+            if (!entity.isAlive() || !entity.isAddedToLevel()) continue;
             if (entity instanceof Container container) convert(level, container, entity.position());
             if (entity instanceof ItemEntity item) {
                 var outputs = ArchwayStacks.replacements(item.getItem());
@@ -53,11 +54,11 @@ public final class ArchwayStackMigration {
         QUEUE.forget(event.getLevel());
         ENTITIES.remove(event.getLevel());
     }
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && event.player.level() instanceof ServerLevel level
-                && event.player.tickCount % 20 == 0) {
-            convert(level, event.player.getInventory(), event.player.position());
-            convert(level, event.player.getEnderChestInventory(), event.player.position());
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (event.getEntity().level() instanceof ServerLevel level
+                && event.getEntity().tickCount % 20 == 0) {
+            convert(level, event.getEntity().getInventory(), event.getEntity().position());
+            convert(level, event.getEntity().getEnderChestInventory(), event.getEntity().position());
         }
     }
     public static void onEntityJoin(EntityJoinLevelEvent event) {
@@ -68,7 +69,7 @@ public final class ArchwayStackMigration {
     public static boolean convert(ServerLevel level, Container container, Vec3 pos) {
         // Reading getItem would roll unopened loot without the opening player's luck/context.
         if (container instanceof net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity random
-                && random.saveWithoutMetadata().contains("LootTable")) return false;
+                && random.getLootTable() != null) return false;
         if (container instanceof net.minecraft.world.entity.vehicle.ContainerEntity vehicle && vehicle.getLootTable() != null) return false;
         return ArchwayStacks.convert(container, stacks -> drop(level, pos, stacks));
     }

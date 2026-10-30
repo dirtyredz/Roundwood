@@ -9,9 +9,11 @@ import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
 import io.github.dirtyredz.roundwood.block.door.frame.DoorArchAttachment;
 import io.github.dirtyredz.roundwood.block.door.frame.DoorArchStore;
 import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageData;
+import io.github.dirtyredz.roundwood.block.door.camouflage.CamouflageStore;
 import io.github.dirtyredz.roundwood.block.door.leaf.DoorSwing;
 import io.github.dirtyredz.roundwood.block.door.trim.DoorTrimNbt;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -70,8 +72,7 @@ public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements
         changed();
         return true;
     }
-    @Nullable
-    private CamouflageData camouflage;
+    private final CamouflageStore camouflage = new CamouflageStore();
 
     public RoundDoorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state, AppearanceFamily.DOOR, Map.of(TrimSlot.PERIMETER, DoorTrimNbt.FORMAT));
@@ -84,48 +85,63 @@ public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements
     }
 
     public Optional<CamouflageData> camouflage() {
-        return Optional.ofNullable(camouflage);
+        return camouflage.value();
     }
 
-    /** Server: replaces (or with null clears) the camouflage, saves, and tells the clients. */
-    public void setCamouflage(@Nullable CamouflageData data) {
-        camouflage = data;
+    /** False while the saved camouflage holds a refund this version cannot decode ({@link CamouflageStore}). */
+    public boolean camouflageEditable() {
+        return camouflage.editable();
+    }
+
+    /** The undecodable camouflage held in custody (carried on the door's drop), or null. */
+    public @Nullable CompoundTag lockedCamouflage() {
+        return camouflage.locked();
+    }
+
+    /** Moves this anchor's whole camouflage custody (decoded or locked) to {@code target}, saving both. */
+    public void transferCamouflage(RoundDoorBlockEntity target) {
+        camouflage.transferTo(target.camouflage);
+        setChanged();
+        target.changed();
+    }
+
+    /** Server: replaces (or with null clears) the camouflage, saves, and tells the clients; refused while locked. */
+    public boolean setCamouflage(@Nullable CamouflageData data) {
+        if (!camouflage.set(data)) return false;
         changed();
+        return true;
     }
 
     /** Removes and returns the camouflage, so whoever takes it is the only one who can refund it. */
     public Optional<CamouflageData> takeCamouflage() {
-        Optional<CamouflageData> taken = camouflage();
+        Optional<CamouflageData> taken = camouflage.take();
         if (taken.isPresent()) {
-            camouflage = null;
             setChanged();
         }
         return taken;
     }
 
-    /** On disk the camouflage keeps its refund. */
+    /** On disk the camouflage keeps its refund (or its undecodable raw custody). */
     @Override
-    protected void saveFamily(CompoundTag tag) {
+    protected void saveFamily(CompoundTag tag, HolderLookup.Provider registries) {
         arch.save(tag);
         hardware.save(tag);
-        if (camouflage != null) {
-            tag.put(CamouflageData.TAG, camouflage.write(true));
-        }
+        camouflage.save(tag, registries);
     }
 
     /** Clients get the material, never the refund, and an explicit empty compound once it is cleared. */
     @Override
-    protected void writeFamilyUpdate(CompoundTag tag) {
+    protected void writeFamilyUpdate(CompoundTag tag, HolderLookup.Provider registries) {
         arch.writeUpdate(tag);
         hardware.writeUpdate(tag);
-        tag.put(CamouflageData.TAG, camouflage == null ? new CompoundTag() : camouflage.write(false));
+        camouflage.writeUpdate(tag, registries);
     }
 
     @Override
-    protected void loadFamily(CompoundTag tag) {
+    protected void loadFamily(CompoundTag tag, HolderLookup.Provider registries) {
         arch.load(tag);
         hardware.load(tag);
-        camouflage = CamouflageData.read(tag).orElse(null);
+        camouflage.load(tag, registries);
     }
 
     /** Called by the chunk whenever this cell's state changes; on the client an open change starts a swing. */
@@ -141,8 +157,7 @@ public class RoundDoorBlockEntity extends AppearanceAnchorBlockEntity implements
     }
 
     /** Both resting poses and the sweep between them, so the leaf is not culled while only its projection is in view. */
-    @Override
-    public AABB getRenderBoundingBox() {
+    public AABB renderBoundingBox() {
         BlockState state = getBlockState();
         if (state.getBlock() instanceof AssemblyDoorBlock) {
             renderAssembly();

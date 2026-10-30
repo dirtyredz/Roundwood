@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.block.door.camouflage;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.dirtyredz.roundwood.Roundwood;
 import io.github.dirtyredz.roundwood.block.door.adapter.RoundDoorBlockEntity;
 import io.github.dirtyredz.roundwood.block.door.assembly.DoorLayout;
@@ -18,11 +19,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
 import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.anchorEntity;
@@ -49,7 +49,7 @@ public final class CamouflageRemovalGameTests {
     }
 
     /** Test-only stand-in for a protection mod: cancels breaks by one designated fake player. */
-    @Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+    @EventBusSubscriber(modid = Roundwood.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
     public static final class BreakCanceller {
         private BreakCanceller() {
         }

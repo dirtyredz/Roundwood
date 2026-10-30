@@ -27,7 +27,7 @@ public final class WindowBeamModels {
     public static net.minecraft.client.resources.model.BakedModel item(net.minecraft.client.resources.model.BakedModel source,
             List<BakedQuad> quads, net.minecraft.client.renderer.texture.TextureAtlasSprite particle) {
         List<BakedQuad> frozen = List.copyOf(quads);
-        return new net.minecraftforge.client.model.BakedModelWrapper<>(source) {
+        return new net.neoforged.neoforge.client.model.BakedModelWrapper<>(source) {
             @Override
             public List<BakedQuad> getQuads(net.minecraft.world.level.block.state.BlockState state, Direction side,
                                             net.minecraft.util.RandomSource random) {
@@ -36,7 +36,7 @@ public final class WindowBeamModels {
 
             @Override
             public List<BakedQuad> getQuads(net.minecraft.world.level.block.state.BlockState state, Direction side,
-                    net.minecraft.util.RandomSource random, net.minecraftforge.client.model.data.ModelData data,
+                    net.minecraft.util.RandomSource random, net.neoforged.neoforge.client.model.data.ModelData data,
                     net.minecraft.client.renderer.RenderType renderType) {
                 return getQuads(state, side, random);
             }
@@ -47,7 +47,7 @@ public final class WindowBeamModels {
             }
 
             @Override public net.minecraft.client.renderer.texture.TextureAtlasSprite getParticleIcon() { return particle; }
-            @Override public net.minecraft.client.renderer.texture.TextureAtlasSprite getParticleIcon(net.minecraftforge.client.model.data.ModelData data) { return particle; }
+            @Override public net.minecraft.client.renderer.texture.TextureAtlasSprite getParticleIcon(net.neoforged.neoforge.client.model.data.ModelData data) { return particle; }
         };
     }
 

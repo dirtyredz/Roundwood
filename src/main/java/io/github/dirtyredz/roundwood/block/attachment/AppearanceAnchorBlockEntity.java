@@ -7,6 +7,7 @@ import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
 import io.github.dirtyredz.roundwood.block.attachment.storage.FaceTrimStore;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
@@ -140,15 +141,15 @@ public abstract class AppearanceAnchorBlockEntity extends BlockEntity implements
     }
 
     /** The family's own saved state (door camouflage with its refund, window glass). */
-    protected void saveFamily(CompoundTag tag) {
+    protected void saveFamily(CompoundTag tag, HolderLookup.Provider registries) {
     }
 
     /** The family's own state for clients (door camouflage without its refund, explicit when cleared; window glass). */
-    protected void writeFamilyUpdate(CompoundTag tag) {
+    protected void writeFamilyUpdate(CompoundTag tag, HolderLookup.Provider registries) {
     }
 
     /** Replaces the family's own state with what {@code tag} holds (a save or an update). */
-    protected void loadFamily(CompoundTag tag) {
+    protected void loadFamily(CompoundTag tag, HolderLookup.Provider registries) {
     }
 
     /** Client, after a packet or update tag was loaded (the window refreshes its chunk model). */
@@ -160,31 +161,35 @@ public abstract class AppearanceAnchorBlockEntity extends BlockEntity implements
     }
 
     @Override
-    protected final void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        saveFamily(tag);
+    protected final void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        saveFamily(tag, registries);
         if (appearance != null) {
             AppearanceNbt.write(tag, appearance);
         }
         stores.values().forEach(store -> store.save(tag));
     }
 
-    /** Replaces the look, every store and the family's state with whatever the tag holds. */
+    /**
+     * Replaces the look, every store and the family's state with whatever the tag holds, then publishes the
+     * render snapshot once the whole entity is loaded. Callers outside a chunk load use vanilla's
+     * {@link #loadWithComponents} with the level's registries.
+     */
     @Override
-    public final void load(CompoundTag tag) {
-        super.load(tag);
+    protected final void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         appearance = AppearanceNbt.read(tag).filter(family::accepts).orElse(null);
         stores.forEach((slot, store) -> store.load(tag, legacy(slot)));
-        loadFamily(tag);
+        loadFamily(tag, registries);
         io.github.dirtyredz.roundwood.block.assembly.render.AssemblyRenderUpdates.refresh(this, false);
         afterLoad();
     }
 
     /** The look (omitted when it is the default), always every store, and the family's update state. */
     @Override
-    public final CompoundTag getUpdateTag() {
+    public final CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = new CompoundTag();
-        writeFamilyUpdate(tag);
+        writeFamilyUpdate(tag, registries);
         if (appearance != null) {
             AppearanceNbt.write(tag, appearance);
         }
@@ -197,17 +202,20 @@ public abstract class AppearanceAnchorBlockEntity extends BlockEntity implements
         return ClientboundBlockEntityDataPacket.create(this);
     }
 
-    /** A packet always carries the whole state; one without a tag means the default and every store explicitly empty. */
+    /**
+     * A packet always carries the whole state. One with an empty tag (1.21 packets are never tagless) means
+     * the default and every store explicitly empty, never a legacy reading.
+     */
     @Override
-    public final void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet) {
+    public final void onDataPacket(Connection connection, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries) {
         CompoundTag tag = packet.getTag();
-        load(tag == null ? emptyUpdate() : tag);
+        loadWithComponents(tag == null || tag.isEmpty() ? emptyUpdate() : tag, registries);
         afterClientUpdate();
     }
 
     @Override
-    public final void handleUpdateTag(CompoundTag tag) {
-        load(tag);
+    public final void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        loadWithComponents(tag.isEmpty() ? emptyUpdate() : tag, registries);
         afterClientUpdate();
     }
 

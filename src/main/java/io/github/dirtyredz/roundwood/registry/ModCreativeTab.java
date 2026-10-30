@@ -5,14 +5,14 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 /** The Roundwood creative tab: exactly the advertised items, in {@link ModItems#all()} order (never the hidden compatibility items). */
 public final class ModCreativeTab {
     public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, Roundwood.MOD_ID);
 
-    public static final RegistryObject<CreativeModeTab> ROUNDWOOD = TABS.register(Roundwood.MOD_ID, () -> CreativeModeTab.builder()
+    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> ROUNDWOOD = TABS.register(Roundwood.MOD_ID, () -> CreativeModeTab.builder()
             .title(Component.translatable("itemGroup." + Roundwood.MOD_ID))
             .icon(() -> new ItemStack(ModItems.ROUND_DOOR.get()))
             .displayItems((parameters, output) -> ModItems.all().forEach(output::accept))

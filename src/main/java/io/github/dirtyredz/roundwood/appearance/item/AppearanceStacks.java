@@ -3,7 +3,6 @@ package io.github.dirtyredz.roundwood.appearance.item;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -27,26 +26,19 @@ public final class AppearanceStacks {
     /** The appearance {@code stack} places: its own, else its item's default. */
     public static Appearance read(ItemStack stack) {
         Appearance fallback = AppearanceDefaults.of(stack.getItem());
-        CompoundTag tag = stack.getTag();
-        if (tag == null) {
-            return fallback;
-        }
-        return AppearanceNbt.read(tag).filter(a -> !(stack.getItem() instanceof AppearanceDefaults d)
+        return StackPayloads.readCustom(stack, AppearanceNbt::read).filter(a -> !(stack.getItem() instanceof AppearanceDefaults d)
                 || d.appearanceFamily().accepts(a)).orElse(fallback);
     }
 
-    /** Stores {@code appearance} on {@code stack}, or removes the tag when it is the item's default. */
+    /**
+     * Stores {@code appearance} in the stack's custom data, or removes only that key when it is the item's
+     * default (empty custom data is removed, so default items stack).
+     */
     public static void write(ItemStack stack, Appearance appearance) {
         if (appearance.equals(AppearanceDefaults.of(stack.getItem()))) {
-            CompoundTag tag = stack.getTag();
-            if (tag != null) {
-                tag.remove(AppearanceNbt.TAG);
-                if (tag.isEmpty()) {
-                    stack.setTag(null);
-                }
-            }
+            StackPayloads.removeCustom(stack, AppearanceNbt.TAG);
             return;
         }
-        AppearanceNbt.write(stack.getOrCreateTag(), appearance);
+        StackPayloads.editCustom(stack, tag -> AppearanceNbt.write(tag, appearance));
     }
 }

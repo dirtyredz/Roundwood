@@ -13,8 +13,8 @@ import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,13 +30,13 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings("deprecation")
 public final class LegacyContent {
-    private static final List<RegistryObject<LegacyDoorBlock>> DOORS = new ArrayList<>();
-    private static final List<RegistryObject<LegacyWindowBlock>> WINDOWS = new ArrayList<>();
-    private static final List<RegistryObject<LegacyTrimBlock>> TRIMS = new ArrayList<>();
-    private static final List<RegistryObject<Item>> ITEMS = new ArrayList<>();
+    private static final List<DeferredHolder<Block, LegacyDoorBlock>> DOORS = new ArrayList<>();
+    private static final List<DeferredHolder<Block, LegacyWindowBlock>> WINDOWS = new ArrayList<>();
+    private static final List<DeferredHolder<Block, LegacyTrimBlock>> TRIMS = new ArrayList<>();
+    private static final List<DeferredHolder<Item, Item>> ITEMS = new ArrayList<>();
     /** The 0.8.0 window trim's registry path (an item only). */
     public static final String WINDOW_TRIM_ID = "window_trim";
-    private static RegistryObject<Item> windowTrim;
+    private static DeferredHolder<Item, Item> windowTrim;
 
     private LegacyContent() {
     }
@@ -44,7 +44,7 @@ public final class LegacyContent {
     /** Called once from the bootstrap, before the registers fire. */
     public static void register(DeferredRegister<Block> blocks, DeferredRegister<Item> items) {
         for (LegacyAppearances.Entry entry : LegacyAppearances.DOORS) {
-            RegistryObject<LegacyDoorBlock> block = blocks.register(entry.id(), () -> new LegacyDoorBlock(
+            DeferredHolder<Block, LegacyDoorBlock> block = blocks.register(entry.id(), () -> new LegacyDoorBlock(
                     ModBlocks.doorProperties(), entry, ModBlocks::roundDoor, ModBlockEntities::roundDoor));
             DOORS.add(block);
             ITEMS.add(items.register(entry.id(), () -> new RoundDoorItem(ModBlocks.roundDoor(), new Item.Properties(),
@@ -72,15 +72,15 @@ public final class LegacyContent {
     }
 
     public static List<LegacyDoorBlock> doors() {
-        return DOORS.stream().map(RegistryObject::get).toList();
+        return DOORS.stream().map(DeferredHolder::get).toList();
     }
 
     public static List<LegacyWindowBlock> windows() {
-        return WINDOWS.stream().map(RegistryObject::get).toList();
+        return WINDOWS.stream().map(DeferredHolder::get).toList();
     }
 
     public static List<LegacyTrimBlock> trims() {
-        return TRIMS.stream().map(RegistryObject::get).toList();
+        return TRIMS.stream().map(DeferredHolder::get).toList();
     }
 
     /** Every alias block: doors, windows, trims, each in 0.4.0 order. */
@@ -90,7 +90,7 @@ public final class LegacyContent {
 
     /** The 49 0.4.0 alias items, in the same order as {@link #blocks()}'s families. */
     public static List<Item> aliasItems() {
-        return ITEMS.stream().map(RegistryObject::get).toList();
+        return ITEMS.stream().map(DeferredHolder::get).toList();
     }
 
     /** Every hidden compatibility item: the 49 aliases, then the window trim. */

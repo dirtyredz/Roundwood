@@ -9,7 +9,7 @@ import io.github.dirtyredz.roundwood.migration.LegacyContent;
 import io.github.dirtyredz.roundwood.registry.ModBlocks;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.LanguageProvider;
+import net.neoforged.neoforge.common.data.LanguageProvider;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -73,6 +73,7 @@ public class RoundwoodLanguageProvider extends LanguageProvider {
         add("tooltip.roundwood.glass", "Glass: %s");
         add("message.roundwood.arch_fit_refused", "This arch cannot fit here: check size, depth, clearance and existing attachments.");
         add("message.roundwood.unknown_arch_item", "This door carries an unknown frame payload; placement would lose it.");
+        add("message.roundwood.unknown_camouflage_item", "This door carries a camouflage refund this version cannot read; placement would lose it.");
         add("message.roundwood.aim_at_leaf", "Aim at the door leaf to restyle or paint it");
         add("message.roundwood.masonry_unpaintable", "Masonry trims cannot be painted");
         add("message.roundwood.masonry_trim_only", "Aim at a trim or cross beam to apply masonry");

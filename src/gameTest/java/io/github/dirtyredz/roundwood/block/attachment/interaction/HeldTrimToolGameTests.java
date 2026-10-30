@@ -46,9 +46,9 @@ import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -402,7 +402,7 @@ public final class HeldTrimToolGameTests {
      */
     private static void taggedShearsRemove(Scene s) {
         ItemStack tool = new ItemStack(Items.CARROT_ON_A_STICK);
-        check(!(tool.getItem() instanceof ShearsItem) && tool.is(Tags.Items.SHEARS), "the test tag forge:shears is not loaded");
+        check(!(tool.getItem() instanceof ShearsItem) && tool.is(Tags.Items.TOOLS_SHEAR), "the test tag forge:shears is not loaded");
         int before = s.trims.get().count();
         s.hold(tool, ItemStack.EMPTY);
         check(s.claims(MAIN), "tagged shears were not claimed");

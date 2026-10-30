@@ -7,7 +7,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.event.TickEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -62,8 +62,8 @@ public final class AssemblyHarvest {
     }
 
     /** End of a server level tick: removes any deferred part whose harvest never ran. */
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level) || PENDING.isEmpty()) {
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof ServerLevel level) || PENDING.isEmpty()) {
             return;
         }
         for (Iterator<Pending> it = PENDING.iterator(); it.hasNext(); ) {

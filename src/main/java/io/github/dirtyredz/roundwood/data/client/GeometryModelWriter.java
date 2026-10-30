@@ -5,7 +5,7 @@ import io.github.dirtyredz.roundwood.geometry.FaceUv;
 import io.github.dirtyredz.roundwood.geometry.Piece;
 import io.github.dirtyredz.roundwood.geometry.Surface;
 import net.minecraft.core.Direction;
-import net.minecraftforge.client.model.generators.ModelBuilder;
+import net.neoforged.neoforge.client.model.generators.ModelBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;

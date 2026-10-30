@@ -22,8 +22,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import static io.github.dirtyredz.roundwood.fixture.AppearanceFixtures.windowLook;
 import static io.github.dirtyredz.roundwood.fixture.door.DoorFixtures.TEMPLATE;
@@ -54,7 +54,7 @@ public final class CrossWindowItemCompatibilityGameTests {
         var chest = (net.minecraft.world.level.block.entity.ChestBlockEntity) helper.getLevel().getBlockEntity(helper.absolutePos(chestPos));
         var expected = new java.util.ArrayList<ItemStack>();
         for (int i = 0; i < CrossWindowCompatibility.IDS.size(); i++) {
-            var item = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(net.minecraft.resources.ResourceLocation
+            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.get(net.minecraft.resources.ResourceLocation
                     .fromNamespaceAndPath("roundwood", CrossWindowCompatibility.IDS.get(i)));
             var stack = new ItemStack(item, i + 2);
             stack.getOrCreateTag().putString("Arbitrary", "kept " + i);

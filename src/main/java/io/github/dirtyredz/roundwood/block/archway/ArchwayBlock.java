@@ -111,7 +111,11 @@ public class ArchwayBlock extends Block implements EntityBlock, AppearanceDefaul
     /** Face trims and restyling ({@link ArchwayInteraction}); anything else is the item's own use. */
     @Override
     @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected net.minecraft.world.ItemInteractionResult useItemOn(ItemStack held, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return io.github.dirtyredz.roundwood.block.BlockUseResults.itemUse(route(state, level, pos, player, hand, hit));
+    }
+
+    private InteractionResult route(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         return ArchwayInteraction.use(this, state, level, pos, player, hand, hit);
     }
 
@@ -143,7 +147,7 @@ public class ArchwayBlock extends Block implements EntityBlock, AppearanceDefaul
 
     /** Picking any cell gives the archway in its look. */
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state) {
         return AppearanceStacks.create(asItem(), ArchwayAppearance.of(level, pos, state));
     }
 

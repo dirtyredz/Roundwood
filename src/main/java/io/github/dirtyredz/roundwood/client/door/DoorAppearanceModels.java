@@ -9,7 +9,7 @@ import io.github.dirtyredz.roundwood.registry.ModItems;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
 import io.github.dirtyredz.roundwood.appearance.AppearanceFamily;
 import io.github.dirtyredz.roundwood.appearance.AppearanceDefaults;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.minecraft.world.item.Item;
 import java.util.stream.Stream;
 import java.util.List;
@@ -88,7 +88,7 @@ public final class DoorAppearanceModels {
 
     /** The baked leaf of {@code design} for {@code hinge} in {@code look}. */
     public static BakedModel leaf(Look look, DoorDesign design, DoorHingeSide hinge, io.github.dirtyredz.roundwood.block.door.hardware.DoorHardware hardware) {
-        BakedModel oak = Minecraft.getInstance().getModelManager().getModel(DoorLeafModels.location(design, hinge));
+        BakedModel oak = Minecraft.getInstance().getModelManager().getModel(net.minecraft.client.resources.model.ModelResourceLocation.standalone(DoorLeafModels.location(design, hinge)));
         return MODELS.get(new Key(look, design, hinge.getSerializedName(),hardware), key -> retexture(oak, look, design, hinge, false, hardware));
     }
 

@@ -6,14 +6,14 @@ import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowPattern;
 import io.github.dirtyredz.roundwood.block.window.geometry.face.WindowProfile;
 import io.github.dirtyredz.roundwood.registry.ModItems;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
-import java.util.function.Consumer;
 
 /**
  * The 26 window recipes, each straight from planks (P, mixed types allowed), a glass pane (G) and,
@@ -37,7 +37,7 @@ public final class WindowRecipes {
     private WindowRecipes() {
     }
 
-    public static void build(Consumer<FinishedRecipe> writer, InventoryChangeTrigger.TriggerInstance unlock) {
+    public static void build(RecipeOutput writer, Criterion<InventoryChangeTrigger.TriggerInstance> unlock) {
         net.minecraft.data.recipes.ShapelessRecipeBuilder.shapeless(RecipeCategory.DECORATIONS,
                 ModItems.window(WindowDesign.plain(WindowProfile.BLANK)))
                 .requires(Items.GLASS_PANE)
@@ -59,7 +59,7 @@ public final class WindowRecipes {
         window(writer, unlock, WindowProfile.EDGE_RIGHT, WindowPattern.PLAIN, "round_window_edge", "GP", " P", " P");
     }
 
-    private static void window(Consumer<FinishedRecipe> writer, InventoryChangeTrigger.TriggerInstance unlock,
+    private static void window(RecipeOutput writer, Criterion<InventoryChangeTrigger.TriggerInstance> unlock,
                                WindowProfile profile, WindowPattern pattern, String group, String... rows) {
         Item result = ModItems.window(new WindowDesign(profile, pattern));
         ShapedRecipeBuilder builder = ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, result);

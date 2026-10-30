@@ -8,8 +8,8 @@ import io.github.dirtyredz.roundwood.block.arch.geometry.KeyholeShoulderProfile.
 import io.github.dirtyredz.roundwood.data.client.GeometryModelWriter;
 import io.github.dirtyredz.roundwood.data.client.ItemModelTransforms;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.joml.Vector3f;
 
 /** Full-shape oak icons, with the same legal-bounds translation as the styled runtime model. */

@@ -44,8 +44,8 @@ public class RoundWindowItem extends AppearanceBlockItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, level, tooltip, flag);
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, context, tooltip, flag);
         WindowGlassStacks.describe(stack).ifPresent(line -> tooltip.add(1, line));
     }
 }

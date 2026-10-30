@@ -2,6 +2,7 @@ package io.github.dirtyredz.roundwood.migration.item;
 
 import io.github.dirtyredz.roundwood.appearance.AppearanceNbt;
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.appearance.item.StackPayloads;
 import io.github.dirtyredz.roundwood.block.arch.geometry.ArchPieceDesign;
 import io.github.dirtyredz.roundwood.block.archway.geometry.ArchwayDesign;
 import io.github.dirtyredz.roundwood.registry.ModItems;
@@ -17,12 +18,10 @@ public final class ArchwayStacks {
 
     public static List<ItemStack> replacements(ItemStack source) {
         if (!(source.getItem() instanceof RetiredArchwayItem retired)) return List.of();
-        var look = AppearanceNbt.read(source.getTag()).orElseGet(() ->
-                AppearanceNbt.read(source.getTagElement("BlockEntityTag")).orElse(AppearanceStacks.read(source)));
-        var saved = source.save(new net.minecraft.nbt.CompoundTag());
-        saved.putString("id", net.minecraftforge.registries.ForgeRegistries.ITEMS
-                .getKey(ModItems.archPiece(ArchPieceDesign.TOP_1X2)).toString());
-        var top = ItemStack.of(saved);
+        var look = StackPayloads.readCustom(source, AppearanceNbt::read).orElseGet(() ->
+                AppearanceNbt.read(StackPayloads.blockEntityData(source)).orElse(AppearanceStacks.read(source)));
+        // The whole component patch (names, enchantments, unknown custom data, removed defaults) moves to the top.
+        var top = source.transmuteCopy(ModItems.archPiece(ArchPieceDesign.TOP_1X2), source.getCount());
         AppearanceStacks.write(top, look);
         List<ItemStack> result = new ArrayList<>();
         result.add(top);
@@ -60,9 +59,9 @@ public final class ArchwayStacks {
                 // Inventory's default canPlaceItem accepts armor slots too; extra building pieces belong in storage.
                 if (holder instanceof net.minecraft.world.entity.player.Inventory inventory && slot >= inventory.items.size()) continue;
                 if (!holder.canPlaceItem(slot, stack)) continue;
-                int max = Math.min(holder.getMaxStackSize(), stack.getMaxStackSize());
+                int max = Math.min(holder.getMaxStackSize(stack), stack.getMaxStackSize());
                 if (target.isEmpty()) planned.set(slot, stack.split(Math.min(max, stack.getCount())));
-                else if (ItemStack.isSameItemSameTags(target, stack)) {
+                else if (ItemStack.isSameItemSameComponents(target, stack)) {
                     int count = Math.min(stack.getCount(), Math.max(0, max - target.getCount()));
                     target.grow(count);
                     stack.shrink(count);

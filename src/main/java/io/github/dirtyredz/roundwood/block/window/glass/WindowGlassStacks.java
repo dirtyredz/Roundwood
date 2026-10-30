@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.block.window.glass;
 
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.appearance.item.StackPayloads;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.DyeColor;
@@ -19,21 +20,16 @@ public final class WindowGlassStacks {
     }
 
     public static Optional<DyeColor> read(ItemStack stack) {
-        return WindowGlassNbt.read(stack.getTag());
+        return StackPayloads.readCustom(stack, WindowGlassNbt::read);
     }
 
-    /** Stores {@code color} on {@code stack}, dropping the tag (and an emptied stack tag) for clear glass. */
+    /** Stores {@code color} on {@code stack}, removing only that key (and emptied custom data) for clear glass. */
     public static void write(ItemStack stack, Optional<DyeColor> color) {
         if (color.isEmpty()) {
-            if (stack.getTag() != null) {
-                stack.getTag().remove(WindowGlassNbt.TAG);
-                if (stack.getTag().isEmpty()) {
-                    stack.setTag(null);
-                }
-            }
+            StackPayloads.removeCustom(stack, WindowGlassNbt.TAG);
             return;
         }
-        WindowGlassNbt.write(stack.getOrCreateTag(), color);
+        StackPayloads.editCustom(stack, tag -> WindowGlassNbt.write(tag, color));
     }
 
     /** The comparison identity of a window stack: its frame appearance key plus its glass colour. */

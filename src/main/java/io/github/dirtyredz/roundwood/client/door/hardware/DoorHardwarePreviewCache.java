@@ -39,7 +39,7 @@ final class DoorHardwarePreviewCache {
         // hand changes and camera movement invalidate immediately, including within that tick.
         var key=new Key(level,player,level.getGameTime(),hit.getBlockPos(),hit.getLocation(),hit.getDirection(),player.getEyePosition(),
                 state,entity.staticRenderPublication().current(),entity.hardware(),entity.swing().moving(level.getGameTime()),
-                stack.getItem(),stack.getTag()==null?null:stack.getTag().copy(),hand,player.isAlive(),player.isSpectator(),player.mayBuild(),
+                stack.getItem(),stack.getComponentsPatch(),hand,player.isAlive(),player.isSpectator(),player.mayBuild(),
                 io.github.dirtyredz.roundwood.client.material.AppearanceModelCache.generation());
         return memo.get(key,()->DoorHardwareTarget.of(level,player,hand,hit).filter(DoorHardwareTarget.Proposal::eligible)
                 .map(proposal->new Preview(proposal,shape(proposal))));

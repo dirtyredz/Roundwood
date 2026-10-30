@@ -10,6 +10,7 @@ import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.window.trim.WindowBeamNbt;
 import io.github.dirtyredz.roundwood.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -27,10 +28,10 @@ public final class WindowCellConversion {
 
     /** Materialize the source's historical defaults before changing its identity or summary. */
     public static Optional<CompoundTag> contents(BlockPos pos, BlockState source, CompoundTag disk,
-                                                 Appearance appearance, boolean cross) {
+                                                 Appearance appearance, boolean cross, HolderLookup.Provider registries) {
         var normalized = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), pos, source);
-        normalized.load(disk.copy());
-        CompoundTag next = normalized.saveWithFullMetadata();
+        normalized.loadWithComponents(disk.copy(), registries);
+        CompoundTag next = normalized.saveWithFullMetadata(registries);
         AppearanceNbt.write(next, appearance);
         if (cross) {
             var beams = WindowBeamNbt.read(next);
@@ -45,17 +46,17 @@ public final class WindowCellConversion {
     public static LegacyCells.Result convert(Level level, BlockPos pos, BlockState source, WindowPaneBlock destination, boolean cross) {
         if (!level.isLoaded(pos) || level.restoringBlockSnapshots || level.getBlockState(pos) != source
                 || !(level.getBlockEntity(pos) instanceof RoundWindowBlockEntity old)) return LegacyCells.Result.DEFERRED;
-        var data = contents(pos, source, old.saveWithFullMetadata(), old.appearance(), cross);
+        var data = contents(pos, source, old.saveWithFullMetadata(level.registryAccess()), old.appearance(), cross, level.registryAccess());
         if (data.isEmpty()) return LegacyCells.Result.DEFERRED;
         BlockState next = LegacyCells.copyProperties(source, destination.defaultBlockState());
-        next = summary(pos, next, data.get());
+        next = summary(pos, next, data.get(), level.registryAccess());
         return install(level, pos, next, data.get()) ? LegacyCells.Result.CONVERTED : LegacyCells.Result.DEFERRED;
     }
 
     /** Reconcile only understood stores; unknown slots retain the historical summary. */
-    public static BlockState summary(BlockPos pos, BlockState state, CompoundTag data) {
+    public static BlockState summary(BlockPos pos, BlockState state, CompoundTag data, HolderLookup.Provider registries) {
         var probe = new RoundWindowBlockEntity(ModBlockEntities.roundWindow(), pos, state);
-        probe.load(data);
+        probe.loadWithComponents(data, registries);
         return probe.attachmentsEditable() ? state.setValue(WindowPaneBlock.TRIMMED, probe.anyAttachment()) : state;
     }
 
@@ -64,7 +65,7 @@ public final class WindowCellConversion {
         if (!level.isLoaded(pos) || level.restoringBlockSnapshots) return false;
         BlockState before = level.getBlockState(pos);
         BlockEntity old = level.getBlockEntity(pos);
-        CompoundTag disk = old == null ? null : old.saveWithFullMetadata();
+        CompoundTag disk = old == null ? null : old.saveWithFullMetadata(level.registryAccess());
         int mark = level.capturedBlockSnapshots.size();
         boolean[] valid = {false};
         boolean ran;
@@ -72,8 +73,8 @@ public final class WindowCellConversion {
             ran = AssemblyMutationBatch.run(level, List.of(pos), () -> {
                 if (!level.setBlock(pos, next, level.captureBlockSnapshots ? Block.UPDATE_ALL : SILENT) || level.getBlockState(pos) != next
                         || !(level.getBlockEntity(pos) instanceof RoundWindowBlockEntity window)) return;
-                window.load(data.copy());
-                CompoundTag saved = window.saveWithFullMetadata();
+                window.loadWithComponents(data.copy(), level.registryAccess());
+                CompoundTag saved = window.saveWithFullMetadata(level.registryAccess());
                 // Metadata follows the destination; all persisted content must match the preflight.
                 valid[0] = data.getAllKeys().stream().filter(key -> !List.of("id", "x", "y", "z").contains(key))
                         .allMatch(key -> data.get(key).equals(saved.get(key)));
@@ -108,7 +109,7 @@ public final class WindowCellConversion {
             if (disk != null) {
                 BlockEntity restored = level.getBlockEntity(pos);
                 if (restored == null) throw new IllegalStateException("Unable to restore window entity at " + pos);
-                restored.load(disk);
+                restored.loadWithComponents(disk, level.registryAccess());
                 restored.setChanged();
             }
         } finally {

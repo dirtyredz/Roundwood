@@ -1,6 +1,7 @@
 package io.github.dirtyredz.roundwood.migration.retired;
 
 import io.github.dirtyredz.roundwood.appearance.item.AppearanceStacks;
+import io.github.dirtyredz.roundwood.appearance.item.StackPayloads;
 import io.github.dirtyredz.roundwood.appearance.Appearance;
 import io.github.dirtyredz.roundwood.block.window.pane.RetiredCrossWindows;
 import io.github.dirtyredz.roundwood.migration.conversion.WindowCrossConversion;
@@ -62,22 +63,22 @@ public final class CrossWindowCompatibility {
         return ModBlocks.WindowProducts.all().stream().filter(d -> d.pattern() == WindowPattern.CROSS).map(ModItems::window).map(Item.class::cast).toList();
     }
 
-    /** Historical stack contents may live in BlockEntityTag; explicit stack values take precedence. */
+    /** Historical stack contents may live in native block-entity data; explicit custom-data values take precedence. */
     public static Appearance appearance(ItemStack stack) {
-        return AppearanceNbt.read(stack.getTag()).orElseGet(() -> AppearanceNbt.read(stack.getTagElement("BlockEntityTag"))
+        return StackPayloads.readCustom(stack, AppearanceNbt::read).orElseGet(() -> AppearanceNbt.read(StackPayloads.blockEntityData(stack))
                 .orElse(AppearanceStacks.read(stack)));
     }
 
     public static Optional<DyeColor> glass(ItemStack stack) {
-        return stack.getTag() != null && stack.getTag().contains(WindowGlassNbt.TAG)
-                ? WindowGlassStacks.read(stack) : WindowGlassNbt.read(stack.getTagElement("BlockEntityTag"));
+        return StackPayloads.hasCustom(stack, WindowGlassNbt.TAG)
+                ? WindowGlassStacks.read(stack) : WindowGlassNbt.read(StackPayloads.blockEntityData(stack));
     }
 
     /** Pending blocks yield one lossless hidden stack; no separate attachment refunds. */
     public static ItemStack stack(WindowPaneBlock block, @Nullable RoundWindowBlockEntity entity) {
         var stack = AppearanceStacks.create(ModItems.window(block.design()), entity == null ? block.defaultAppearance() : entity.appearance());
         if (entity != null) {
-            stack.getOrCreateTag().put("BlockEntityTag", entity.saveWithFullMetadata());
+            if (entity.getLevel() != null) entity.saveToItem(stack, entity.getLevel().registryAccess());
             WindowGlassStacks.write(stack, entity.glass());
         }
         return stack;

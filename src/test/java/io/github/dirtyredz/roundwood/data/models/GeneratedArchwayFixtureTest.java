@@ -15,7 +15,7 @@ class GeneratedArchwayFixtureTest {
     @Test
     void savedArchwaysKeepHistoricalPartsAnchorsAndIndependentLooks() throws Exception {
         CompoundTag fixture;
-        try (var input = Files.newInputStream(Path.of("src/gameTest/resources/data/roundwood/structures/archways_v0133.nbt"))) {
+        try (var input = Files.newInputStream(Path.of("src/gameTest/resources/data/roundwood/structure/archways_v0133.nbt"))) {
             fixture = NbtIo.readCompressed(input);
         }
         var palette = fixture.getList("palette", Tag.TAG_COMPOUND);

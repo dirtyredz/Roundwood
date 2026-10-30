@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,11 +49,6 @@ public final class ArchPieceLayout {
                     && state.getValue(ArchPieceBlock.FACING) == facing && state.getValue(ArchPieceBlock.CELL) == cell
                     && state.getValue(ArchPieceBlock.SIDE) == side && piece.thickness() == thickness
                     && ArchPieceBlock.depth(state) == depth;
-        }
-        public AABB renderBounds() {
-            AABB bounds = new AABB(anchor);
-            for (BlockPos pos : positions()) bounds = bounds.minmax(new AABB(pos));
-            return bounds.inflate(Math.abs(facing.getStepX()) / 16.0, 0, Math.abs(facing.getStepZ()) / 16.0);
         }
     }
 

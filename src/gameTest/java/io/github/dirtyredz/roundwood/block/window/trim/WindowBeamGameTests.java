@@ -19,7 +19,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.gametest.*;
+import net.neoforged.neoforge.gametest.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -136,7 +136,7 @@ public final class WindowBeamGameTests {
         check(entity(helper).trims(TrimSlot.SILL).get(face).orElseThrow().paint().equals(Optional.of(DyeColor.PINK))
                 && entity(helper).trims(TrimSlot.CROSS_BEAMS).equals(beamBefore), "sill did not cover the beam end target");
         var shears = new ItemStack(Items.CARROT_ON_A_STICK);
-        check(shears.is(net.minecraftforge.common.Tags.Items.SHEARS), "test tagged shears unavailable");
+        check(shears.is(net.neoforged.neoforge.common.Tags.Items.TOOLS_SHEAR), "test tagged shears unavailable");
         AppearanceFixtures.use(helper, player, shears, ItemStack.EMPTY, WindowRays.face(helper, player, AT, 8, 8, pose.front().getOpposite()), true);
         check(!entity(helper).trims(TrimSlot.CROSS_BEAMS).any() && shears.getDamageValue() == 1 && entity(helper).trims(TrimSlot.SILL).count() == 1, "tagged shears removed wrong attachment");
         helper.succeed();

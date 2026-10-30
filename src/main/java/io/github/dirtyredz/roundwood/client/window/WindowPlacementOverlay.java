@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.window;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.dirtyredz.roundwood.client.render.PlacementHighlights;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -13,10 +14,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -35,7 +35,7 @@ import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
  * highlight events (the door highlight cancels its own) and never changes their cancellation.
  * Client-only, on the Forge bus.
  */
-@Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Roundwood.MOD_ID, value = Dist.CLIENT)
 public final class WindowPlacementOverlay {
     private static final double LIFT = 0.002;
     private static final float[] GRID = {0F, 0F, 0F, 0.45F};

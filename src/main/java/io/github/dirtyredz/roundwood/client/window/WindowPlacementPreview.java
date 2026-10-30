@@ -75,7 +75,7 @@ public final class WindowPlacementPreview {
     private static Optional<Proposal> proposal(Player player, Level level, BlockItem item, BlockPlaceContext context) {
         if (item instanceof RetiredCrossWindowItem retired) {
             return CrossWindowPlacement.plan(retired, context)
-                    .map(plan -> new Proposal(plan.pos(), plan.state(), plan.selection()));
+                    .map(plan -> new Proposal(plan.pos(), plan.state(), plan.selection(level.registryAccess())));
         }
         if (!context.canPlace()) {
             return Optional.empty();

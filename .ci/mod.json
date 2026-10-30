@@ -1,7 +1,53 @@
 {
   "modId": "roundwood",
   "mainPackage": "io.github.dirtyredz.roundwood",
+  "profile": "neoforge-1.21.1",
+  "releaseBranch": "neoforge-1.21.1",
   "datagen": true,
   "gametests": true,
-  "packSide": "both"
+  "packSide": "both",
+  "jar": {
+    "requiredEntries": [
+      "roundwood.mixins.json",
+      "META-INF/neoforge.mods.toml",
+      "META-INF/LICENSE",
+      "roundwood-logo.png",
+      "assets/roundwood/blockstates/round_door.json",
+      "data/roundwood/recipe/round_door.json",
+      "data/roundwood/loot_table/blocks/round_door.json"
+    ],
+    "forbiddenEntries": [
+      "data/roundwood/recipes/**",
+      "data/roundwood/loot_tables/**",
+      "data/roundwood/structures/**",
+      "data/roundwood/structure/**",
+      "compatibility/**",
+      ".cache/**"
+    ],
+    "manifestExcludes": [
+      "MixinConfigs"
+    ],
+    "entryContains": [
+      {
+        "entry": "META-INF/neoforge.mods.toml",
+        "contains": "config=\"roundwood.mixins.json\""
+      },
+      {
+        "entry": "META-INF/neoforge.mods.toml",
+        "contains": "modId=\"roundwood\""
+      },
+      {
+        "entry": "roundwood.mixins.json",
+        "contains": "\"compatibilityLevel\": \"JAVA_21\""
+      },
+      {
+        "entry": "roundwood.mixins.json",
+        "contains": "BreakingModelDataMixin"
+      },
+      {
+        "entry": "META-INF/LICENSE",
+        "contains": "MIT License"
+      }
+    ]
+  }
 }

@@ -1,15 +1,15 @@
 package io.github.dirtyredz.roundwood.fixture;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.dirtyredz.roundwood.Roundwood;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 /**
  * Test-only listener that cancels block placement by one designated fake player, standing in for a
  * protection mod. Keyed by player name so tests running in parallel are unaffected.
  */
-@Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = Roundwood.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public final class PlacementCanceller {
     public static final String PLAYER = "rw_cancelled";
     private static volatile int multiPlaceEvents;

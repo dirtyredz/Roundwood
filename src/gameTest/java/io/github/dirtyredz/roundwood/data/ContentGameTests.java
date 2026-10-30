@@ -42,9 +42,9 @@ import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import io.github.dirtyredz.roundwood.block.attachment.TrimSlot;
 import io.github.dirtyredz.roundwood.block.attachment.item.TrimAttachmentItem;
 import io.github.dirtyredz.roundwood.block.attachment.item.UniversalTrimItem;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.List;
 import java.util.Optional;
@@ -64,13 +64,13 @@ public final class ContentGameTests {
 
     @GameTest(template = TEMPLATE)
     public static void canonicalEntriesAndFortyNineHiddenAliasesAreRegistered(GameTestHelper helper) {
-        long blocks = ForgeRegistries.BLOCKS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
-        long items = ForgeRegistries.ITEMS.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
+        long blocks = BuiltInRegistries.BLOCK.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
+        long items = BuiltInRegistries.ITEM.getKeys().stream().filter(k -> k.getNamespace().equals(Roundwood.MOD_ID)).count();
         check(blocks == 91, "expected 20 + 8 modular (4 full, 4 thin) + 13 + 49 blocks, found " + blocks);
         check(items == 94, "expected 20 + 8 modular + two attachments + 13 + 49 + the window trim items, found " + items);
         for (String id : List.of("arch_top_1x1", "arch_top_1x2", "arch_top_2x3", "keyhole_shoulder")) {
-            Block block = ForgeRegistries.BLOCKS.getValue(id(id));
-            Item item = ForgeRegistries.ITEMS.getValue(id(id));
+            Block block = BuiltInRegistries.BLOCK.get(id(id));
+            Item item = BuiltInRegistries.ITEM.get(id(id));
             check(block instanceof io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceBlock
                     && item instanceof io.github.dirtyredz.roundwood.block.arch.adapter.ArchPieceItem
                     && block.asItem() == item, "modular registration " + id);
@@ -78,29 +78,29 @@ public final class ContentGameTests {
             check(!ModBlockEntities.archway().isValid(block.defaultBlockState()), "modular piece reused old anchor type " + id);
         }
         for (String id : CANONICAL_BLOCKS) {
-            check(ForgeRegistries.BLOCKS.containsKey(id(id)) && ForgeRegistries.ITEMS.containsKey(id(id)), "missing " + id);
-            check(ForgeRegistries.BLOCKS.getValue(id(id)).asItem() == ForgeRegistries.ITEMS.getValue(id(id)), id + ": item mapping");
+            check(BuiltInRegistries.BLOCK.containsKey(id(id)) && BuiltInRegistries.ITEM.containsKey(id(id)), "missing " + id);
+            check(BuiltInRegistries.BLOCK.get(id(id)).asItem() == BuiltInRegistries.ITEM.get(id(id)), id + ": item mapping");
         }
         for (String plain : CANONICAL_BLOCKS.stream().filter(id -> id.startsWith("round_window")).toList()) {
-            Item retired = ForgeRegistries.ITEMS.getValue(id(plain + "_cross"));
-            Block block = ForgeRegistries.BLOCKS.getValue(id(plain + "_cross"));
+            Item retired = BuiltInRegistries.ITEM.get(id(plain + "_cross"));
+            Block block = BuiltInRegistries.BLOCK.get(id(plain + "_cross"));
             check(retired instanceof io.github.dirtyredz.roundwood.migration.item.RetiredCrossWindowItem
                     && block.asItem() == retired && !ModItems.all().contains(retired) && LegacyContent.items().contains(retired), "retired registration/visibility " + plain);
         }
         check(ModItems.CROSS_BEAMS.get() instanceof io.github.dirtyredz.roundwood.block.attachment.item.StyledAttachmentItem
                 && TrimAttachmentItem.slotOf(new ItemStack(ModItems.CROSS_BEAMS.get())).equals(Optional.of(TrimSlot.CROSS_BEAMS)), "cross beams attachment item");
-        Item sill = ForgeRegistries.ITEMS.getValue(id("arch_sill_trim"));
-        check(sill == ModItems.ARCH_SILL_TRIM.get() && !ForgeRegistries.BLOCKS.containsKey(id("arch_sill_trim"))
+        Item sill = BuiltInRegistries.ITEM.get(id("arch_sill_trim"));
+        check(sill == ModItems.ARCH_SILL_TRIM.get() && !BuiltInRegistries.BLOCK.containsKey(id("arch_sill_trim"))
                 && sill instanceof ArchSillTrimItem && !(sill instanceof net.minecraft.world.item.BlockItem)
                 && TrimAttachmentItem.slotOf(new ItemStack(sill)).equals(Optional.of(TrimSlot.SILL)) && ModItems.all().contains(sill)
                 && TrimSlot.SILL.item() == sill, "the arch sill is an advertised item without a block, the sill slot's item");
-        check(ForgeRegistries.ITEMS.containsKey(id("window_trim")) && !ForgeRegistries.BLOCKS.containsKey(id("window_trim")),
+        check(BuiltInRegistries.ITEM.containsKey(id("window_trim")) && !BuiltInRegistries.BLOCK.containsKey(id("window_trim")),
                 "the window trim is an item without a block");
         Item windowTrim = LegacyContent.windowTrim();
         check(windowTrim instanceof UniversalTrimItem trim && trim.appearanceFamily() == AppearanceFamily.TRIM && trim.isAlias()
                 && TrimAttachmentItem.slotOf(new ItemStack(windowTrim)).equals(Optional.of(TrimSlot.PERIMETER)),
                 "the window trim is a hidden Universal Trim");
-        check(windowTrim == ForgeRegistries.ITEMS.getValue(id("window_trim")) && LegacyContent.items().contains(windowTrim)
+        check(windowTrim == BuiltInRegistries.ITEM.get(id("window_trim")) && LegacyContent.items().contains(windowTrim)
                 && !ModItems.all().contains(windowTrim), "the window trim is hidden compatibility content");
         check(windowTrim.getDescriptionId().equals("block.roundwood.window_trim"), "the window trim keeps its own name");
         check(ModItems.ROUND_TRIM.get() instanceof UniversalTrimItem && !((UniversalTrimItem) ModItems.ROUND_TRIM.get()).isAlias(),
@@ -113,8 +113,8 @@ public final class ContentGameTests {
         check(ModBlocks.archLeft().asItem() == ModItems.ROUND_WINDOW_ARCH_LEFT.get()
                 && ModBlocks.archRight().asItem() == ModItems.ROUND_WINDOW_ARCH_RIGHT.get(), "arch item mappings");
         for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
-            Block block = ForgeRegistries.BLOCKS.getValue(id(entry.id()));
-            Item item = ForgeRegistries.ITEMS.getValue(id(entry.id()));
+            Block block = BuiltInRegistries.BLOCK.get(id(entry.id()));
+            Item item = BuiltInRegistries.ITEM.get(id(entry.id()));
             check(block != null && AppearanceDefaults.of(block).equals(entry.appearance()), entry.id() + ": alias block look");
             check(item instanceof AppearanceBlockItem alias && alias.isAlias(), entry.id() + ": not a hidden alias item");
             check(entry.family() != AppearanceFamily.TRIM || item instanceof UniversalTrimItem, entry.id() + ": a trim alias is no Universal Trim");
@@ -339,7 +339,7 @@ public final class ContentGameTests {
                     window + " trimmed loot is " + drops);
         }
         for (LegacyAppearances.Entry entry : LegacyAppearances.ALL) {
-            Block alias = ForgeRegistries.BLOCKS.getValue(id(entry.id()));
+            Block alias = BuiltInRegistries.BLOCK.get(id(entry.id()));
             List<ItemStack> drops = Block.getDrops(alias.defaultBlockState(), helper.getLevel(), pos, null);
             Item canonical = canonicalBlock(entry.family()).asItem();
             check(drops.size() == 1 && drops.get(0).is(canonical) && AppearanceStacks.read(drops.get(0)).equals(entry.appearance()),
@@ -357,7 +357,7 @@ public final class ContentGameTests {
         List<String> expected = new java.util.ArrayList<>(CANONICAL_BLOCKS);
         expected.add("arch_sill_trim");
         expected.add("cross_beams");
-        check(shown.stream().map(stack -> ForgeRegistries.ITEMS.getKey(stack.getItem()).getPath()).toList().equals(expected),
+        check(shown.stream().map(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath()).toList().equals(expected),
                 "tab is not the three doors, 13 plain windows, four full and four thin arch pieces, Universal Trim, Arch Sill and Cross Beams: " + shown);
         check(shown.stream().noneMatch(ItemStack::hasTag), "tab entries carry an appearance: " + shown);
         check(AppearanceStacks.read(shown.get(0)).equals(Appearance.DEFAULT), "the tab's door is not oak");

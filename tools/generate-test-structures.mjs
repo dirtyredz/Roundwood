@@ -2,7 +2,7 @@
 //
 //   node tools/generate-test-structures.mjs
 //
-// Writes src/gameTest/resources/data/roundwood/structures/:
+// Writes src/gameTest/resources/data/roundwood/structure/:
 //   empty.nbt, strip.nbt, showcase.nbt   only a size and an air palette: GameTests build their own floor.
 //                                        "strip" is wide enough (17 blocks) to always contain a chunk
 //                                        boundary; "showcase" holds the whole showcase in any facing.
@@ -21,7 +21,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const outDir = join(root, 'src/gameTest/resources/data/roundwood/structures');
+const outDir = join(root, 'src/gameTest/resources/data/roundwood/structure');
 import { file } from './structures/nbt.mjs';
 import { legacyBuild } from './structures/legacy-v040.mjs';
 import { build070 } from './structures/door-trim-v070.mjs';

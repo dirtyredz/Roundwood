@@ -98,7 +98,7 @@ public final class DoorArchFitting {
         var anchor = plan.fit().door().anchor();
         boolean installed = AssemblyCapturedPlacement.place(level, plan.states(), () -> {
             if (!(level.getBlockEntity(anchor) instanceof RoundDoorBlockEntity entity)) return false;
-            entity.load(plan.anchorData().copy());
+            entity.loadWithComponents(plan.anchorData().copy(), level.registryAccess());
             return entity.arch().filter(plan.attachment()::equals).isPresent();
         }, context.getPlayer(), context.getClickedFace(), () -> level.getBlockEntity(anchor).setChanged());
         if (!installed || !announce) return InteractionResult.CONSUME;

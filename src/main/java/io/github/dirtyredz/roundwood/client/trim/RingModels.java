@@ -41,7 +41,7 @@ public final class RingModels {
     public static BakedModel quarter(TrimLooks.Look look, Direction facing, Quarter part) {
         return QUARTERS.get(new Key(look, facing, part), key -> {
             BakedModel source = Minecraft.getInstance().getModelManager()
-                    .getModel(RingModelNames.quarterLocation(part, look.whole()));
+                    .getModel(net.minecraft.client.resources.model.ModelResourceLocation.standalone(RingModelNames.quarterLocation(part, look.whole())));
             int turns = VoxelShapeFactory.quarterTurns(facing);
             UnaryOperator<BakedQuad> paint = painter(look);
             return ModelRetexturing.map(source, quad -> ModelRetexturing.rotateY(paint.apply(quad), turns),

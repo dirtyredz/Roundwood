@@ -23,8 +23,8 @@ public final class DoorArchLoot {
             for(var face:AttachmentFace.values()) frame.casings().get(face).ifPresent(look->add(result,AppearanceStacks.create(TrimSlot.PERIMETER.item(),look),context));
         } else if(!entity.archEditable()) {
             // Unknown custody is opaque on the door item, never decoded into additional refunds.
-            var raw=entity.saveWithoutMetadata().get(DoorArchStore.TAG);
-            if(raw!=null) for(var stack:result) if(stack.getItem()==block.familyItem()) stack.getOrCreateTag().put(DoorArchStore.TAG,raw.copy());
+            var raw=entity.saveWithoutMetadata(context.getLevel().registryAccess()).get(DoorArchStore.TAG);
+            if(raw!=null) for(var stack:result) if(stack.getItem()==block.familyItem()) io.github.dirtyredz.roundwood.appearance.item.StackPayloads.putCustom(stack,DoorArchStore.TAG,raw);
         }
         return result;
     }

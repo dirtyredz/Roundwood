@@ -49,9 +49,9 @@ import net.minecraft.world.phys.HitResult;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import net.minecraft.world.phys.Vec3;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
-import net.minecraftforge.gametest.GameTestHolder;
+import net.neoforged.neoforge.gametest.GameTestHolder;
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import io.github.dirtyredz.roundwood.block.window.pane.WindowPaneBlock;
 import java.util.function.Supplier;

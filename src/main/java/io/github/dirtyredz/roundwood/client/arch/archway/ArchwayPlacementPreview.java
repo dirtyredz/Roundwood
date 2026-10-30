@@ -1,5 +1,6 @@
 package io.github.dirtyredz.roundwood.client.arch.archway;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import io.github.dirtyredz.roundwood.client.render.PlacementHighlights;
 import io.github.dirtyredz.roundwood.block.archway.assembly.ArchwayPart;
 import io.github.dirtyredz.roundwood.block.assembly.placement.AssemblyPlacementPlan;
@@ -23,10 +24,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderHighlightEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderHighlightEvent;
+import net.neoforged.bus.api.SubscribeEvent;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +40,7 @@ import java.util.Optional;
  * block's or item's use. Receives cancelled highlight events and never changes their cancellation.
  * Client-only, on the Forge bus.
  */
-@Mod.EventBusSubscriber(modid = Roundwood.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@EventBusSubscriber(modid = Roundwood.MOD_ID, value = Dist.CLIENT)
 public final class ArchwayPlacementPreview {
     private static final float[] FRAME = {0.35F, 0.8F, 1F, 0.9F};
     private static final float[] CELLS = {0F, 0F, 0F, 0.35F};

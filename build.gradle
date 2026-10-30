@@ -1,17 +1,19 @@
 plugins {
+    id 'java-library'
     id 'eclipse'
     id 'idea'
-    id 'net.minecraftforge.gradle' version '6.0.54'
+    id 'net.neoforged.moddev' version '2.0.148'
 }
 
 version = mod_version
 group = mod_group_id
 
+// Loader-qualified release name: <mod_id>-<minecraft>-neoforge-<mod_version>.jar
 base {
-    archivesName = "${mod_id}-${minecraft_version}"
+    archivesName = "${mod_id}-${minecraft_version}-neoforge"
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 // Generated assets and data are checked in and packaged; the datagen cache is not.
 sourceSets {
@@ -63,103 +65,90 @@ if (project.hasProperty('archFitReproduction')) {
     sourceSets.gameTest.java.include '**/fixture/**', '**/DoorArchFittingGameTests.java', '**/TestWorldGameTests.java'
 }
 
+// Focused save-compatibility qualification: historical fixtures, registry contract and upgrade suites.
+if (project.hasProperty('compatTargets')) {
+    sourceSets.gameTest.java.include '**/fixture/**', '**/migration/**', '**/camouflage/**', '**/DoorUsePayloadGameTests.java',
+            '**/TestWorldGameTests.java'
+}
+
 configurations {
     gameTestImplementation.extendsFrom implementation
     gameTestCompileOnly.extendsFrom compileOnly
     gameTestRuntimeOnly.extendsFrom runtimeOnly
 }
 
-// -PpackModsDir=<mods folder> puts the pack's door mods (Double Doors + Collective, Dramatic Doors)
-// on the dev runtime so the GameTests can exercise them. Never part of a normal build.
-def packModsDir = project.findProperty('packModsDir')?.toString()
 // -PwithViewers=emi|jei|jei,emi puts the optional recipe viewers on the dev runtime (GameTests included).
 // They are compile-only otherwise: the release jar never carries or requires them.
 def runtimeViewers = (project.findProperty('withViewers') ?: '').toString().split(',').collect { it.trim() }.findAll { it }
 
-minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-    copyIdeResources = true
+neoForge {
+    version = neo_version
+    addModdingDependenciesTo(sourceSets.gameTest)
+    // Pure JUnit tests use Minecraft math, NBT and model types without a game bootstrap.
+    addModdingDependenciesTo(sourceSets.test)
 
     runs {
         configureEach {
-            args '--mixin', 'roundwood.mixins.json'
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'info'
-            if (packModsDir) {
-                // The pack mods ship SRG refmaps; remap them for the dev environment.
-                property 'mixin.env.remapRefMap', 'true'
-                property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            }
-
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
-            }
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            logLevel = org.slf4j.event.Level.INFO
         }
-
+        client {
+            client()
+        }
         server {
-            property 'forge.enabledGameTestNamespaces', mod_id
-            args '--nogui'
+            server()
+            programArgument '--nogui'
         }
-
+        // GameTests are enabled only here; the other runs load the classes but never register tests.
         gameTestServer {
-            property 'roundwood.navigationRepeats', navigationRepeats.toString()
-            workingDirectory project.file('run/gametest')
-            property 'forge.enabledGameTestNamespaces', mod_id
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                    source sourceSets.gameTest
-                }
-            }
+            type = 'gameTestServer'
+            gameDirectory = project.file('run/gametest')
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+            systemProperty 'roundwood.navigationRepeats', navigationRepeats.toString()
         }
-
         // Headless datagen: writes src/generated/resources, reading hand-made assets from src/main/resources.
         data {
-            workingDirectory project.file('run/data')
-            args '--mod', mod_id, '--all',
-                    '--output', file('src/generated/resources/'),
-                    '--existing', file('src/main/resources/')
+            data()
+            gameDirectory = project.file('run/data')
+            programArguments.addAll '--mod', mod_id, '--all',
+                    '--output', file('src/generated/resources/').absolutePath,
+                    '--existing', file('src/main/resources/').absolutePath
+        }
+    }
+
+    // One mod, two source sets: ModDevGradle groups both outputs under this mod id in development.
+    // The release jar is built from sourceSets.main only.
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.gameTest
         }
     }
 }
 
 repositories {
-    if (packModsDir) {
-        flatDir { dirs packModsDir }
-    }
     maven {
         name = 'BlameJared (JEI)'
         url = 'https://maven.blamejared.com/'
-        content { includeGroup 'mezz.jei'; includeGroup 'net.mezzdev.config' }
+        content { includeGroup 'mezz.jei' }
     }
     maven {
-        name = 'TerraformersMC (EMI)'
-        url = 'https://maven.terraformersmc.com/releases/'
+        name = 'Sleeping Town (EMI)'
+        url = 'https://repo.sleeping.town/'
         content { includeGroup 'dev.emi' }
     }
     mavenCentral()
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-
-    if (packModsDir) {
-        runtimeOnly fg.deobf('local:collective-1.20.1:8.40')
-        runtimeOnly fg.deobf('local:doubledoors-1.20.1:7.2')
-        runtimeOnly fg.deobf('local:DramaticDoors-Forge-1.20.1:2.3.7_1')
-    }
-
-    // Optional recipe-viewer integrations, compile-only (pinned to the workspace's versions).
-    compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")) { transitive = false }
-    compileOnly(fg.deobf("dev.emi:emi-forge:${emi_version}")) { transitive = false }
+    // Optional recipe-viewer integrations, compile-only (pinned to the pack lock).
+    compileOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}") { transitive = false }
+    compileOnly("dev.emi:emi-neoforge:${emi_version}") { transitive = false }
     if (runtimeViewers.contains('jei')) {
-        runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}")) { transitive = false }
+        runtimeOnly("mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}") { transitive = false }
     }
     if (runtimeViewers.contains('emi')) {
-        runtimeOnly(fg.deobf("dev.emi:emi-forge:${emi_version}")) { transitive = false }
+        runtimeOnly("dev.emi:emi-neoforge:${emi_version}") { transitive = false }
     }
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
@@ -172,7 +161,7 @@ test {
     workingDir = projectDir
 }
 
-// Optional compatibility check uses an existing local jar; never resolves or downloads a mod.
+// Optional compatibility check uses an existing local Sodium jar; never resolves or downloads a mod.
 tasks.register('checkEmbeddium', JavaExec) {
     dependsOn testClasses
     classpath = sourceSets.test.runtimeClasspath
@@ -186,19 +175,20 @@ tasks.register('checkEmbeddium', JavaExec) {
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
             minecraft_version      : minecraft_version, minecraft_version_range: minecraft_version_range,
-            forge_version          : forge_version, forge_version_range: forge_version_range,
+            neo_version            : neo_version, neo_version_range: neo_version_range,
             loader_version_range   : loader_version_range,
             mod_id                 : mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
             mod_authors            : mod_authors, mod_description: mod_description,
     ]
     inputs.properties replaceProperties
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
         expand replaceProperties + [project: project]
     }
 }
 
 tasks.named('jar', Jar).configure {
     from('LICENSE') { into 'META-INF' }
+    // The client mixin is declared in neoforge.mods.toml ([[mixins]]), not the manifest.
     manifest {
         attributes([
                 'Specification-Title'     : mod_id,
@@ -207,10 +197,8 @@ tasks.named('jar', Jar).configure {
                 'Implementation-Title'    : project.name,
                 'Implementation-Version'  : project.jar.archiveVersion,
                 'Implementation-Vendor'   : mod_authors,
-                'MixinConfigs'            : 'roundwood.mixins.json',
         ])
     }
-    finalizedBy 'reobfJar'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -223,6 +211,7 @@ apply from: 'gradle/verify-release-jar.gradle'
 
 // Every GameTest run starts from a fresh world: the server saves its world under run/gametest, and
 // item entities or villagers saved by an earlier run load into later tests' areas a few ticks in.
+// Save-compatibility fixtures are compact SNBT on the GameTest classpath, never an imported world.
 tasks.matching { it.name == 'runGameTestServer' }.configureEach {
     doFirst {
         delete file('run/gametest/world')

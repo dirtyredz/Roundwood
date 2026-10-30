@@ -1,10 +1,7 @@
 package io.github.dirtyredz.roundwood.block.attachment;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import net.minecraft.util.GsonHelper;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -24,7 +21,12 @@ import java.util.Set;
  * slot other than the perimeter (an omitted slot is the perimeter, so 0.8.0 tables keep their meaning).
  */
 public record TrimFaceCondition(AttachmentFace face, TrimSlot slot) implements LootItemCondition {
-    public static final LootItemConditionType TYPE = new LootItemConditionType(new Serializer());
+    /** The perimeter slot is the default: omitted on write and when absent, so 0.8.0 tables keep their meaning. */
+    public static final MapCodec<TrimFaceCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            StringRepresentable.fromEnum(AttachmentFace::values).fieldOf("face").forGetter(TrimFaceCondition::face),
+            StringRepresentable.fromEnum(TrimSlot::values).optionalFieldOf("slot", TrimSlot.PERIMETER).forGetter(TrimFaceCondition::slot)
+    ).apply(instance, TrimFaceCondition::new));
+    public static final LootItemConditionType TYPE = new LootItemConditionType(CODEC);
 
     @Override
     public LootItemConditionType getType() {
@@ -44,32 +46,5 @@ public record TrimFaceCondition(AttachmentFace face, TrimSlot slot) implements L
 
     public static LootItemCondition.Builder hasTrim(TrimSlot slot, AttachmentFace face) {
         return () -> new TrimFaceCondition(face, slot);
-    }
-
-    public static final class Serializer implements net.minecraft.world.level.storage.loot.Serializer<TrimFaceCondition> {
-        @Override
-        public void serialize(JsonObject json, TrimFaceCondition condition, JsonSerializationContext context) {
-            json.addProperty("face", condition.face().getSerializedName());
-            if (condition.slot() != TrimSlot.PERIMETER) {
-                json.addProperty("slot", condition.slot().getSerializedName());
-            }
-        }
-
-        @Override
-        public TrimFaceCondition deserialize(JsonObject json, JsonDeserializationContext context) {
-            AttachmentFace face = named(AttachmentFace.values(), GsonHelper.getAsString(json, "face"), "trim face");
-            TrimSlot slot = json.has("slot")
-                    ? named(TrimSlot.values(), GsonHelper.getAsString(json, "slot"), "trim slot") : TrimSlot.PERIMETER;
-            return new TrimFaceCondition(face, slot);
-        }
-
-        private static <T extends StringRepresentable> T named(T[] values, String name, String what) {
-            for (T value : values) {
-                if (value.getSerializedName().equals(name)) {
-                    return value;
-                }
-            }
-            throw new JsonParseException("unknown " + what + " " + name);
-        }
     }
 }
