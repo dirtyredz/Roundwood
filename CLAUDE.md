@@ -4,8 +4,9 @@ Standalone mod repo inside the `minecraft-mods` workspace (see `../../CLAUDE.md`
 [README.md](README.md), [STRUCTURE.md](STRUCTURE.md), [docs/](docs/).
 
 - **Commit identity:** `dirtyredz <dirtyredz@live.com>`.
-- **Loader lines.** `main` is NeoForge 21.1.265; Forge 1.20.1 is frozen on `forge-1.20.1` (owner cutover 2026-11-01) (ModDevGradle,
-  Java 21; profile `neoforge-1.21.1` in `.ci/mod.json`, provenance in `.ci/port-provenance.json`). Fixes move
+- **Loader lines.** `main` is NeoForge 21.1.265 (ModDevGradle,
+  Java 21; profile `neoforge-1.21.1` in `.ci/mod.json`, provenance in `.ci/port-provenance.json`); Forge 1.20.1 is
+  frozen on `forge-1.20.1` (owner cutover 2026-11-01). Fixes move
   between lines by deliberate cherry-pick, never a merge.
 - **Headless only.** Never run `runClient`. Verification is `node tools/generate-textures.mjs`, `runData`,
   `./gradlew test build verifyReleaseJar` (unit tests run under FML's JUnit launcher), `runGameTestServer`
