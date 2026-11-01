@@ -2,6 +2,13 @@
 
 Newest first.
 
+## 2026-11-01 - NeoForge 1.21.1 becomes main; Forge frozen
+
+Owner-authorized cutover: `main` is the NeoForge 1.21.1 line (fast-forwarded from `neoforge-1.21.1`) and
+the Forge 1.20.1 tip is preserved at `forge-1.20.1` (`4a3bdfb`). Forge is frozen: no further maintenance, existing
+`v<version>` releases untouched. `.ci/mod.json` declares `releaseBranch: main`; releases keep the
+`neoforge-1.21.1-v<version>` tag and loader-qualified jar names.
+
 ## 2026-10-29 - NeoForge 1.21.1 line: same ids, payloads in custom data, locked refunds
 
 The `neoforge-1.21.1` branch ports the 0.17.0 source line to Minecraft 1.21.1 / NeoForge 21.1.265

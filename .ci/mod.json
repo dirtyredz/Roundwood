@@ -2,7 +2,7 @@
   "modId": "roundwood",
   "mainPackage": "io.github.dirtyredz.roundwood",
   "profile": "neoforge-1.21.1",
-  "releaseBranch": "neoforge-1.21.1",
+  "releaseBranch": "main",
   "datagen": true,
   "gametests": true,
   "packSide": "both",

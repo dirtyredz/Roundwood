@@ -1,6 +1,6 @@
 # Roundwood
 
-NeoForge 1.21.1 mod (this `neoforge-1.21.1` line; Forge 1.20.1 lives on `main`): a round 2x2 wooden door, an arched 1x2 door and double arched 3x3 and 3x4 doors, a round window with arch, corner and edge profiles with optional Cross Beams attachments, three modular arch tops and a mirrored keyhole shoulder, a Universal Trim for all of them and an Arch Sill, hobbit-hole style. Each is one item you
+NeoForge 1.21.1 mod (`main`; Forge 1.20.1 is frozen on the `forge-1.20.1` branch): a round 2x2 wooden door, an arched 1x2 door and double arched 3x3 and 3x4 doors, a round window with arch, corner and edge profiles with optional Cross Beams attachments, three modular arch tops and a mirrored keyhole shoulder, a Universal Trim for all of them and an Arch Sill, hobbit-hole style. Each is one item you
 restyle in the world: any planks (vanilla or modded) set the wood, any of the 16 dyes paints it,
 and trims can also be faced with radial brick. Install on **both** the server and every client.
 Generic: not tied to any modpack.
@@ -486,9 +486,9 @@ git diff --check
 ## Release
 
 Bump `mod_version` in `gradle.properties` and commit non-empty `docs/releases/<version>.md`.
-Push, land on the line's release branch (`neoforge-1.21.1` here, `main` for Forge), and wait for green CI
+Push, land on the line's release branch (`main`), and wait for green CI
 (tests, build, final-jar guard and datagen). With the owner's go-ahead, the agent runs
-`gh workflow run release.yml --ref neoforge-1.21.1` (`--ref main` on the Forge line).
+`gh workflow run release.yml --ref main`.
 The release workflow verifies again, gates on GameTests, builds the release jar, creates its
 version tag, uploads a draft, reads back and hashes every asset, then **publishes** the release
 with the jar, its `.sha256` and `roundwood.pw.toml`. The pack session consumes the published
